@@ -22,7 +22,7 @@ export function useOnboarding() {
         return;
       }
 
-      setState(storedState.completed ? DEFAULT_ONBOARDING_STATE : storedState);
+      setState(storedState);
       setIsHydrated(true);
     });
 
@@ -54,7 +54,10 @@ export function useOnboarding() {
   const goNext = useCallback(() => {
     setState((current) => {
       const index = ONBOARDING_STEP_ORDER.indexOf(current.currentStep);
-      const nextStep = ONBOARDING_STEP_ORDER[Math.min(index + 1, ONBOARDING_STEP_ORDER.length - 1)];
+      const nextStep =
+        ONBOARDING_STEP_ORDER[
+          Math.min(index + 1, ONBOARDING_STEP_ORDER.length - 1)
+        ];
 
       return {
         ...current,
