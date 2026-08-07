@@ -1,15 +1,31 @@
-import { Stack } from 'expo-router';
+import {
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/manrope';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeProvider, useTheme } from '@/design-system/theme/ThemeProvider';
-import { I18nProvider, useI18n } from '@/i18n/I18nProvider';
+import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
+import { I18nProvider } from '@/i18n/I18nProvider';
+import { RootNavigator } from '@/navigation/RootNavigator';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
-void SplashScreen.preventAutoHideAsync().catch(EMPTY_FUNCTION);
+SplashScreen.preventAutoHideAsync().catch(EMPTY_FUNCTION);
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
+  });
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <SafeAreaProvider>
       <ThemeProvider>
@@ -18,35 +34,5 @@ export default function RootLayout() {
         </I18nProvider>
       </ThemeProvider>
     </SafeAreaProvider>
-  );
-}
-
-function RootNavigator() {
-  const { theme, resolvedTheme, isHydrated: isThemeHydrated } = useTheme();
-  const { isHydrated: isLanguageHydrated } = useI18n();
-  const isReady = isThemeHydrated && isLanguageHydrated;
-
-  useEffect(() => {
-    if (!isReady) {
-      return;
-    }
-
-    SplashScreen.hideAsync().catch(EMPTY_FUNCTION);
-  }, [isReady]);
-
-  if (!isReady) {
-    return null;
-  }
-
-  return (
-    <>
-      <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          contentStyle: { backgroundColor: theme.colors.canvas },
-          headerShown: false,
-        }}
-      />
-    </>
   );
 }
