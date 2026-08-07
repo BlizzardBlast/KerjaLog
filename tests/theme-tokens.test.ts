@@ -29,7 +29,11 @@ function contrastRatio(foreground: string, background: string): number {
 
 describe('theme token contrast', () => {
   test.each([
-    ['light primary', themes.light.colors.onPrimary, themes.light.colors.primary],
+    [
+      'light primary',
+      themes.light.colors.onPrimary,
+      themes.light.colors.primary,
+    ],
     [
       'light primary pressed',
       themes.light.colors.onPrimary,

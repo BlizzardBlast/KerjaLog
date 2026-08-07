@@ -74,9 +74,7 @@ export const REQUIRED_ONBOARDING_ANSWER_FIELDS = [
   'reviewSchedule',
 ] as const satisfies ReadonlyArray<keyof OnboardingEditableState>;
 
-export function hasRequiredOnboardingAnswers(
-  state: OnboardingState,
-): boolean {
+export function hasRequiredOnboardingAnswers(state: OnboardingState): boolean {
   return REQUIRED_ONBOARDING_ANSWER_FIELDS.every(
     (key) => state[key] !== undefined,
   );

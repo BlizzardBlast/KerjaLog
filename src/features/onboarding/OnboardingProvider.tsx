@@ -30,8 +30,9 @@ export type OnboardingContextValue = {
   complete: () => Promise<void>;
 };
 
-export const OnboardingContext =
-  createContext<OnboardingContextValue | null>(null);
+export const OnboardingContext = createContext<OnboardingContextValue | null>(
+  null,
+);
 
 export function OnboardingProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState<OnboardingState>(DEFAULT_ONBOARDING_STATE);
@@ -142,15 +143,7 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
       goBack,
       complete,
     }),
-    [
-      complete,
-      currentStepIndex,
-      goBack,
-      goNext,
-      isHydrated,
-      state,
-      update,
-    ],
+    [complete, currentStepIndex, goBack, goNext, isHydrated, state, update],
   );
 
   return (

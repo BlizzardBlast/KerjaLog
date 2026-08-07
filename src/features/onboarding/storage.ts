@@ -69,8 +69,7 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
   return {
     ...sanitizedState,
     completed:
-      value.completed === true &&
-      hasRequiredOnboardingAnswers(sanitizedState),
+      value.completed === true && hasRequiredOnboardingAnswers(sanitizedState),
   };
 }
 

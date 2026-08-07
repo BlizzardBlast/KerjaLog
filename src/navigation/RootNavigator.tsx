@@ -11,8 +11,7 @@ export function RootNavigator() {
   const { theme, resolvedTheme, isHydrated: isThemeHydrated } = useTheme();
   const { isHydrated: isLanguageHydrated } = useI18n();
   const { isHydrated: isOnboardingHydrated } = useOnboarding();
-  const isReady =
-    isThemeHydrated && isLanguageHydrated && isOnboardingHydrated;
+  const isReady = isThemeHydrated && isLanguageHydrated && isOnboardingHydrated;
 
   useEffect(() => {
     if (!isReady) {
