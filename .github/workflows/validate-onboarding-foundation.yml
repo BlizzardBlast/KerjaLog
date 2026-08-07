@@ -1,0 +1,51 @@
+name: Validate onboarding foundation
+
+on:
+  push:
+    branches:
+      - feat/onboarding-foundation
+    paths:
+      - package.json
+      - pnpm-lock.yaml
+      - src/**
+      - .github/workflows/validate-onboarding-foundation.yml
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.20.0 --activate
+
+      - name: Install dependencies and refresh lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Export web bundle
+        run: pnpm exec expo export --platform web
+
+      - name: Commit validated lockfile and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git rm .github/workflows/validate-onboarding-foundation.yml
+          git commit -m "chore: validate onboarding foundation"
+          git push origin HEAD:feat/onboarding-foundation
