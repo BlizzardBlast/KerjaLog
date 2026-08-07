@@ -1,4 +1,4 @@
-import type { TextStyle } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type ResolvedTheme = Exclude<ThemeMode, 'system'>;
@@ -21,6 +21,7 @@ export type ThemeColors = {
   warningSoft: string;
   danger: string;
   dangerSoft: string;
+  onDanger: string;
 };
 
 export type AppTheme = {
@@ -61,46 +62,63 @@ export type TypographyVariant =
   | 'caption'
   | 'overline';
 
+// Native v1 intentionally uses the platform system font for predictable text
+// scaling and rendering on Android and iOS. The prototype's Manrope direction
+// remains visual guidance rather than an unbundled runtime dependency.
+const systemFontFamily = Platform.select({
+  android: 'sans-serif',
+  ios: 'System',
+  web: 'system-ui',
+});
+
 export const typography = {
   display: {
+    fontFamily: systemFontFamily,
     fontSize: 32,
     lineHeight: 36,
     fontWeight: '700',
     letterSpacing: -0.8,
   },
   title: {
+    fontFamily: systemFontFamily,
     fontSize: 28,
     lineHeight: 33,
     fontWeight: '700',
     letterSpacing: -0.55,
   },
   heading: {
+    fontFamily: systemFontFamily,
     fontSize: 20,
     lineHeight: 26,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
   body: {
+    fontFamily: systemFontFamily,
     fontSize: 16,
     lineHeight: 25,
     fontWeight: '400',
   },
   bodyStrong: {
+    fontFamily: systemFontFamily,
     fontSize: 16,
     lineHeight: 24,
     fontWeight: '600',
   },
   label: {
+    fontFamily: systemFontFamily,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '600',
   },
   caption: {
+    fontFamily: systemFontFamily,
     fontSize: 13,
     lineHeight: 19,
     fontWeight: '400',
   },
   overline: {
+    fontFamily: systemFontFamily,
     fontSize: 11,
     lineHeight: 16,
     fontWeight: '700',
@@ -127,6 +145,7 @@ const lightColors: ThemeColors = {
   warningSoft: '#FFF0D9',
   danger: '#B42318',
   dangerSoft: '#FEECEB',
+  onDanger: '#FFFFFF',
 };
 
 const darkColors: ThemeColors = {
@@ -137,16 +156,17 @@ const darkColors: ThemeColors = {
   text: '#F8F3FB',
   textMuted: '#BCB2C1',
   border: '#453D49',
-  primary: '#8B5CF6',
-  primaryPressed: '#A78BFA',
+  primary: '#A78BFA',
+  primaryPressed: '#8B5CF6',
   primarySoft: '#39265E',
-  onPrimary: '#FFFFFF',
+  onPrimary: '#151218',
   success: '#5BCB91',
   successSoft: '#173D2D',
   warning: '#F2A45D',
   warningSoft: '#4B3019',
   danger: '#FF8177',
   dangerSoft: '#4A2425',
+  onDanger: '#151218',
 };
 
 export const themes: Record<ResolvedTheme, AppTheme> = {
