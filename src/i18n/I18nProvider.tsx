@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react';
 import { translations, type TranslationKey } from '@/i18n/translations';
+import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 const LANGUAGE_STORAGE_KEY = '@kerjalog/language/v1';
 
@@ -62,9 +63,7 @@ export function I18nProvider({ children }: PropsWithChildren) {
           setLanguageState(storedLanguage);
         }
       })
-      .catch(() => {
-        // Device locale remains a safe fallback when preference storage fails.
-      })
+      .catch(EMPTY_FUNCTION)
       .finally(() => {
         if (isActive) {
           setIsHydrated(true);
@@ -78,10 +77,9 @@ export function I18nProvider({ children }: PropsWithChildren) {
 
   const setLanguage = useCallback((nextLanguage: Language) => {
     setLanguageState(nextLanguage);
-    void AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage).catch(() => {
-      // Language persistence is a convenience. Keep the in-memory selection
-      // even if local preference storage is temporarily unavailable.
-    });
+    void AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage).catch(
+      EMPTY_FUNCTION,
+    );
   }, []);
 
   const t = useCallback(
