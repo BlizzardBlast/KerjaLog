@@ -4,11 +4,11 @@ import {
   type TextProps as NativeTextProps,
   type TextStyle,
 } from 'react-native';
+import { useTheme } from '@/design-system/theme/ThemeProvider';
 import type {
   ThemeColors,
   TypographyVariant,
 } from '@/design-system/tokens/theme';
-import { useTheme } from '@/design-system/theme/ThemeProvider';
 
 export type TextProps = PropsWithChildren<
   Omit<NativeTextProps, 'style'> & {

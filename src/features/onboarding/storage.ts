@@ -89,7 +89,7 @@ export async function loadOnboardingState(): Promise<OnboardingState> {
       return DEFAULT_ONBOARDING_STATE;
     }
 
-    return sanitizeOnboardingState(JSON.parse(storedValue) as unknown);
+    return sanitizeOnboardingState(JSON.parse(storedValue));
   } catch {
     return DEFAULT_ONBOARDING_STATE;
   }

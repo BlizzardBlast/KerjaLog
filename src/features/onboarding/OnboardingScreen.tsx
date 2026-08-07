@@ -1,6 +1,6 @@
-import { type ReactNode, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { type ReactNode, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -22,7 +22,7 @@ import {
   workAreaOptions,
 } from '@/features/onboarding/options';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
-import { useI18n, type Language } from '@/i18n/I18nProvider';
+import { type Language, useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
 
 const languageOptions: ReadonlyArray<{

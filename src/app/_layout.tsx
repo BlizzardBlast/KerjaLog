@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '@/design-system/theme/ThemeProvider';
 import { I18nProvider, useI18n } from '@/i18n/I18nProvider';
@@ -31,7 +31,7 @@ function RootNavigator() {
       return;
     }
 
-    void SplashScreen.hideAsync().catch(EMPTY_FUNCTION);
+    SplashScreen.hideAsync().catch(EMPTY_FUNCTION);
   }, [isReady]);
 
   if (!isReady) {

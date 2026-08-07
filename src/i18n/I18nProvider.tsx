@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { translations, type TranslationKey } from '@/i18n/translations';
+import { type TranslationKey, translations } from '@/i18n/translations';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 const LANGUAGE_STORAGE_KEY = '@kerjalog/language/v1';

@@ -1,7 +1,7 @@
-import type { ComponentProps, Ref } from 'react';
 import type { Href } from 'expo-router';
-import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
+import { TabList, TabSlot, Tabs, TabTrigger } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
+import type { ComponentProps, Ref } from 'react';
 import { Pressable, type PressableProps, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/design-system/components/Text';

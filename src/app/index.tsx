@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Redirect } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { loadOnboardingState } from '@/features/onboarding/storage';
 import { useI18n } from '@/i18n/I18nProvider';
 import { RouteLoadingScreen } from '@/shared/components/RouteLoadingScreen';
