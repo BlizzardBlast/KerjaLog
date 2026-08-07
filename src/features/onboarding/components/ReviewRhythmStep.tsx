@@ -62,7 +62,6 @@ export function ReviewRhythmStep({
 
       {hasFinishError ? (
         <View
-          accessibilityLiveRegion="polite"
           accessibilityRole="alert"
           style={[
             styles.errorCard,
