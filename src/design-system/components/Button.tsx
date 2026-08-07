@@ -10,10 +10,7 @@ import {
 } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import type {
-  AppTheme,
-  ThemeColors,
-} from '@/design-system/tokens/theme';
+import type { AppTheme, ThemeColors } from '@/design-system/tokens/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
