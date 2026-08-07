@@ -7,11 +7,7 @@ export type StepHeadingProps = {
   description: string;
 };
 
-export function StepHeading({
-  eyebrow,
-  title,
-  description,
-}: StepHeadingProps) {
+export function StepHeading({ eyebrow, title, description }: StepHeadingProps) {
   return (
     <View style={styles.container}>
       <Text variant="overline" color="primary">
