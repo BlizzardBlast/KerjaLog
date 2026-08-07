@@ -20,7 +20,7 @@ type TranslationParams = Record<string, string | number>;
 type I18nContextValue = {
   language: Language;
   isHydrated: boolean;
-  setLanguage: (language: Language) => void;
+  setLanguage: (language: Language) => Promise<void>;
   t: (key: TranslationKey, params?: TranslationParams) => string;
 };
 
@@ -55,31 +55,37 @@ export function I18nProvider({ children }: PropsWithChildren) {
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    let isActive = true;
+    let ignore = false;
 
-    AsyncStorage.getItem(LANGUAGE_STORAGE_KEY)
-      .then((storedLanguage) => {
-        if (isActive && isLanguage(storedLanguage)) {
+    const hydrateLanguage = async () => {
+      try {
+        const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+
+        if (!ignore && isLanguage(storedLanguage)) {
           setLanguageState(storedLanguage);
         }
-      })
-      .catch(EMPTY_FUNCTION)
-      .finally(() => {
-        if (isActive) {
+      } finally {
+        if (!ignore) {
           setIsHydrated(true);
         }
-      });
+      }
+    };
+
+    hydrateLanguage().catch(EMPTY_FUNCTION);
 
     return () => {
-      isActive = false;
+      ignore = true;
     };
   }, []);
 
-  const setLanguage = useCallback((nextLanguage: Language) => {
+  const setLanguage = useCallback(async (nextLanguage: Language) => {
     setLanguageState(nextLanguage);
-    void AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage).catch(
-      EMPTY_FUNCTION,
-    );
+
+    try {
+      await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+    } catch {
+      // Keep the optimistic session preference even if persistence is unavailable.
+    }
   }, []);
 
   const t = useCallback(
