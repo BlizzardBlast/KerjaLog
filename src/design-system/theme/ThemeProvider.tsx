@@ -24,7 +24,7 @@ type ThemeContextValue = {
   mode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   isHydrated: boolean;
-  setMode: (mode: ThemeMode) => void;
+  setMode: (mode: ThemeMode) => Promise<void>;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -39,31 +39,37 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    let isActive = true;
+    let ignore = false;
 
-    AsyncStorage.getItem(THEME_MODE_STORAGE_KEY)
-      .then((storedMode) => {
-        if (isActive && isThemeMode(storedMode)) {
+    const hydrateThemeMode = async () => {
+      try {
+        const storedMode = await AsyncStorage.getItem(THEME_MODE_STORAGE_KEY);
+
+        if (!ignore && isThemeMode(storedMode)) {
           setModeState(storedMode);
         }
-      })
-      .catch(EMPTY_FUNCTION)
-      .finally(() => {
-        if (isActive) {
+      } finally {
+        if (!ignore) {
           setIsHydrated(true);
         }
-      });
+      }
+    };
+
+    hydrateThemeMode().catch(EMPTY_FUNCTION);
 
     return () => {
-      isActive = false;
+      ignore = true;
     };
   }, []);
 
-  const setMode = useCallback((nextMode: ThemeMode) => {
+  const setMode = useCallback(async (nextMode: ThemeMode) => {
     setModeState(nextMode);
-    void AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, nextMode).catch(
-      EMPTY_FUNCTION,
-    );
+
+    try {
+      await AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, nextMode);
+    } catch {
+      // Keep the optimistic session preference even if persistence is unavailable.
+    }
   }, []);
 
   const resolvedTheme: ResolvedTheme =
