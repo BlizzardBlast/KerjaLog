@@ -1,0 +1,165 @@
+import type { TextStyle } from 'react-native';
+
+export type ThemeMode = 'system' | 'light' | 'dark';
+export type ResolvedTheme = Exclude<ThemeMode, 'system'>;
+
+export type ThemeColors = {
+  canvas: string;
+  surface: string;
+  surfaceSubtle: string;
+  surfaceMuted: string;
+  text: string;
+  textMuted: string;
+  border: string;
+  primary: string;
+  primaryPressed: string;
+  primarySoft: string;
+  onPrimary: string;
+  success: string;
+  successSoft: string;
+  warning: string;
+  warningSoft: string;
+  danger: string;
+  dangerSoft: string;
+};
+
+export type AppTheme = {
+  colors: ThemeColors;
+  spacing: typeof spacing;
+  radii: typeof radii;
+  typography: typeof typography;
+};
+
+export const spacing = {
+  0: 0,
+  1: 4,
+  2: 8,
+  3: 12,
+  4: 16,
+  5: 20,
+  6: 24,
+  8: 32,
+  10: 40,
+  12: 48,
+} as const;
+
+export const radii = {
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 28,
+  full: 999,
+} as const;
+
+export type TypographyVariant =
+  | 'display'
+  | 'title'
+  | 'heading'
+  | 'body'
+  | 'bodyStrong'
+  | 'label'
+  | 'caption'
+  | 'overline';
+
+export const typography = {
+  display: {
+    fontSize: 32,
+    lineHeight: 36,
+    fontWeight: '700',
+    letterSpacing: -0.8,
+  },
+  title: {
+    fontSize: 28,
+    lineHeight: 33,
+    fontWeight: '700',
+    letterSpacing: -0.55,
+  },
+  heading: {
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  body: {
+    fontSize: 16,
+    lineHeight: 25,
+    fontWeight: '400',
+  },
+  bodyStrong: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '600',
+  },
+  label: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+  },
+  caption: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '400',
+  },
+  overline: {
+    fontSize: 11,
+    lineHeight: 16,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+} satisfies Record<TypographyVariant, TextStyle>;
+
+const lightColors: ThemeColors = {
+  canvas: '#F7F3EE',
+  surface: '#FFFDFC',
+  surfaceSubtle: '#F2EDE7',
+  surfaceMuted: '#EBE4DC',
+  text: '#211B2A',
+  textMuted: '#6F6675',
+  border: '#DED6DF',
+  primary: '#7138F2',
+  primaryPressed: '#5121A8',
+  primarySoft: '#EEE7FF',
+  onPrimary: '#FFFFFF',
+  success: '#167A4D',
+  successSoft: '#E1F5EA',
+  warning: '#A95B12',
+  warningSoft: '#FFF0D9',
+  danger: '#B42318',
+  dangerSoft: '#FEECEB',
+};
+
+const darkColors: ThemeColors = {
+  canvas: '#151218',
+  surface: '#211C25',
+  surfaceSubtle: '#2A242E',
+  surfaceMuted: '#342D38',
+  text: '#F8F3FB',
+  textMuted: '#BCB2C1',
+  border: '#453D49',
+  primary: '#8B5CF6',
+  primaryPressed: '#A78BFA',
+  primarySoft: '#39265E',
+  onPrimary: '#FFFFFF',
+  success: '#5BCB91',
+  successSoft: '#173D2D',
+  warning: '#F2A45D',
+  warningSoft: '#4B3019',
+  danger: '#FF8177',
+  dangerSoft: '#4A2425',
+};
+
+export const themes: Record<ResolvedTheme, AppTheme> = {
+  light: {
+    colors: lightColors,
+    spacing,
+    radii,
+    typography,
+  },
+  dark: {
+    colors: darkColors,
+    spacing,
+    radii,
+    typography,
+  },
+};
