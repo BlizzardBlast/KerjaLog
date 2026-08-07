@@ -81,7 +81,9 @@ describe('design-system interactions', () => {
       </DecorativeView>,
     );
 
-    const decorative = screen.getByTestId('decorative');
+    const decorative = screen.getByTestId('decorative', {
+      includeHiddenElements: true,
+    });
 
     expect(decorative.props.accessibilityElementsHidden).toBe(true);
     expect(decorative.props.importantForAccessibility).toBe(
