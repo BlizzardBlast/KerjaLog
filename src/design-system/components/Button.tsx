@@ -88,11 +88,13 @@ export function Button({
   })();
 
   const labelColor =
-    variant === 'primary' || variant === 'destructive'
-      ? 'onPrimary'
-      : variant === 'secondary'
-        ? 'text'
-        : 'primary';
+    variant === 'destructive'
+      ? 'onDanger'
+      : variant === 'primary'
+        ? 'onPrimary'
+        : variant === 'secondary'
+          ? 'text'
+          : 'primary';
 
   return (
     <Pressable
