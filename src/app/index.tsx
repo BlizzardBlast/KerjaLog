@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Text } from '@/design-system/components/Text';
-import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { loadOnboardingState } from '@/features/onboarding/storage';
+import { useI18n } from '@/i18n/I18nProvider';
+import { RouteLoadingScreen } from '@/shared/components/RouteLoadingScreen';
 
 export default function AppEntryRoute() {
-  const { theme } = useTheme();
+  const { t } = useI18n();
   const [isReady, setIsReady] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
 
@@ -28,24 +27,8 @@ export default function AppEntryRoute() {
   }, []);
 
   if (!isReady) {
-    return (
-      <View style={[styles.loading, { backgroundColor: theme.colors.canvas }]}>
-        <ActivityIndicator color={theme.colors.primary} size="small" />
-        <Text variant="caption" color="textMuted">
-          Opening KerjaLog…
-        </Text>
-      </View>
-    );
+    return <RouteLoadingScreen label={t('common.loading.opening')} />;
   }
 
   return <Redirect href={hasCompletedOnboarding ? '/home' : '/onboarding'} />;
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    alignItems: 'center',
-    flex: 1,
-    gap: 12,
-    justifyContent: 'center',
-  },
-});
