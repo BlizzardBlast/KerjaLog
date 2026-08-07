@@ -1,971 +1,3435 @@
 <!doctype html>
 <html lang="en" data-theme="light">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f7f3ee" />
-  <title>KerjaLog — Interactive Mobile Prototype</title>
-  <meta name="description" content="Interactive high-fidelity prototype for KerjaLog, a private work-growth companion." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      color-scheme: light;
-      --brand: #7138f2;
-      --brand-strong: #5121a8;
-      --brand-soft: #eee7ff;
-      --canvas: #f7f3ee;
-      --surface: #fffdfc;
-      --surface-2: #f2ede7;
-      --surface-3: #ebe4dc;
-      --text: #211b2a;
-      --text-muted: #6f6675;
-      --border: #ded6df;
-      --green: #167a4d;
-      --green-soft: #e1f5ea;
-      --amber: #a95b12;
-      --amber-soft: #fff0d9;
-      --danger: #b42318;
-      --danger-soft: #feeceb;
-      --shadow: 0 24px 80px rgba(49, 32, 57, 0.18);
-      --r-sm: 12px;
-      --r-md: 16px;
-      --r-lg: 20px;
-      --r-xl: 28px;
-      --safe-bottom: max(14px, env(safe-area-inset-bottom));
-    }
-
-    html[data-theme="dark"] {
-      color-scheme: dark;
-      --canvas: #151218;
-      --surface: #211c25;
-      --surface-2: #2a242e;
-      --surface-3: #342d38;
-      --text: #f8f3fb;
-      --text-muted: #bcb2c1;
-      --border: #453d49;
-      --brand-soft: #39265e;
-      --green-soft: #173d2d;
-      --amber-soft: #4b3019;
-      --danger-soft: #4a2425;
-      --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
-    }
-
-    * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
-    body {
-      margin: 0;
-      font-family: Manrope, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 16% 12%, color-mix(in srgb, var(--brand) 12%, transparent), transparent 30rem),
-        var(--canvas);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    button, input, textarea, select { font: inherit; }
-    button, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
-      outline: 3px solid color-mix(in srgb, var(--brand) 58%, white);
-      outline-offset: 3px;
-    }
-    button { cursor: pointer; }
-    button:disabled { cursor: not-allowed; opacity: .55; }
-    svg { display: block; }
-
-    .prototype-stage {
-      min-height: 100svh;
-      display: grid;
-      grid-template-columns: minmax(220px, 300px) minmax(0, 390px) minmax(220px, 300px);
-      justify-content: center;
-      align-items: center;
-      gap: 28px;
-      padding: 30px;
-    }
-
-    .prototype-panel {
-      align-self: center;
-      background: color-mix(in srgb, var(--surface) 92%, transparent);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: 0 10px 35px rgba(49, 32, 57, .08);
-      backdrop-filter: blur(16px);
-    }
-    .prototype-panel h2 { font-size: 16px; margin: 0 0 6px; }
-    .prototype-panel p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.55; }
-    .prototype-panel .eyebrow { margin-bottom: 6px; }
-    .jump-list { display: grid; gap: 7px; margin-top: 14px; max-height: 420px; overflow: auto; padding-right: 4px; }
-    .jump-button {
-      min-height: 38px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text-muted);
-      text-align: left;
-      border-radius: 10px;
-      padding: 7px 9px;
-      font-size: 12px;
-    }
-    .jump-button:hover, .jump-button[aria-current="true"] { background: var(--brand-soft); color: var(--brand-strong); }
-    html[data-theme="dark"] .jump-button:hover,
-    html[data-theme="dark"] .jump-button[aria-current="true"] { color: #eaddff; }
-
-    .phone-shell {
-      position: relative;
-      width: min(390px, 100vw);
-      height: min(844px, calc(100svh - 32px));
-      min-height: 660px;
-      background: var(--surface);
-      border: 1px solid color-mix(in srgb, var(--border) 88%, black);
-      border-radius: 34px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      isolation: isolate;
-    }
-
-    .status-bar {
-      height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 22px;
-      background: var(--surface);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .01em;
-      border-bottom: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
-      position: relative;
-      z-index: 20;
-    }
-    .status-icons { display: flex; gap: 5px; align-items: center; color: var(--text-muted); }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-    .status-pill { width: 13px; height: 7px; border: 1.5px solid currentColor; border-radius: 2px; position: relative; }
-    .status-pill::after { content: ""; position: absolute; right: 1px; top: 1px; bottom: 1px; width: 7px; background: currentColor; border-radius: 1px; }
-
-    .screen {
-      position: absolute;
-      inset: 42px 0 0;
-      background: var(--surface);
-      opacity: 0;
-      pointer-events: none;
-      transform: translateX(14px);
-      transition: opacity 180ms ease, transform 180ms ease;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .screen.active { opacity: 1; pointer-events: auto; transform: translateX(0); z-index: 5; }
-    .screen.has-nav .screen-body { padding-bottom: 106px; }
-    .screen-body {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      padding: 20px 22px calc(24px + var(--safe-bottom));
-      scrollbar-width: none;
-    }
-    .screen-body::-webkit-scrollbar { display: none; }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 1ms !important; transition-duration: 1ms !important; }
-    }
-
-    .screen-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-    .screen-header .header-copy { min-width: 0; flex: 1; }
-    .icon-button {
-      width: 48px; height: 48px; flex: 0 0 48px;
-      display: inline-grid; place-items: center;
-      border-radius: 15px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
-    }
-    .icon-button:hover { background: var(--surface-2); }
-    .icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-
-    .eyebrow { color: var(--brand); font-size: 11px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-    h1 { margin: 0; font-size: clamp(27px, 7vw, 32px); line-height: 1.08; letter-spacing: -.035em; text-wrap: balance; }
-    h2 { margin: 0; font-size: 20px; line-height: 1.25; letter-spacing: -.02em; text-wrap: balance; }
-    h3 { margin: 0; font-size: 16px; line-height: 1.35; }
-    p { text-wrap: pretty; }
-    .lede { font-size: 16px; line-height: 1.58; color: var(--text-muted); margin: 10px 0 0; }
-    .muted { color: var(--text-muted); }
-    .small { font-size: 13px; line-height: 1.5; }
-    .tiny { font-size: 11px; line-height: 1.45; }
-    .stack-4 > * + * { margin-top: 4px; }
-    .stack-8 > * + * { margin-top: 8px; }
-    .stack-12 > * + * { margin-top: 12px; }
-    .stack-16 > * + * { margin-top: 16px; }
-    .stack-20 > * + * { margin-top: 20px; }
-    .stack-24 > * + * { margin-top: 24px; }
-
-    .progress { display: flex; gap: 6px; margin-bottom: 22px; }
-    .progress span { height: 4px; width: 24px; border-radius: 99px; background: var(--border); }
-    .progress span.done { width: 44px; background: var(--brand); }
-
-    .brand-mark {
-      width: 82px; height: 82px; border-radius: 26px; display: grid; place-items: center;
-      background: var(--brand); color: white; font-size: 34px; font-weight: 800; letter-spacing: -.08em;
-      box-shadow: 0 16px 36px color-mix(in srgb, var(--brand) 24%, transparent);
-    }
-
-    .button {
-      min-height: 52px;
-      border-radius: var(--r-md);
-      border: 1px solid transparent;
-      padding: 13px 17px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 15px;
-      text-align: center;
-    }
-    .button.primary { background: var(--brand); color: white; }
-    .button.primary:hover { background: var(--brand-strong); }
-    .button.secondary { background: var(--surface); color: var(--brand-strong); border-color: var(--border); }
-    html[data-theme="dark"] .button.secondary { color: #eaddff; }
-    .button.ghost { background: transparent; color: var(--text-muted); border-color: transparent; }
-    .button.green { background: var(--green); color: white; }
-    .button.block { width: 100%; }
-    .button-row { display: flex; gap: 10px; }
-    .button-row > * { flex: 1; min-width: 0; }
-
-    .card {
-      border-radius: var(--r-lg);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 16px;
-    }
-    .card.soft { background: var(--surface-2); border-color: transparent; }
-    .card.brand { background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 25%, var(--border)); }
-    .card.success { background: var(--green-soft); border-color: color-mix(in srgb, var(--green) 26%, var(--border)); }
-    .card.warning { background: var(--amber-soft); border-color: color-mix(in srgb, var(--amber) 24%, var(--border)); }
-    .card.danger { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 22%, var(--border)); }
-
-    .select-card, .event-card, .outcome-card, .evidence-card, .purpose-card {
-      width: 100%; text-align: left; min-height: 64px; border-radius: 18px; padding: 14px;
-      background: var(--surface); border: 1px solid var(--border); color: var(--text);
-      display: flex; gap: 12px; align-items: flex-start;
-    }
-    .select-card:hover, .event-card:hover, .outcome-card:hover, .evidence-card:hover, .purpose-card:hover { background: var(--surface-2); }
-    .select-card.selected, .event-card.selected, .outcome-card.selected, .evidence-card.selected, .purpose-card.selected {
-      background: var(--brand-soft); border: 2px solid var(--brand); padding: 13px;
-    }
-    .choice-icon { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--surface-2); color: var(--text-muted); flex: 0 0 40px; font-weight: 800; }
-    .selected .choice-icon { background: var(--brand); color: white; }
-    .choice-copy { min-width: 0; flex: 1; }
-    .choice-copy strong { display: block; font-size: 15px; line-height: 1.35; }
-    .choice-copy span { display: block; color: var(--text-muted); font-size: 12px; line-height: 1.45; margin-top: 3px; }
-    .choice-check { color: var(--brand); font-weight: 900; margin-left: auto; padding-top: 2px; }
-
-    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-      min-height: 38px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
-      padding: 8px 12px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;
-    }
-    button.chip:hover, button.chip[aria-pressed="true"], .chip.active { background: var(--brand-soft); color: var(--brand-strong); border-color: color-mix(in srgb, var(--brand) 35%, var(--border)); }
-    html[data-theme="dark"] button.chip:hover,
-    html[data-theme="dark"] button.chip[aria-pressed="true"],
-    html[data-theme="dark"] .chip.active { color: #eaddff; }
-    .chip.green { background: var(--green-soft); color: var(--green); border-color: transparent; }
-    .chip.amber { background: var(--amber-soft); color: var(--amber); border-color: transparent; }
-
-    .field-label { display: block; font-size: 12px; font-weight: 800; margin-bottom: 7px; color: var(--text); }
-    .input, .textarea, .select {
-      width: 100%; border-radius: 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
-      padding: 14px 15px; min-height: 50px;
-    }
-    .textarea { resize: vertical; min-height: 150px; line-height: 1.55; }
-    .input::placeholder, .textarea::placeholder { color: color-mix(in srgb, var(--text-muted) 75%, transparent); }
-    .field-help { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-top: 7px; }
-
-    .inline-note { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-    .inline-note .note-icon { color: var(--amber); flex: 0 0 auto; margin-top: 1px; }
-
-    .home-hero { padding: 18px; border-radius: 24px; background: var(--brand); color: white; position: relative; overflow: hidden; }
-    .home-hero::after { content: ""; position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 22px solid rgba(255,255,255,.08); right: -35px; top: -32px; }
-    .home-hero p { color: rgba(255,255,255,.82); }
-    .home-hero .button { background: white; color: var(--brand-strong); position: relative; z-index: 1; }
-
-    .week-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .week-summary .metric { padding: 13px 11px; border-radius: 16px; background: var(--surface-2); }
-    .metric b { display: block; font-size: 20px; letter-spacing: -.04em; }
-    .metric span { display: block; color: var(--text-muted); font-size: 10px; margin-top: 3px; line-height: 1.35; }
-
-    .timeline-entry { display: flex; gap: 12px; }
-    .timeline-entry + .timeline-entry { margin-top: 14px; }
-    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand); margin-top: 5px; box-shadow: 0 0 0 5px var(--brand-soft); flex: 0 0 10px; }
-    .timeline-dot.green { background: var(--green); box-shadow: 0 0 0 5px var(--green-soft); }
-    .timeline-dot.amber { background: var(--amber); box-shadow: 0 0 0 5px var(--amber-soft); }
-    .timeline-copy { min-width: 0; flex: 1; }
-    .timeline-copy strong { font-size: 14px; display: block; }
-    .timeline-copy span { font-size: 12px; color: var(--text-muted); margin-top: 3px; display: block; line-height: 1.45; }
-
-    .evidence-thread { position: relative; padding-left: 30px; display: grid; gap: 16px; }
-    .evidence-thread::before { content: ""; position: absolute; left: 8px; top: 10px; bottom: 10px; width: 2px; background: linear-gradient(var(--brand), color-mix(in srgb, var(--brand) 20%, var(--border))); }
-    .thread-node { position: relative; }
-    .thread-node::before { content: ""; position: absolute; left: -27px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 3px solid var(--brand); }
-    .thread-node.confirmed::before { background: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
-    .thread-node small { color: var(--brand); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 3px; }
-    .thread-node p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-muted); }
-
-    .entry-card { padding: 15px; border-radius: 18px; border: 1px solid var(--border); background: var(--surface); }
-    .entry-card + .entry-card { margin-top: 10px; }
-    .entry-top { display: flex; gap: 10px; align-items: flex-start; }
-    .entry-top > div { min-width: 0; flex: 1; }
-    .entry-title { font-size: 14px; font-weight: 800; line-height: 1.4; }
-    .entry-meta { margin-top: 4px; font-size: 11px; color: var(--text-muted); line-height: 1.45; }
-    .entry-evidence { margin-top: 10px; color: var(--text-muted); font-size: 12px; line-height: 1.5; }
-
-    .skill-row { padding: 15px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-    .skill-row:last-child { border-bottom: 0; }
-    .skill-symbol { width: 42px; height: 42px; border-radius: 14px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; font-weight: 900; flex: 0 0 42px; }
-    .skill-copy { min-width: 0; flex: 1; }
-    .skill-copy strong { font-size: 14px; display: block; }
-    .skill-copy span { font-size: 12px; color: var(--text-muted); display: block; margin-top: 2px; }
-    .skill-count { font-size: 12px; font-weight: 800; color: var(--text-muted); white-space: nowrap; }
-
-    .recommendation { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
-    .recommendation input { width: 19px; height: 19px; margin: 2px 0 0; accent-color: var(--brand); }
-    .recommendation label { cursor: pointer; }
-    .recommendation label strong { display: block; font-size: 13px; line-height: 1.4; }
-    .recommendation label span { color: var(--text-muted); display: block; font-size: 11px; line-height: 1.45; margin-top: 4px; }
-
-    .bottom-nav {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      z-index: 30;
-      height: calc(82px + var(--safe-bottom));
-      padding: 9px 12px var(--safe-bottom);
-      background: color-mix(in srgb, var(--surface) 94%, transparent);
-      border-top: 1px solid var(--border);
-      backdrop-filter: blur(16px);
-      display: none;
-      grid-template-columns: 1fr 1fr 72px 1fr 1fr;
-      gap: 2px;
-      align-items: center;
-    }
-    .bottom-nav.visible { display: grid; }
-    .nav-button {
-      border: 0; background: transparent; color: var(--text-muted); min-height: 56px; border-radius: 14px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 800;
-    }
-    .nav-button:hover, .nav-button.active { color: var(--brand); background: var(--brand-soft); }
-    .nav-button .icon { width: 18px; height: 18px; }
-    .capture-nav {
-      width: 58px; height: 58px; border-radius: 20px; border: 0; background: var(--brand); color: white; display: grid; place-items: center;
-      box-shadow: 0 12px 28px color-mix(in srgb, var(--brand) 32%, transparent); justify-self: center; align-self: start; margin-top: -17px;
-    }
-    .capture-nav:hover { background: var(--brand-strong); }
-    .capture-nav .icon { width: 24px; height: 24px; }
-
-    .section-title { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; }
-    .section-title a, .text-action { color: var(--brand); font-size: 12px; font-weight: 800; text-decoration: none; border: 0; background: transparent; padding: 5px 0; }
-
-    .review-output {
-      min-height: 320px; border: 1px solid var(--border); background: var(--surface); border-radius: 18px; padding: 16px; font-size: 13px; line-height: 1.65;
-    }
-    .review-output h3 { margin: 12px 0 5px; font-size: 14px; }
-    .review-output h3:first-child { margin-top: 0; }
-    .review-output ul { padding-left: 18px; margin: 5px 0 0; }
-
-    .modal-backdrop {
-      position: absolute; inset: 0; z-index: 80; background: rgba(24,18,28,.45); display: none; align-items: flex-end; padding: 12px;
-      backdrop-filter: blur(4px);
-    }
-    .modal-backdrop.open { display: flex; }
-    .sheet { width: 100%; max-height: 82%; overflow: auto; background: var(--surface); border-radius: 26px; padding: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); overscroll-behavior: contain; }
-    .sheet-grabber { width: 42px; height: 4px; border-radius: 999px; background: var(--border); margin: 0 auto 18px; }
-
-    .utility-stack { display: grid; gap: 9px; margin-top: 14px; }
-    .utility-button { min-height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); text-align: left; padding: 9px 12px; font-size: 12px; font-weight: 700; }
-    .utility-button:hover { background: var(--surface-2); }
-    .utility-label { color: var(--text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; }
-
-    .toast {
-      position: absolute; left: 20px; right: 20px; bottom: 100px; z-index: 100; transform: translateY(18px); opacity: 0; pointer-events: none;
-      background: var(--text); color: var(--surface); border-radius: 15px; padding: 12px 14px; font-size: 12px; font-weight: 700; transition: opacity 160ms ease, transform 160ms ease;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    @media print {
-      body { background: white !important; }
-      .prototype-panel, .status-bar, .bottom-nav, .toast, .modal-backdrop { display: none !important; }
-      .prototype-stage { display: block; min-height: 0; padding: 0; }
-      .phone-shell { width: 100%; height: auto; min-height: 0; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
-      .screen { display: none !important; position: static; opacity: 1; transform: none; }
-      #screen-review-summary { display: block !important; }
-      #screen-review-summary .screen-body { overflow: visible; padding: 0; }
-      #screen-review-summary .screen-header, #screen-review-summary .chip-row, #screen-review-summary .grid-actions, #screen-review-summary > .screen-body > .button, #screen-review-summary .card.soft { display: none !important; }
-      .review-output { border: 0; padding: 0; min-height: 0; color: #111; background: white; font-size: 12pt; }
-    }
-
-    @media (max-width: 1050px) {
-      .prototype-stage { grid-template-columns: 1fr; padding: 16px; }
-      .prototype-panel { display: none; }
-    }
-    @media (max-width: 430px) {
-      body { background: var(--surface); }
-      .prototype-stage { display: block; min-height: 100svh; padding: 0; }
-      .phone-shell { width: 100vw; height: 100svh; min-height: 0; border-radius: 0; border: 0; box-shadow: none; }
-    }
-  </style>
-</head>
-<body>
-  <svg aria-hidden="true" width="0" height="0" style="position:absolute">
-    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M9.5 20v-6h5v6"/></symbol>
-    <symbol id="i-history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5"/><path d="M4 4.5v4h4"/><path d="M12 8v5l3 2"/></symbol>
-    <symbol id="i-growth" viewBox="0 0 24 24"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/><path d="m17 6 2-2 2 2"/></symbol>
-    <symbol id="i-review" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5"/><path d="M10 12h6M10 16h6"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
-    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.8 8.1 7 10 4.2-1.9 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-4"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
-    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.3 10.9 7.4-4.8M8.3 13.1l7.4 4.8"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
-  </svg>
-
-  <main class="prototype-stage">
-    <aside class="prototype-panel" aria-label="Prototype navigation">
-      <div class="eyebrow">Prototype map</div>
-      <h2>KerjaLog MVP</h2>
-      <p>Jump between screens without changing the mobile interaction design.</p>
-      <div class="jump-list" id="jump-list"></div>
-    </aside>
-
-    <section class="phone-shell" aria-label="KerjaLog mobile prototype">
-      <div class="status-bar" aria-hidden="true">
-        <span>9:41</span>
-        <div class="status-icons"><span class="status-dot"></span><span>◔</span><span class="status-pill"></span></div>
-      </div>
-
-      <!-- 01 Welcome -->
-      <section class="screen active" id="screen-welcome" data-screen="welcome" data-title="01 · Welcome" data-nav="false">
-        <div class="screen-body stack-24">
-          <div class="progress"><span class="done"></span><span></span><span></span><span></span></div>
-          <div class="brand-mark" aria-hidden="true">K</div>
-          <div class="stack-8">
-            <div class="eyebrow">Your private work-growth companion</div>
-            <h1 data-i18n="welcomeTitle">Your work matters—even when it feels routine.</h1>
-            <p class="lede" data-i18n="welcomeLede">KerjaLog helps you notice what changed because of your work and keep the evidence ready for reviews, résumés, and interviews.</p>
-          </div>
-          <div class="card brand stack-8">
-            <div class="inline-note"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><div><strong data-i18n="privateTitle">Private by default</strong><div class="small muted" data-i18n="privateCopy">Local-first. No employer dashboard. You decide what gets exported.</div></div></div>
-          </div>
-          <div class="chip-row" aria-label="Prototype settings">
-            <button class="chip" id="lang-toggle" type="button" aria-label="Switch language">EN · Bahasa</button>
-            <button class="chip" id="theme-toggle" type="button" aria-label="Toggle dark mode"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg><span>Theme</span></button>
-          </div>
-          <div style="min-height:12px;flex:1"></div>
-          <button class="button primary block" type="button" data-go="work-area" data-i18n="setupCta">Set Up KerjaLog</button>
-        </div>
-      </section>
-
-      <!-- 02 Work area -->
-      <section class="screen" id="screen-work-area" data-screen="work-area" data-title="02 · Work Area & Level" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="progress"><span class="done"></span><span class="done"></span><span></span><span></span></div>
-          <div><div class="eyebrow">Tailor your prompts</div><h1>What kind of work do you do?</h1><p class="lede">This only changes examples and skill suggestions. You can change it later.</p></div>
-          <div class="stack-8" data-choice-group="work-area">
-            <button class="select-card selected" type="button" aria-pressed="true"><span class="choice-icon">▦</span><span class="choice-copy"><strong>Finance & accounting</strong><span>Reconciliation, reporting, accuracy, and controls.</span></span><span class="choice-check">✓</span></button>
-            <button class="select-card" type="button" aria-pressed="false"><span class="choice-icon">◎</span><span class="choice-copy"><strong>Administration & operations</strong><span>Coordination, service, data, and process work.</span></span></button>
-            <button class="select-card" type="button" aria-pressed="false"><span class="choice-icon">⌘</span><span class="choice-copy"><strong>Technology</strong><span>Software, data, product, and technical delivery.</span></span></button>
-            <button class="select-card" type="button" aria-pressed="false"><span class="choice-icon">↗</span><span class="choice-copy"><strong>Sales & customer service</strong><span>Customers, relationships, support, and revenue.</span></span></button>
-          </div>
-          <div>
-            <label class="field-label" for="career-level">Current level</label>
-            <select class="select" id="career-level" name="career-level" autocomplete="off">
-              <option>New to working</option>
-              <option selected>Junior individual contributor</option>
-              <option>Experienced individual contributor</option>
-              <option>Supervisor or team lead</option>
-            </select>
-          </div>
-          <div class="card soft small"><strong>Finance prompt example</strong><br><span class="muted">“Did you identify a discrepancy, improve accuracy, or help meet a reporting deadline?”</span></div>
-          <button class="button primary block" type="button" data-go="goal">Choose My Goal</button>
-        </div>
-      </section>
-
-      <!-- 03 Goal -->
-      <section class="screen" id="screen-goal" data-screen="goal" data-title="03 · Main Goal" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="progress"><span class="done"></span><span class="done"></span><span class="done"></span><span></span></div>
-          <div><div class="eyebrow">Make KerjaLog useful now</div><h1>What do you want help with first?</h1><p class="lede">You’ll still get all four sections. This only decides what KerjaLog emphasizes.</p></div>
-          <div class="stack-8" data-choice-group="goal">
-            <button class="select-card selected" type="button" aria-pressed="true"><span class="choice-icon">✓</span><span class="choice-copy"><strong>Prepare for performance reviews</strong><span>Turn your work entries into a clear self-assessment.</span></span><span class="choice-check">✓</span></button>
-            <button class="select-card" type="button" aria-pressed="false"><span class="choice-icon">◷</span><span class="choice-copy"><strong>Remember my work</strong><span>Keep useful details before they disappear.</span></span></button>
-            <button class="select-card" type="button" aria-pressed="false"><span class="choice-icon">↗</span><span class="choice-copy"><strong>Update my résumé</strong><span>Collect evidence for stronger achievement bullets.</span></span></button>
-            <button class="select-card" type="button" aria-pressed="false"><span class="choice-icon">◇</span><span class="choice-copy"><strong>Prepare for interviews</strong><span>Build examples from work you actually did.</span></span></button>
-            <button class="select-card" type="button" aria-pressed="false"><span class="choice-icon">✦</span><span class="choice-copy"><strong>Understand my professional growth</strong><span>See what your entries demonstrate over time.</span></span></button>
-          </div>
-          <button class="button primary block" type="button" data-go="schedule">Set My Review Rhythm</button>
-        </div>
-      </section>
-
-      <!-- 04 Schedule -->
-      <section class="screen" id="screen-schedule" data-screen="schedule" data-title="04 · Review & Reminder" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="progress"><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span></div>
-          <div><div class="eyebrow">One gentle rhythm</div><h1>When should KerjaLog help you reflect?</h1><p class="lede">No streaks. Skip any reminder without losing progress.</p></div>
-          <div>
-            <label class="field-label" for="review-cycle">Performance review schedule</label>
-            <select class="select" id="review-cycle" name="review-cycle" autocomplete="off"><option>Monthly</option><option>Quarterly</option><option>Every 6 months</option><option selected>Annually</option><option>No fixed schedule</option></select>
-          </div>
-          <div class="button-row">
-            <div><label class="field-label" for="reminder-day">Reflection day</label><select class="select" id="reminder-day" name="reminder-day" autocomplete="off"><option>Thursday</option><option selected>Friday</option><option>Saturday</option></select></div>
-            <div><label class="field-label" for="reminder-time">Time</label><input class="input" id="reminder-time" name="reminder-time" type="time" value="16:30" /></div>
-          </div>
-          <div class="card success inline-note"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><div><strong>Protect your work journal</strong><div class="small muted">Use biometrics or your device PIN. Local entries stay encrypted on this device.</div></div></div>
-          <div style="min-height:16px;flex:1"></div>
-          <button class="button primary block" type="button" data-go="home">Finish Setup</button>
-        </div>
-      </section>
-
-      <!-- 05 Home -->
-      <section class="screen has-nav" id="screen-home" data-screen="home" data-title="05 · Home" data-nav="true" data-nav-key="home">
-        <div class="screen-body stack-20">
-          <div class="screen-header">
-            <div class="header-copy"><div class="eyebrow">Friday · 7 August</div><h1 style="font-size:27px">Good afternoon, Dimas</h1></div>
-            <button class="icon-button" type="button" aria-label="Toggle theme" data-theme-button><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg></button>
-          </div>
-          <div class="home-hero stack-12"><div><div class="tiny" style="font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#e9deff">Your work matters</div><h2 style="font-size:22px;margin-top:5px">What became easier, clearer, safer, or more accurate because of your work?</h2><p class="small">Capture it while the detail is still fresh.</p></div><button class="button block" type="button" data-go="capture-type"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Log Something</button></div>
-          <div>
-            <div class="section-title"><h2>This week</h2><span class="small muted">3 work entries</span></div>
-            <div class="week-summary" style="margin-top:10px"><div class="metric"><b>2</b><span>Review ready</span></div><div class="metric"><b>1</b><span>Needs context</span></div><div class="metric"><b>1</b><span>New skill seen</span></div></div>
-          </div>
-          <div class="card warning stack-8"><div class="eyebrow" style="color:var(--amber)">Complete later</div><h3>Monthly reconciliation support</h3><p class="small muted">You saved the event, but haven’t added what changed yet.</p><button class="text-action" type="button" data-go="outcome">Add the outcome →</button></div>
-          <div class="card brand stack-12"><div><div class="eyebrow">Weekly reflection</div><h3 style="margin-top:4px">A 2-minute check-in can reveal work you forgot to log.</h3></div><button class="button secondary block" type="button" id="open-reflection">Reflect on My Week</button></div>
-          <div>
-            <div class="section-title"><h2>Recent progress</h2><button class="text-action" type="button" data-go="history">View History</button></div>
-            <div class="card soft" style="margin-top:10px">
-              <div class="timeline-entry"><span class="timeline-dot green"></span><div class="timeline-copy"><strong>Removed 7 duplicate reconciliation entries</strong><span>Review ready · Accuracy · Problem-solving</span></div></div>
-              <div class="timeline-entry"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Helped Finance close a reporting task on time</strong><span>Developed entry · Collaboration</span></div></div>
-              <div class="timeline-entry"><span class="timeline-dot amber"></span><div class="timeline-copy"><strong>Learned the new approval process</strong><span>Quick note · Learning</span></div></div>
-            </div>
-          </div>
-          <div class="card stack-8"><div class="section-title"><h3>Next review</h3><span class="chip green">18 weeks</span></div><p class="small muted">Annual performance review · 12 December 2026</p><p class="tiny muted">You already have 12 entries that may be useful.</p></div>
-        </div>
-      </section>
-
-      <!-- 06 Capture type -->
-      <section class="screen" id="screen-capture-type" data-screen="capture-type" data-title="06 · Quick Capture" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Home" data-go="home"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Quick capture</div><h1 style="font-size:27px">What happened at work?</h1></div></div>
-          <p class="lede" style="margin-top:-10px">Choose the closest match. Small work counts.</p>
-          <div class="stack-8" data-choice-group="event-type">
-            <button class="event-card selected" type="button" aria-pressed="true" data-event="completed"><span class="choice-icon">✓</span><span class="choice-copy"><strong>I completed something</strong><span>A task, report, deliverable, or milestone moved forward.</span></span><span class="choice-check">✓</span></button>
-            <button class="event-card" type="button" aria-pressed="false" data-event="solved"><span class="choice-icon">✦</span><span class="choice-copy"><strong>I solved a problem</strong><span>An error, blocker, delay, or recurring issue was handled.</span></span></button>
-            <button class="event-card" type="button" aria-pressed="false" data-event="helped"><span class="choice-icon">↔</span><span class="choice-copy"><strong>I helped someone</strong><span>A colleague, team, or customer could move forward.</span></span></button>
-            <button class="event-card" type="button" aria-pressed="false" data-event="feedback"><span class="choice-icon">“</span><span class="choice-copy"><strong>I received feedback</strong><span>Praise, coaching, recognition, or an important comment.</span></span></button>
-            <button class="event-card" type="button" aria-pressed="false" data-event="learned"><span class="choice-icon">◇</span><span class="choice-copy"><strong>I learned something</strong><span>A tool, process, lesson, or new way of working.</span></span></button>
-            <button class="event-card" type="button" aria-pressed="false" data-event="ownership"><span class="choice-icon">↑</span><span class="choice-copy"><strong>I took responsibility</strong><span>A new responsibility, initiative, or ownership moment.</span></span></button>
-            <button class="event-card" type="button" aria-pressed="false" data-event="challenge"><span class="choice-icon">!</span><span class="choice-copy"><strong>Something became difficult</strong><span>A private challenge, mistake, setback, or unresolved blocker.</span></span><span class="chip amber" style="margin-left:auto">Private</span></button>
-          </div>
-          <button class="button primary block" type="button" data-go="event-input">Describe What Happened</button>
-        </div>
-      </section>
-
-      <!-- 07 Event input -->
-      <section class="screen" id="screen-event-input" data-screen="event-input" data-title="07 · Work Event" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="capture-type"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Step 1 · The event</div><h1 style="font-size:27px">What happened?</h1></div></div>
-          <div><label class="field-label" for="work-note">Write it the way you remember it</label><textarea class="textarea" id="work-note" name="work-note" autocomplete="off" placeholder="Example: There were differences between the transaction report and spreadsheet. I checked them and found duplicate entries.…">There were differences between the transaction report and spreadsheet. I checked them and found duplicate entries.</textarea><div class="field-help">You do not need professional wording. KerjaLog will help structure it later.</div></div>
-          <button class="button secondary block" type="button" id="voice-button"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Use Speech-to-Text</button>
-          <div class="card soft small"><strong>Finance prompt</strong><br><span class="muted">What was inaccurate, delayed, risky, or hard to reconcile?</span></div>
-          <div class="card warning inline-note"><span class="note-icon">!</span><div><strong>Keep confidential data out</strong><div class="small muted">Do not include passwords, customer information, account numbers, confidential documents, or company secrets.</div></div></div>
-          <div class="button-row"><button class="button secondary" type="button" id="save-quick-note">Save as Quick Note</button><button class="button primary" type="button" data-go="outcome">Find the Outcome</button></div>
-        </div>
-      </section>
-
-      <!-- 08 Outcome -->
-      <section class="screen" id="screen-outcome" data-screen="outcome" data-title="08 · Outcome" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="event-input"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Step 2 · The outcome</div><h1 style="font-size:27px">What changed because of this?</h1></div></div>
-          <p class="lede" style="margin-top:-10px">Choose what you know now. “I’m not sure yet” is a valid answer.</p>
-          <div class="stack-8" data-choice-group="outcome">
-            <button class="outcome-card selected" type="button" aria-pressed="true"><span class="choice-icon">✓</span><span class="choice-copy"><strong>An error was fixed or prevented</strong><span>The work became more accurate or avoided a mistake.</span></span><span class="choice-check">✓</span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">◷</span><span class="choice-copy"><strong>A deadline was met</strong></span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">↗</span><span class="choice-copy"><strong>Work became faster</strong></span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">≡</span><span class="choice-copy"><strong>Work became clearer</strong></span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">↔</span><span class="choice-copy"><strong>A customer or colleague was helped</strong></span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">△</span><span class="choice-copy"><strong>A risk was reduced</strong></span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">◇</span><span class="choice-copy"><strong>A decision became possible</strong></span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">✦</span><span class="choice-copy"><strong>I gained a new skill</strong></span></button>
-            <button class="outcome-card" type="button" aria-pressed="false"><span class="choice-icon">?</span><span class="choice-copy"><strong>I’m not sure yet</strong><span>Save it now. KerjaLog can revisit this during reflection.</span></span></button>
-          </div>
-          <button class="button primary block" type="button" data-go="evidence">Add Supporting Evidence</button>
-        </div>
-      </section>
-
-      <!-- 09 Evidence -->
-      <section class="screen" id="screen-evidence" data-screen="evidence" data-title="09 · Evidence" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="outcome"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Step 3 · Optional evidence</div><h1 style="font-size:27px">Do you have a useful detail?</h1></div></div>
-          <p class="lede" style="margin-top:-10px">Numbers help sometimes, but deadlines, feedback, and people helped count too.</p>
-          <div class="stack-8" data-choice-group="evidence-type" data-multiple="true">
-            <button class="evidence-card selected" type="button" aria-pressed="true"><span class="choice-icon">7</span><span class="choice-copy"><strong>A number</strong><span>7 duplicate entries were removed.</span></span><span class="choice-check">✓</span></button>
-            <button class="evidence-card" type="button" aria-pressed="false"><span class="choice-icon">◷</span><span class="choice-copy"><strong>A deadline</strong><span>Completed before the report was submitted.</span></span></button>
-            <button class="evidence-card" type="button" aria-pressed="false"><span class="choice-icon">✓</span><span class="choice-copy"><strong>A result</strong><span>Reporting accuracy improved.</span></span></button>
-            <button class="evidence-card" type="button" aria-pressed="false"><span class="choice-icon">“</span><span class="choice-copy"><strong>Feedback received</strong></span></button>
-            <button class="evidence-card" type="button" aria-pressed="false"><span class="choice-icon">↔</span><span class="choice-copy"><strong>People or teams helped</strong></span></button>
-            <button class="evidence-card" type="button" aria-pressed="false"><span class="choice-icon">↗</span><span class="choice-copy"><strong>A reference link</strong></span></button>
-            <button class="evidence-card" type="button" aria-pressed="false"><span class="choice-icon">+</span><span class="choice-copy"><strong>A supporting note</strong></span></button>
-          </div>
-          <div><label class="field-label" for="evidence-detail">Useful detail</label><textarea class="textarea" id="evidence-detail" name="evidence-detail" autocomplete="off" style="min-height:104px" placeholder="Example: 7 duplicate entries were removed before submission.…">7 duplicate entries were removed before the report was submitted.</textarea></div>
-          <div class="button-row"><button class="button secondary" type="button" data-go="impact">Skip Evidence</button><button class="button primary" type="button" data-go="impact">Preview My Impact</button></div>
-        </div>
-      </section>
-
-      <!-- 10 Impact Builder -->
-      <section class="screen" id="screen-impact" data-screen="impact" data-title="10 · Impact Builder" data-nav="false">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="evidence"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Impact Builder</div><h1 style="font-size:27px">See the value inside the work</h1></div></div>
-          <div class="card brand">
-            <div class="evidence-thread">
-              <div class="thread-node confirmed"><small>What happened</small><p>Checked differences between a transaction report and spreadsheet.</p></div>
-              <div class="thread-node confirmed"><small>What changed</small><p>An error was fixed before submission.</p></div>
-              <div class="thread-node confirmed"><small>What supports it</small><p>7 duplicate entries removed.</p></div>
-              <div class="thread-node confirmed"><small>What this demonstrates</small><p>Attention to detail · Problem-solving · Execution</p></div>
-            </div>
-          </div>
-          <div class="card soft stack-8"><div class="eyebrow">Your original note</div><p class="small">“There were differences between the transaction report and spreadsheet. I checked them and found duplicate entries.”</p></div>
-          <div class="card stack-8"><div class="eyebrow">KerjaLog’s suggestion</div><p style="font-size:15px;line-height:1.6;margin:0;font-weight:700">Investigated discrepancies between the transaction report and reconciliation spreadsheet, identifying and removing 7 duplicate entries before submission and improving reporting accuracy.</p></div>
-          <div class="card warning stack-8"><div class="eyebrow" style="color:var(--amber)">Check these assumptions</div><p class="small muted">KerjaLog inferred “improving reporting accuracy” from the duplicate removal. Confirm it is fair, or edit the suggestion.</p></div>
-          <div class="button-row"><button class="button secondary" type="button" id="edit-suggestion">Edit Suggestion</button><button class="button primary" type="button" data-go="entry-detail">Confirm & Save</button></div>
-        </div>
-      </section>
-
-      <!-- 11 Entry detail -->
-      <section class="screen has-nav" id="screen-entry-detail" data-screen="entry-detail" data-title="11 · Saved Entry" data-nav="true" data-nav-key="history">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Home" data-go="home"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Saved work entry</div><h1 style="font-size:25px">Reconciliation discrepancies resolved</h1></div></div>
-          <div class="chip-row"><span class="chip green">Review ready</span><span class="chip">Problem solved</span><span class="chip">Finance</span><span class="chip"><svg class="icon" aria-hidden="true" style="width:14px;height:14px"><use href="#i-lock"/></svg>Private</span></div>
-          <div class="card brand"><div class="evidence-thread"><div class="thread-node confirmed"><small>Task</small><p>Reviewed differences between transaction report and spreadsheet.</p></div><div class="thread-node confirmed"><small>Contribution</small><p>Identified and removed duplicate records.</p></div><div class="thread-node confirmed"><small>Outcome</small><p>An error was fixed before submission.</p></div><div class="thread-node confirmed"><small>Evidence</small><p>7 duplicate entries removed.</p></div><div class="thread-node confirmed"><small>Career story</small><p>Attention to detail · Problem-solving · Execution</p></div></div></div>
-          <div class="card stack-8"><div class="section-title"><h3>Impact statement</h3><button class="text-action" type="button">Edit</button></div><p class="small muted">Investigated discrepancies between the transaction report and reconciliation spreadsheet, identifying and removing 7 duplicate entries before submission and improving reporting accuracy.</p></div>
-          <div class="card stack-12"><h3>Entry details</h3><div class="small"><strong>Project / work area</strong><br><span class="muted">Monthly reconciliation</span></div><div class="small"><strong>Review period</strong><br><span class="muted">2026 annual review</span></div><div class="small"><strong>Included in generated documents</strong><br><span class="muted">Yes, when you select it</span></div></div>
-          <button class="button primary block" type="button" data-go="growth">See What This Demonstrates</button>
-        </div>
-      </section>
-
-      <!-- 12 History -->
-      <section class="screen has-nav" id="screen-history" data-screen="history" data-title="12 · History" data-nav="true" data-nav-key="history">
-        <div class="screen-body stack-20">
-          <div><div class="eyebrow">History</div><h1 style="font-size:28px">Your work, when you need it</h1><p class="lede">Search by what happened, project, evidence, skill, or review period.</p></div>
-          <label class="field-label" for="history-search">Search work history</label>
-          <div style="position:relative"><svg class="icon" aria-hidden="true" style="position:absolute;left:14px;top:15px;color:var(--text-muted)"><use href="#i-search"/></svg><input class="input" id="history-search" name="history-search" type="search" autocomplete="off" placeholder="Search entries…" style="padding-left:43px" /></div>
-          <div class="chip-row" aria-label="History filters"><button class="chip" type="button" aria-pressed="true">All</button><button class="chip" type="button" aria-pressed="false">Project</button><button class="chip" type="button" aria-pressed="false">Entry type</button><button class="chip" type="button" aria-pressed="false">Skill</button><button class="chip" type="button" aria-pressed="false">Evidence</button><button class="chip" type="button" aria-pressed="false">Review ready</button></div>
-          <div><div class="section-title"><h2>August 2026</h2><span class="small muted">4 entries</span></div><div style="margin-top:10px" id="history-entries">
-            <article class="entry-card" data-search="reconciliation duplicate reporting finance problem solving accuracy"><div class="entry-top"><div><div class="entry-title">Resolved reconciliation discrepancies</div><div class="entry-meta">6 Aug · Finance · Problem solved</div></div><span class="chip green">Review ready</span></div><div class="entry-evidence">7 duplicate entries removed before submission.</div></article>
-            <article class="entry-card" data-search="finance deadline helped closing collaboration"><div class="entry-top"><div><div class="entry-title">Helped Finance complete monthly closing</div><div class="entry-meta">4 Aug · Finance · Helped someone</div></div><span class="chip">Developed</span></div><div class="entry-evidence">Supported reconciliation checks before the reporting deadline.</div></article>
-            <article class="entry-card" data-search="approval process learning workflow"><div class="entry-top"><div><div class="entry-title">Learned the updated approval process</div><div class="entry-meta">1 Aug · Operations · Learning</div></div><span class="chip amber">Quick note</span></div><div class="entry-evidence">Outcome can be added during weekly reflection.</div></article>
-            <article class="entry-card" data-search="challenge delay spreadsheet private"><div class="entry-top"><div><div class="entry-title">Spreadsheet handoff became difficult</div><div class="entry-meta">31 Jul · Challenge · Private</div></div><span class="chip amber"><svg class="icon" aria-hidden="true" style="width:13px;height:13px"><use href="#i-lock"/></svg>Private</span></div><div class="entry-evidence">Excluded from generated documents unless intentionally selected.</div></article>
-          </div></div>
-        </div>
-      </section>
-
-      <!-- 13 Growth -->
-      <section class="screen has-nav" id="screen-growth" data-screen="growth" data-title="13 · Growth" data-nav="true" data-nav-key="growth">
-        <div class="screen-body stack-20">
-          <div><div class="eyebrow">Growth</div><h1 style="font-size:28px">Your evidence map</h1><p class="lede">This is not a performance score. It only shows where KerjaLog has recorded supporting examples.</p></div>
-          <div class="card brand stack-8"><div class="eyebrow">12 work entries</div><h2>Evidence across 6 skill areas</h2><p class="small muted">Tap a skill to see the real work behind it.</p></div>
-          <div class="card" style="padding-top:4px;padding-bottom:4px">
-            <button class="skill-row" style="width:100%;border-left:0;border-right:0;border-top:0;background:transparent;color:inherit;text-align:left" type="button" data-go="skill-detail"><span class="skill-symbol">◎</span><span class="skill-copy"><strong>Attention to detail</strong><span>Reconciliation, validation, reporting accuracy</span></span><span class="skill-count">7 entries</span></button>
-            <button class="skill-row" style="width:100%;border-left:0;border-right:0;border-top:0;background:transparent;color:inherit;text-align:left" type="button" data-go="skill-detail"><span class="skill-symbol">✦</span><span class="skill-copy"><strong>Problem-solving</strong><span>Errors, blockers, root-cause checks</span></span><span class="skill-count">4 entries</span></button>
-            <div class="skill-row"><span class="skill-symbol">↔</span><span class="skill-copy"><strong>Collaboration</strong><span>Support across Finance and Operations</span></span><span class="skill-count">3 entries</span></div>
-            <div class="skill-row"><span class="skill-symbol">✓</span><span class="skill-copy"><strong>Execution</strong><span>Deadlines and dependable delivery</span></span><span class="skill-count">5 entries</span></div>
-            <div class="skill-row"><span class="skill-symbol">↑</span><span class="skill-copy"><strong>Ownership</strong><span>Initiative and added responsibility</span></span><span class="skill-count">2 entries</span></div>
-            <div class="skill-row"><span class="skill-symbol" style="background:var(--surface-2);color:var(--text-muted)">◇</span><span class="skill-copy"><strong>Leadership</strong><span>No evidence recorded yet</span></span><span class="skill-count">—</span></div>
-          </div>
-          <div class="card soft small"><strong>Nothing is “weak” here.</strong><br><span class="muted">If leadership matters to your next role, KerjaLog can remind you to notice examples when they happen.</span></div>
-          <button class="button primary block" type="button" data-go="review-setup">Build Review Material</button>
-        </div>
-      </section>
-
-      <!-- 14 Skill detail -->
-      <section class="screen has-nav" id="screen-skill-detail" data-screen="skill-detail" data-title="14 · Skill Evidence" data-nav="true" data-nav-key="growth">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Growth" data-go="growth"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Skill evidence</div><h1 style="font-size:25px">Attention to detail</h1></div></div>
-          <div class="card brand stack-8"><div class="section-title"><h2>7 supporting entries</h2><span class="chip">Suggested skill</span></div><p class="small muted">KerjaLog suggested this skill from your work. You stay in control of the label.</p><div class="button-row"><button class="button secondary" type="button" id="remove-skill">Remove Skill</button><button class="button primary" type="button" id="confirm-skill">Confirm Skill</button></div></div>
-          <div class="card"><div class="evidence-thread"><div class="thread-node confirmed"><small>6 Aug · Reconciliation</small><p>Removed 7 duplicate entries before submission.</p></div><div class="thread-node confirmed"><small>22 Jul · Monthly report</small><p>Corrected incomplete records before the verification deadline.</p></div><div class="thread-node confirmed"><small>9 Jul · Controls</small><p>Flagged a mismatch before data was sent to the next team.</p></div></div></div>
-          <div class="card soft small"><strong>Evidence coverage, not a rating</strong><br><span class="muted">KerjaLog never converts these entries into a performance percentage or rank.</span></div>
-          <button class="button primary block" type="button" data-go="review-setup">Use These Entries in Review Builder</button>
-        </div>
-      </section>
-
-      <!-- 15 Review setup -->
-      <section class="screen has-nav" id="screen-review-setup" data-screen="review-setup" data-title="15 · Review Builder" data-nav="true" data-nav-key="review">
-        <div class="screen-body stack-20">
-          <div><div class="eyebrow">Review Builder</div><h1 style="font-size:28px">What are you preparing for?</h1><p class="lede">KerjaLog recommends evidence. You decide what gets included.</p></div>
-          <div class="stack-8" data-choice-group="purpose">
-            <button class="purpose-card selected" type="button" aria-pressed="true"><span class="choice-icon">✓</span><span class="choice-copy"><strong>Performance self-review</strong><span>Organize contributions, problems solved, collaboration, and growth.</span></span><span class="choice-check">✓</span></button>
-            <button class="purpose-card" type="button" aria-pressed="false"><span class="choice-icon">↔</span><span class="choice-copy"><strong>One-on-one meeting</strong><span>A concise update with talking points.</span></span></button>
-            <button class="purpose-card" type="button" aria-pressed="false"><span class="choice-icon">↗</span><span class="choice-copy"><strong>Résumé achievements</strong><span>Action + responsibility + outcome + evidence.</span></span></button>
-            <button class="purpose-card" type="button" aria-pressed="false"><span class="choice-icon">◇</span><span class="choice-copy"><strong>Interview examples</strong><span>Situation, task, action, result, and learning.</span></span></button>
-          </div>
-          <div><div class="field-label">Period</div><div class="chip-row" data-chip-group="period"><button class="chip" type="button" aria-pressed="false">This month</button><button class="chip" type="button" aria-pressed="false">Last quarter</button><button class="chip" type="button" aria-pressed="true">This year</button><button class="chip" type="button" aria-pressed="false">Custom</button></div></div>
-          <div><div class="section-title"><h2>Recommended entries</h2><span class="small muted">3 selected</span></div><div class="stack-12" style="margin-top:10px">
-            <div class="card recommendation"><input id="rec-1" type="checkbox" checked /><label for="rec-1"><strong>Resolved reconciliation discrepancies</strong><span>Recommended because it has a clear outcome, specific evidence, and demonstrates accuracy.</span></label></div>
-            <div class="card recommendation"><input id="rec-2" type="checkbox" checked /><label for="rec-2"><strong>Helped Finance complete monthly closing</strong><span>Adds collaboration and deadline support to the review.</span></label></div>
-            <div class="card recommendation"><input id="rec-3" type="checkbox" checked /><label for="rec-3"><strong>Reduced BOS frontend tests from ~60 min to 4 min</strong><span>Adds a technical example with strong measurable evidence.</span></label></div>
-            <div class="card recommendation"><input id="rec-4" type="checkbox" /><label for="rec-4"><strong>Learned the updated approval process</strong><span>Useful if you want to emphasize growth and adaptability.</span></label></div>
-          </div></div>
-          <button class="button primary block" type="button" data-go="review-summary">Create My Review Draft</button>
-        </div>
-      </section>
-
-      <!-- 16 Summary -->
-      <section class="screen has-nav" id="screen-review-summary" data-screen="review-summary" data-title="16 · Generated Summary" data-nav="true" data-nav-key="review">
-        <div class="screen-body stack-20">
-          <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Review Builder" data-go="review-setup"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Performance self-review</div><h1 style="font-size:25px">Your review draft</h1></div></div>
-          <div class="chip-row"><span class="chip green">3 entries included</span><span class="chip">Editable</span><span class="chip">2026</span></div>
-          <div class="review-output" id="review-output" contenteditable="true" role="textbox" aria-label="Editable review draft" spellcheck="true">
-            <h3>Major contributions</h3>
-            <ul><li>Investigated discrepancies between the transaction report and reconciliation spreadsheet, identifying and removing 7 duplicate entries before submission and improving reporting accuracy.</li><li>Reduced the BOS frontend test suite runtime from approximately 60 minutes to 4 minutes by restructuring shared test setup and eliminating duplicated execution.</li></ul>
-            <h3>Collaboration & support</h3>
-            <ul><li>Supported the Finance team during monthly closing by helping complete reconciliation checks before the reporting deadline.</li></ul>
-            <h3>Growth & learning</h3>
-            <ul><li>Strengthened attention to detail, problem-solving, execution, and cross-team support through repeated evidence across the year.</li></ul>
-            <h3>Next-period focus</h3>
-            <ul><li>Capture more examples of ownership and leadership when taking initiative or coordinating work across people.</li></ul>
-          </div>
-          <div class="grid-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
-            <button class="button secondary" type="button" data-export="plain"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy Text</button>
-            <button class="button secondary" type="button" data-export="formatted"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy Formatted</button>
-            <button class="button secondary" type="button" data-export="pdf"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export PDF</button>
-            <button class="button secondary" type="button" data-export="markdown"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export Markdown</button>
-          </div>
-          <button class="button primary block" type="button" data-export="share"><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>Share Review Draft</button>
-          <div class="card soft small"><strong>No large KerjaLog watermark.</strong><br><span class="muted">The content is yours. Exported material stays easy to paste into company forms, email, documents, and job portals.</span></div>
-        </div>
-      </section>
-
-      <nav class="bottom-nav" id="bottom-nav" aria-label="Primary navigation">
-        <button class="nav-button" type="button" data-nav-go="home"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></button>
-        <button class="nav-button" type="button" data-nav-go="history"><svg class="icon" aria-hidden="true"><use href="#i-history"/></svg><span>History</span></button>
-        <button class="capture-nav" type="button" data-go="capture-type" aria-label="Log something"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-        <button class="nav-button" type="button" data-nav-go="growth"><svg class="icon" aria-hidden="true"><use href="#i-growth"/></svg><span>Growth</span></button>
-        <button class="nav-button" type="button" data-nav-go="review-setup"><svg class="icon" aria-hidden="true"><use href="#i-review"/></svg><span>Review</span></button>
-      </nav>
-
-      <div class="modal-backdrop" id="reflection-modal" role="dialog" aria-modal="true" aria-labelledby="reflection-title">
-        <div class="sheet stack-16">
-          <div class="sheet-grabber" aria-hidden="true"></div>
-          <div><div class="eyebrow">Weekly reflection</div><h2 id="reflection-title">Four prompts. Skip anything that doesn’t fit.</h2></div>
-          <div><label class="field-label" for="reflection-1">1. What did you finish or move forward?</label><textarea class="textarea" id="reflection-1" style="min-height:72px" placeholder="A task, project, or follow-up…"></textarea></div>
-          <div><label class="field-label" for="reflection-2">2. Who did you help?</label><textarea class="textarea" id="reflection-2" style="min-height:72px" placeholder="A colleague, team, or customer…"></textarea></div>
-          <div><label class="field-label" for="reflection-3">3. What problem did you handle?</label><textarea class="textarea" id="reflection-3" style="min-height:72px" placeholder="An error, blocker, delay, or risk…"></textarea></div>
-          <div><label class="field-label" for="reflection-4">4. What did you learn?</label><textarea class="textarea" id="reflection-4" style="min-height:72px" placeholder="A process, tool, lesson, or new approach…"></textarea></div>
-          <button class="button primary block" type="button" id="finish-reflection">Show My Week in 3 Points</button>
-          <button class="button ghost block" type="button" id="close-reflection">Close Reflection</button>
-        </div>
-      </div>
-
-      <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    </section>
-
-    <aside class="prototype-panel">
-      <div class="eyebrow">Design direction</div>
-      <h2>Evidence over scoring</h2>
-      <p>The vertical Evidence Thread is KerjaLog’s signature device: what happened → what changed → evidence → what the work demonstrates.</p>
-      <div class="utility-stack">
-        <div><div class="utility-label">Theme</div><button class="utility-button" type="button" data-theme-button>Toggle Light / Dark</button></div>
-        <div><div class="utility-label">Reset</div><button class="utility-button" type="button" id="reset-prototype">Restart Onboarding</button></div>
-      </div>
-    </aside>
-  </main>
-
-  <script>
-    const screens = [...document.querySelectorAll('.screen')];
-    const bottomNav = document.getElementById('bottom-nav');
-    const toast = document.getElementById('toast');
-    const jumpList = document.getElementById('jump-list');
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
-    let currentScreen = 'welcome';
-    let toastTimer;
-    let lang = 'en';
-
-    const i18n = {
-      en: {
-        welcomeTitle: 'Your work matters—even when it feels routine.',
-        welcomeLede: 'KerjaLog helps you notice what changed because of your work and keep the evidence ready for reviews, résumés, and interviews.',
-        privateTitle: 'Private by default',
-        privateCopy: 'Local-first. No employer dashboard. You decide what gets exported.',
-        setupCta: 'Set Up KerjaLog'
-      },
-      id: {
-        welcomeTitle: 'Pekerjaanmu berarti—bahkan saat terasa biasa saja.',
-        welcomeLede: 'KerjaLog membantumu melihat apa yang berubah karena pekerjaanmu dan menyimpan buktinya untuk penilaian, CV, dan wawancara.',
-        privateTitle: 'Privat secara default',
-        privateCopy: 'Utamakan penyimpanan lokal. Tidak ada dashboard atasan. Kamu yang menentukan apa yang diekspor.',
-        setupCta: 'Atur KerjaLog'
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f7f3ee" />
+    <title>KerjaLog — Interactive Mobile Prototype</title>
+    <meta
+      name="description"
+      content="Interactive high-fidelity prototype for KerjaLog, a private work-growth companion."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --brand: #7138f2;
+        --brand-strong: #5121a8;
+        --brand-soft: #eee7ff;
+        --canvas: #f7f3ee;
+        --surface: #fffdfc;
+        --surface-2: #f2ede7;
+        --surface-3: #ebe4dc;
+        --text: #211b2a;
+        --text-muted: #6f6675;
+        --border: #ded6df;
+        --green: #167a4d;
+        --green-soft: #e1f5ea;
+        --amber: #a95b12;
+        --amber-soft: #fff0d9;
+        --danger: #b42318;
+        --danger-soft: #feeceb;
+        --shadow: 0 24px 80px rgba(49, 32, 57, 0.18);
+        --r-sm: 12px;
+        --r-md: 16px;
+        --r-lg: 20px;
+        --r-xl: 28px;
+        --safe-bottom: max(14px, env(safe-area-inset-bottom));
       }
-    };
 
-    function showToast(message) {
-      clearTimeout(toastTimer);
-      toast.textContent = message;
-      toast.classList.add('show');
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
-    }
+      html[data-theme='dark'] {
+        color-scheme: dark;
+        --canvas: #151218;
+        --surface: #211c25;
+        --surface-2: #2a242e;
+        --surface-3: #342d38;
+        --text: #f8f3fb;
+        --text-muted: #bcb2c1;
+        --border: #453d49;
+        --brand-soft: #39265e;
+        --green-soft: #173d2d;
+        --amber-soft: #4b3019;
+        --danger-soft: #4a2425;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+      }
 
-    function navigate(name) {
-      const next = document.querySelector(`[data-screen="${name}"]`);
-      if (!next) return;
-      screens.forEach(screen => screen.classList.toggle('active', screen === next));
-      currentScreen = name;
-      next.querySelector('.screen-body')?.scrollTo({ top: 0, behavior: 'auto' });
-      const hasNav = next.dataset.nav === 'true';
-      bottomNav.classList.toggle('visible', hasNav);
-      const navKey = next.dataset.navKey;
-      document.querySelectorAll('[data-nav-go]').forEach(btn => btn.classList.toggle('active', btn.dataset.navGo === navKey));
-      document.querySelectorAll('.jump-button').forEach(btn => btn.setAttribute('aria-current', String(btn.dataset.jump === name)));
-      window.location.hash = name;
-      const heading = next.querySelector('h1');
-      if (heading) heading.setAttribute('tabindex', '-1');
-    }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        min-height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family:
+          Manrope,
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        background:
+          radial-gradient(
+            circle at 16% 12%,
+            color-mix(in srgb, var(--brand) 12%, transparent),
+            transparent 30rem
+          ),
+          var(--canvas);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
 
-    screens.forEach(screen => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'jump-button';
-      button.dataset.jump = screen.dataset.screen;
-      button.textContent = screen.dataset.title;
-      button.addEventListener('click', () => navigate(screen.dataset.screen));
-      jumpList.appendChild(button);
-    });
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+      button,
+      [role='button'] {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      select:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--brand) 58%, white);
+        outline-offset: 3px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+      svg {
+        display: block;
+      }
 
-    document.addEventListener('click', event => {
-      const go = event.target.closest('[data-go]');
-      if (go) navigate(go.dataset.go);
-      const nav = event.target.closest('[data-nav-go]');
-      if (nav) navigate(nav.dataset.navGo);
-    });
+      .prototype-stage {
+        min-height: 100svh;
+        display: grid;
+        grid-template-columns: minmax(220px, 300px) minmax(0, 390px) minmax(
+            220px,
+            300px
+          );
+        justify-content: center;
+        align-items: center;
+        gap: 28px;
+        padding: 30px;
+      }
 
-    document.querySelectorAll('[data-choice-group]').forEach(group => {
-      group.addEventListener('click', event => {
-        const choice = event.target.closest('button');
-        if (!choice) return;
-        const multiple = group.dataset.multiple === 'true';
-        if (multiple) {
-          const isSelected = choice.classList.toggle('selected');
-          choice.setAttribute('aria-pressed', String(isSelected));
-          const existing = choice.querySelector('.choice-check');
-          if (!existing && isSelected) {
-            const check = document.createElement('span'); check.className = 'choice-check'; check.textContent = '✓'; choice.appendChild(check);
-          } else if (existing && !isSelected) existing.remove();
-          return;
+      .prototype-panel {
+        align-self: center;
+        background: color-mix(in srgb, var(--surface) 92%, transparent);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 18px;
+        box-shadow: 0 10px 35px rgba(49, 32, 57, 0.08);
+        backdrop-filter: blur(16px);
+      }
+      .prototype-panel h2 {
+        font-size: 16px;
+        margin: 0 0 6px;
+      }
+      .prototype-panel p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .prototype-panel .eyebrow {
+        margin-bottom: 6px;
+      }
+      .jump-list {
+        display: grid;
+        gap: 7px;
+        margin-top: 14px;
+        max-height: 420px;
+        overflow: auto;
+        padding-right: 4px;
+      }
+      .jump-button {
+        min-height: 38px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-muted);
+        text-align: left;
+        border-radius: 10px;
+        padding: 7px 9px;
+        font-size: 12px;
+      }
+      .jump-button:hover,
+      .jump-button[aria-current='true'] {
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+      }
+      html[data-theme='dark'] .jump-button:hover,
+      html[data-theme='dark'] .jump-button[aria-current='true'] {
+        color: #eaddff;
+      }
+
+      .phone-shell {
+        position: relative;
+        width: min(390px, 100vw);
+        height: min(844px, calc(100svh - 32px));
+        min-height: 660px;
+        background: var(--surface);
+        border: 1px solid color-mix(in srgb, var(--border) 88%, black);
+        border-radius: 34px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .status-bar {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 22px;
+        background: var(--surface);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        border-bottom: 1px solid
+          color-mix(in srgb, var(--border) 35%, transparent);
+        position: relative;
+        z-index: 20;
+      }
+      .status-icons {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        color: var(--text-muted);
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .status-pill {
+        width: 13px;
+        height: 7px;
+        border: 1.5px solid currentColor;
+        border-radius: 2px;
+        position: relative;
+      }
+      .status-pill::after {
+        content: '';
+        position: absolute;
+        right: 1px;
+        top: 1px;
+        bottom: 1px;
+        width: 7px;
+        background: currentColor;
+        border-radius: 1px;
+      }
+
+      .screen {
+        position: absolute;
+        inset: 42px 0 0;
+        background: var(--surface);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(14px);
+        transition:
+          opacity 180ms ease,
+          transform 180ms ease;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .screen.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+        z-index: 5;
+      }
+      .screen.has-nav .screen-body {
+        padding-bottom: 106px;
+      }
+      .screen-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 20px 22px calc(24px + var(--safe-bottom));
+        scrollbar-width: none;
+      }
+      .screen-body::-webkit-scrollbar {
+        display: none;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 1ms !important;
+          transition-duration: 1ms !important;
         }
-        [...group.querySelectorAll('button')].forEach(btn => {
-          btn.classList.remove('selected'); btn.setAttribute('aria-pressed', 'false'); btn.querySelector('.choice-check')?.remove();
+      }
+
+      .screen-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .screen-header .header-copy {
+        min-width: 0;
+        flex: 1;
+      }
+      .icon-button {
+        width: 48px;
+        height: 48px;
+        flex: 0 0 48px;
+        display: inline-grid;
+        place-items: center;
+        border-radius: 15px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+      }
+      .icon-button:hover {
+        background: var(--surface-2);
+      }
+      .icon {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .eyebrow {
+        color: var(--brand);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(27px, 7vw, 32px);
+        line-height: 1.08;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+      }
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.35;
+      }
+      p {
+        text-wrap: pretty;
+      }
+      .lede {
+        font-size: 16px;
+        line-height: 1.58;
+        color: var(--text-muted);
+        margin: 10px 0 0;
+      }
+      .muted {
+        color: var(--text-muted);
+      }
+      .small {
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .tiny {
+        font-size: 11px;
+        line-height: 1.45;
+      }
+      .stack-4 > * + * {
+        margin-top: 4px;
+      }
+      .stack-8 > * + * {
+        margin-top: 8px;
+      }
+      .stack-12 > * + * {
+        margin-top: 12px;
+      }
+      .stack-16 > * + * {
+        margin-top: 16px;
+      }
+      .stack-20 > * + * {
+        margin-top: 20px;
+      }
+      .stack-24 > * + * {
+        margin-top: 24px;
+      }
+
+      .progress {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 22px;
+      }
+      .progress span {
+        height: 4px;
+        width: 24px;
+        border-radius: 99px;
+        background: var(--border);
+      }
+      .progress span.done {
+        width: 44px;
+        background: var(--brand);
+      }
+
+      .brand-mark {
+        width: 82px;
+        height: 82px;
+        border-radius: 26px;
+        display: grid;
+        place-items: center;
+        background: var(--brand);
+        color: white;
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: -0.08em;
+        box-shadow: 0 16px 36px
+          color-mix(in srgb, var(--brand) 24%, transparent);
+      }
+
+      .button {
+        min-height: 52px;
+        border-radius: var(--r-md);
+        border: 1px solid transparent;
+        padding: 13px 17px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 15px;
+        text-align: center;
+      }
+      .button.primary {
+        background: var(--brand);
+        color: white;
+      }
+      .button.primary:hover {
+        background: var(--brand-strong);
+      }
+      .button.secondary {
+        background: var(--surface);
+        color: var(--brand-strong);
+        border-color: var(--border);
+      }
+      html[data-theme='dark'] .button.secondary {
+        color: #eaddff;
+      }
+      .button.ghost {
+        background: transparent;
+        color: var(--text-muted);
+        border-color: transparent;
+      }
+      .button.green {
+        background: var(--green);
+        color: white;
+      }
+      .button.block {
+        width: 100%;
+      }
+      .button-row {
+        display: flex;
+        gap: 10px;
+      }
+      .button-row > * {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .card {
+        border-radius: var(--r-lg);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 16px;
+      }
+      .card.soft {
+        background: var(--surface-2);
+        border-color: transparent;
+      }
+      .card.brand {
+        background: var(--brand-soft);
+        border-color: color-mix(in srgb, var(--brand) 25%, var(--border));
+      }
+      .card.success {
+        background: var(--green-soft);
+        border-color: color-mix(in srgb, var(--green) 26%, var(--border));
+      }
+      .card.warning {
+        background: var(--amber-soft);
+        border-color: color-mix(in srgb, var(--amber) 24%, var(--border));
+      }
+      .card.danger {
+        background: var(--danger-soft);
+        border-color: color-mix(in srgb, var(--danger) 22%, var(--border));
+      }
+
+      .select-card,
+      .event-card,
+      .outcome-card,
+      .evidence-card,
+      .purpose-card {
+        width: 100%;
+        text-align: left;
+        min-height: 64px;
+        border-radius: 18px;
+        padding: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .select-card:hover,
+      .event-card:hover,
+      .outcome-card:hover,
+      .evidence-card:hover,
+      .purpose-card:hover {
+        background: var(--surface-2);
+      }
+      .select-card.selected,
+      .event-card.selected,
+      .outcome-card.selected,
+      .evidence-card.selected,
+      .purpose-card.selected {
+        background: var(--brand-soft);
+        border: 2px solid var(--brand);
+        padding: 13px;
+      }
+      .choice-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        background: var(--surface-2);
+        color: var(--text-muted);
+        flex: 0 0 40px;
+        font-weight: 800;
+      }
+      .selected .choice-icon {
+        background: var(--brand);
+        color: white;
+      }
+      .choice-copy {
+        min-width: 0;
+        flex: 1;
+      }
+      .choice-copy strong {
+        display: block;
+        font-size: 15px;
+        line-height: 1.35;
+      }
+      .choice-copy span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+        line-height: 1.45;
+        margin-top: 3px;
+      }
+      .choice-check {
+        color: var(--brand);
+        font-weight: 900;
+        margin-left: auto;
+        padding-top: 2px;
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        min-height: 38px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-muted);
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      button.chip:hover,
+      button.chip[aria-pressed='true'],
+      .chip.active {
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+        border-color: color-mix(in srgb, var(--brand) 35%, var(--border));
+      }
+      html[data-theme='dark'] button.chip:hover,
+      html[data-theme='dark'] button.chip[aria-pressed='true'],
+      html[data-theme='dark'] .chip.active {
+        color: #eaddff;
+      }
+      .chip.green {
+        background: var(--green-soft);
+        color: var(--green);
+        border-color: transparent;
+      }
+      .chip.amber {
+        background: var(--amber-soft);
+        color: var(--amber);
+        border-color: transparent;
+      }
+
+      .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 7px;
+        color: var(--text);
+      }
+      .input,
+      .textarea,
+      .select {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        padding: 14px 15px;
+        min-height: 50px;
+      }
+      .textarea {
+        resize: vertical;
+        min-height: 150px;
+        line-height: 1.55;
+      }
+      .input::placeholder,
+      .textarea::placeholder {
+        color: color-mix(in srgb, var(--text-muted) 75%, transparent);
+      }
+      .field-help {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin-top: 7px;
+      }
+
+      .inline-note {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .inline-note .note-icon {
+        color: var(--amber);
+        flex: 0 0 auto;
+        margin-top: 1px;
+      }
+
+      .home-hero {
+        padding: 18px;
+        border-radius: 24px;
+        background: var(--brand);
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+      .home-hero::after {
+        content: '';
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 22px solid rgba(255, 255, 255, 0.08);
+        right: -35px;
+        top: -32px;
+      }
+      .home-hero p {
+        color: rgba(255, 255, 255, 0.82);
+      }
+      .home-hero .button {
+        background: white;
+        color: var(--brand-strong);
+        position: relative;
+        z-index: 1;
+      }
+
+      .week-summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .week-summary .metric {
+        padding: 13px 11px;
+        border-radius: 16px;
+        background: var(--surface-2);
+      }
+      .metric b {
+        display: block;
+        font-size: 20px;
+        letter-spacing: -0.04em;
+      }
+      .metric span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 10px;
+        margin-top: 3px;
+        line-height: 1.35;
+      }
+
+      .timeline-entry {
+        display: flex;
+        gap: 12px;
+      }
+      .timeline-entry + .timeline-entry {
+        margin-top: 14px;
+      }
+      .timeline-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--brand);
+        margin-top: 5px;
+        box-shadow: 0 0 0 5px var(--brand-soft);
+        flex: 0 0 10px;
+      }
+      .timeline-dot.green {
+        background: var(--green);
+        box-shadow: 0 0 0 5px var(--green-soft);
+      }
+      .timeline-dot.amber {
+        background: var(--amber);
+        box-shadow: 0 0 0 5px var(--amber-soft);
+      }
+      .timeline-copy {
+        min-width: 0;
+        flex: 1;
+      }
+      .timeline-copy strong {
+        font-size: 14px;
+        display: block;
+      }
+      .timeline-copy span {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 3px;
+        display: block;
+        line-height: 1.45;
+      }
+
+      .evidence-thread {
+        position: relative;
+        padding-left: 30px;
+        display: grid;
+        gap: 16px;
+      }
+      .evidence-thread::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        background: linear-gradient(
+          var(--brand),
+          color-mix(in srgb, var(--brand) 20%, var(--border))
+        );
+      }
+      .thread-node {
+        position: relative;
+      }
+      .thread-node::before {
+        content: '';
+        position: absolute;
+        left: -27px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 3px solid var(--brand);
+      }
+      .thread-node.confirmed::before {
+        background: var(--brand);
+        box-shadow: 0 0 0 4px var(--brand-soft);
+      }
+      .thread-node small {
+        color: var(--brand);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 3px;
+      }
+      .thread-node p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--text-muted);
+      }
+
+      .entry-card {
+        padding: 15px;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .entry-card + .entry-card {
+        margin-top: 10px;
+      }
+      .entry-top {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .entry-top > div {
+        min-width: 0;
+        flex: 1;
+      }
+      .entry-title {
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1.4;
+      }
+      .entry-meta {
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.45;
+      }
+      .entry-evidence {
+        margin-top: 10px;
+        color: var(--text-muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .skill-row {
+        padding: 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .skill-row:last-child {
+        border-bottom: 0;
+      }
+      .skill-symbol {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: var(--brand-soft);
+        color: var(--brand);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        flex: 0 0 42px;
+      }
+      .skill-copy {
+        min-width: 0;
+        flex: 1;
+      }
+      .skill-copy strong {
+        font-size: 14px;
+        display: block;
+      }
+      .skill-copy span {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: block;
+        margin-top: 2px;
+      }
+      .skill-count {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--text-muted);
+        white-space: nowrap;
+      }
+
+      .recommendation {
+        display: grid;
+        grid-template-columns: 22px 1fr;
+        gap: 10px;
+        align-items: start;
+      }
+      .recommendation input {
+        width: 19px;
+        height: 19px;
+        margin: 2px 0 0;
+        accent-color: var(--brand);
+      }
+      .recommendation label {
+        cursor: pointer;
+      }
+      .recommendation label strong {
+        display: block;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .recommendation label span {
+        color: var(--text-muted);
+        display: block;
+        font-size: 11px;
+        line-height: 1.45;
+        margin-top: 4px;
+      }
+
+      .bottom-nav {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 30;
+        height: calc(82px + var(--safe-bottom));
+        padding: 9px 12px var(--safe-bottom);
+        background: color-mix(in srgb, var(--surface) 94%, transparent);
+        border-top: 1px solid var(--border);
+        backdrop-filter: blur(16px);
+        display: none;
+        grid-template-columns: 1fr 1fr 72px 1fr 1fr;
+        gap: 2px;
+        align-items: center;
+      }
+      .bottom-nav.visible {
+        display: grid;
+      }
+      .nav-button {
+        border: 0;
+        background: transparent;
+        color: var(--text-muted);
+        min-height: 56px;
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 800;
+      }
+      .nav-button:hover,
+      .nav-button.active {
+        color: var(--brand);
+        background: var(--brand-soft);
+      }
+      .nav-button .icon {
+        width: 18px;
+        height: 18px;
+      }
+      .capture-nav {
+        width: 58px;
+        height: 58px;
+        border-radius: 20px;
+        border: 0;
+        background: var(--brand);
+        color: white;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 12px 28px
+          color-mix(in srgb, var(--brand) 32%, transparent);
+        justify-self: center;
+        align-self: start;
+        margin-top: -17px;
+      }
+      .capture-nav:hover {
+        background: var(--brand-strong);
+      }
+      .capture-nav .icon {
+        width: 24px;
+        height: 24px;
+      }
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 14px;
+      }
+      .section-title a,
+      .text-action {
+        color: var(--brand);
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        border: 0;
+        background: transparent;
+        padding: 5px 0;
+      }
+
+      .review-output {
+        min-height: 320px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 18px;
+        padding: 16px;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+      .review-output h3 {
+        margin: 12px 0 5px;
+        font-size: 14px;
+      }
+      .review-output h3:first-child {
+        margin-top: 0;
+      }
+      .review-output ul {
+        padding-left: 18px;
+        margin: 5px 0 0;
+      }
+
+      .modal-backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 80;
+        background: rgba(24, 18, 28, 0.45);
+        display: none;
+        align-items: flex-end;
+        padding: 12px;
+        backdrop-filter: blur(4px);
+      }
+      .modal-backdrop.open {
+        display: flex;
+      }
+      .sheet {
+        width: 100%;
+        max-height: 82%;
+        overflow: auto;
+        background: var(--surface);
+        border-radius: 26px;
+        padding: 18px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overscroll-behavior: contain;
+      }
+      .sheet-grabber {
+        width: 42px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--border);
+        margin: 0 auto 18px;
+      }
+
+      .utility-stack {
+        display: grid;
+        gap: 9px;
+        margin-top: 14px;
+      }
+      .utility-button {
+        min-height: 42px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        text-align: left;
+        padding: 9px 12px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .utility-button:hover {
+        background: var(--surface-2);
+      }
+      .utility-label {
+        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 5px;
+      }
+
+      .toast {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        bottom: 100px;
+        z-index: 100;
+        transform: translateY(18px);
+        opacity: 0;
+        pointer-events: none;
+        background: var(--text);
+        color: var(--surface);
+        border-radius: 15px;
+        padding: 12px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        transition:
+          opacity 160ms ease,
+          transform 160ms ease;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media print {
+        body {
+          background: white !important;
+        }
+        .prototype-panel,
+        .status-bar,
+        .bottom-nav,
+        .toast,
+        .modal-backdrop {
+          display: none !important;
+        }
+        .prototype-stage {
+          display: block;
+          min-height: 0;
+          padding: 0;
+        }
+        .phone-shell {
+          width: 100%;
+          height: auto;
+          min-height: 0;
+          border: 0;
+          border-radius: 0;
+          box-shadow: none;
+          overflow: visible;
+        }
+        .screen {
+          display: none !important;
+          position: static;
+          opacity: 1;
+          transform: none;
+        }
+        #screen-review-summary {
+          display: block !important;
+        }
+        #screen-review-summary .screen-body {
+          overflow: visible;
+          padding: 0;
+        }
+        #screen-review-summary .screen-header,
+        #screen-review-summary .chip-row,
+        #screen-review-summary .grid-actions,
+        #screen-review-summary > .screen-body > .button,
+        #screen-review-summary .card.soft {
+          display: none !important;
+        }
+        .review-output {
+          border: 0;
+          padding: 0;
+          min-height: 0;
+          color: #111;
+          background: white;
+          font-size: 12pt;
+        }
+      }
+
+      @media (max-width: 1050px) {
+        .prototype-stage {
+          grid-template-columns: 1fr;
+          padding: 16px;
+        }
+        .prototype-panel {
+          display: none;
+        }
+      }
+      @media (max-width: 430px) {
+        body {
+          background: var(--surface);
+        }
+        .prototype-stage {
+          display: block;
+          min-height: 100svh;
+          padding: 0;
+        }
+        .phone-shell {
+          width: 100vw;
+          height: 100svh;
+          min-height: 0;
+          border-radius: 0;
+          border: 0;
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg aria-hidden="true" width="0" height="0" style="position: absolute">
+      <symbol id="i-home" viewBox="0 0 24 24">
+        <path d="M3 11.5 12 4l9 7.5" />
+        <path d="M5.5 10v10h13V10" />
+        <path d="M9.5 20v-6h5v6" />
+      </symbol>
+      <symbol id="i-history" viewBox="0 0 24 24">
+        <path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5" />
+        <path d="M4 4.5v4h4" />
+        <path d="M12 8v5l3 2" />
+      </symbol>
+      <symbol id="i-growth" viewBox="0 0 24 24">
+        <path d="M4 19V9" />
+        <path d="M10 19V5" />
+        <path d="M16 19v-7" />
+        <path d="M22 19H2" />
+        <path d="m17 6 2-2 2 2" />
+      </symbol>
+      <symbol id="i-review" viewBox="0 0 24 24">
+        <path d="M7 3h8l4 4v14H7z" />
+        <path d="M15 3v5h5" />
+        <path d="M10 12h6M10 16h6" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
+      <symbol id="i-back" viewBox="0 0 24 24">
+        <path d="m15 18-6-6 6-6" />
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="10" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24">
+        <rect x="9" y="3" width="6" height="11" rx="3" />
+        <path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 3 5 6v5c0 4.6 2.8 8.1 7 10 4.2-1.9 7-5.4 7-10V6z" />
+        <path d="m9 12 2 2 4-4" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+        />
+      </symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24">
+        <rect x="8" y="8" width="11" height="11" rx="2" />
+        <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+      </symbol>
+      <symbol id="i-share" viewBox="0 0 24 24">
+        <circle cx="18" cy="5" r="2.5" />
+        <circle cx="6" cy="12" r="2.5" />
+        <circle cx="18" cy="19" r="2.5" />
+        <path d="m8.3 10.9 7.4-4.8M8.3 13.1l7.4 4.8" />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" />
+      </symbol>
+    </svg>
+
+    <main class="prototype-stage">
+      <aside class="prototype-panel" aria-label="Prototype navigation">
+        <div class="eyebrow">Prototype map</div>
+        <h2>KerjaLog MVP</h2>
+        <p>
+          Jump between screens without changing the mobile interaction design.
+        </p>
+        <div class="jump-list" id="jump-list"></div>
+      </aside>
+
+      <section class="phone-shell" aria-label="KerjaLog mobile prototype">
+        <div class="status-bar" aria-hidden="true">
+          <span>9:41</span>
+          <div class="status-icons">
+            <span class="status-dot"></span><span>◔</span
+            ><span class="status-pill"></span>
+          </div>
+        </div>
+
+        <!-- 01 Welcome -->
+        <section
+          class="screen active"
+          id="screen-welcome"
+          data-screen="welcome"
+          data-title="01 · Welcome"
+          data-nav="false"
+        >
+          <div class="screen-body stack-24">
+            <div class="progress">
+              <span class="done"></span><span></span><span></span><span></span>
+            </div>
+            <div class="brand-mark" aria-hidden="true">K</div>
+            <div class="stack-8">
+              <div class="eyebrow">Your private work-growth companion</div>
+              <h1 data-i18n="welcomeTitle">
+                Your work matters—even when it feels routine.
+              </h1>
+              <p class="lede" data-i18n="welcomeLede">
+                KerjaLog helps you notice what changed because of your work and
+                keep the evidence ready for reviews, résumés, and interviews.
+              </p>
+            </div>
+            <div class="card brand stack-8">
+              <div class="inline-note">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-shield" />
+                </svg>
+                <div>
+                  <strong data-i18n="privateTitle">Private by default</strong>
+                  <div class="small muted" data-i18n="privateCopy">
+                    Local-first. No employer dashboard. You decide what gets
+                    exported.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chip-row" aria-label="Prototype settings">
+              <button
+                class="chip"
+                id="lang-toggle"
+                type="button"
+                aria-label="Switch language"
+              >
+                EN · Bahasa
+              </button>
+              <button
+                class="chip"
+                id="theme-toggle"
+                type="button"
+                aria-label="Toggle dark mode"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-sun" /></svg
+                ><span>Theme</span>
+              </button>
+            </div>
+            <div style="min-height: 12px; flex: 1"></div>
+            <button
+              class="button primary block"
+              type="button"
+              data-go="work-area"
+              data-i18n="setupCta"
+            >
+              Set Up KerjaLog
+            </button>
+          </div>
+        </section>
+
+        <!-- 02 Work area -->
+        <section
+          class="screen"
+          id="screen-work-area"
+          data-screen="work-area"
+          data-title="02 · Work Area & Level"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="progress">
+              <span class="done"></span><span class="done"></span><span></span
+              ><span></span>
+            </div>
+            <div>
+              <div class="eyebrow">Tailor your prompts</div>
+              <h1>What kind of work do you do?</h1>
+              <p class="lede">
+                This only changes examples and skill suggestions. You can change
+                it later.
+              </p>
+            </div>
+            <div class="stack-8" data-choice-group="work-area">
+              <button
+                class="select-card selected"
+                type="button"
+                aria-pressed="true"
+              >
+                <span class="choice-icon">▦</span
+                ><span class="choice-copy"
+                  ><strong>Finance & accounting</strong
+                  ><span
+                    >Reconciliation, reporting, accuracy, and controls.</span
+                  ></span
+                ><span class="choice-check">✓</span>
+              </button>
+              <button class="select-card" type="button" aria-pressed="false">
+                <span class="choice-icon">◎</span
+                ><span class="choice-copy"
+                  ><strong>Administration & operations</strong
+                  ><span
+                    >Coordination, service, data, and process work.</span
+                  ></span
+                >
+              </button>
+              <button class="select-card" type="button" aria-pressed="false">
+                <span class="choice-icon">⌘</span
+                ><span class="choice-copy"
+                  ><strong>Technology</strong
+                  ><span
+                    >Software, data, product, and technical delivery.</span
+                  ></span
+                >
+              </button>
+              <button class="select-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↗</span
+                ><span class="choice-copy"
+                  ><strong>Sales & customer service</strong
+                  ><span
+                    >Customers, relationships, support, and revenue.</span
+                  ></span
+                >
+              </button>
+            </div>
+            <div>
+              <label class="field-label" for="career-level"
+                >Current level</label
+              >
+              <select
+                class="select"
+                id="career-level"
+                name="career-level"
+                autocomplete="off"
+              >
+                <option>New to working</option>
+                <option selected>Junior individual contributor</option>
+                <option>Experienced individual contributor</option>
+                <option>Supervisor or team lead</option>
+              </select>
+            </div>
+            <div class="card soft small">
+              <strong>Finance prompt example</strong><br /><span class="muted"
+                >“Did you identify a discrepancy, improve accuracy, or help meet
+                a reporting deadline?”</span
+              >
+            </div>
+            <button class="button primary block" type="button" data-go="goal">
+              Choose My Goal
+            </button>
+          </div>
+        </section>
+
+        <!-- 03 Goal -->
+        <section
+          class="screen"
+          id="screen-goal"
+          data-screen="goal"
+          data-title="03 · Main Goal"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="progress">
+              <span class="done"></span><span class="done"></span
+              ><span class="done"></span><span></span>
+            </div>
+            <div>
+              <div class="eyebrow">Make KerjaLog useful now</div>
+              <h1>What do you want help with first?</h1>
+              <p class="lede">
+                You’ll still get all four sections. This only decides what
+                KerjaLog emphasizes.
+              </p>
+            </div>
+            <div class="stack-8" data-choice-group="goal">
+              <button
+                class="select-card selected"
+                type="button"
+                aria-pressed="true"
+              >
+                <span class="choice-icon">✓</span
+                ><span class="choice-copy"
+                  ><strong>Prepare for performance reviews</strong
+                  ><span
+                    >Turn your work entries into a clear self-assessment.</span
+                  ></span
+                ><span class="choice-check">✓</span>
+              </button>
+              <button class="select-card" type="button" aria-pressed="false">
+                <span class="choice-icon">◷</span
+                ><span class="choice-copy"
+                  ><strong>Remember my work</strong
+                  ><span>Keep useful details before they disappear.</span></span
+                >
+              </button>
+              <button class="select-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↗</span
+                ><span class="choice-copy"
+                  ><strong>Update my résumé</strong
+                  ><span
+                    >Collect evidence for stronger achievement bullets.</span
+                  ></span
+                >
+              </button>
+              <button class="select-card" type="button" aria-pressed="false">
+                <span class="choice-icon">◇</span
+                ><span class="choice-copy"
+                  ><strong>Prepare for interviews</strong
+                  ><span>Build examples from work you actually did.</span></span
+                >
+              </button>
+              <button class="select-card" type="button" aria-pressed="false">
+                <span class="choice-icon">✦</span
+                ><span class="choice-copy"
+                  ><strong>Understand my professional growth</strong
+                  ><span
+                    >See what your entries demonstrate over time.</span
+                  ></span
+                >
+              </button>
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              data-go="schedule"
+            >
+              Set My Review Rhythm
+            </button>
+          </div>
+        </section>
+
+        <!-- 04 Schedule -->
+        <section
+          class="screen"
+          id="screen-schedule"
+          data-screen="schedule"
+          data-title="04 · Review & Reminder"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="progress">
+              <span class="done"></span><span class="done"></span
+              ><span class="done"></span><span class="done"></span>
+            </div>
+            <div>
+              <div class="eyebrow">One gentle rhythm</div>
+              <h1>When should KerjaLog help you reflect?</h1>
+              <p class="lede">
+                No streaks. Skip any reminder without losing progress.
+              </p>
+            </div>
+            <div>
+              <label class="field-label" for="review-cycle"
+                >Performance review schedule</label
+              >
+              <select
+                class="select"
+                id="review-cycle"
+                name="review-cycle"
+                autocomplete="off"
+              >
+                <option>Monthly</option>
+                <option>Quarterly</option>
+                <option>Every 6 months</option>
+                <option selected>Annually</option>
+                <option>No fixed schedule</option>
+              </select>
+            </div>
+            <div class="button-row">
+              <div>
+                <label class="field-label" for="reminder-day"
+                  >Reflection day</label
+                ><select
+                  class="select"
+                  id="reminder-day"
+                  name="reminder-day"
+                  autocomplete="off"
+                >
+                  <option>Thursday</option>
+                  <option selected>Friday</option>
+                  <option>Saturday</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="reminder-time">Time</label
+                ><input
+                  class="input"
+                  id="reminder-time"
+                  name="reminder-time"
+                  type="time"
+                  value="16:30"
+                />
+              </div>
+            </div>
+            <div class="card success inline-note">
+              <svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>
+              <div>
+                <strong>Protect your work journal</strong>
+                <div class="small muted">
+                  Use biometrics or your device PIN. Local entries stay
+                  encrypted on this device.
+                </div>
+              </div>
+            </div>
+            <div style="min-height: 16px; flex: 1"></div>
+            <button class="button primary block" type="button" data-go="home">
+              Finish Setup
+            </button>
+          </div>
+        </section>
+
+        <!-- 05 Home -->
+        <section
+          class="screen has-nav"
+          id="screen-home"
+          data-screen="home"
+          data-title="05 · Home"
+          data-nav="true"
+          data-nav-key="home"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <div class="header-copy">
+                <div class="eyebrow">Friday · 7 August</div>
+                <h1 style="font-size: 27px">Good afternoon, Dimas</h1>
+              </div>
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Toggle theme"
+                data-theme-button
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-sun" /></svg>
+              </button>
+            </div>
+            <div class="home-hero stack-12">
+              <div>
+                <div
+                  class="tiny"
+                  style="
+                    font-weight: 800;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: #e9deff;
+                  "
+                >
+                  Your work matters
+                </div>
+                <h2 style="font-size: 22px; margin-top: 5px">
+                  What became easier, clearer, safer, or more accurate because
+                  of your work?
+                </h2>
+                <p class="small">Capture it while the detail is still fresh.</p>
+              </div>
+              <button class="button block" type="button" data-go="capture-type">
+                <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg
+                >Log Something
+              </button>
+            </div>
+            <div>
+              <div class="section-title">
+                <h2>This week</h2>
+                <span class="small muted">3 work entries</span>
+              </div>
+              <div class="week-summary" style="margin-top: 10px">
+                <div class="metric"><b>2</b><span>Review ready</span></div>
+                <div class="metric"><b>1</b><span>Needs context</span></div>
+                <div class="metric"><b>1</b><span>New skill seen</span></div>
+              </div>
+            </div>
+            <div class="card warning stack-8">
+              <div class="eyebrow" style="color: var(--amber)">
+                Complete later
+              </div>
+              <h3>Monthly reconciliation support</h3>
+              <p class="small muted">
+                You saved the event, but haven’t added what changed yet.
+              </p>
+              <button class="text-action" type="button" data-go="outcome">
+                Add the outcome →
+              </button>
+            </div>
+            <div class="card brand stack-12">
+              <div>
+                <div class="eyebrow">Weekly reflection</div>
+                <h3 style="margin-top: 4px">
+                  A 2-minute check-in can reveal work you forgot to log.
+                </h3>
+              </div>
+              <button
+                class="button secondary block"
+                type="button"
+                id="open-reflection"
+              >
+                Reflect on My Week
+              </button>
+            </div>
+            <div>
+              <div class="section-title">
+                <h2>Recent progress</h2>
+                <button class="text-action" type="button" data-go="history">
+                  View History
+                </button>
+              </div>
+              <div class="card soft" style="margin-top: 10px">
+                <div class="timeline-entry">
+                  <span class="timeline-dot green"></span>
+                  <div class="timeline-copy">
+                    <strong>Removed 7 duplicate reconciliation entries</strong
+                    ><span>Review ready · Accuracy · Problem-solving</span>
+                  </div>
+                </div>
+                <div class="timeline-entry">
+                  <span class="timeline-dot"></span>
+                  <div class="timeline-copy">
+                    <strong
+                      >Helped Finance close a reporting task on time</strong
+                    ><span>Developed entry · Collaboration</span>
+                  </div>
+                </div>
+                <div class="timeline-entry">
+                  <span class="timeline-dot amber"></span>
+                  <div class="timeline-copy">
+                    <strong>Learned the new approval process</strong
+                    ><span>Quick note · Learning</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card stack-8">
+              <div class="section-title">
+                <h3>Next review</h3>
+                <span class="chip green">18 weeks</span>
+              </div>
+              <p class="small muted">
+                Annual performance review · 12 December 2026
+              </p>
+              <p class="tiny muted">
+                You already have 12 entries that may be useful.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 06 Capture type -->
+        <section
+          class="screen"
+          id="screen-capture-type"
+          data-screen="capture-type"
+          data-title="06 · Quick Capture"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back to Home"
+                data-go="home"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Quick capture</div>
+                <h1 style="font-size: 27px">What happened at work?</h1>
+              </div>
+            </div>
+            <p class="lede" style="margin-top: -10px">
+              Choose the closest match. Small work counts.
+            </p>
+            <div class="stack-8" data-choice-group="event-type">
+              <button
+                class="event-card selected"
+                type="button"
+                aria-pressed="true"
+                data-event="completed"
+              >
+                <span class="choice-icon">✓</span
+                ><span class="choice-copy"
+                  ><strong>I completed something</strong
+                  ><span
+                    >A task, report, deliverable, or milestone moved
+                    forward.</span
+                  ></span
+                ><span class="choice-check">✓</span>
+              </button>
+              <button
+                class="event-card"
+                type="button"
+                aria-pressed="false"
+                data-event="solved"
+              >
+                <span class="choice-icon">✦</span
+                ><span class="choice-copy"
+                  ><strong>I solved a problem</strong
+                  ><span
+                    >An error, blocker, delay, or recurring issue was
+                    handled.</span
+                  ></span
+                >
+              </button>
+              <button
+                class="event-card"
+                type="button"
+                aria-pressed="false"
+                data-event="helped"
+              >
+                <span class="choice-icon">↔</span
+                ><span class="choice-copy"
+                  ><strong>I helped someone</strong
+                  ><span
+                    >A colleague, team, or customer could move forward.</span
+                  ></span
+                >
+              </button>
+              <button
+                class="event-card"
+                type="button"
+                aria-pressed="false"
+                data-event="feedback"
+              >
+                <span class="choice-icon">“</span
+                ><span class="choice-copy"
+                  ><strong>I received feedback</strong
+                  ><span
+                    >Praise, coaching, recognition, or an important
+                    comment.</span
+                  ></span
+                >
+              </button>
+              <button
+                class="event-card"
+                type="button"
+                aria-pressed="false"
+                data-event="learned"
+              >
+                <span class="choice-icon">◇</span
+                ><span class="choice-copy"
+                  ><strong>I learned something</strong
+                  ><span
+                    >A tool, process, lesson, or new way of working.</span
+                  ></span
+                >
+              </button>
+              <button
+                class="event-card"
+                type="button"
+                aria-pressed="false"
+                data-event="ownership"
+              >
+                <span class="choice-icon">↑</span
+                ><span class="choice-copy"
+                  ><strong>I took responsibility</strong
+                  ><span
+                    >A new responsibility, initiative, or ownership
+                    moment.</span
+                  ></span
+                >
+              </button>
+              <button
+                class="event-card"
+                type="button"
+                aria-pressed="false"
+                data-event="challenge"
+              >
+                <span class="choice-icon">!</span
+                ><span class="choice-copy"
+                  ><strong>Something became difficult</strong
+                  ><span
+                    >A private challenge, mistake, setback, or unresolved
+                    blocker.</span
+                  ></span
+                ><span class="chip amber" style="margin-left: auto"
+                  >Private</span
+                >
+              </button>
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              data-go="event-input"
+            >
+              Describe What Happened
+            </button>
+          </div>
+        </section>
+
+        <!-- 07 Event input -->
+        <section
+          class="screen"
+          id="screen-event-input"
+          data-screen="event-input"
+          data-title="07 · Work Event"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back"
+                data-go="capture-type"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Step 1 · The event</div>
+                <h1 style="font-size: 27px">What happened?</h1>
+              </div>
+            </div>
+            <div>
+              <label class="field-label" for="work-note"
+                >Write it the way you remember it</label
+              ><textarea
+                class="textarea"
+                id="work-note"
+                name="work-note"
+                autocomplete="off"
+                placeholder="Example: There were differences between the transaction report and spreadsheet. I checked them and found duplicate entries.…"
+              >
+There were differences between the transaction report and spreadsheet. I checked them and found duplicate entries.</textarea
+              >
+              <div class="field-help">
+                You do not need professional wording. KerjaLog will help
+                structure it later.
+              </div>
+            </div>
+            <button
+              class="button secondary block"
+              type="button"
+              id="voice-button"
+            >
+              <svg class="icon" aria-hidden="true"><use href="#i-mic" /></svg
+              >Use Speech-to-Text
+            </button>
+            <div class="card soft small">
+              <strong>Finance prompt</strong><br /><span class="muted"
+                >What was inaccurate, delayed, risky, or hard to
+                reconcile?</span
+              >
+            </div>
+            <div class="card warning inline-note">
+              <span class="note-icon">!</span>
+              <div>
+                <strong>Keep confidential data out</strong>
+                <div class="small muted">
+                  Do not include passwords, customer information, account
+                  numbers, confidential documents, or company secrets.
+                </div>
+              </div>
+            </div>
+            <div class="button-row">
+              <button
+                class="button secondary"
+                type="button"
+                id="save-quick-note"
+              >
+                Save as Quick Note</button
+              ><button class="button primary" type="button" data-go="outcome">
+                Find the Outcome
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 08 Outcome -->
+        <section
+          class="screen"
+          id="screen-outcome"
+          data-screen="outcome"
+          data-title="08 · Outcome"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back"
+                data-go="event-input"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Step 2 · The outcome</div>
+                <h1 style="font-size: 27px">What changed because of this?</h1>
+              </div>
+            </div>
+            <p class="lede" style="margin-top: -10px">
+              Choose what you know now. “I’m not sure yet” is a valid answer.
+            </p>
+            <div class="stack-8" data-choice-group="outcome">
+              <button
+                class="outcome-card selected"
+                type="button"
+                aria-pressed="true"
+              >
+                <span class="choice-icon">✓</span
+                ><span class="choice-copy"
+                  ><strong>An error was fixed or prevented</strong
+                  ><span
+                    >The work became more accurate or avoided a mistake.</span
+                  ></span
+                ><span class="choice-check">✓</span>
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">◷</span
+                ><span class="choice-copy"
+                  ><strong>A deadline was met</strong></span
+                >
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↗</span
+                ><span class="choice-copy"
+                  ><strong>Work became faster</strong></span
+                >
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">≡</span
+                ><span class="choice-copy"
+                  ><strong>Work became clearer</strong></span
+                >
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↔</span
+                ><span class="choice-copy"
+                  ><strong>A customer or colleague was helped</strong></span
+                >
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">△</span
+                ><span class="choice-copy"
+                  ><strong>A risk was reduced</strong></span
+                >
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">◇</span
+                ><span class="choice-copy"
+                  ><strong>A decision became possible</strong></span
+                >
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">✦</span
+                ><span class="choice-copy"
+                  ><strong>I gained a new skill</strong></span
+                >
+              </button>
+              <button class="outcome-card" type="button" aria-pressed="false">
+                <span class="choice-icon">?</span
+                ><span class="choice-copy"
+                  ><strong>I’m not sure yet</strong
+                  ><span
+                    >Save it now. KerjaLog can revisit this during
+                    reflection.</span
+                  ></span
+                >
+              </button>
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              data-go="evidence"
+            >
+              Add Supporting Evidence
+            </button>
+          </div>
+        </section>
+
+        <!-- 09 Evidence -->
+        <section
+          class="screen"
+          id="screen-evidence"
+          data-screen="evidence"
+          data-title="09 · Evidence"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back"
+                data-go="outcome"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Step 3 · Optional evidence</div>
+                <h1 style="font-size: 27px">Do you have a useful detail?</h1>
+              </div>
+            </div>
+            <p class="lede" style="margin-top: -10px">
+              Numbers help sometimes, but deadlines, feedback, and people helped
+              count too.
+            </p>
+            <div
+              class="stack-8"
+              data-choice-group="evidence-type"
+              data-multiple="true"
+            >
+              <button
+                class="evidence-card selected"
+                type="button"
+                aria-pressed="true"
+              >
+                <span class="choice-icon">7</span
+                ><span class="choice-copy"
+                  ><strong>A number</strong
+                  ><span>7 duplicate entries were removed.</span></span
+                ><span class="choice-check">✓</span>
+              </button>
+              <button class="evidence-card" type="button" aria-pressed="false">
+                <span class="choice-icon">◷</span
+                ><span class="choice-copy"
+                  ><strong>A deadline</strong
+                  ><span>Completed before the report was submitted.</span></span
+                >
+              </button>
+              <button class="evidence-card" type="button" aria-pressed="false">
+                <span class="choice-icon">✓</span
+                ><span class="choice-copy"
+                  ><strong>A result</strong
+                  ><span>Reporting accuracy improved.</span></span
+                >
+              </button>
+              <button class="evidence-card" type="button" aria-pressed="false">
+                <span class="choice-icon">“</span
+                ><span class="choice-copy"
+                  ><strong>Feedback received</strong></span
+                >
+              </button>
+              <button class="evidence-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↔</span
+                ><span class="choice-copy"
+                  ><strong>People or teams helped</strong></span
+                >
+              </button>
+              <button class="evidence-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↗</span
+                ><span class="choice-copy"
+                  ><strong>A reference link</strong></span
+                >
+              </button>
+              <button class="evidence-card" type="button" aria-pressed="false">
+                <span class="choice-icon">+</span
+                ><span class="choice-copy"
+                  ><strong>A supporting note</strong></span
+                >
+              </button>
+            </div>
+            <div>
+              <label class="field-label" for="evidence-detail"
+                >Useful detail</label
+              ><textarea
+                class="textarea"
+                id="evidence-detail"
+                name="evidence-detail"
+                autocomplete="off"
+                style="min-height: 104px"
+                placeholder="Example: 7 duplicate entries were removed before submission.…"
+              >
+7 duplicate entries were removed before the report was submitted.</textarea
+              >
+            </div>
+            <div class="button-row">
+              <button class="button secondary" type="button" data-go="impact">
+                Skip Evidence</button
+              ><button class="button primary" type="button" data-go="impact">
+                Preview My Impact
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 10 Impact Builder -->
+        <section
+          class="screen"
+          id="screen-impact"
+          data-screen="impact"
+          data-title="10 · Impact Builder"
+          data-nav="false"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back"
+                data-go="evidence"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Impact Builder</div>
+                <h1 style="font-size: 27px">See the value inside the work</h1>
+              </div>
+            </div>
+            <div class="card brand">
+              <div class="evidence-thread">
+                <div class="thread-node confirmed">
+                  <small>What happened</small>
+                  <p>
+                    Checked differences between a transaction report and
+                    spreadsheet.
+                  </p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>What changed</small>
+                  <p>An error was fixed before submission.</p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>What supports it</small>
+                  <p>7 duplicate entries removed.</p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>What this demonstrates</small>
+                  <p>Attention to detail · Problem-solving · Execution</p>
+                </div>
+              </div>
+            </div>
+            <div class="card soft stack-8">
+              <div class="eyebrow">Your original note</div>
+              <p class="small">
+                “There were differences between the transaction report and
+                spreadsheet. I checked them and found duplicate entries.”
+              </p>
+            </div>
+            <div class="card stack-8">
+              <div class="eyebrow">KerjaLog’s suggestion</div>
+              <p
+                style="
+                  font-size: 15px;
+                  line-height: 1.6;
+                  margin: 0;
+                  font-weight: 700;
+                "
+              >
+                Investigated discrepancies between the transaction report and
+                reconciliation spreadsheet, identifying and removing 7 duplicate
+                entries before submission and improving reporting accuracy.
+              </p>
+            </div>
+            <div class="card warning stack-8">
+              <div class="eyebrow" style="color: var(--amber)">
+                Check these assumptions
+              </div>
+              <p class="small muted">
+                KerjaLog inferred “improving reporting accuracy” from the
+                duplicate removal. Confirm it is fair, or edit the suggestion.
+              </p>
+            </div>
+            <div class="button-row">
+              <button
+                class="button secondary"
+                type="button"
+                id="edit-suggestion"
+              >
+                Edit Suggestion</button
+              ><button
+                class="button primary"
+                type="button"
+                data-go="entry-detail"
+              >
+                Confirm & Save
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 11 Entry detail -->
+        <section
+          class="screen has-nav"
+          id="screen-entry-detail"
+          data-screen="entry-detail"
+          data-title="11 · Saved Entry"
+          data-nav="true"
+          data-nav-key="history"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back to Home"
+                data-go="home"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Saved work entry</div>
+                <h1 style="font-size: 25px">
+                  Reconciliation discrepancies resolved
+                </h1>
+              </div>
+            </div>
+            <div class="chip-row">
+              <span class="chip green">Review ready</span
+              ><span class="chip">Problem solved</span
+              ><span class="chip">Finance</span
+              ><span class="chip"
+                ><svg
+                  class="icon"
+                  aria-hidden="true"
+                  style="width: 14px; height: 14px"
+                >
+                  <use href="#i-lock" /></svg
+                >Private</span
+              >
+            </div>
+            <div class="card brand">
+              <div class="evidence-thread">
+                <div class="thread-node confirmed">
+                  <small>Task</small>
+                  <p>
+                    Reviewed differences between transaction report and
+                    spreadsheet.
+                  </p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>Contribution</small>
+                  <p>Identified and removed duplicate records.</p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>Outcome</small>
+                  <p>An error was fixed before submission.</p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>Evidence</small>
+                  <p>7 duplicate entries removed.</p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>Career story</small>
+                  <p>Attention to detail · Problem-solving · Execution</p>
+                </div>
+              </div>
+            </div>
+            <div class="card stack-8">
+              <div class="section-title">
+                <h3>Impact statement</h3>
+                <button class="text-action" type="button">Edit</button>
+              </div>
+              <p class="small muted">
+                Investigated discrepancies between the transaction report and
+                reconciliation spreadsheet, identifying and removing 7 duplicate
+                entries before submission and improving reporting accuracy.
+              </p>
+            </div>
+            <div class="card stack-12">
+              <h3>Entry details</h3>
+              <div class="small">
+                <strong>Project / work area</strong><br /><span class="muted"
+                  >Monthly reconciliation</span
+                >
+              </div>
+              <div class="small">
+                <strong>Review period</strong><br /><span class="muted"
+                  >2026 annual review</span
+                >
+              </div>
+              <div class="small">
+                <strong>Included in generated documents</strong><br /><span
+                  class="muted"
+                  >Yes, when you select it</span
+                >
+              </div>
+            </div>
+            <button class="button primary block" type="button" data-go="growth">
+              See What This Demonstrates
+            </button>
+          </div>
+        </section>
+
+        <!-- 12 History -->
+        <section
+          class="screen has-nav"
+          id="screen-history"
+          data-screen="history"
+          data-title="12 · History"
+          data-nav="true"
+          data-nav-key="history"
+        >
+          <div class="screen-body stack-20">
+            <div>
+              <div class="eyebrow">History</div>
+              <h1 style="font-size: 28px">Your work, when you need it</h1>
+              <p class="lede">
+                Search by what happened, project, evidence, skill, or review
+                period.
+              </p>
+            </div>
+            <label class="field-label" for="history-search"
+              >Search work history</label
+            >
+            <div style="position: relative">
+              <svg
+                class="icon"
+                aria-hidden="true"
+                style="
+                  position: absolute;
+                  left: 14px;
+                  top: 15px;
+                  color: var(--text-muted);
+                "
+              >
+                <use href="#i-search" /></svg
+              ><input
+                class="input"
+                id="history-search"
+                name="history-search"
+                type="search"
+                autocomplete="off"
+                placeholder="Search entries…"
+                style="padding-left: 43px"
+              />
+            </div>
+            <div class="chip-row" aria-label="History filters">
+              <button class="chip" type="button" aria-pressed="true">All</button
+              ><button class="chip" type="button" aria-pressed="false">
+                Project</button
+              ><button class="chip" type="button" aria-pressed="false">
+                Entry type</button
+              ><button class="chip" type="button" aria-pressed="false">
+                Skill</button
+              ><button class="chip" type="button" aria-pressed="false">
+                Evidence</button
+              ><button class="chip" type="button" aria-pressed="false">
+                Review ready
+              </button>
+            </div>
+            <div>
+              <div class="section-title">
+                <h2>August 2026</h2>
+                <span class="small muted">4 entries</span>
+              </div>
+              <div style="margin-top: 10px" id="history-entries">
+                <article
+                  class="entry-card"
+                  data-search="reconciliation duplicate reporting finance problem solving accuracy"
+                >
+                  <div class="entry-top">
+                    <div>
+                      <div class="entry-title">
+                        Resolved reconciliation discrepancies
+                      </div>
+                      <div class="entry-meta">
+                        6 Aug · Finance · Problem solved
+                      </div>
+                    </div>
+                    <span class="chip green">Review ready</span>
+                  </div>
+                  <div class="entry-evidence">
+                    7 duplicate entries removed before submission.
+                  </div>
+                </article>
+                <article
+                  class="entry-card"
+                  data-search="finance deadline helped closing collaboration"
+                >
+                  <div class="entry-top">
+                    <div>
+                      <div class="entry-title">
+                        Helped Finance complete monthly closing
+                      </div>
+                      <div class="entry-meta">
+                        4 Aug · Finance · Helped someone
+                      </div>
+                    </div>
+                    <span class="chip">Developed</span>
+                  </div>
+                  <div class="entry-evidence">
+                    Supported reconciliation checks before the reporting
+                    deadline.
+                  </div>
+                </article>
+                <article
+                  class="entry-card"
+                  data-search="approval process learning workflow"
+                >
+                  <div class="entry-top">
+                    <div>
+                      <div class="entry-title">
+                        Learned the updated approval process
+                      </div>
+                      <div class="entry-meta">
+                        1 Aug · Operations · Learning
+                      </div>
+                    </div>
+                    <span class="chip amber">Quick note</span>
+                  </div>
+                  <div class="entry-evidence">
+                    Outcome can be added during weekly reflection.
+                  </div>
+                </article>
+                <article
+                  class="entry-card"
+                  data-search="challenge delay spreadsheet private"
+                >
+                  <div class="entry-top">
+                    <div>
+                      <div class="entry-title">
+                        Spreadsheet handoff became difficult
+                      </div>
+                      <div class="entry-meta">31 Jul · Challenge · Private</div>
+                    </div>
+                    <span class="chip amber"
+                      ><svg
+                        class="icon"
+                        aria-hidden="true"
+                        style="width: 13px; height: 13px"
+                      >
+                        <use href="#i-lock" /></svg
+                      >Private</span
+                    >
+                  </div>
+                  <div class="entry-evidence">
+                    Excluded from generated documents unless intentionally
+                    selected.
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 13 Growth -->
+        <section
+          class="screen has-nav"
+          id="screen-growth"
+          data-screen="growth"
+          data-title="13 · Growth"
+          data-nav="true"
+          data-nav-key="growth"
+        >
+          <div class="screen-body stack-20">
+            <div>
+              <div class="eyebrow">Growth</div>
+              <h1 style="font-size: 28px">Your evidence map</h1>
+              <p class="lede">
+                This is not a performance score. It only shows where KerjaLog
+                has recorded supporting examples.
+              </p>
+            </div>
+            <div class="card brand stack-8">
+              <div class="eyebrow">12 work entries</div>
+              <h2>Evidence across 6 skill areas</h2>
+              <p class="small muted">
+                Tap a skill to see the real work behind it.
+              </p>
+            </div>
+            <div class="card" style="padding-top: 4px; padding-bottom: 4px">
+              <button
+                class="skill-row"
+                style="
+                  width: 100%;
+                  border-left: 0;
+                  border-right: 0;
+                  border-top: 0;
+                  background: transparent;
+                  color: inherit;
+                  text-align: left;
+                "
+                type="button"
+                data-go="skill-detail"
+              >
+                <span class="skill-symbol">◎</span
+                ><span class="skill-copy"
+                  ><strong>Attention to detail</strong
+                  ><span
+                    >Reconciliation, validation, reporting accuracy</span
+                  ></span
+                ><span class="skill-count">7 entries</span>
+              </button>
+              <button
+                class="skill-row"
+                style="
+                  width: 100%;
+                  border-left: 0;
+                  border-right: 0;
+                  border-top: 0;
+                  background: transparent;
+                  color: inherit;
+                  text-align: left;
+                "
+                type="button"
+                data-go="skill-detail"
+              >
+                <span class="skill-symbol">✦</span
+                ><span class="skill-copy"
+                  ><strong>Problem-solving</strong
+                  ><span>Errors, blockers, root-cause checks</span></span
+                ><span class="skill-count">4 entries</span>
+              </button>
+              <div class="skill-row">
+                <span class="skill-symbol">↔</span
+                ><span class="skill-copy"
+                  ><strong>Collaboration</strong
+                  ><span>Support across Finance and Operations</span></span
+                ><span class="skill-count">3 entries</span>
+              </div>
+              <div class="skill-row">
+                <span class="skill-symbol">✓</span
+                ><span class="skill-copy"
+                  ><strong>Execution</strong
+                  ><span>Deadlines and dependable delivery</span></span
+                ><span class="skill-count">5 entries</span>
+              </div>
+              <div class="skill-row">
+                <span class="skill-symbol">↑</span
+                ><span class="skill-copy"
+                  ><strong>Ownership</strong
+                  ><span>Initiative and added responsibility</span></span
+                ><span class="skill-count">2 entries</span>
+              </div>
+              <div class="skill-row">
+                <span
+                  class="skill-symbol"
+                  style="background: var(--surface-2); color: var(--text-muted)"
+                  >◇</span
+                ><span class="skill-copy"
+                  ><strong>Leadership</strong
+                  ><span>No evidence recorded yet</span></span
+                ><span class="skill-count">—</span>
+              </div>
+            </div>
+            <div class="card soft small">
+              <strong>Nothing is “weak” here.</strong><br /><span class="muted"
+                >If leadership matters to your next role, KerjaLog can remind
+                you to notice examples when they happen.</span
+              >
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              data-go="review-setup"
+            >
+              Build Review Material
+            </button>
+          </div>
+        </section>
+
+        <!-- 14 Skill detail -->
+        <section
+          class="screen has-nav"
+          id="screen-skill-detail"
+          data-screen="skill-detail"
+          data-title="14 · Skill Evidence"
+          data-nav="true"
+          data-nav-key="growth"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back to Growth"
+                data-go="growth"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Skill evidence</div>
+                <h1 style="font-size: 25px">Attention to detail</h1>
+              </div>
+            </div>
+            <div class="card brand stack-8">
+              <div class="section-title">
+                <h2>7 supporting entries</h2>
+                <span class="chip">Suggested skill</span>
+              </div>
+              <p class="small muted">
+                KerjaLog suggested this skill from your work. You stay in
+                control of the label.
+              </p>
+              <div class="button-row">
+                <button
+                  class="button secondary"
+                  type="button"
+                  id="remove-skill"
+                >
+                  Remove Skill</button
+                ><button
+                  class="button primary"
+                  type="button"
+                  id="confirm-skill"
+                >
+                  Confirm Skill
+                </button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="evidence-thread">
+                <div class="thread-node confirmed">
+                  <small>6 Aug · Reconciliation</small>
+                  <p>Removed 7 duplicate entries before submission.</p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>22 Jul · Monthly report</small>
+                  <p>
+                    Corrected incomplete records before the verification
+                    deadline.
+                  </p>
+                </div>
+                <div class="thread-node confirmed">
+                  <small>9 Jul · Controls</small>
+                  <p>
+                    Flagged a mismatch before data was sent to the next team.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="card soft small">
+              <strong>Evidence coverage, not a rating</strong><br /><span
+                class="muted"
+                >KerjaLog never converts these entries into a performance
+                percentage or rank.</span
+              >
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              data-go="review-setup"
+            >
+              Use These Entries in Review Builder
+            </button>
+          </div>
+        </section>
+
+        <!-- 15 Review setup -->
+        <section
+          class="screen has-nav"
+          id="screen-review-setup"
+          data-screen="review-setup"
+          data-title="15 · Review Builder"
+          data-nav="true"
+          data-nav-key="review"
+        >
+          <div class="screen-body stack-20">
+            <div>
+              <div class="eyebrow">Review Builder</div>
+              <h1 style="font-size: 28px">What are you preparing for?</h1>
+              <p class="lede">
+                KerjaLog recommends evidence. You decide what gets included.
+              </p>
+            </div>
+            <div class="stack-8" data-choice-group="purpose">
+              <button
+                class="purpose-card selected"
+                type="button"
+                aria-pressed="true"
+              >
+                <span class="choice-icon">✓</span
+                ><span class="choice-copy"
+                  ><strong>Performance self-review</strong
+                  ><span
+                    >Organize contributions, problems solved, collaboration, and
+                    growth.</span
+                  ></span
+                ><span class="choice-check">✓</span>
+              </button>
+              <button class="purpose-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↔</span
+                ><span class="choice-copy"
+                  ><strong>One-on-one meeting</strong
+                  ><span>A concise update with talking points.</span></span
+                >
+              </button>
+              <button class="purpose-card" type="button" aria-pressed="false">
+                <span class="choice-icon">↗</span
+                ><span class="choice-copy"
+                  ><strong>Résumé achievements</strong
+                  ><span
+                    >Action + responsibility + outcome + evidence.</span
+                  ></span
+                >
+              </button>
+              <button class="purpose-card" type="button" aria-pressed="false">
+                <span class="choice-icon">◇</span
+                ><span class="choice-copy"
+                  ><strong>Interview examples</strong
+                  ><span
+                    >Situation, task, action, result, and learning.</span
+                  ></span
+                >
+              </button>
+            </div>
+            <div>
+              <div class="field-label">Period</div>
+              <div class="chip-row" data-chip-group="period">
+                <button class="chip" type="button" aria-pressed="false">
+                  This month</button
+                ><button class="chip" type="button" aria-pressed="false">
+                  Last quarter</button
+                ><button class="chip" type="button" aria-pressed="true">
+                  This year</button
+                ><button class="chip" type="button" aria-pressed="false">
+                  Custom
+                </button>
+              </div>
+            </div>
+            <div>
+              <div class="section-title">
+                <h2>Recommended entries</h2>
+                <span class="small muted">3 selected</span>
+              </div>
+              <div class="stack-12" style="margin-top: 10px">
+                <div class="card recommendation">
+                  <input id="rec-1" type="checkbox" checked /><label for="rec-1"
+                    ><strong>Resolved reconciliation discrepancies</strong
+                    ><span
+                      >Recommended because it has a clear outcome, specific
+                      evidence, and demonstrates accuracy.</span
+                    ></label
+                  >
+                </div>
+                <div class="card recommendation">
+                  <input id="rec-2" type="checkbox" checked /><label for="rec-2"
+                    ><strong>Helped Finance complete monthly closing</strong
+                    ><span
+                      >Adds collaboration and deadline support to the
+                      review.</span
+                    ></label
+                  >
+                </div>
+                <div class="card recommendation">
+                  <input id="rec-3" type="checkbox" checked /><label for="rec-3"
+                    ><strong
+                      >Reduced BOS frontend tests from ~60 min to 4 min</strong
+                    ><span
+                      >Adds a technical example with strong measurable
+                      evidence.</span
+                    ></label
+                  >
+                </div>
+                <div class="card recommendation">
+                  <input id="rec-4" type="checkbox" /><label for="rec-4"
+                    ><strong>Learned the updated approval process</strong
+                    ><span
+                      >Useful if you want to emphasize growth and
+                      adaptability.</span
+                    ></label
+                  >
+                </div>
+              </div>
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              data-go="review-summary"
+            >
+              Create My Review Draft
+            </button>
+          </div>
+        </section>
+
+        <!-- 16 Summary -->
+        <section
+          class="screen has-nav"
+          id="screen-review-summary"
+          data-screen="review-summary"
+          data-title="16 · Generated Summary"
+          data-nav="true"
+          data-nav-key="review"
+        >
+          <div class="screen-body stack-20">
+            <div class="screen-header">
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Back to Review Builder"
+                data-go="review-setup"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-back" />
+                </svg>
+              </button>
+              <div class="header-copy">
+                <div class="eyebrow">Performance self-review</div>
+                <h1 style="font-size: 25px">Your review draft</h1>
+              </div>
+            </div>
+            <div class="chip-row">
+              <span class="chip green">3 entries included</span
+              ><span class="chip">Editable</span><span class="chip">2026</span>
+            </div>
+            <div
+              class="review-output"
+              id="review-output"
+              contenteditable="true"
+              role="textbox"
+              aria-label="Editable review draft"
+              spellcheck="true"
+            >
+              <h3>Major contributions</h3>
+              <ul>
+                <li>
+                  Investigated discrepancies between the transaction report and
+                  reconciliation spreadsheet, identifying and removing 7
+                  duplicate entries before submission and improving reporting
+                  accuracy.
+                </li>
+                <li>
+                  Reduced the BOS frontend test suite runtime from approximately
+                  60 minutes to 4 minutes by restructuring shared test setup and
+                  eliminating duplicated execution.
+                </li>
+              </ul>
+              <h3>Collaboration & support</h3>
+              <ul>
+                <li>
+                  Supported the Finance team during monthly closing by helping
+                  complete reconciliation checks before the reporting deadline.
+                </li>
+              </ul>
+              <h3>Growth & learning</h3>
+              <ul>
+                <li>
+                  Strengthened attention to detail, problem-solving, execution,
+                  and cross-team support through repeated evidence across the
+                  year.
+                </li>
+              </ul>
+              <h3>Next-period focus</h3>
+              <ul>
+                <li>
+                  Capture more examples of ownership and leadership when taking
+                  initiative or coordinating work across people.
+                </li>
+              </ul>
+            </div>
+            <div
+              class="grid-actions"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 9px"
+            >
+              <button
+                class="button secondary"
+                type="button"
+                data-export="plain"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg
+                >Copy Text
+              </button>
+              <button
+                class="button secondary"
+                type="button"
+                data-export="formatted"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg
+                >Copy Formatted
+              </button>
+              <button class="button secondary" type="button" data-export="pdf">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-download" /></svg
+                >Export PDF
+              </button>
+              <button
+                class="button secondary"
+                type="button"
+                data-export="markdown"
+              >
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-download" /></svg
+                >Export Markdown
+              </button>
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              data-export="share"
+            >
+              <svg class="icon" aria-hidden="true"><use href="#i-share" /></svg
+              >Share Review Draft
+            </button>
+            <div class="card soft small">
+              <strong>No large KerjaLog watermark.</strong><br /><span
+                class="muted"
+                >The content is yours. Exported material stays easy to paste
+                into company forms, email, documents, and job portals.</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <nav class="bottom-nav" id="bottom-nav" aria-label="Primary navigation">
+          <button class="nav-button" type="button" data-nav-go="home">
+            <svg class="icon" aria-hidden="true"><use href="#i-home" /></svg
+            ><span>Home</span>
+          </button>
+          <button class="nav-button" type="button" data-nav-go="history">
+            <svg class="icon" aria-hidden="true"><use href="#i-history" /></svg
+            ><span>History</span>
+          </button>
+          <button
+            class="capture-nav"
+            type="button"
+            data-go="capture-type"
+            aria-label="Log something"
+          >
+            <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+          </button>
+          <button class="nav-button" type="button" data-nav-go="growth">
+            <svg class="icon" aria-hidden="true"><use href="#i-growth" /></svg
+            ><span>Growth</span>
+          </button>
+          <button class="nav-button" type="button" data-nav-go="review-setup">
+            <svg class="icon" aria-hidden="true"><use href="#i-review" /></svg
+            ><span>Review</span>
+          </button>
+        </nav>
+
+        <div
+          class="modal-backdrop"
+          id="reflection-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reflection-title"
+        >
+          <div class="sheet stack-16">
+            <div class="sheet-grabber" aria-hidden="true"></div>
+            <div>
+              <div class="eyebrow">Weekly reflection</div>
+              <h2 id="reflection-title">
+                Four prompts. Skip anything that doesn’t fit.
+              </h2>
+            </div>
+            <div>
+              <label class="field-label" for="reflection-1"
+                >1. What did you finish or move forward?</label
+              ><textarea
+                class="textarea"
+                id="reflection-1"
+                style="min-height: 72px"
+                placeholder="A task, project, or follow-up…"
+              ></textarea>
+            </div>
+            <div>
+              <label class="field-label" for="reflection-2"
+                >2. Who did you help?</label
+              ><textarea
+                class="textarea"
+                id="reflection-2"
+                style="min-height: 72px"
+                placeholder="A colleague, team, or customer…"
+              ></textarea>
+            </div>
+            <div>
+              <label class="field-label" for="reflection-3"
+                >3. What problem did you handle?</label
+              ><textarea
+                class="textarea"
+                id="reflection-3"
+                style="min-height: 72px"
+                placeholder="An error, blocker, delay, or risk…"
+              ></textarea>
+            </div>
+            <div>
+              <label class="field-label" for="reflection-4"
+                >4. What did you learn?</label
+              ><textarea
+                class="textarea"
+                id="reflection-4"
+                style="min-height: 72px"
+                placeholder="A process, tool, lesson, or new approach…"
+              ></textarea>
+            </div>
+            <button
+              class="button primary block"
+              type="button"
+              id="finish-reflection"
+            >
+              Show My Week in 3 Points
+            </button>
+            <button
+              class="button ghost block"
+              type="button"
+              id="close-reflection"
+            >
+              Close Reflection
+            </button>
+          </div>
+        </div>
+
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      </section>
+
+      <aside class="prototype-panel">
+        <div class="eyebrow">Design direction</div>
+        <h2>Evidence over scoring</h2>
+        <p>
+          The vertical Evidence Thread is KerjaLog’s signature device: what
+          happened → what changed → evidence → what the work demonstrates.
+        </p>
+        <div class="utility-stack">
+          <div>
+            <div class="utility-label">Theme</div>
+            <button class="utility-button" type="button" data-theme-button>
+              Toggle Light / Dark
+            </button>
+          </div>
+          <div>
+            <div class="utility-label">Reset</div>
+            <button class="utility-button" type="button" id="reset-prototype">
+              Restart Onboarding
+            </button>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <script>
+      const screens = [...document.querySelectorAll('.screen')];
+      const bottomNav = document.getElementById('bottom-nav');
+      const toast = document.getElementById('toast');
+      const jumpList = document.getElementById('jump-list');
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      let currentScreen = 'welcome';
+      let toastTimer;
+      let lang = 'en';
+
+      const i18n = {
+        en: {
+          welcomeTitle: 'Your work matters—even when it feels routine.',
+          welcomeLede:
+            'KerjaLog helps you notice what changed because of your work and keep the evidence ready for reviews, résumés, and interviews.',
+          privateTitle: 'Private by default',
+          privateCopy:
+            'Local-first. No employer dashboard. You decide what gets exported.',
+          setupCta: 'Set Up KerjaLog'
+        },
+        id: {
+          welcomeTitle: 'Pekerjaanmu berarti—bahkan saat terasa biasa saja.',
+          welcomeLede:
+            'KerjaLog membantumu melihat apa yang berubah karena pekerjaanmu dan menyimpan buktinya untuk penilaian, CV, dan wawancara.',
+          privateTitle: 'Privat secara default',
+          privateCopy:
+            'Utamakan penyimpanan lokal. Tidak ada dashboard atasan. Kamu yang menentukan apa yang diekspor.',
+          setupCta: 'Atur KerjaLog'
+        }
+      };
+
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add('show');
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+      }
+
+      function navigate(name) {
+        const next = document.querySelector(`[data-screen="${name}"]`);
+        if (!next) return;
+        screens.forEach((screen) =>
+          screen.classList.toggle('active', screen === next)
+        );
+        currentScreen = name;
+        next
+          .querySelector('.screen-body')
+          ?.scrollTo({ top: 0, behavior: 'auto' });
+        const hasNav = next.dataset.nav === 'true';
+        bottomNav.classList.toggle('visible', hasNav);
+        const navKey = next.dataset.navKey;
+        document
+          .querySelectorAll('[data-nav-go]')
+          .forEach((btn) =>
+            btn.classList.toggle('active', btn.dataset.navGo === navKey)
+          );
+        document
+          .querySelectorAll('.jump-button')
+          .forEach((btn) =>
+            btn.setAttribute('aria-current', String(btn.dataset.jump === name))
+          );
+        window.location.hash = name;
+        const heading = next.querySelector('h1');
+        if (heading) heading.setAttribute('tabindex', '-1');
+      }
+
+      screens.forEach((screen) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'jump-button';
+        button.dataset.jump = screen.dataset.screen;
+        button.textContent = screen.dataset.title;
+        button.addEventListener('click', () => navigate(screen.dataset.screen));
+        jumpList.appendChild(button);
+      });
+
+      document.addEventListener('click', (event) => {
+        const go = event.target.closest('[data-go]');
+        if (go) navigate(go.dataset.go);
+        const nav = event.target.closest('[data-nav-go]');
+        if (nav) navigate(nav.dataset.navGo);
+      });
+
+      document.querySelectorAll('[data-choice-group]').forEach((group) => {
+        group.addEventListener('click', (event) => {
+          const choice = event.target.closest('button');
+          if (!choice) return;
+          const multiple = group.dataset.multiple === 'true';
+          if (multiple) {
+            const isSelected = choice.classList.toggle('selected');
+            choice.setAttribute('aria-pressed', String(isSelected));
+            const existing = choice.querySelector('.choice-check');
+            if (!existing && isSelected) {
+              const check = document.createElement('span');
+              check.className = 'choice-check';
+              check.textContent = '✓';
+              choice.appendChild(check);
+            } else if (existing && !isSelected) existing.remove();
+            return;
+          }
+          [...group.querySelectorAll('button')].forEach((btn) => {
+            btn.classList.remove('selected');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.querySelector('.choice-check')?.remove();
+          });
+          choice.classList.add('selected');
+          choice.setAttribute('aria-pressed', 'true');
+          const check = document.createElement('span');
+          check.className = 'choice-check';
+          check.textContent = '✓';
+          choice.appendChild(check);
         });
-        choice.classList.add('selected'); choice.setAttribute('aria-pressed', 'true');
-        const check = document.createElement('span'); check.className = 'choice-check'; check.textContent = '✓'; choice.appendChild(check);
       });
-    });
 
-    document.querySelectorAll('[data-chip-group], [aria-label="History filters"]').forEach(group => {
-      group.addEventListener('click', event => {
-        const chip = event.target.closest('button.chip'); if (!chip) return;
-        [...group.querySelectorAll('button.chip')].forEach(btn => btn.setAttribute('aria-pressed', 'false'));
-        chip.setAttribute('aria-pressed', 'true');
+      document
+        .querySelectorAll('[data-chip-group], [aria-label="History filters"]')
+        .forEach((group) => {
+          group.addEventListener('click', (event) => {
+            const chip = event.target.closest('button.chip');
+            if (!chip) return;
+            [...group.querySelectorAll('button.chip')].forEach((btn) =>
+              btn.setAttribute('aria-pressed', 'false')
+            );
+            chip.setAttribute('aria-pressed', 'true');
+          });
+        });
+
+      function setTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem('kerjalog-theme', theme);
+        themeMeta.setAttribute(
+          'content',
+          theme === 'dark' ? '#151218' : '#f7f3ee'
+        );
+        showToast(theme === 'dark' ? 'Dark mode on' : 'Light mode on');
+      }
+      document
+        .querySelectorAll('[data-theme-button], #theme-toggle')
+        .forEach((btn) =>
+          btn.addEventListener('click', () =>
+            setTheme(
+              document.documentElement.dataset.theme === 'dark'
+                ? 'light'
+                : 'dark'
+            )
+          )
+        );
+      const savedTheme = localStorage.getItem('kerjalog-theme');
+      if (savedTheme) setTheme(savedTheme);
+
+      document.getElementById('lang-toggle').addEventListener('click', () => {
+        lang = lang === 'en' ? 'id' : 'en';
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const key = node.dataset.i18n;
+          if (i18n[lang][key]) node.textContent = i18n[lang][key];
+        });
+        document.getElementById('lang-toggle').textContent =
+          lang === 'en' ? 'EN · Bahasa' : 'ID · English';
+        showToast(
+          lang === 'en' ? 'English preview' : 'Pratinjau Bahasa Indonesia'
+        );
       });
-    });
 
-    function setTheme(theme) {
-      document.documentElement.dataset.theme = theme;
-      localStorage.setItem('kerjalog-theme', theme);
-      themeMeta.setAttribute('content', theme === 'dark' ? '#151218' : '#f7f3ee');
-      showToast(theme === 'dark' ? 'Dark mode on' : 'Light mode on');
-    }
-    document.querySelectorAll('[data-theme-button], #theme-toggle').forEach(btn => btn.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark')));
-    const savedTheme = localStorage.getItem('kerjalog-theme');
-    if (savedTheme) setTheme(savedTheme);
+      document
+        .getElementById('voice-button')
+        .addEventListener('click', () =>
+          showToast('Prototype: device speech-to-text would open here.')
+        );
+      document
+        .getElementById('save-quick-note')
+        .addEventListener('click', () => {
+          showToast(
+            'Quick note saved. Add the outcome whenever you are ready.'
+          );
+          setTimeout(() => navigate('home'), 750);
+        });
+      document
+        .getElementById('edit-suggestion')
+        .addEventListener('click', () =>
+          showToast('Prototype: suggested wording is editable before save.')
+        );
+      document
+        .getElementById('confirm-skill')
+        .addEventListener('click', () => showToast('Skill confirmed.'));
+      document
+        .getElementById('remove-skill')
+        .addEventListener('click', () =>
+          showToast('Skill removed from this evidence set.')
+        );
 
-    document.getElementById('lang-toggle').addEventListener('click', () => {
-      lang = lang === 'en' ? 'id' : 'en';
-      document.documentElement.lang = lang;
-      document.querySelectorAll('[data-i18n]').forEach(node => { const key = node.dataset.i18n; if (i18n[lang][key]) node.textContent = i18n[lang][key]; });
-      document.getElementById('lang-toggle').textContent = lang === 'en' ? 'EN · Bahasa' : 'ID · English';
-      showToast(lang === 'en' ? 'English preview' : 'Pratinjau Bahasa Indonesia');
-    });
+      const reflection = document.getElementById('reflection-modal');
+      document
+        .getElementById('open-reflection')
+        .addEventListener('click', () => {
+          reflection.classList.add('open');
+          document.getElementById('reflection-1').focus();
+        });
+      document
+        .getElementById('close-reflection')
+        .addEventListener('click', () => reflection.classList.remove('open'));
+      reflection.addEventListener('click', (event) => {
+        if (event.target === reflection) reflection.classList.remove('open');
+      });
+      document
+        .getElementById('finish-reflection')
+        .addEventListener('click', () => {
+          reflection.classList.remove('open');
+          showToast('Your week in 3 points is ready.');
+        });
 
-    document.getElementById('voice-button').addEventListener('click', () => showToast('Prototype: device speech-to-text would open here.'));
-    document.getElementById('save-quick-note').addEventListener('click', () => { showToast('Quick note saved. Add the outcome whenever you are ready.'); setTimeout(() => navigate('home'), 750); });
-    document.getElementById('edit-suggestion').addEventListener('click', () => showToast('Prototype: suggested wording is editable before save.'));
-    document.getElementById('confirm-skill').addEventListener('click', () => showToast('Skill confirmed.'));
-    document.getElementById('remove-skill').addEventListener('click', () => showToast('Skill removed from this evidence set.'));
+      document
+        .getElementById('history-search')
+        .addEventListener('input', (event) => {
+          const query = event.target.value.trim().toLowerCase();
+          document
+            .querySelectorAll('#history-entries .entry-card')
+            .forEach((card) => {
+              card.hidden = query && !card.dataset.search.includes(query);
+            });
+        });
 
-    const reflection = document.getElementById('reflection-modal');
-    document.getElementById('open-reflection').addEventListener('click', () => { reflection.classList.add('open'); document.getElementById('reflection-1').focus(); });
-    document.getElementById('close-reflection').addEventListener('click', () => reflection.classList.remove('open'));
-    reflection.addEventListener('click', event => { if (event.target === reflection) reflection.classList.remove('open'); });
-    document.getElementById('finish-reflection').addEventListener('click', () => { reflection.classList.remove('open'); showToast('Your week in 3 points is ready.'); });
-
-    document.getElementById('history-search').addEventListener('input', event => {
-      const query = event.target.value.trim().toLowerCase();
-      document.querySelectorAll('#history-entries .entry-card').forEach(card => { card.hidden = query && !card.dataset.search.includes(query); });
-    });
-
-    async function copyText(text) {
-      if (navigator.clipboard?.writeText) {
-        try { await navigator.clipboard.writeText(text); return true; } catch {}
+      async function copyText(text) {
+        if (navigator.clipboard?.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch {}
+        }
+        const fallback = document.createElement('textarea');
+        fallback.value = text;
+        fallback.setAttribute('readonly', '');
+        fallback.style.position = 'fixed';
+        fallback.style.opacity = '0';
+        document.body.appendChild(fallback);
+        fallback.select();
+        const copied = document.execCommand('copy');
+        fallback.remove();
+        return copied;
       }
-      const fallback = document.createElement('textarea');
-      fallback.value = text;
-      fallback.setAttribute('readonly', '');
-      fallback.style.position = 'fixed';
-      fallback.style.opacity = '0';
-      document.body.appendChild(fallback);
-      fallback.select();
-      const copied = document.execCommand('copy');
-      fallback.remove();
-      return copied;
-    }
 
-    function outputPlainText() {
-      return document.getElementById('review-output').innerText.trim();
-    }
-    function outputMarkdown() {
-      const root = document.getElementById('review-output');
-      return [...root.children].map(node => {
-        if (node.tagName === 'H3') return `## ${node.innerText.trim()}`;
-        if (node.tagName === 'UL') return [...node.querySelectorAll('li')].map(li => `- ${li.innerText.trim()}`).join('\n');
-        return node.innerText.trim();
-      }).join('\n\n');
-    }
-    function downloadText(filename, text, type = 'text/plain') {
-      const blob = new Blob([text], { type });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click(); anchor.remove(); URL.revokeObjectURL(url);
-    }
-
-    document.querySelectorAll('[data-export]').forEach(button => button.addEventListener('click', async () => {
-      const action = button.dataset.export;
-      const plain = outputPlainText();
-      if (action === 'plain') { const copied = await copyText(plain); showToast(copied ? 'Plain text copied.' : 'Copy is unavailable in this browser.'); }
-      if (action === 'formatted') {
-        try { await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([document.getElementById('review-output').innerHTML], { type: 'text/html' }), 'text/plain': new Blob([plain], { type: 'text/plain' }) })]); showToast('Formatted review copied.'); }
-        catch { const copied = await copyText(plain); showToast(copied ? 'Copied as plain text on this browser.' : 'Copy is unavailable in this browser.'); }
+      function outputPlainText() {
+        return document.getElementById('review-output').innerText.trim();
       }
-      if (action === 'markdown') { downloadText('kerjalog-review-2026.md', outputMarkdown(), 'text/markdown'); showToast('Markdown downloaded.'); }
-      if (action === 'pdf') { showToast('Use the browser Print dialog → Save as PDF.'); setTimeout(() => window.print(), 650); }
-      if (action === 'share') {
-        if (navigator.share) await navigator.share({ title: 'KerjaLog review draft', text: plain });
-        else { const copied = await copyText(plain); showToast(copied ? 'Sharing is unavailable here, so the draft was copied.' : 'Sharing and clipboard access are unavailable here.'); }
+      function outputMarkdown() {
+        const root = document.getElementById('review-output');
+        return [...root.children]
+          .map((node) => {
+            if (node.tagName === 'H3') return `## ${node.innerText.trim()}`;
+            if (node.tagName === 'UL')
+              return [...node.querySelectorAll('li')]
+                .map((li) => `- ${li.innerText.trim()}`)
+                .join('\n');
+            return node.innerText.trim();
+          })
+          .join('\n\n');
       }
-    }));
+      function downloadText(filename, text, type = 'text/plain') {
+        const blob = new Blob([text], { type });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+      }
 
-    document.getElementById('reset-prototype').addEventListener('click', () => navigate('welcome'));
+      document.querySelectorAll('[data-export]').forEach((button) =>
+        button.addEventListener('click', async () => {
+          const action = button.dataset.export;
+          const plain = outputPlainText();
+          if (action === 'plain') {
+            const copied = await copyText(plain);
+            showToast(
+              copied
+                ? 'Plain text copied.'
+                : 'Copy is unavailable in this browser.'
+            );
+          }
+          if (action === 'formatted') {
+            try {
+              await navigator.clipboard.write([
+                new ClipboardItem({
+                  'text/html': new Blob(
+                    [document.getElementById('review-output').innerHTML],
+                    { type: 'text/html' }
+                  ),
+                  'text/plain': new Blob([plain], { type: 'text/plain' })
+                })
+              ]);
+              showToast('Formatted review copied.');
+            } catch {
+              const copied = await copyText(plain);
+              showToast(
+                copied
+                  ? 'Copied as plain text on this browser.'
+                  : 'Copy is unavailable in this browser.'
+              );
+            }
+          }
+          if (action === 'markdown') {
+            downloadText(
+              'kerjalog-review-2026.md',
+              outputMarkdown(),
+              'text/markdown'
+            );
+            showToast('Markdown downloaded.');
+          }
+          if (action === 'pdf') {
+            showToast('Use the browser Print dialog → Save as PDF.');
+            setTimeout(() => window.print(), 650);
+          }
+          if (action === 'share') {
+            if (navigator.share)
+              await navigator.share({
+                title: 'KerjaLog review draft',
+                text: plain
+              });
+            else {
+              const copied = await copyText(plain);
+              showToast(
+                copied
+                  ? 'Sharing is unavailable here, so the draft was copied.'
+                  : 'Sharing and clipboard access are unavailable here.'
+              );
+            }
+          }
+        })
+      );
 
-    const hashScreen = window.location.hash.slice(1);
-    if (hashScreen && document.querySelector(`[data-screen="${hashScreen}"]`)) navigate(hashScreen);
-    else navigate('welcome');
-  </script>
-</body>
+      document
+        .getElementById('reset-prototype')
+        .addEventListener('click', () => navigate('welcome'));
+
+      const hashScreen = window.location.hash.slice(1);
+      if (hashScreen && document.querySelector(`[data-screen="${hashScreen}"]`))
+        navigate(hashScreen);
+      else navigate('welcome');
+    </script>
+  </body>
 </html>

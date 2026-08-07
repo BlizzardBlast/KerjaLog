@@ -1133,18 +1133,18 @@ Only after core retention is proven should the product evaluate:
 
 These links are implementation references, not requirements to install every technology immediately.
 
-- Expo SDK reference: https://docs.expo.dev/versions/latest/
-- Expo Router: https://docs.expo.dev/router/introduction/
-- Expo SQLite: https://docs.expo.dev/versions/latest/sdk/sqlite/
-- Expo SecureStore: https://docs.expo.dev/versions/latest/sdk/securestore/
-- Expo LocalAuthentication: https://docs.expo.dev/versions/latest/sdk/local-authentication/
-- Expo Notifications: https://docs.expo.dev/versions/latest/sdk/notifications/
-- Expo Print: https://docs.expo.dev/versions/latest/sdk/print/
-- Expo Sharing: https://docs.expo.dev/versions/latest/sdk/sharing/
-- Expo EAS Build: https://docs.expo.dev/build/introduction/
-- Expo unit testing: https://docs.expo.dev/develop/unit-testing/
-- Expo + Maestro: https://docs.expo.dev/eas/workflows/examples/e2e-tests/
-- Drizzle Expo SQLite guide (revisit after v1 RC stabilizes): https://orm.drizzle.team/docs/get-started/expo-new
+- Expo SDK reference: <https://docs.expo.dev/versions/latest/>
+- Expo Router: <https://docs.expo.dev/router/introduction/>
+- Expo SQLite: <https://docs.expo.dev/versions/latest/sdk/sqlite/>
+- Expo SecureStore: <https://docs.expo.dev/versions/latest/sdk/securestore/>
+- Expo LocalAuthentication: <https://docs.expo.dev/versions/latest/sdk/local-authentication/>
+- Expo Notifications: <https://docs.expo.dev/versions/latest/sdk/notifications/>
+- Expo Print: <https://docs.expo.dev/versions/latest/sdk/print/>
+- Expo Sharing: <https://docs.expo.dev/versions/latest/sdk/sharing/>
+- Expo EAS Build: <https://docs.expo.dev/build/introduction/>
+- Expo unit testing: <https://docs.expo.dev/develop/unit-testing/>
+- Expo + Maestro: <https://docs.expo.dev/eas/workflows/examples/e2e-tests/>
+- Drizzle Expo SQLite guide (revisit after v1 RC stabilizes): <https://orm.drizzle.team/docs/get-started/expo-new>
 
 ---
 
