@@ -39,10 +39,11 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint",
+    "lint": "pnpm dlx @biomejs/biome@2.5.5 lint src",
+    "format:check": "pnpm dlx @biomejs/biome@2.5.5 format src",
     "typecheck": "tsc --noEmit",
-    "doctor": "pnpm dlx expo-doctor@latest",
-    "check": "pnpm lint && pnpm typecheck && pnpm doctor && pnpm exec expo export --platform web"
+    "doctor": "pnpm dlx expo-doctor@1.20.1",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm doctor && pnpm exec expo export --platform web"
   },
   "private": true
 }
