@@ -45,7 +45,10 @@ jobs:
         run: pnpm test:ci
 
       - name: Expo Doctor
-        run: pnpm doctor
+        run: pnpm run expo:doctor
 
-      - name: Export web bundle
-        run: pnpm exec expo export --platform web
+      - name: Export Android bundle
+        run: pnpm run export:android
+
+      - name: Export iOS bundle
+        run: pnpm run export:ios
