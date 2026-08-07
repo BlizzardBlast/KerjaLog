@@ -17,9 +17,7 @@ function expectUnique(values: readonly string[], label: string) {
 }
 
 function placeholders(value: string) {
-  return [...value.matchAll(/{{(\w+)}}/g)]
-    .map((match) => match[1])
-    .sort();
+  return [...value.matchAll(/{{(\w+)}}/g)].map((match) => match[1]).sort();
 }
 
 describe('onboarding foundation', () => {
