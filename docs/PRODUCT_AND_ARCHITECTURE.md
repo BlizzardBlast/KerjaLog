@@ -472,37 +472,37 @@ Expo SDK 57 maps to React Native 0.86 and targets Android SDK 36, which is appro
 
 ### Keep from the repository
 
-| Concern | Choice |
-| --- | --- |
-| Cross-platform framework | Expo SDK 57 + React Native 0.86 |
-| UI runtime | React 19.2 |
-| Language | TypeScript 6, strict mode |
-| Package manager | pnpm |
-| Navigation | Expo Router |
-| Animation | React Native Reanimated |
-| Gestures | React Native Gesture Handler |
+| Concern                  | Choice                                   |
+| ------------------------ | ---------------------------------------- |
+| Cross-platform framework | Expo SDK 57 + React Native 0.86          |
+| UI runtime               | React 19.2                               |
+| Language                 | TypeScript 6, strict mode                |
+| Package manager          | pnpm                                     |
+| Navigation               | Expo Router                              |
+| Animation                | React Native Reanimated                  |
+| Gestures                 | React Native Gesture Handler             |
 | Native screen primitives | react-native-screens / safe-area-context |
 
 ### Add for v1
 
-| Concern | Choice | Why |
-| --- | --- | --- |
-| Local database | `expo-sqlite` | Durable relational local storage |
-| Database encryption | SQLCipher through `expo-sqlite` config | Career data may be sensitive |
-| Secret storage | `expo-secure-store` | Store the database encryption key and small secrets |
-| App lock | `expo-local-authentication` | Optional biometric/device authentication |
-| Forms | `react-hook-form` | Efficient form/wizard state |
-| Validation | `zod` | Typed boundary validation |
-| Ephemeral app state | `zustand` | Small UI/workflow state only |
-| Localization | `expo-localization` + `i18next`/`react-i18next` | Indonesian + English without scattered strings |
-| Reminders | `expo-notifications` | Local weekly reflection reminders |
-| PDF | `expo-print` | Local HTML-to-PDF generation |
-| Sharing | `expo-sharing` | Native share sheet for generated files |
-| File handling | Expo file-system APIs | Export/import files |
-| Unit/component tests | Jest + React Native Testing Library | Logic and component confidence |
-| E2E | Maestro | Core Android/iOS journey validation |
-| Crash reporting | Sentry, with aggressive scrubbing | Production diagnostics without career-content leakage |
-| Builds/releases | EAS Build / Submit / Update | Managed native build and release workflow |
+| Concern              | Choice                                          | Why                                                   |
+| -------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| Local database       | `expo-sqlite`                                   | Durable relational local storage                      |
+| Database encryption  | SQLCipher through `expo-sqlite` config          | Career data may be sensitive                          |
+| Secret storage       | `expo-secure-store`                             | Store the database encryption key and small secrets   |
+| App lock             | `expo-local-authentication`                     | Optional biometric/device authentication              |
+| Forms                | `react-hook-form`                               | Efficient form/wizard state                           |
+| Validation           | `zod`                                           | Typed boundary validation                             |
+| Ephemeral app state  | `zustand`                                       | Small UI/workflow state only                          |
+| Localization         | `expo-localization` + `i18next`/`react-i18next` | Indonesian + English without scattered strings        |
+| Reminders            | `expo-notifications`                            | Local weekly reflection reminders                     |
+| PDF                  | `expo-print`                                    | Local HTML-to-PDF generation                          |
+| Sharing              | `expo-sharing`                                  | Native share sheet for generated files                |
+| File handling        | Expo file-system APIs                           | Export/import files                                   |
+| Unit/component tests | Jest + React Native Testing Library             | Logic and component confidence                        |
+| E2E                  | Maestro                                         | Core Android/iOS journey validation                   |
+| Crash reporting      | Sentry, with aggressive scrubbing               | Production diagnostics without career-content leakage |
+| Builds/releases      | EAS Build / Submit / Update                     | Managed native build and release workflow             |
 
 ### Linting and formatting
 
@@ -1103,29 +1103,29 @@ Only after core retention is proven should the product evaluate:
 
 ## 20. Key architectural decisions summary
 
-| Decision | v1 choice |
-| --- | --- |
-| Mobile framework | Expo SDK 57 / React Native 0.86 |
-| Supported product platforms | Android + iOS |
-| Web | Not first-class in v1 |
-| Persistence | Local encrypted SQLite |
-| Database API | Expo SQLite + typed repositories + SQL migrations |
-| ORM | None initially; avoid Drizzle v1 RC for core persistence |
-| Accounts | None |
-| Backend | None required |
-| Sync | None |
-| AI | Deterministic local rules only |
-| Global state | Zustand for ephemeral state only |
-| Forms | React Hook Form + Zod |
-| Search | SQLite FTS5 |
-| Reminders | Local notifications |
-| Export | Local text/Markdown/PDF/share/JSON |
-| App protection | SQLCipher + SecureStore + optional LocalAuthentication |
-| i18n | Indonesian + English |
-| E2E | Maestro |
-| Remote backend later | Supabase candidate |
-| Sync engine later | Evaluate only when required |
-| Billing later | RevenueCat candidate |
+| Decision                    | v1 choice                                                |
+| --------------------------- | -------------------------------------------------------- |
+| Mobile framework            | Expo SDK 57 / React Native 0.86                          |
+| Supported product platforms | Android + iOS                                            |
+| Web                         | Not first-class in v1                                    |
+| Persistence                 | Local encrypted SQLite                                   |
+| Database API                | Expo SQLite + typed repositories + SQL migrations        |
+| ORM                         | None initially; avoid Drizzle v1 RC for core persistence |
+| Accounts                    | None                                                     |
+| Backend                     | None required                                            |
+| Sync                        | None                                                     |
+| AI                          | Deterministic local rules only                           |
+| Global state                | Zustand for ephemeral state only                         |
+| Forms                       | React Hook Form + Zod                                    |
+| Search                      | SQLite FTS5                                              |
+| Reminders                   | Local notifications                                      |
+| Export                      | Local text/Markdown/PDF/share/JSON                       |
+| App protection              | SQLCipher + SecureStore + optional LocalAuthentication   |
+| i18n                        | Indonesian + English                                     |
+| E2E                         | Maestro                                                  |
+| Remote backend later        | Supabase candidate                                       |
+| Sync engine later           | Evaluate only when required                              |
+| Billing later               | RevenueCat candidate                                     |
 
 ---
 
