@@ -1,5 +1,5 @@
 import type { Href } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
+import type { SymbolView } from 'expo-symbols';
 import type { ComponentProps } from 'react';
 import type { TranslationKey } from '@/i18n/translations';
 
