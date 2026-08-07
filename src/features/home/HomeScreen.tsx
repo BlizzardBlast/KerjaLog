@@ -6,10 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { SectionHeading } from '@/features/home/components/SectionHeading';
 import type { ReviewSchedule } from '@/features/onboarding/model';
 import { loadOnboardingState } from '@/features/onboarding/storage';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
+import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
   'within-3-months': 'home.review.within3Months',
@@ -28,25 +30,33 @@ export function HomeScreen() {
   const [isReviewScheduleLoaded, setIsReviewScheduleLoaded] = useState(false);
 
   useEffect(() => {
-    let isActive = true;
+    let ignore = false;
 
-    loadOnboardingState().then((state) => {
-      if (isActive) {
-        setReviewSchedule(state.reviewSchedule);
-        setIsReviewScheduleLoaded(true);
+    const loadReviewSchedule = async () => {
+      const state = await loadOnboardingState();
+
+      if (ignore) {
+        return;
       }
-    });
+
+      setReviewSchedule(state.reviewSchedule);
+      setIsReviewScheduleLoaded(true);
+    };
+
+    loadReviewSchedule().catch(EMPTY_FUNCTION);
 
     return () => {
-      isActive = false;
+      ignore = true;
     };
   }, []);
 
-  const reviewScheduleLabel = !isReviewScheduleLoaded
-    ? t('common.loading.setup')
-    : reviewSchedule
+  let reviewScheduleLabel = t('common.loading.setup');
+
+  if (isReviewScheduleLoaded) {
+    reviewScheduleLabel = reviewSchedule
       ? t(reviewScheduleLabelKeys[reviewSchedule])
       : t('home.review.notSet');
+  }
 
   return (
     <SafeAreaView
@@ -220,23 +230,6 @@ export function HomeScreen() {
   );
 }
 
-function SectionHeading({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <View style={styles.sectionHeading}>
-      <Text variant="heading">{title}</Text>
-      <Text variant="caption" color="textMuted">
-        {description}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -270,10 +263,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
-  },
-  sectionHeading: {
-    gap: 2,
-    marginTop: 10,
   },
   card: {
     borderRadius: 20,
