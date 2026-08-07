@@ -1,0 +1,37 @@
+{
+  "fill": {
+    "solid": "srgb:0.44314,0.21961,0.94902,1.00000"
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "kerjalog-mark.svg",
+          "name": "KerjaLog mark",
+          "position": {
+            "scale": 0.82,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.28
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": true,
+        "value": 0.18
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

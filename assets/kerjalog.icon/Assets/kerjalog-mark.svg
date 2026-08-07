@@ -1,0 +1,14 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="markMask">
+      <rect width="1024" height="1024" fill="black"/>
+      <rect x="318" y="252" width="90" height="520" rx="45" fill="white"/>
+      <path d="M383 512 L704 274" stroke="white" stroke-width="92" stroke-linecap="round"/>
+      <path d="M383 512 L704 750" stroke="white" stroke-width="92" stroke-linecap="round"/>
+      <circle cx="363" cy="350" r="17" fill="black"/>
+      <circle cx="363" cy="512" r="17" fill="black"/>
+      <circle cx="363" cy="674" r="17" fill="black"/>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" fill="white" mask="url(#markMask)"/>
+</svg>
