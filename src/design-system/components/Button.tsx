@@ -10,6 +10,10 @@ import {
 } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import type {
+  AppTheme,
+  ThemeColors,
+} from '@/design-system/tokens/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -27,6 +31,12 @@ export type ButtonProps = Omit<
   leadingIcon?: ReactNode;
   trailingIcon?: ReactNode;
   style?: StyleProp<ViewStyle>;
+};
+
+type ButtonVariantConfig = {
+  containerStyle: ViewStyle;
+  pressedStyle: ViewStyle;
+  labelColor: keyof ThemeColors;
 };
 
 const sizeStyles: Record<ButtonSize, ViewStyle> = {
@@ -47,6 +57,37 @@ const sizeStyles: Record<ButtonSize, ViewStyle> = {
   },
 };
 
+function getVariantConfigs(
+  theme: AppTheme,
+): Record<ButtonVariant, ButtonVariantConfig> {
+  return {
+    primary: {
+      containerStyle: { backgroundColor: theme.colors.primary },
+      pressedStyle: { backgroundColor: theme.colors.primaryPressed },
+      labelColor: 'onPrimary',
+    },
+    secondary: {
+      containerStyle: {
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.border,
+        borderWidth: 1,
+      },
+      pressedStyle: { backgroundColor: theme.colors.primarySoft },
+      labelColor: 'text',
+    },
+    ghost: {
+      containerStyle: { backgroundColor: 'transparent' },
+      pressedStyle: { backgroundColor: theme.colors.surfaceSubtle },
+      labelColor: 'primary',
+    },
+    destructive: {
+      containerStyle: { backgroundColor: theme.colors.danger },
+      pressedStyle: styles.pressed,
+      labelColor: 'onDanger',
+    },
+  };
+}
+
 export function Button({
   children,
   variant = 'primary',
@@ -63,38 +104,7 @@ export function Button({
 }: ButtonProps) {
   const { theme } = useTheme();
   const isDisabled = disabled || loading;
-
-  const variantStyle: ViewStyle = (() => {
-    switch (variant) {
-      case 'secondary':
-        return {
-          backgroundColor: theme.colors.surface,
-          borderColor: theme.colors.border,
-          borderWidth: 1,
-        };
-      case 'ghost':
-        return {
-          backgroundColor: 'transparent',
-        };
-      case 'destructive':
-        return {
-          backgroundColor: theme.colors.danger,
-        };
-      default:
-        return {
-          backgroundColor: theme.colors.primary,
-        };
-    }
-  })();
-
-  const labelColor =
-    variant === 'destructive'
-      ? 'onDanger'
-      : variant === 'primary'
-        ? 'onPrimary'
-        : variant === 'secondary'
-          ? 'text'
-          : 'primary';
+  const variantConfig = getVariantConfigs(theme)[variant];
 
   return (
     <Pressable
@@ -109,17 +119,9 @@ export function Button({
       style={({ pressed }) => [
         styles.base,
         sizeStyles[size],
-        variantStyle,
+        variantConfig.containerStyle,
         fullWidth && styles.fullWidth,
-        pressed && !isDisabled
-          ? variant === 'primary'
-            ? { backgroundColor: theme.colors.primaryPressed }
-            : variant === 'ghost'
-              ? { backgroundColor: theme.colors.surfaceSubtle }
-              : variant === 'secondary'
-                ? { backgroundColor: theme.colors.primarySoft }
-                : styles.pressed
-          : null,
+        pressed && !isDisabled && variantConfig.pressedStyle,
         isDisabled && styles.disabled,
         style,
       ]}
@@ -128,14 +130,18 @@ export function Button({
         {loading ? (
           <ActivityIndicator
             accessibilityElementsHidden
-            color={theme.colors[labelColor]}
+            color={theme.colors[variantConfig.labelColor]}
             size="small"
           />
         ) : (
           leadingIcon
         )}
         {typeof children === 'string' || typeof children === 'number' ? (
-          <Text variant="label" color={labelColor} style={styles.label}>
+          <Text
+            variant="label"
+            color={variantConfig.labelColor}
+            style={styles.label}
+          >
             {children}
           </Text>
         ) : (
