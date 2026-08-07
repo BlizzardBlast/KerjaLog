@@ -15,6 +15,7 @@ import {
   type ThemeMode,
   themes,
 } from '@/design-system/tokens/theme';
+import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 const THEME_MODE_STORAGE_KEY = '@kerjalog/theme-mode/v1';
 
@@ -46,9 +47,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
           setModeState(storedMode);
         }
       })
-      .catch(() => {
-        // The system theme remains a safe fallback when persistence fails.
-      })
+      .catch(EMPTY_FUNCTION)
       .finally(() => {
         if (isActive) {
           setIsHydrated(true);
@@ -62,9 +61,9 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
   const setMode = useCallback((nextMode: ThemeMode) => {
     setModeState(nextMode);
-    void AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, nextMode).catch(() => {
-      // Keep the in-memory choice even when persistence fails.
-    });
+    void AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, nextMode).catch(
+      EMPTY_FUNCTION,
+    );
   }, []);
 
   const resolvedTheme: ResolvedTheme =
