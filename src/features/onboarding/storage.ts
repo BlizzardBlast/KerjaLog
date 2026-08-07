@@ -12,6 +12,13 @@ import {
 
 const ONBOARDING_STORAGE_KEY = '@kerjalog/onboarding/v1';
 
+const REQUIRED_COMPLETION_FIELDS = [
+  'workArea',
+  'careerLevel',
+  'mainGoal',
+  'reviewSchedule',
+] as const satisfies ReadonlyArray<keyof OnboardingState>;
+
 /**
  * AsyncStorage is intentionally limited to coarse setup preferences and wizard
  * progress. Never add free-form work content, employer identifiers, salary,
@@ -35,20 +42,21 @@ function isStep(value: unknown): value is OnboardingStepId {
   return hasValue(ONBOARDING_STEP_ORDER, value);
 }
 
+function hasRequiredAnswers(state: OnboardingState): boolean {
+  return REQUIRED_COMPLETION_FIELDS.every((key) => state[key] !== undefined);
+}
+
 function sanitizeOnboardingState(value: unknown): OnboardingState {
   if (!isRecord(value) || value.version !== 1) {
     return DEFAULT_ONBOARDING_STATE;
   }
 
-  return {
+  const sanitizedState: OnboardingState = {
     version: 1,
     currentStep: isStep(value.currentStep)
       ? value.currentStep
       : DEFAULT_ONBOARDING_STATE.currentStep,
-    completed:
-      typeof value.completed === 'boolean'
-        ? value.completed
-        : DEFAULT_ONBOARDING_STATE.completed,
+    completed: false,
     workArea: hasValue(WORK_AREAS, value.workArea) ? value.workArea : undefined,
     careerLevel: hasValue(CAREER_LEVELS, value.careerLevel)
       ? value.careerLevel
@@ -65,6 +73,11 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
       typeof value.appLockPreferred === 'boolean'
         ? value.appLockPreferred
         : DEFAULT_ONBOARDING_STATE.appLockPreferred,
+  };
+
+  return {
+    ...sanitizedState,
+    completed: value.completed === true && hasRequiredAnswers(sanitizedState),
   };
 }
 
