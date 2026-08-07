@@ -6,6 +6,7 @@ import {
   REVIEW_SCHEDULES,
   WORK_AREAS,
 } from '@/features/onboarding/model';
+import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { en, id } from '@/i18n/translations';
 
 function expectUnique(values: readonly string[], label: string) {
@@ -33,6 +34,40 @@ describe('onboarding foundation', () => {
     expect(ONBOARDING_STEP_ORDER).toContain(
       DEFAULT_ONBOARDING_STATE.currentStep,
     );
+  });
+
+  test('step configuration covers every step and validates progression', () => {
+    expect(Object.keys(ONBOARDING_STEP_CONFIG)).toEqual([
+      ...ONBOARDING_STEP_ORDER,
+    ]);
+
+    expect(
+      ONBOARDING_STEP_CONFIG.welcome.canContinue(DEFAULT_ONBOARDING_STATE),
+    ).toBe(true);
+    expect(
+      ONBOARDING_STEP_CONFIG['work-context'].canContinue(
+        DEFAULT_ONBOARDING_STATE,
+      ),
+    ).toBe(false);
+    expect(
+      ONBOARDING_STEP_CONFIG['work-context'].canContinue({
+        ...DEFAULT_ONBOARDING_STATE,
+        workArea: 'technology-product',
+        careerLevel: 'junior-contributor',
+      }),
+    ).toBe(true);
+    expect(
+      ONBOARDING_STEP_CONFIG.goal.canContinue({
+        ...DEFAULT_ONBOARDING_STATE,
+        mainGoal: 'performance-review',
+      }),
+    ).toBe(true);
+    expect(
+      ONBOARDING_STEP_CONFIG['review-rhythm'].canContinue({
+        ...DEFAULT_ONBOARDING_STATE,
+        reviewSchedule: 'within-3-months',
+      }),
+    ).toBe(true);
   });
 
   test('English and Indonesian translations expose the same keys', () => {
