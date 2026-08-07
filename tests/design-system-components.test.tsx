@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Button } from '@/design-system/components/Button';
 import { OptionCard } from '@/design-system/components/OptionCard';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 
-function withTheme(children: React.ReactNode) {
+function withTheme(children: ReactNode) {
   return <ThemeProvider>{children}</ThemeProvider>;
 }
 
