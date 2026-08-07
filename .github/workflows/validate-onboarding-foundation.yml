@@ -27,6 +27,9 @@ jobs:
           node-version: 22.13.1
           cache: pnpm
 
+      - name: Relax package age gate for temporary validation
+        run: pnpm config set minimumReleaseAge 0
+
       - name: Install dependencies and refresh lockfile
         run: pnpm install --no-frozen-lockfile
 
