@@ -8,6 +8,7 @@ import {
   loadOnboardingState,
   saveOnboardingState,
 } from '@/features/onboarding/storage';
+import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 export function useOnboarding() {
   const [state, setState] = useState<OnboardingState>(DEFAULT_ONBOARDING_STATE);
@@ -38,7 +39,7 @@ export function useOnboarding() {
 
     const snapshot = state;
     writeQueueRef.current = writeQueueRef.current
-      .catch(() => undefined)
+      .catch(EMPTY_FUNCTION)
       .then(() => saveOnboardingState(snapshot));
   }, [isHydrated, state]);
 
@@ -85,7 +86,7 @@ export function useOnboarding() {
       currentStep: 'review-rhythm',
     };
 
-    await writeQueueRef.current.catch(() => undefined);
+    await writeQueueRef.current.catch(EMPTY_FUNCTION);
     await saveOnboardingState(completedState);
     setState(completedState);
   }, [state]);
