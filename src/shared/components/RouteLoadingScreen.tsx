@@ -1,6 +1,7 @@
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { spacing } from '@/design-system/tokens/theme';
 
 export function RouteLoadingScreen({ label }: { label: string }) {
   const { theme } = useTheme();
@@ -19,7 +20,7 @@ const styles = StyleSheet.create({
   screen: {
     alignItems: 'center',
     flex: 1,
-    gap: 12,
+    gap: spacing[3],
     justifyContent: 'center',
   },
 });

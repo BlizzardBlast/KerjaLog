@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
+import { View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { OptionCard } from '@/design-system/components/OptionCard';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 
@@ -70,5 +72,20 @@ describe('design-system interactions', () => {
     await fireEvent.press(option);
 
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  test('DecorativeView hides descendants on both native platforms', async () => {
+    await render(
+      <DecorativeView testID="decorative">
+        <View />
+      </DecorativeView>,
+    );
+
+    const decorative = screen.getByTestId('decorative');
+
+    expect(decorative.props.accessibilityElementsHidden).toBe(true);
+    expect(decorative.props.importantForAccessibility).toBe(
+      'no-hide-descendants',
+    );
   });
 });

@@ -1,6 +1,8 @@
 import { StyleSheet, View } from 'react-native';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
 import { LanguageSelector } from '@/features/onboarding/components/LanguageSelector';
 import { PrivacyPoint } from '@/features/onboarding/components/PrivacyPoint';
@@ -13,14 +15,13 @@ export function WelcomeStep() {
 
   return (
     <View style={styles.content}>
-      <View
-        accessibilityElementsHidden
+      <DecorativeView
         style={[styles.brandMark, { backgroundColor: theme.colors.primary }]}
       >
         <Text variant="display" color="onPrimary" style={styles.brandLetter}>
           K
         </Text>
-      </View>
+      </DecorativeView>
 
       <LanguageSelector />
 
@@ -55,12 +56,12 @@ export function WelcomeStep() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 24,
+    gap: spacing[6],
   },
   brandMark: {
     alignItems: 'center',
     alignSelf: 'flex-start',
-    borderRadius: 24,
+    borderRadius: spacing[6],
     height: 78,
     justifyContent: 'center',
     width: 78,
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     letterSpacing: -2,
   },
   privacyCard: {
-    borderRadius: 20,
+    borderRadius: radii.lg,
     borderWidth: 1,
     gap: 14,
     padding: 18,

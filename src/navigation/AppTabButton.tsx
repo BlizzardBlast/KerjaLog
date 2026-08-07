@@ -3,6 +3,7 @@ import type { Ref } from 'react';
 import { Pressable, type PressableProps, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TabDefinition } from '@/navigation/tabs';
 
@@ -74,14 +75,14 @@ const styles = StyleSheet.create({
     gap: 3,
     justifyContent: 'center',
     minHeight: 52,
-    minWidth: 48,
+    minWidth: spacing[12],
   },
   captureItem: {
     justifyContent: 'flex-end',
   },
   captureButton: {
     alignItems: 'center',
-    borderRadius: 999,
+    borderRadius: radii.full,
     borderWidth: 5,
     height: 58,
     justifyContent: 'center',
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
     marginTop: -1,
   },
   tabLabel: {
-    lineHeight: 16,
+    lineHeight: spacing[4],
   },
   pressed: {
     opacity: 0.7,

@@ -1,7 +1,10 @@
-import type { OnboardingState } from '@/features/onboarding/model';
+import type {
+  OnboardingPatch,
+  OnboardingState,
+} from '@/features/onboarding/model';
 
 export type OnboardingStepProps = {
   state: OnboardingState;
-  update: (patch: Partial<OnboardingState>) => void;
+  update: (patch: OnboardingPatch) => void;
   hasFinishError: boolean;
 };

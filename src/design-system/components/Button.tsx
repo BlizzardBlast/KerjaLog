@@ -8,9 +8,15 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import type { AppTheme, ThemeColors } from '@/design-system/tokens/theme';
+import {
+  type AppTheme,
+  radii,
+  spacing,
+  type ThemeColors,
+} from '@/design-system/tokens/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -38,18 +44,18 @@ type ButtonVariantConfig = {
 
 const sizeStyles: Record<ButtonSize, ViewStyle> = {
   sm: {
-    minHeight: 48,
-    paddingHorizontal: 16,
+    minHeight: spacing[12],
+    paddingHorizontal: spacing[4],
     paddingVertical: 10,
   },
   md: {
     minHeight: 52,
     paddingHorizontal: 18,
-    paddingVertical: 12,
+    paddingVertical: spacing[3],
   },
   lg: {
     minHeight: 56,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing[5],
     paddingVertical: 14,
   },
 };
@@ -125,11 +131,12 @@ export function Button({
     >
       <View style={styles.content}>
         {loading ? (
-          <ActivityIndicator
-            accessibilityElementsHidden
-            color={theme.colors[variantConfig.labelColor]}
-            size="small"
-          />
+          <DecorativeView>
+            <ActivityIndicator
+              color={theme.colors[variantConfig.labelColor]}
+              size="small"
+            />
+          </DecorativeView>
         ) : (
           leadingIcon
         )}
@@ -154,7 +161,7 @@ const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
+    borderRadius: radii.md,
   },
   fullWidth: {
     alignSelf: 'stretch',
@@ -162,7 +169,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing[2],
     justifyContent: 'center',
   },
   label: {

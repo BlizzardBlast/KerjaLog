@@ -2,6 +2,7 @@ import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import { ONBOARDING_STEP_ORDER } from '@/features/onboarding/model';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -27,7 +28,7 @@ export function OnboardingHeader({
         <Pressable
           accessibilityLabel={t('onboarding.back')}
           accessibilityRole="button"
-          hitSlop={4}
+          hitSlop={spacing[1]}
           onPress={onBack}
           style={({ pressed }) => [
             styles.backButton,
@@ -91,22 +92,22 @@ const styles = StyleSheet.create({
   topBar: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing[3],
     minHeight: 60,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing[5],
     paddingVertical: 6,
   },
   backButton: {
     alignItems: 'center',
     borderRadius: 14,
     borderWidth: 1,
-    height: 48,
+    height: spacing[12],
     justifyContent: 'center',
-    width: 48,
+    width: spacing[12],
   },
   backButtonPlaceholder: {
-    height: 48,
-    width: 48,
+    height: spacing[12],
+    width: spacing[12],
   },
   pressed: {
     opacity: 0.72,
@@ -118,9 +119,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   progressSegment: {
-    borderRadius: 999,
+    borderRadius: radii.full,
     flex: 1,
-    height: 4,
+    height: spacing[1],
   },
   progressSegmentActive: {
     flexGrow: 1.6,

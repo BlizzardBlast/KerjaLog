@@ -4,9 +4,10 @@ import { ReviewRhythmStep } from '@/features/onboarding/components/ReviewRhythmS
 import type { OnboardingStepProps } from '@/features/onboarding/components/types';
 import { WelcomeStep } from '@/features/onboarding/components/WelcomeStep';
 import { WorkContextStep } from '@/features/onboarding/components/WorkContextStep';
-import type {
-  OnboardingState,
-  OnboardingStepId,
+import {
+  hasRequiredOnboardingAnswers,
+  type OnboardingState,
+  type OnboardingStepId,
 } from '@/features/onboarding/model';
 import type { TranslationKey } from '@/i18n/translations';
 
@@ -29,7 +30,8 @@ export const ONBOARDING_STEP_CONFIG: Record<
   },
   'work-context': {
     Component: WorkContextStep,
-    canContinue: (state) => Boolean(state.workArea && state.careerLevel),
+    canContinue: (state) =>
+      state.workArea !== undefined && state.careerLevel !== undefined,
     primaryActionKey: 'common.action.continue',
     isFinal: false,
   },
@@ -41,7 +43,7 @@ export const ONBOARDING_STEP_CONFIG: Record<
   },
   'review-rhythm': {
     Component: ReviewRhythmStep,
-    canContinue: (state) => state.reviewSchedule !== undefined,
+    canContinue: hasRequiredOnboardingAnswers,
     primaryActionKey: 'common.action.finishSetup',
     isFinal: true,
   },

@@ -1,17 +1,17 @@
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import { SectionHeading } from '@/features/home/components/SectionHeading';
 import type { ReviewSchedule } from '@/features/onboarding/model';
-import { loadOnboardingState } from '@/features/onboarding/storage';
+import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
   'within-3-months': 'home.review.within3Months',
@@ -23,40 +23,11 @@ const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
 export function HomeScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { state } = useOnboarding();
   const { t } = useI18n();
-  const [reviewSchedule, setReviewSchedule] = useState<
-    ReviewSchedule | undefined
-  >();
-  const [isReviewScheduleLoaded, setIsReviewScheduleLoaded] = useState(false);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const loadReviewSchedule = async () => {
-      const state = await loadOnboardingState();
-
-      if (ignore) {
-        return;
-      }
-
-      setReviewSchedule(state.reviewSchedule);
-      setIsReviewScheduleLoaded(true);
-    };
-
-    loadReviewSchedule().catch(EMPTY_FUNCTION);
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  let reviewScheduleLabel = t('common.loading.setup');
-
-  if (isReviewScheduleLoaded) {
-    reviewScheduleLabel = reviewSchedule
-      ? t(reviewScheduleLabelKeys[reviewSchedule])
-      : t('home.review.notSet');
-  }
+  const reviewScheduleLabel = state.reviewSchedule
+    ? t(reviewScheduleLabelKeys[state.reviewSchedule])
+    : t('home.review.notSet');
 
   return (
     <SafeAreaView
@@ -167,8 +138,7 @@ export function HomeScreen() {
             },
           ]}
         >
-          <View
-            accessibilityElementsHidden
+          <DecorativeView
             style={[
               styles.emptyIcon,
               { backgroundColor: theme.colors.surfaceSubtle },
@@ -179,7 +149,7 @@ export function HomeScreen() {
               size={24}
               tintColor={theme.colors.textMuted}
             />
-          </View>
+          </DecorativeView>
           <Text variant="bodyStrong">{t('home.recent.emptyTitle')}</Text>
           <Text variant="caption" color="textMuted" style={styles.emptyCopy}>
             {t('home.recent.emptyDescription')}
@@ -199,8 +169,7 @@ export function HomeScreen() {
             },
           ]}
         >
-          <View
-            accessibilityElementsHidden
+          <DecorativeView
             style={[
               styles.reviewIcon,
               { backgroundColor: theme.colors.successSoft },
@@ -215,7 +184,7 @@ export function HomeScreen() {
               size={22}
               tintColor={theme.colors.success}
             />
-          </View>
+          </DecorativeView>
           <View style={styles.reviewCopy}>
             <Text variant="bodyStrong">
               {t('home.review.performanceReview')}
@@ -235,14 +204,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: 16,
-    paddingBottom: 32,
+    gap: spacing[4],
+    paddingBottom: spacing[8],
     paddingHorizontal: 22,
     paddingTop: 18,
   },
   headingBlock: {
-    gap: 8,
-    marginBottom: 4,
+    gap: spacing[2],
+    marginBottom: spacing[1],
   },
   weekCard: {
     borderRadius: 22,
@@ -253,19 +222,19 @@ const styles = StyleSheet.create({
   cardHeadingRow: {
     alignItems: 'flex-start',
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing[3],
   },
   cardHeadingCopy: {
     flex: 1,
-    gap: 4,
+    gap: spacing[1],
   },
   countPill: {
-    borderRadius: 999,
+    borderRadius: radii.full,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   card: {
-    borderRadius: 20,
+    borderRadius: radii.lg,
     borderWidth: 1,
     padding: 18,
   },
@@ -273,11 +242,11 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   inlineButton: {
-    marginTop: 16,
+    marginTop: spacing[4],
   },
   emptyCard: {
     alignItems: 'flex-start',
-    borderRadius: 20,
+    borderRadius: radii.lg,
     borderWidth: 1,
     padding: 18,
   },
@@ -298,7 +267,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     gap: 14,
-    padding: 16,
+    padding: spacing[4],
   },
   reviewIcon: {
     alignItems: 'center',

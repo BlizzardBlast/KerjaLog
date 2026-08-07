@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   CAREER_LEVELS,
   DEFAULT_ONBOARDING_STATE,
+  hasRequiredOnboardingAnswers,
   MAIN_GOALS,
+  ONBOARDING_STATE_VERSION,
   ONBOARDING_STEP_ORDER,
   type OnboardingState,
   type OnboardingStepId,
@@ -11,13 +13,6 @@ import {
 } from '@/features/onboarding/model';
 
 const ONBOARDING_STORAGE_KEY = '@kerjalog/onboarding/v1';
-
-const REQUIRED_COMPLETION_FIELDS = [
-  'workArea',
-  'careerLevel',
-  'mainGoal',
-  'reviewSchedule',
-] as const satisfies ReadonlyArray<keyof OnboardingState>;
 
 /**
  * AsyncStorage is intentionally limited to coarse setup preferences and wizard
@@ -42,17 +37,13 @@ function isStep(value: unknown): value is OnboardingStepId {
   return hasValue(ONBOARDING_STEP_ORDER, value);
 }
 
-function hasRequiredAnswers(state: OnboardingState): boolean {
-  return REQUIRED_COMPLETION_FIELDS.every((key) => state[key] !== undefined);
-}
-
 function sanitizeOnboardingState(value: unknown): OnboardingState {
-  if (!isRecord(value) || value.version !== 1) {
+  if (!isRecord(value) || value.version !== ONBOARDING_STATE_VERSION) {
     return DEFAULT_ONBOARDING_STATE;
   }
 
   const sanitizedState: OnboardingState = {
-    version: 1,
+    version: ONBOARDING_STATE_VERSION,
     currentStep: isStep(value.currentStep)
       ? value.currentStep
       : DEFAULT_ONBOARDING_STATE.currentStep,
@@ -77,7 +68,9 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
 
   return {
     ...sanitizedState,
-    completed: value.completed === true && hasRequiredAnswers(sanitizedState),
+    completed:
+      value.completed === true &&
+      hasRequiredOnboardingAnswers(sanitizedState),
   };
 }
 

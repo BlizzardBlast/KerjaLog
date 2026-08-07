@@ -1,6 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
 
 export type OptionCardProps = {
   title: string;
@@ -38,8 +40,7 @@ export function OptionCard({
         disabled && styles.disabled,
       ]}
     >
-      <View
-        accessibilityElementsHidden
+      <DecorativeView
         style={[
           styles.indicator,
           {
@@ -55,7 +56,7 @@ export function OptionCard({
             ✓
           </Text>
         ) : null}
-      </View>
+      </DecorativeView>
       <View style={styles.copy}>
         <Text variant="bodyStrong">{title}</Text>
         {description ? (
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing[3],
     minHeight: 68,
     padding: 14,
   },
@@ -90,11 +91,11 @@ const styles = StyleSheet.create({
   },
   indicator: {
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: radii.sm,
     borderWidth: 1,
-    height: 40,
+    height: spacing[10],
     justifyContent: 'center',
-    width: 40,
+    width: spacing[10],
   },
   copy: {
     flex: 1,

@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { spacing } from '@/design-system/tokens/theme';
 import { type Language, useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
 
@@ -30,9 +31,7 @@ export function LanguageSelector() {
               key={option.value}
               accessibilityRole="radio"
               accessibilityState={{ checked: selected }}
-              onPress={async () => {
-                await setLanguage(option.value);
-              }}
+              onPress={() => setLanguage(option.value)}
               style={({ pressed }) => [
                 styles.option,
                 {
@@ -75,8 +74,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flex: 1,
     justifyContent: 'center',
-    minHeight: 48,
-    paddingHorizontal: 12,
+    minHeight: spacing[12],
+    paddingHorizontal: spacing[3],
     paddingVertical: 10,
   },
   label: {

@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { OptionCard } from '@/design-system/components/OptionCard';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
 import { OptionSection } from '@/features/onboarding/components/OptionSection';
 import { SettingToggle } from '@/features/onboarding/components/SettingToggle';
@@ -62,6 +63,7 @@ export function ReviewRhythmStep({
       {hasFinishError ? (
         <View
           accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
           style={[
             styles.errorCard,
             {
@@ -81,10 +83,10 @@ export function ReviewRhythmStep({
 
 const styles = StyleSheet.create({
   content: {
-    gap: 24,
+    gap: spacing[6],
   },
   errorCard: {
-    borderRadius: 16,
+    borderRadius: radii.md,
     borderWidth: 1,
     padding: 14,
   },

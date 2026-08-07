@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { spacing } from '@/design-system/tokens/theme';
 
 export type InfoCardProps = {
   title: string;
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 18,
     borderWidth: 1,
-    padding: 16,
+    padding: spacing[4],
   },
   body: {
     marginTop: 5,

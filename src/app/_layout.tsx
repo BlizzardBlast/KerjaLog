@@ -6,6 +6,7 @@ import { useFonts } from '@expo-google-fonts/manrope/useFonts';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
+import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
@@ -28,7 +29,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <I18nProvider>
-          <RootNavigator />
+          <OnboardingProvider>
+            <RootNavigator />
+          </OnboardingProvider>
         </I18nProvider>
       </ThemeProvider>
     </SafeAreaProvider>

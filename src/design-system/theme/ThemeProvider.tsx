@@ -24,13 +24,17 @@ type ThemeContextValue = {
   mode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   isHydrated: boolean;
-  setMode: (mode: ThemeMode) => Promise<void>;
+  setMode: (mode: ThemeMode) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function isThemeMode(value: string | null): value is ThemeMode {
   return value === 'system' || value === 'light' || value === 'dark';
+}
+
+async function persistThemeMode(mode: ThemeMode): Promise<void> {
+  await AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
 }
 
 export function ThemeProvider({ children }: PropsWithChildren) {
@@ -62,14 +66,9 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setMode = useCallback(async (nextMode: ThemeMode) => {
+  const setMode = useCallback((nextMode: ThemeMode) => {
     setModeState(nextMode);
-
-    try {
-      await AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, nextMode);
-    } catch {
-      // Keep the optimistic session preference even if persistence is unavailable.
-    }
+    persistThemeMode(nextMode).catch(EMPTY_FUNCTION);
   }, []);
 
   const resolvedTheme: ResolvedTheme =

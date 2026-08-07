@@ -1,3 +1,5 @@
+export const ONBOARDING_STATE_VERSION = 1 as const;
+
 export const ONBOARDING_STEP_ORDER = [
   'welcome',
   'work-context',
@@ -42,7 +44,7 @@ export const REVIEW_SCHEDULES = [
 export type ReviewSchedule = (typeof REVIEW_SCHEDULES)[number];
 
 export type OnboardingState = {
-  version: 1;
+  version: typeof ONBOARDING_STATE_VERSION;
   currentStep: OnboardingStepId;
   completed: boolean;
   workArea?: WorkArea;
@@ -53,8 +55,35 @@ export type OnboardingState = {
   appLockPreferred: boolean;
 };
 
+export type OnboardingEditableState = Pick<
+  OnboardingState,
+  | 'workArea'
+  | 'careerLevel'
+  | 'mainGoal'
+  | 'reviewSchedule'
+  | 'weeklyReminderEnabled'
+  | 'appLockPreferred'
+>;
+
+export type OnboardingPatch = Partial<OnboardingEditableState>;
+
+export const REQUIRED_ONBOARDING_ANSWER_FIELDS = [
+  'workArea',
+  'careerLevel',
+  'mainGoal',
+  'reviewSchedule',
+] as const satisfies ReadonlyArray<keyof OnboardingEditableState>;
+
+export function hasRequiredOnboardingAnswers(
+  state: OnboardingState,
+): boolean {
+  return REQUIRED_ONBOARDING_ANSWER_FIELDS.every(
+    (key) => state[key] !== undefined,
+  );
+}
+
 export const DEFAULT_ONBOARDING_STATE: OnboardingState = {
-  version: 1,
+  version: ONBOARDING_STATE_VERSION,
   currentStep: 'welcome',
   completed: false,
   weeklyReminderEnabled: true,

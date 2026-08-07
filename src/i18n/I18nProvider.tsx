@@ -20,7 +20,7 @@ type TranslationParams = Record<string, string | number>;
 type I18nContextValue = {
   language: Language;
   isHydrated: boolean;
-  setLanguage: (language: Language) => Promise<void>;
+  setLanguage: (language: Language) => void;
   t: (key: TranslationKey, params?: TranslationParams) => string;
 };
 
@@ -48,6 +48,10 @@ function interpolate(template: string, params?: TranslationParams): string {
     const value = params[key];
     return value === undefined ? match : String(value);
   });
+}
+
+async function persistLanguage(language: Language): Promise<void> {
+  await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
 }
 
 export function I18nProvider({ children }: PropsWithChildren) {
@@ -78,14 +82,9 @@ export function I18nProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setLanguage = useCallback(async (nextLanguage: Language) => {
+  const setLanguage = useCallback((nextLanguage: Language) => {
     setLanguageState(nextLanguage);
-
-    try {
-      await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
-    } catch {
-      // Keep the optimistic session preference even if persistence is unavailable.
-    }
+    persistLanguage(nextLanguage).catch(EMPTY_FUNCTION);
   }, []);
 
   const t = useCallback(

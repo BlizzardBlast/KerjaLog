@@ -1,10 +1,17 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  AccessibilityInfo,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { spacing } from '@/design-system/tokens/theme';
 import { OnboardingHeader } from '@/features/onboarding/components/OnboardingHeader';
 import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
@@ -57,7 +64,9 @@ export function OnboardingScreen() {
       await complete();
       router.replace('/home');
     } catch {
+      const message = t('onboarding.review.saveError');
       setHasFinishError(true);
+      AccessibilityInfo.announceForAccessibility(message);
     } finally {
       setIsFinishing(false);
     }
@@ -119,7 +128,7 @@ const styles = StyleSheet.create({
   loadingScreen: {
     alignItems: 'center',
     flex: 1,
-    gap: 12,
+    gap: spacing[3],
     justifyContent: 'center',
   },
   scrollContent: {
@@ -133,7 +142,7 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   footerNote: {
-    marginTop: 8,
+    marginTop: spacing[2],
     textAlign: 'center',
   },
 });

@@ -2,6 +2,7 @@ import { TabList, TabSlot, Tabs, TabTrigger } from 'expo-router/ui';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { spacing } from '@/design-system/tokens/theme';
 import { AppTabButton } from '@/navigation/AppTabButton';
 import { tabs } from '@/navigation/tabs';
 
@@ -21,7 +22,7 @@ export function AppTabs() {
           {
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.border,
-            paddingBottom: Math.max(insets.bottom, 8),
+            paddingBottom: Math.max(insets.bottom, spacing[2]),
           },
         ]}
       >
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     minHeight: 72,
-    paddingHorizontal: 8,
-    paddingTop: 8,
+    paddingHorizontal: spacing[2],
+    paddingTop: spacing[2],
   },
 });

@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { OptionCard } from '@/design-system/components/OptionCard';
+import { spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
 import { OptionSection } from '@/features/onboarding/components/OptionSection';
 import { StepHeading } from '@/features/onboarding/components/StepHeading';
@@ -55,6 +56,6 @@ export function WorkContextStep({ state, update }: OnboardingStepProps) {
 
 const styles = StyleSheet.create({
   content: {
-    gap: 24,
+    gap: spacing[6],
   },
 });
