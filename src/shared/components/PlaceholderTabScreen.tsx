@@ -1,0 +1,44 @@
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text } from '@/design-system/components/Text';
+import { useTheme } from '@/design-system/theme/ThemeProvider';
+
+export function PlaceholderTabScreen({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+}) {
+  const { theme } = useTheme();
+
+  return (
+    <SafeAreaView
+      edges={['top']}
+      style={[styles.screen, { backgroundColor: theme.colors.canvas }]}
+    >
+      <View style={styles.content}>
+        <Text variant="overline" color="primary">
+          {eyebrow}
+        </Text>
+        <Text variant="title">{title}</Text>
+        <Text variant="body" color="textMuted">
+          {description}
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  content: {
+    gap: 10,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+  },
+});
