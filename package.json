@@ -40,7 +40,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "doctor": "pnpm dlx expo-doctor@latest",
+    "check": "pnpm lint && pnpm typecheck && pnpm doctor && pnpm exec expo export --platform web"
   },
   "private": true
 }
