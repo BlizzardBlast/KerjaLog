@@ -50,8 +50,10 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci",
-    "doctor": "pnpm dlx expo-doctor@1.20.1",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:ci && pnpm doctor && pnpm exec expo export --platform web"
+    "expo:doctor": "pnpm dlx expo-doctor@1.20.1",
+    "export:android": "expo export --platform android --output-dir dist/android",
+    "export:ios": "expo export --platform ios --output-dir dist/ios",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:ci && pnpm run expo:doctor && pnpm run export:android && pnpm run export:ios"
   },
   "jest": {
     "preset": "jest-expo",
