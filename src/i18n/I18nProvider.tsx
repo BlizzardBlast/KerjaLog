@@ -65,6 +65,9 @@ export function I18nProvider({ children }: PropsWithChildren) {
           setLanguageState(storedLanguage);
         }
       })
+      .catch(() => {
+        // Device locale remains a safe fallback when preference storage fails.
+      })
       .finally(() => {
         if (isActive) {
           setIsHydrated(true);
