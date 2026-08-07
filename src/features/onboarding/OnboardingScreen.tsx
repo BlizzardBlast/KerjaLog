@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import {
@@ -14,18 +14,29 @@ import { Button } from '@/design-system/components/Button';
 import { OptionCard } from '@/design-system/components/OptionCard';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { ONBOARDING_STEP_ORDER } from '@/features/onboarding/model';
 import {
   careerLevelOptions,
   goalOptions,
-  ONBOARDING_STEP_ORDER,
   reviewScheduleOptions,
   workAreaOptions,
-} from '@/features/onboarding/model';
+} from '@/features/onboarding/options';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
+import { useI18n, type Language } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translations';
+
+const languageOptions: ReadonlyArray<{
+  value: Language;
+  labelKey: TranslationKey;
+}> = [
+  { value: 'en', labelKey: 'onboarding.language.english' },
+  { value: 'id', labelKey: 'onboarding.language.indonesian' },
+];
 
 export function OnboardingScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useI18n();
   const {
     state,
     isHydrated,
@@ -35,7 +46,7 @@ export function OnboardingScreen() {
     goBack,
     complete,
   } = useOnboarding();
-  const [finishError, setFinishError] = useState<string | null>(null);
+  const [hasFinishError, setHasFinishError] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
 
   if (!isHydrated) {
@@ -46,7 +57,7 @@ export function OnboardingScreen() {
       >
         <ActivityIndicator color={theme.colors.primary} size="small" />
         <Text variant="caption" color="textMuted">
-          Loading your setup…
+          {t('common.loading.setup')}
         </Text>
       </SafeAreaView>
     );
@@ -71,20 +82,23 @@ export function OnboardingScreen() {
       return;
     }
 
-    setFinishError(null);
+    setHasFinishError(false);
     setIsFinishing(true);
 
     try {
       await complete();
       router.replace('/home');
     } catch {
-      setFinishError(
-        'KerjaLog could not save your setup. Please try again before continuing.',
-      );
+      setHasFinishError(true);
     } finally {
       setIsFinishing(false);
     }
   };
+
+  const progressText = t('onboarding.progress', {
+    current: currentStepIndex + 1,
+    total: ONBOARDING_STEP_ORDER.length,
+  });
 
   return (
     <SafeAreaView
@@ -94,7 +108,7 @@ export function OnboardingScreen() {
       <View style={styles.topBar}>
         {currentStepIndex > 0 ? (
           <Pressable
-            accessibilityLabel="Go to previous setup step"
+            accessibilityLabel={t('onboarding.back')}
             accessibilityRole="button"
             hitSlop={4}
             onPress={goBack}
@@ -122,8 +136,14 @@ export function OnboardingScreen() {
         )}
 
         <View
-          accessibilityLabel={`Step ${currentStepIndex + 1} of ${ONBOARDING_STEP_ORDER.length}`}
+          accessibilityLabel={progressText}
           accessibilityRole="progressbar"
+          accessibilityValue={{
+            min: 1,
+            max: ONBOARDING_STEP_ORDER.length,
+            now: currentStepIndex + 1,
+            text: progressText,
+          }}
           style={styles.progress}
         >
           {ONBOARDING_STEP_ORDER.map((step, index) => (
@@ -144,7 +164,7 @@ export function OnboardingScreen() {
         </View>
 
         <Text variant="caption" color="textMuted" style={styles.stepCount}>
-          {currentStepIndex + 1}/4
+          {currentStepIndex + 1}/{ONBOARDING_STEP_ORDER.length}
         </Text>
       </View>
 
@@ -159,29 +179,29 @@ export function OnboardingScreen() {
         {state.currentStep === 'work-context' ? (
           <View style={styles.stepContent}>
             <StepHeading
-              eyebrow="Personalize KerjaLog"
-              title="Tell us about your work"
-              description="A little context lets KerjaLog show examples that fit your role. No company or manager details needed."
+              eyebrow={t('onboarding.workContext.eyebrow')}
+              title={t('onboarding.workContext.title')}
+              description={t('onboarding.workContext.description')}
             />
 
-            <OptionSection title="Work area">
+            <OptionSection title={t('onboarding.workContext.workArea')}>
               {workAreaOptions.map((option) => (
                 <OptionCard
                   key={option.value}
-                  title={option.title}
-                  description={option.description}
+                  title={t(option.titleKey)}
+                  description={t(option.descriptionKey)}
                   selected={state.workArea === option.value}
                   onPress={() => update({ workArea: option.value })}
                 />
               ))}
             </OptionSection>
 
-            <OptionSection title="Current level">
+            <OptionSection title={t('onboarding.workContext.currentLevel')}>
               {careerLevelOptions.map((option) => (
                 <OptionCard
                   key={option.value}
-                  title={option.title}
-                  description={option.description}
+                  title={t(option.titleKey)}
+                  description={t(option.descriptionKey)}
                   selected={state.careerLevel === option.value}
                   onPress={() => update({ careerLevel: option.value })}
                 />
@@ -189,8 +209,8 @@ export function OnboardingScreen() {
             </OptionSection>
 
             <InfoCard
-              title="Prompts will match your work"
-              body="Examples can include fixing an error, improving a process, supporting a teammate, finishing a report, or learning a tool."
+              title={t('onboarding.workContext.promptsTitle')}
+              body={t('onboarding.workContext.promptsDescription')}
             />
           </View>
         ) : null}
@@ -198,17 +218,17 @@ export function OnboardingScreen() {
         {state.currentStep === 'goal' ? (
           <View style={styles.stepContent}>
             <StepHeading
-              eyebrow="Your main goal"
-              title="What should KerjaLog help with first?"
-              description="Choose one for now. The same work entries can support every goal later."
+              eyebrow={t('onboarding.goal.eyebrow')}
+              title={t('onboarding.goal.title')}
+              description={t('onboarding.goal.description')}
             />
 
-            <OptionSection title="Choose a starting point">
+            <OptionSection title={t('onboarding.goal.section')}>
               {goalOptions.map((option) => (
                 <OptionCard
                   key={option.value}
-                  title={option.title}
-                  description={option.description}
+                  title={t(option.titleKey)}
+                  description={t(option.descriptionKey)}
                   selected={state.mainGoal === option.value}
                   onPress={() => update({ mainGoal: option.value })}
                 />
@@ -220,17 +240,17 @@ export function OnboardingScreen() {
         {state.currentStep === 'review-rhythm' ? (
           <View style={styles.stepContent}>
             <StepHeading
-              eyebrow="Review & reminders"
-              title="Set a gentle check-in"
-              description="KerjaLog can help you remember to reflect without streaks, points, or guilt."
+              eyebrow={t('onboarding.review.eyebrow')}
+              title={t('onboarding.review.title')}
+              description={t('onboarding.review.description')}
             />
 
-            <OptionSection title="When is your next review likely to be?">
+            <OptionSection title={t('onboarding.review.scheduleSection')}>
               {reviewScheduleOptions.map((option) => (
                 <OptionCard
                   key={option.value}
-                  title={option.title}
-                  description={option.description}
+                  title={t(option.titleKey)}
+                  description={t(option.descriptionKey)}
                   selected={state.reviewSchedule === option.value}
                   onPress={() => update({ reviewSchedule: option.value })}
                 />
@@ -238,8 +258,8 @@ export function OnboardingScreen() {
             </OptionSection>
 
             <SettingToggle
-              title="Weekly reflection reminder"
-              description="A short reminder to capture what moved forward that week."
+              title={t('onboarding.review.weeklyReminderTitle')}
+              description={t('onboarding.review.weeklyReminderDescription')}
               value={state.weeklyReminderEnabled}
               onValueChange={(weeklyReminderEnabled) =>
                 update({ weeklyReminderEnabled })
@@ -247,18 +267,18 @@ export function OnboardingScreen() {
             />
 
             <SettingToggle
-              title="Prefer biometric or PIN app lock"
-              description="We will ask before enabling device protection when that feature is configured."
+              title={t('onboarding.review.appLockTitle')}
+              description={t('onboarding.review.appLockDescription')}
               value={state.appLockPreferred}
               onValueChange={(appLockPreferred) => update({ appLockPreferred })}
             />
 
             <InfoCard
-              title="Private from the start"
-              body="Your setup stays on this device. KerjaLog does not need your employer, manager, salary, or workplace documents."
+              title={t('onboarding.review.privacyTitle')}
+              body={t('onboarding.review.privacyDescription')}
             />
 
-            {finishError ? (
+            {hasFinishError ? (
               <View
                 accessibilityLiveRegion="polite"
                 style={[
@@ -270,7 +290,7 @@ export function OnboardingScreen() {
                 ]}
               >
                 <Text variant="caption" color="danger">
-                  {finishError}
+                  {t('onboarding.review.saveError')}
                 </Text>
               </View>
             ) : null}
@@ -295,15 +315,15 @@ export function OnboardingScreen() {
           size="lg"
         >
           {state.currentStep === 'welcome'
-            ? 'Set up KerjaLog'
+            ? t('common.action.startSetup')
             : state.currentStep === 'review-rhythm'
-              ? 'Finish setup'
-              : 'Continue'}
+              ? t('common.action.finishSetup')
+              : t('common.action.continue')}
         </Button>
 
         {state.currentStep === 'review-rhythm' ? (
           <Text variant="caption" color="textMuted" style={styles.footerNote}>
-            You can change review timing, reminders, and app protection later.
+            {t('onboarding.review.footerNote')}
           </Text>
         ) : null}
       </View>
@@ -313,6 +333,7 @@ export function OnboardingScreen() {
 
 function WelcomeStep() {
   const { theme } = useTheme();
+  const { t } = useI18n();
 
   return (
     <View style={styles.stepContent}>
@@ -325,10 +346,12 @@ function WelcomeStep() {
         </Text>
       </View>
 
+      <LanguageSelector />
+
       <StepHeading
-        eyebrow="Private work-growth companion"
-        title="Turn everyday work into evidence of progress"
-        description="You do not need to know how to describe your value. KerjaLog helps you discover it from the work you already do."
+        eyebrow={t('onboarding.welcome.eyebrow')}
+        title={t('onboarding.welcome.title')}
+        description={t('onboarding.welcome.description')}
       />
 
       <View
@@ -340,16 +363,63 @@ function WelcomeStep() {
           },
         ]}
       >
-        <Text variant="heading">Private from day one</Text>
-        <PrivacyPoint text="Your setup and work log stay local by default" />
-        <PrivacyPoint text="No employer or manager access" />
-        <PrivacyPoint text="App-lock preference is part of setup" />
+        <Text variant="heading">{t('onboarding.welcome.privacyTitle')}</Text>
+        <PrivacyPoint text={t('onboarding.welcome.privacyLocal')} />
+        <PrivacyPoint text={t('onboarding.welcome.privacyEmployer')} />
+        <PrivacyPoint text={t('onboarding.welcome.privacyLock')} />
       </View>
 
       <InfoCard
-        title="Small work counts too"
-        body="Helping a teammate, fixing an error, learning a process, handling a difficult moment, or making routine work clearer can all become useful evidence."
+        title={t('onboarding.welcome.smallWorkTitle')}
+        body={t('onboarding.welcome.smallWorkDescription')}
       />
+    </View>
+  );
+}
+
+function LanguageSelector() {
+  const { theme } = useTheme();
+  const { language, setLanguage, t } = useI18n();
+
+  return (
+    <View style={styles.languageSection} accessibilityRole="radiogroup">
+      <Text variant="label" color="textMuted">
+        {t('onboarding.language.title')}
+      </Text>
+      <View style={styles.languageOptions}>
+        {languageOptions.map((option) => {
+          const selected = language === option.value;
+
+          return (
+            <Pressable
+              key={option.value}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+              onPress={() => setLanguage(option.value)}
+              style={({ pressed }) => [
+                styles.languageOption,
+                {
+                  backgroundColor: selected
+                    ? theme.colors.primary
+                    : theme.colors.surface,
+                  borderColor: selected
+                    ? theme.colors.primary
+                    : theme.colors.border,
+                },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text
+                variant="label"
+                color={selected ? 'onPrimary' : 'text'}
+                style={styles.languageLabel}
+              >
+                {t(option.labelKey)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -381,7 +451,7 @@ function OptionSection({
   children,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <View style={styles.optionSection} accessibilityRole="radiogroup">
@@ -457,6 +527,7 @@ function SettingToggle({
         </Text>
       </View>
       <Switch
+        accessibilityHint={description}
         accessibilityLabel={title}
         ios_backgroundColor={theme.colors.surfaceMuted}
         onValueChange={onValueChange}
@@ -540,6 +611,26 @@ const styles = StyleSheet.create({
   },
   brandLetter: {
     letterSpacing: -2,
+  },
+  languageSection: {
+    gap: 10,
+  },
+  languageOptions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  languageOption: {
+    alignItems: 'center',
+    borderRadius: 14,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: 'center',
+    minHeight: 48,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  languageLabel: {
+    textAlign: 'center',
   },
   headingBlock: {
     gap: 10,
