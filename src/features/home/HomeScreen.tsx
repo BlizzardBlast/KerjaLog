@@ -8,18 +8,22 @@ import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import type { ReviewSchedule } from '@/features/onboarding/model';
 import { loadOnboardingState } from '@/features/onboarding/storage';
+import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translations';
 
-const reviewScheduleLabels: Record<ReviewSchedule, string> = {
-  'within-3-months': 'Within the next 3 months',
-  'within-6-months': 'Within the next 6 months',
-  'within-12-months': 'Within the next 12 months',
-  'not-sure': 'Not set yet',
+const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
+  'within-3-months': 'home.review.within3Months',
+  'within-6-months': 'home.review.within6Months',
+  'within-12-months': 'home.review.within12Months',
+  'not-sure': 'home.review.notSet',
 };
 
 export function HomeScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useI18n();
   const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule | undefined>();
+  const [isReviewScheduleLoaded, setIsReviewScheduleLoaded] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -27,6 +31,7 @@ export function HomeScreen() {
     loadOnboardingState().then((state) => {
       if (isActive) {
         setReviewSchedule(state.reviewSchedule);
+        setIsReviewScheduleLoaded(true);
       }
     });
 
@@ -34,6 +39,12 @@ export function HomeScreen() {
       isActive = false;
     };
   }, []);
+
+  const reviewScheduleLabel = !isReviewScheduleLoaded
+    ? t('common.loading.setup')
+    : reviewSchedule
+      ? t(reviewScheduleLabelKeys[reviewSchedule])
+      : t('home.review.notSet');
 
   return (
     <SafeAreaView
@@ -46,11 +57,11 @@ export function HomeScreen() {
       >
         <View style={styles.headingBlock}>
           <Text variant="overline" color="primary">
-            KerjaLog
+            {t('home.eyebrow')}
           </Text>
-          <Text variant="title">Your work matters—even when it feels routine.</Text>
+          <Text variant="title">{t('home.title')}</Text>
           <Text variant="body" color="textMuted">
-            Capture one useful detail while it is still easy to remember.
+            {t('home.description')}
           </Text>
         </View>
 
@@ -66,7 +77,7 @@ export function HomeScreen() {
           onPress={() => router.push('/capture')}
           size="lg"
         >
-          Log something
+          {t('home.logSomething')}
         </Button>
 
         <View
@@ -81,9 +92,9 @@ export function HomeScreen() {
           <View style={styles.cardHeadingRow}>
             <View style={styles.cardHeadingCopy}>
               <Text variant="overline" color="primary">
-                This week
+                {t('home.thisWeek.eyebrow')}
               </Text>
-              <Text variant="heading">Start with one small thing</Text>
+              <Text variant="heading">{t('home.thisWeek.title')}</Text>
             </View>
             <View
               style={[
@@ -92,18 +103,18 @@ export function HomeScreen() {
               ]}
             >
               <Text variant="label" color="primary">
-                0 entries
+                {t('home.thisWeek.zeroEntries')}
               </Text>
             </View>
           </View>
           <Text variant="body" color="textMuted">
-            A solved problem, a teammate you helped, a task you finished, or something you learned all count.
+            {t('home.thisWeek.description')}
           </Text>
         </View>
 
         <SectionHeading
-          title="Weekly reflection"
-          description="A gentle prompt, not a streak."
+          title={t('home.reflection.title')}
+          description={t('home.reflection.description')}
         />
         <View
           style={[
@@ -114,24 +125,22 @@ export function HomeScreen() {
             },
           ]}
         >
-          <Text variant="bodyStrong">
-            What became easier, clearer, faster, or safer because of your work this week?
-          </Text>
+          <Text variant="bodyStrong">{t('home.reflection.prompt')}</Text>
           <Text variant="caption" color="textMuted" style={styles.cardDescription}>
-            You can skip this and come back later.
+            {t('home.reflection.note')}
           </Text>
           <Button
             onPress={() => router.push('/capture')}
             style={styles.inlineButton}
             variant="secondary"
           >
-            Reflect on this week
+            {t('home.reflection.action')}
           </Button>
         </View>
 
         <SectionHeading
-          title="Recent progress"
-          description="Your newest work entries will appear here."
+          title={t('home.recent.title')}
+          description={t('home.recent.description')}
         />
         <View
           style={[
@@ -155,15 +164,15 @@ export function HomeScreen() {
               tintColor={theme.colors.textMuted}
             />
           </View>
-          <Text variant="bodyStrong">Nothing logged yet</Text>
+          <Text variant="bodyStrong">{t('home.recent.emptyTitle')}</Text>
           <Text variant="caption" color="textMuted" style={styles.emptyCopy}>
-            Your first entry does not need a metric or a big achievement. Write down what happened and KerjaLog will help you develop it later.
+            {t('home.recent.emptyDescription')}
           </Text>
         </View>
 
         <SectionHeading
-          title="Next review"
-          description="A reminder of what you are collecting evidence for."
+          title={t('home.review.title')}
+          description={t('home.review.description')}
         />
         <View
           style={[
@@ -188,9 +197,9 @@ export function HomeScreen() {
             />
           </View>
           <View style={styles.reviewCopy}>
-            <Text variant="bodyStrong">Performance review</Text>
+            <Text variant="bodyStrong">{t('home.review.performanceReview')}</Text>
             <Text variant="caption" color="textMuted">
-              {reviewSchedule ? reviewScheduleLabels[reviewSchedule] : 'Loading your setup…'}
+              {reviewScheduleLabel}
             </Text>
           </View>
         </View>
