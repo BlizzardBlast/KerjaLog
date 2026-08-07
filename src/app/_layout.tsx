@@ -5,10 +5,9 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '@/design-system/theme/ThemeProvider';
 import { I18nProvider, useI18n } from '@/i18n/I18nProvider';
+import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
-void SplashScreen.preventAutoHideAsync().catch(() => {
-  // Hot reload or platform lifecycle can make this a no-op.
-});
+void SplashScreen.preventAutoHideAsync().catch(EMPTY_FUNCTION);
 
 export default function RootLayout() {
   return (
@@ -32,9 +31,7 @@ function RootNavigator() {
       return;
     }
 
-    void SplashScreen.hideAsync().catch(() => {
-      // The app is already ready to render even if splash dismissal is stale.
-    });
+    void SplashScreen.hideAsync().catch(EMPTY_FUNCTION);
   }, [isReady]);
 
   if (!isReady) {
