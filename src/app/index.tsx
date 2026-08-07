@@ -12,6 +12,8 @@ export default function AppEntryRoute() {
   }
 
   return (
-    <Redirect href={onboardingStatus === 'complete' ? '/home' : '/onboarding'} />
+    <Redirect
+      href={onboardingStatus === 'complete' ? '/home' : '/onboarding'}
+    />
   );
 }
