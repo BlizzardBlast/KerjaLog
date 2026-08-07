@@ -16,19 +16,23 @@ export function useOnboarding() {
   const writeQueueRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
-    let isActive = true;
+    let ignore = false;
 
-    loadOnboardingState().then((storedState) => {
-      if (!isActive) {
+    const hydrateOnboarding = async () => {
+      const storedState = await loadOnboardingState();
+
+      if (ignore) {
         return;
       }
 
       setState(storedState);
       setIsHydrated(true);
-    });
+    };
+
+    hydrateOnboarding().catch(EMPTY_FUNCTION);
 
     return () => {
-      isActive = false;
+      ignore = true;
     };
   }, []);
 
@@ -38,9 +42,17 @@ export function useOnboarding() {
     }
 
     const snapshot = state;
-    writeQueueRef.current = writeQueueRef.current
-      .catch(EMPTY_FUNCTION)
-      .then(() => saveOnboardingState(snapshot));
+    const previousWrite = writeQueueRef.current;
+
+    writeQueueRef.current = (async () => {
+      try {
+        await previousWrite;
+      } catch {
+        // A failed earlier write must not permanently block later snapshots.
+      }
+
+      await saveOnboardingState(snapshot);
+    })();
   }, [isHydrated, state]);
 
   const currentStepIndex = useMemo(
@@ -86,7 +98,12 @@ export function useOnboarding() {
       currentStep: 'review-rhythm',
     };
 
-    await writeQueueRef.current.catch(EMPTY_FUNCTION);
+    try {
+      await writeQueueRef.current;
+    } catch {
+      // The final explicit write below is authoritative for completion.
+    }
+
     await saveOnboardingState(completedState);
     setState(completedState);
   }, [state]);
