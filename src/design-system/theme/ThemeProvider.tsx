@@ -22,6 +22,7 @@ type ThemeContextValue = {
   theme: AppTheme;
   mode: ThemeMode;
   resolvedTheme: ResolvedTheme;
+  isHydrated: boolean;
   setMode: (mode: ThemeMode) => void;
 };
 
@@ -34,6 +35,7 @@ function isThemeMode(value: string | null): value is ThemeMode {
 export function ThemeProvider({ children }: PropsWithChildren) {
   const systemColorScheme = useColorScheme();
   const [mode, setModeState] = useState<ThemeMode>('system');
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -45,8 +47,12 @@ export function ThemeProvider({ children }: PropsWithChildren) {
         }
       })
       .catch(() => {
-        // Theme persistence is a convenience. The app can safely fall back to
-        // the system theme if local storage is unavailable.
+        // The system theme remains a safe fallback when persistence fails.
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsHydrated(true);
+        }
       });
 
     return () => {
@@ -73,9 +79,10 @@ export function ThemeProvider({ children }: PropsWithChildren) {
       theme: themes[resolvedTheme],
       mode,
       resolvedTheme,
+      isHydrated,
       setMode,
     }),
-    [mode, resolvedTheme, setMode],
+    [isHydrated, mode, resolvedTheme, setMode],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
