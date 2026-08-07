@@ -175,7 +175,7 @@
     .screen-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
     .screen-header .header-copy { min-width: 0; flex: 1; }
     .icon-button {
-      width: 46px; height: 46px; flex: 0 0 46px;
+      width: 48px; height: 48px; flex: 0 0 48px;
       display: inline-grid; place-items: center;
       border-radius: 15px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
     }
@@ -389,6 +389,18 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
+    @media print {
+      body { background: white !important; }
+      .prototype-panel, .status-bar, .bottom-nav, .toast, .modal-backdrop { display: none !important; }
+      .prototype-stage { display: block; min-height: 0; padding: 0; }
+      .phone-shell { width: 100%; height: auto; min-height: 0; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+      .screen { display: none !important; position: static; opacity: 1; transform: none; }
+      #screen-review-summary { display: block !important; }
+      #screen-review-summary .screen-body { overflow: visible; padding: 0; }
+      #screen-review-summary .screen-header, #screen-review-summary .chip-row, #screen-review-summary .grid-actions, #screen-review-summary > .screen-body > .button, #screen-review-summary .card.soft { display: none !important; }
+      .review-output { border: 0; padding: 0; min-height: 0; color: #111; background: white; font-size: 12pt; }
+    }
+
     @media (max-width: 1050px) {
       .prototype-stage { grid-template-columns: 1fr; padding: 16px; }
       .prototype-panel { display: none; }
@@ -433,6 +445,7 @@
         <div class="status-icons"><span class="status-dot"></span><span>◔</span><span class="status-pill"></span></div>
       </div>
 
+      <!-- 01 Welcome -->
       <section class="screen active" id="screen-welcome" data-screen="welcome" data-title="01 · Welcome" data-nav="false">
         <div class="screen-body stack-24">
           <div class="progress"><span class="done"></span><span></span><span></span><span></span></div>
@@ -454,6 +467,7 @@
         </div>
       </section>
 
+      <!-- 02 Work area -->
       <section class="screen" id="screen-work-area" data-screen="work-area" data-title="02 · Work Area & Level" data-nav="false">
         <div class="screen-body stack-20">
           <div class="progress"><span class="done"></span><span class="done"></span><span></span><span></span></div>
@@ -478,6 +492,7 @@
         </div>
       </section>
 
+      <!-- 03 Goal -->
       <section class="screen" id="screen-goal" data-screen="goal" data-title="03 · Main Goal" data-nav="false">
         <div class="screen-body stack-20">
           <div class="progress"><span class="done"></span><span class="done"></span><span class="done"></span><span></span></div>
@@ -493,6 +508,7 @@
         </div>
       </section>
 
+      <!-- 04 Schedule -->
       <section class="screen" id="screen-schedule" data-screen="schedule" data-title="04 · Review & Reminder" data-nav="false">
         <div class="screen-body stack-20">
           <div class="progress"><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span></div>
@@ -511,6 +527,7 @@
         </div>
       </section>
 
+      <!-- 05 Home -->
       <section class="screen has-nav" id="screen-home" data-screen="home" data-title="05 · Home" data-nav="true" data-nav-key="home">
         <div class="screen-body stack-20">
           <div class="screen-header">
@@ -536,6 +553,7 @@
         </div>
       </section>
 
+      <!-- 06 Capture type -->
       <section class="screen" id="screen-capture-type" data-screen="capture-type" data-title="06 · Quick Capture" data-nav="false">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Home" data-go="home"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Quick capture</div><h1 style="font-size:27px">What happened at work?</h1></div></div>
@@ -553,6 +571,7 @@
         </div>
       </section>
 
+      <!-- 07 Event input -->
       <section class="screen" id="screen-event-input" data-screen="event-input" data-title="07 · Work Event" data-nav="false">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="capture-type"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Step 1 · The event</div><h1 style="font-size:27px">What happened?</h1></div></div>
@@ -564,6 +583,7 @@
         </div>
       </section>
 
+      <!-- 08 Outcome -->
       <section class="screen" id="screen-outcome" data-screen="outcome" data-title="08 · Outcome" data-nav="false">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="event-input"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Step 2 · The outcome</div><h1 style="font-size:27px">What changed because of this?</h1></div></div>
@@ -583,6 +603,7 @@
         </div>
       </section>
 
+      <!-- 09 Evidence -->
       <section class="screen" id="screen-evidence" data-screen="evidence" data-title="09 · Evidence" data-nav="false">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="outcome"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Step 3 · Optional evidence</div><h1 style="font-size:27px">Do you have a useful detail?</h1></div></div>
@@ -601,6 +622,7 @@
         </div>
       </section>
 
+      <!-- 10 Impact Builder -->
       <section class="screen" id="screen-impact" data-screen="impact" data-title="10 · Impact Builder" data-nav="false">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back" data-go="evidence"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Impact Builder</div><h1 style="font-size:27px">See the value inside the work</h1></div></div>
@@ -619,6 +641,7 @@
         </div>
       </section>
 
+      <!-- 11 Entry detail -->
       <section class="screen has-nav" id="screen-entry-detail" data-screen="entry-detail" data-title="11 · Saved Entry" data-nav="true" data-nav-key="history">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Home" data-go="home"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Saved work entry</div><h1 style="font-size:25px">Reconciliation discrepancies resolved</h1></div></div>
@@ -630,6 +653,7 @@
         </div>
       </section>
 
+      <!-- 12 History -->
       <section class="screen has-nav" id="screen-history" data-screen="history" data-title="12 · History" data-nav="true" data-nav-key="history">
         <div class="screen-body stack-20">
           <div><div class="eyebrow">History</div><h1 style="font-size:28px">Your work, when you need it</h1><p class="lede">Search by what happened, project, evidence, skill, or review period.</p></div>
@@ -645,6 +669,7 @@
         </div>
       </section>
 
+      <!-- 13 Growth -->
       <section class="screen has-nav" id="screen-growth" data-screen="growth" data-title="13 · Growth" data-nav="true" data-nav-key="growth">
         <div class="screen-body stack-20">
           <div><div class="eyebrow">Growth</div><h1 style="font-size:28px">Your evidence map</h1><p class="lede">This is not a performance score. It only shows where KerjaLog has recorded supporting examples.</p></div>
@@ -662,6 +687,7 @@
         </div>
       </section>
 
+      <!-- 14 Skill detail -->
       <section class="screen has-nav" id="screen-skill-detail" data-screen="skill-detail" data-title="14 · Skill Evidence" data-nav="true" data-nav-key="growth">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Growth" data-go="growth"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Skill evidence</div><h1 style="font-size:25px">Attention to detail</h1></div></div>
@@ -672,6 +698,7 @@
         </div>
       </section>
 
+      <!-- 15 Review setup -->
       <section class="screen has-nav" id="screen-review-setup" data-screen="review-setup" data-title="15 · Review Builder" data-nav="true" data-nav-key="review">
         <div class="screen-body stack-20">
           <div><div class="eyebrow">Review Builder</div><h1 style="font-size:28px">What are you preparing for?</h1><p class="lede">KerjaLog recommends evidence. You decide what gets included.</p></div>
@@ -692,6 +719,7 @@
         </div>
       </section>
 
+      <!-- 16 Summary -->
       <section class="screen has-nav" id="screen-review-summary" data-screen="review-summary" data-title="16 · Generated Summary" data-nav="true" data-nav-key="review">
         <div class="screen-body stack-20">
           <div class="screen-header"><button class="icon-button" type="button" aria-label="Back to Review Builder" data-go="review-setup"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><div class="header-copy"><div class="eyebrow">Performance self-review</div><h1 style="font-size:25px">Your review draft</h1></div></div>
@@ -884,6 +912,22 @@
       document.querySelectorAll('#history-entries .entry-card').forEach(card => { card.hidden = query && !card.dataset.search.includes(query); });
     });
 
+    async function copyText(text) {
+      if (navigator.clipboard?.writeText) {
+        try { await navigator.clipboard.writeText(text); return true; } catch {}
+      }
+      const fallback = document.createElement('textarea');
+      fallback.value = text;
+      fallback.setAttribute('readonly', '');
+      fallback.style.position = 'fixed';
+      fallback.style.opacity = '0';
+      document.body.appendChild(fallback);
+      fallback.select();
+      const copied = document.execCommand('copy');
+      fallback.remove();
+      return copied;
+    }
+
     function outputPlainText() {
       return document.getElementById('review-output').innerText.trim();
     }
@@ -904,16 +948,16 @@
     document.querySelectorAll('[data-export]').forEach(button => button.addEventListener('click', async () => {
       const action = button.dataset.export;
       const plain = outputPlainText();
-      if (action === 'plain') { await navigator.clipboard.writeText(plain); showToast('Plain text copied.'); }
+      if (action === 'plain') { const copied = await copyText(plain); showToast(copied ? 'Plain text copied.' : 'Copy is unavailable in this browser.'); }
       if (action === 'formatted') {
         try { await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([document.getElementById('review-output').innerHTML], { type: 'text/html' }), 'text/plain': new Blob([plain], { type: 'text/plain' }) })]); showToast('Formatted review copied.'); }
-        catch { await navigator.clipboard.writeText(plain); showToast('Copied as plain text on this browser.'); }
+        catch { const copied = await copyText(plain); showToast(copied ? 'Copied as plain text on this browser.' : 'Copy is unavailable in this browser.'); }
       }
       if (action === 'markdown') { downloadText('kerjalog-review-2026.md', outputMarkdown(), 'text/markdown'); showToast('Markdown downloaded.'); }
       if (action === 'pdf') { showToast('Use the browser Print dialog → Save as PDF.'); setTimeout(() => window.print(), 650); }
       if (action === 'share') {
         if (navigator.share) await navigator.share({ title: 'KerjaLog review draft', text: plain });
-        else { await navigator.clipboard.writeText(plain); showToast('Sharing is unavailable here, so the draft was copied.'); }
+        else { const copied = await copyText(plain); showToast(copied ? 'Sharing is unavailable here, so the draft was copied.' : 'Sharing and clipboard access are unavailable here.'); }
       }
     }));
 
