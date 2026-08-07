@@ -489,7 +489,9 @@ function PrivacyPoint({ text }: { text: string }) {
 
   return (
     <View style={styles.privacyPoint}>
-      <View style={[styles.privacyDot, { backgroundColor: theme.colors.primary }]} />
+      <View
+        style={[styles.privacyDot, { backgroundColor: theme.colors.primary }]}
+      />
       <Text variant="body" style={styles.privacyText}>
         {text}
       </Text>

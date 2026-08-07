@@ -2,12 +2,7 @@ import type { ComponentProps, Ref } from 'react';
 import type { Href } from 'expo-router';
 import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import {
-  Pressable,
-  type PressableProps,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Pressable, type PressableProps, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';

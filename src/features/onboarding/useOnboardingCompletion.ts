@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
 import { loadOnboardingState } from '@/features/onboarding/storage';
 
-export type OnboardingCompletionStatus =
-  | 'loading'
-  | 'incomplete'
-  | 'complete';
+export type OnboardingCompletionStatus = 'loading' | 'incomplete' | 'complete';
 
 export function useOnboardingCompletion(): OnboardingCompletionStatus {
   const [status, setStatus] = useState<OnboardingCompletionStatus>('loading');

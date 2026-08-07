@@ -22,7 +22,9 @@ export function HomeScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useI18n();
-  const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule | undefined>();
+  const [reviewSchedule, setReviewSchedule] = useState<
+    ReviewSchedule | undefined
+  >();
   const [isReviewScheduleLoaded, setIsReviewScheduleLoaded] = useState(false);
 
   useEffect(() => {
@@ -126,7 +128,11 @@ export function HomeScreen() {
           ]}
         >
           <Text variant="bodyStrong">{t('home.reflection.prompt')}</Text>
-          <Text variant="caption" color="textMuted" style={styles.cardDescription}>
+          <Text
+            variant="caption"
+            color="textMuted"
+            style={styles.cardDescription}
+          >
             {t('home.reflection.note')}
           </Text>
           <Button
@@ -191,13 +197,19 @@ export function HomeScreen() {
             ]}
           >
             <SymbolView
-              name={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }}
+              name={{
+                ios: 'calendar',
+                android: 'calendar_month',
+                web: 'calendar_month',
+              }}
               size={22}
               tintColor={theme.colors.success}
             />
           </View>
           <View style={styles.reviewCopy}>
-            <Text variant="bodyStrong">{t('home.review.performanceReview')}</Text>
+            <Text variant="bodyStrong">
+              {t('home.review.performanceReview')}
+            </Text>
             <Text variant="caption" color="textMuted">
               {reviewScheduleLabel}
             </Text>

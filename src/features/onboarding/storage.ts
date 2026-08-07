@@ -82,7 +82,9 @@ export async function loadOnboardingState(): Promise<OnboardingState> {
   }
 }
 
-export async function saveOnboardingState(state: OnboardingState): Promise<void> {
+export async function saveOnboardingState(
+  state: OnboardingState,
+): Promise<void> {
   await AsyncStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
 }
 

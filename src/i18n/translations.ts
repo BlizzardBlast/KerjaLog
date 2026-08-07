@@ -211,8 +211,7 @@ export const id: Record<TranslationKey, string> = {
 
   'home.eyebrow': 'KerjaLog',
   'home.title': 'Pekerjaan Anda berarti—meski terasa rutin.',
-  'home.description':
-    'Catat satu detail berguna selagi masih mudah diingat.',
+  'home.description': 'Catat satu detail berguna selagi masih mudah diingat.',
   'home.logSomething': 'Catat sesuatu',
   'home.thisWeek.eyebrow': 'Minggu ini',
   'home.thisWeek.title': 'Mulai dari satu hal kecil',
@@ -246,14 +245,17 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.language.indonesian': 'Bahasa Indonesia',
 
   'onboarding.welcome.eyebrow': 'Pendamping perkembangan kerja pribadi',
-  'onboarding.welcome.title': 'Ubah pekerjaan sehari-hari menjadi bukti perkembangan',
+  'onboarding.welcome.title':
+    'Ubah pekerjaan sehari-hari menjadi bukti perkembangan',
   'onboarding.welcome.description':
     'Anda tidak perlu tahu cara menjelaskan nilai pekerjaan Anda. KerjaLog membantu menemukannya dari pekerjaan yang sudah Anda lakukan.',
   'onboarding.welcome.privacyTitle': 'Privat sejak hari pertama',
   'onboarding.welcome.privacyLocal':
     'Pengaturan dan catatan kerja Anda tersimpan lokal secara default',
-  'onboarding.welcome.privacyEmployer': 'Tidak ada akses untuk perusahaan atau atasan',
-  'onboarding.welcome.privacyLock': 'Preferensi kunci aplikasi menjadi bagian pengaturan',
+  'onboarding.welcome.privacyEmployer':
+    'Tidak ada akses untuk perusahaan atau atasan',
+  'onboarding.welcome.privacyLock':
+    'Preferensi kunci aplikasi menjadi bagian pengaturan',
   'onboarding.welcome.smallWorkTitle': 'Pekerjaan kecil juga berarti',
   'onboarding.welcome.smallWorkDescription':
     'Membantu rekan, memperbaiki kesalahan, mempelajari proses, menghadapi situasi sulit, atau membuat pekerjaan rutin lebih jelas semuanya dapat menjadi bukti yang berguna.',
@@ -264,7 +266,8 @@ export const id: Record<TranslationKey, string> = {
     'Sedikit konteks membantu KerjaLog memberikan contoh yang sesuai dengan peran Anda. Tidak perlu nama perusahaan atau atasan.',
   'onboarding.workContext.workArea': 'Bidang pekerjaan',
   'onboarding.workContext.currentLevel': 'Level saat ini',
-  'onboarding.workContext.promptsTitle': 'Prompt akan menyesuaikan pekerjaan Anda',
+  'onboarding.workContext.promptsTitle':
+    'Prompt akan menyesuaikan pekerjaan Anda',
   'onboarding.workContext.promptsDescription':
     'Contohnya bisa berupa memperbaiki kesalahan, meningkatkan proses, membantu rekan, menyelesaikan laporan, atau mempelajari alat baru.',
 
@@ -278,7 +281,8 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.review.title': 'Atur check-in yang ringan',
   'onboarding.review.description':
     'KerjaLog dapat membantu Anda mengingat refleksi tanpa streak, poin, atau rasa bersalah.',
-  'onboarding.review.scheduleSection': 'Kapan review berikutnya kemungkinan dilakukan?',
+  'onboarding.review.scheduleSection':
+    'Kapan review berikutnya kemungkinan dilakukan?',
   'onboarding.review.weeklyReminderTitle': 'Pengingat refleksi mingguan',
   'onboarding.review.weeklyReminderDescription':
     'Pengingat singkat untuk mencatat apa yang bergerak maju minggu itu.',
@@ -296,7 +300,8 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.workArea.technologyProduct.title': 'Teknologi & Produk',
   'onboarding.workArea.technologyProduct.description':
     'Software, data, desain, produk, dan delivery teknis',
-  'onboarding.workArea.operationsAdministration.title': 'Operasional & Administrasi',
+  'onboarding.workArea.operationsAdministration.title':
+    'Operasional & Administrasi',
   'onboarding.workArea.operationsAdministration.description':
     'Proses, koordinasi, pelaporan, dan operasional kantor',
   'onboarding.workArea.financeBanking.title': 'Keuangan & Perbankan',
@@ -312,7 +317,8 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.careerLevel.newToWorking.title': 'Baru mulai bekerja',
   'onboarding.careerLevel.newToWorking.description':
     'Memulai peran profesional pertama Anda',
-  'onboarding.careerLevel.juniorContributor.title': 'Individual contributor junior',
+  'onboarding.careerLevel.juniorContributor.title':
+    'Individual contributor junior',
   'onboarding.careerLevel.juniorContributor.description':
     'Sekitar 1–4 tahun pengalaman',
   'onboarding.careerLevel.experiencedContributor.title':
@@ -323,10 +329,12 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.careerLevel.supervisor.description':
     'Bertanggung jawab mengoordinasikan atau membimbing orang lain',
 
-  'onboarding.goalOption.performanceReview.title': 'Persiapkan performance review',
+  'onboarding.goalOption.performanceReview.title':
+    'Persiapkan performance review',
   'onboarding.goalOption.performanceReview.description':
     'Ubah pekerjaan nyata menjadi self-review yang lebih jelas',
-  'onboarding.goalOption.rememberWork.title': 'Ingat apa yang sudah saya kerjakan',
+  'onboarding.goalOption.rememberWork.title':
+    'Ingat apa yang sudah saya kerjakan',
   'onboarding.goalOption.rememberWork.description':
     'Agar pekerjaan rutin tidak terlupakan seiring waktu',
   'onboarding.goalOption.understandGrowth.title': 'Pahami perkembangan saya',
