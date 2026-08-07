@@ -1,4 +1,4 @@
-import { Platform, type TextStyle } from 'react-native';
+import type { TextStyle } from 'react-native';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type ResolvedTheme = Exclude<ThemeMode, 'system'>;
@@ -52,6 +52,13 @@ export const radii = {
   full: 999,
 } as const;
 
+export const fontFamilies = {
+  medium: 'Manrope_500Medium',
+  semiBold: 'Manrope_600SemiBold',
+  bold: 'Manrope_700Bold',
+  extraBold: 'Manrope_800ExtraBold',
+} as const;
+
 export type TypographyVariant =
   | 'display'
   | 'title'
@@ -62,66 +69,49 @@ export type TypographyVariant =
   | 'caption'
   | 'overline';
 
-// Native v1 intentionally uses the platform system font for predictable text
-// scaling and rendering on Android and iOS. The prototype's Manrope direction
-// remains visual guidance rather than an unbundled runtime dependency.
-const systemFontFamily = Platform.select({
-  android: 'sans-serif',
-  ios: 'System',
-  web: 'system-ui',
-});
-
 export const typography = {
   display: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.bold,
     fontSize: 32,
     lineHeight: 36,
-    fontWeight: '700',
     letterSpacing: -0.8,
   },
   title: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.bold,
     fontSize: 28,
     lineHeight: 33,
-    fontWeight: '700',
     letterSpacing: -0.55,
   },
   heading: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.bold,
     fontSize: 20,
     lineHeight: 26,
-    fontWeight: '700',
     letterSpacing: -0.2,
   },
   body: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.medium,
     fontSize: 16,
     lineHeight: 25,
-    fontWeight: '400',
   },
   bodyStrong: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.semiBold,
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: '600',
   },
   label: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.semiBold,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: '600',
   },
   caption: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.medium,
     fontSize: 13,
     lineHeight: 19,
-    fontWeight: '400',
   },
   overline: {
-    fontFamily: systemFontFamily,
+    fontFamily: fontFamilies.extraBold,
     fontSize: 11,
     lineHeight: 16,
-    fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
