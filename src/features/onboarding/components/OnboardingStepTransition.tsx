@@ -18,9 +18,7 @@ export function OnboardingStepTransition({
   direction,
   children,
 }: OnboardingStepTransitionProps) {
-  const entering = (
-    direction === 'forward' ? FadeInRight : FadeInLeft
-  )
+  const entering = (direction === 'forward' ? FadeInRight : FadeInLeft)
     .duration(180)
     .reduceMotion(ReduceMotion.System)
     .withInitialValues({
