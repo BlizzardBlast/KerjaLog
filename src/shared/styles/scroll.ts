@@ -4,9 +4,10 @@ type WebCompatibleScrollStyle = ViewStyle & {
   overscrollBehavior?: 'auto' | 'contain' | 'none';
 };
 
-export const screenScrollBoundaryStyle = Platform.select<WebCompatibleScrollStyle>({
-  web: {
-    overscrollBehavior: 'none',
-  },
-  default: {},
-});
+export const screenScrollBoundaryStyle =
+  Platform.select<WebCompatibleScrollStyle>({
+    web: {
+      overscrollBehavior: 'none',
+    },
+    default: {},
+  });
