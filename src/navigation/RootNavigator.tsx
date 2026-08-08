@@ -27,7 +27,8 @@ export function RootNavigator() {
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
-          contentStyle: { backgroundColor: theme.colors.canvas },
+          animation: 'slide_from_right',
+          contentStyle: { backgroundColor: theme.colors.surface },
           headerShown: false,
         }}
       />
