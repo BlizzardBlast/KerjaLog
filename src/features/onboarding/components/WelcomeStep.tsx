@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { ThemeToggleButton } from '@/design-system/components/ThemeToggleButton';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
@@ -15,15 +16,20 @@ export function WelcomeStep() {
 
   return (
     <View style={styles.content}>
-      <DecorativeView
-        style={[styles.brandMark, { backgroundColor: theme.colors.primary }]}
-      >
-        <Text variant="display" color="onPrimary" style={styles.brandLetter}>
-          K
-        </Text>
-      </DecorativeView>
+      <View style={styles.brandRow}>
+        <DecorativeView
+          style={[styles.brandMark, { backgroundColor: theme.colors.primary }]}
+        >
+          <Text variant="display" color="onPrimary" style={styles.brandLetter}>
+            K
+          </Text>
+        </DecorativeView>
 
-      <LanguageSelector />
+        <View style={styles.controls}>
+          <LanguageSelector />
+          <ThemeToggleButton />
+        </View>
+      </View>
 
       <StepHeading
         eyebrow={t('onboarding.welcome.eyebrow')}
@@ -58,16 +64,25 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing[6],
   },
+  brandRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   brandMark: {
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    borderRadius: spacing[6],
-    height: 78,
+    borderRadius: 26,
+    height: 82,
     justifyContent: 'center',
-    width: 78,
+    width: 82,
   },
   brandLetter: {
     letterSpacing: -2,
+  },
+  controls: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing[2],
   },
   privacyCard: {
     borderRadius: radii.lg,
