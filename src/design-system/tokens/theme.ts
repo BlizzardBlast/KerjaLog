@@ -138,7 +138,7 @@ const lightColors: ThemeColors = {
   danger: '#B42318',
   dangerSoft: '#FEECEB',
   onDanger: '#FFFFFF',
-  controlTrackOff: '#D3C9D5',
+  controlTrackOff: '#9A8E9D',
   controlThumb: '#FFFDFC',
 };
 
@@ -161,7 +161,7 @@ const darkColors: ThemeColors = {
   danger: '#FF8177',
   dangerSoft: '#4A2425',
   onDanger: '#151218',
-  controlTrackOff: '#62586A',
+  controlTrackOff: '#756A7D',
   controlThumb: '#FFFDFC',
 };
 
