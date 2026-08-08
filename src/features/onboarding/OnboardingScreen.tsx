@@ -7,7 +7,10 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
@@ -21,10 +24,13 @@ import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 
+const SCREEN_HORIZONTAL_PADDING = 22;
+
 export function OnboardingScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useI18n();
+  const insets = useSafeAreaInsets();
   const {
     state,
     isHydrated,
@@ -60,6 +66,10 @@ export function OnboardingScreen() {
   const stepConfig = ONBOARDING_STEP_CONFIG[state.currentStep];
   const CurrentStep = stepConfig.Component;
   const canContinue = stepConfig.canContinue(state);
+  const horizontalPadding = {
+    paddingLeft: Math.max(insets.left, SCREEN_HORIZONTAL_PADDING),
+    paddingRight: Math.max(insets.right, SCREEN_HORIZONTAL_PADDING),
+  };
 
   const resetScroll = () => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -96,7 +106,7 @@ export function OnboardingScreen() {
 
   return (
     <SafeAreaView
-      edges={['top', 'bottom']}
+      edges={['top']}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <OnboardingHeader
@@ -106,7 +116,8 @@ export function OnboardingScreen() {
 
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
+        contentContainerStyle={[styles.scrollContent, horizontalPadding]}
         contentInsetAdjustmentBehavior="never"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -126,9 +137,11 @@ export function OnboardingScreen() {
       <View
         style={[
           styles.footer,
+          horizontalPadding,
           {
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.border,
+            paddingBottom: Math.max(insets.bottom, spacing[4]),
           },
         ]}
       >
@@ -162,14 +175,16 @@ const styles = StyleSheet.create({
     gap: spacing[3],
     justifyContent: 'center',
   },
+  scrollView: {
+    flex: 1,
+    minHeight: 0,
+  },
   scrollContent: {
-    paddingBottom: 28,
-    paddingHorizontal: 22,
+    paddingBottom: spacing[8],
     paddingTop: 14,
   },
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 22,
     paddingTop: 14,
   },
   footerNote: {
