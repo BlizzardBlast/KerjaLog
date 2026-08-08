@@ -1,6 +1,15 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 import type { PropsWithChildren } from 'react';
 
+const webScrollBoundaryCss = `
+  html,
+  body,
+  #root,
+  #root * {
+    overscroll-behavior: none;
+  }
+`;
+
 export default function Root({ children }: PropsWithChildren) {
   return (
     <html lang="en">
@@ -12,6 +21,7 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
         <ScrollViewStyleReset />
+        <style>{webScrollBoundaryCss}</style>
       </head>
       <body>{children}</body>
     </html>
