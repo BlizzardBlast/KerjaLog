@@ -1,5 +1,6 @@
-import { StyleSheet, Switch, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
+import { ToggleSwitch } from '@/design-system/components/ToggleSwitch';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
 
@@ -37,17 +38,12 @@ export function SettingToggle({
           {description}
         </Text>
       </View>
-      <Switch
+
+      <ToggleSwitch
         accessibilityHint={description}
         accessibilityLabel={title}
         disabled={disabled}
-        ios_backgroundColor={theme.colors.surfaceMuted}
         onValueChange={onValueChange}
-        thumbColor={theme.colors.surface}
-        trackColor={{
-          false: theme.colors.surfaceMuted,
-          true: theme.colors.primary,
-        }}
         value={value}
       />
     </View>
