@@ -23,8 +23,7 @@ export type WeeklyReflectionNotificationCopy = {
 
 function isUnsupportedNotificationRuntime(): boolean {
   return (
-    Platform.OS === 'web' ||
-    (Platform.OS === 'android' && isRunningInExpoGo())
+    Platform.OS === 'web' || (Platform.OS === 'android' && isRunningInExpoGo())
   );
 }
 
@@ -42,8 +41,7 @@ function isNotificationPermissionGranted(
 ): boolean {
   return (
     permissions.granted ||
-    permissions.ios?.status ===
-      notifications.IosAuthorizationStatus.PROVISIONAL
+    permissions.ios?.status === notifications.IosAuthorizationStatus.PROVISIONAL
   );
 }
 
@@ -139,9 +137,7 @@ export async function enableWeeklyReflectionNotification(
       hour: WEEKLY_REFLECTION_HOUR,
       minute: WEEKLY_REFLECTION_MINUTE,
       channelId:
-        Platform.OS === 'android'
-          ? WEEKLY_REFLECTION_CHANNEL_ID
-          : undefined,
+        Platform.OS === 'android' ? WEEKLY_REFLECTION_CHANNEL_ID : undefined,
     },
   });
 
