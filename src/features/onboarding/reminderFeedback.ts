@@ -1,4 +1,8 @@
-export type NotificationReminderIssue = 'permission' | 'runtime' | 'setup';
+export type NotificationReminderIssue =
+  | 'permission'
+  | 'exact-alarm'
+  | 'runtime'
+  | 'setup';
 
 export type ReminderFeedbackState = {
   issue: NotificationReminderIssue | null;
