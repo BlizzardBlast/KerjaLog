@@ -23,6 +23,7 @@ import {
 import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
+import { screenScrollBoundaryStyle } from '@/shared/styles/scroll';
 
 const SCREEN_HORIZONTAL_PADDING = 22;
 
@@ -116,7 +117,7 @@ export function OnboardingScreen() {
 
       <ScrollView
         ref={scrollRef}
-        style={styles.scrollView}
+        style={[styles.scrollView, screenScrollBoundaryStyle]}
         contentContainerStyle={[styles.scrollContent, horizontalPadding]}
         contentInsetAdjustmentBehavior="never"
         keyboardShouldPersistTaps="handled"
