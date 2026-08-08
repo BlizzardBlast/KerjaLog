@@ -13,13 +13,28 @@ import type { OnboardingStepProps } from '@/features/onboarding/components/types
 import { reviewScheduleOptions } from '@/features/onboarding/options';
 import {
   INITIAL_REMINDER_FEEDBACK_STATE,
+  type NotificationReminderIssue,
   reminderFeedbackReducer,
 } from '@/features/onboarding/reminderFeedback';
 import { useI18n } from '@/i18n/I18nProvider';
 import {
   disableWeeklyReflectionNotification,
   enableWeeklyReflectionNotification,
+  type WeeklyReflectionEnableResult,
 } from '@/platform/notifications/weeklyReflection';
+
+function getReminderIssue(
+  result: Exclude<WeeklyReflectionEnableResult, 'enabled'>,
+): NotificationReminderIssue {
+  switch (result) {
+    case 'permission-denied':
+      return 'permission';
+    case 'exact-alarm-permission-required':
+      return 'exact-alarm';
+    case 'unsupported-runtime':
+      return 'runtime';
+  }
+}
 
 export function ReviewRhythmStep({
   state,
@@ -54,7 +69,7 @@ export function ReviewRhythmStep({
         update({ weeklyReminderEnabled: false });
         dispatchReminderFeedback({
           type: 'failure',
-          issue: result === 'permission-denied' ? 'permission' : 'runtime',
+          issue: getReminderIssue(result),
         });
         return;
       }
