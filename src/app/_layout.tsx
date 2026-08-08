@@ -4,7 +4,10 @@ import { Manrope_700Bold } from '@expo-google-fonts/manrope/700Bold';
 import { Manrope_800ExtraBold } from '@expo-google-fonts/manrope/800ExtraBold';
 import { useFonts } from '@expo-google-fonts/manrope/useFonts';
 import * as SplashScreen from 'expo-splash-screen';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+} from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { I18nProvider } from '@/i18n/I18nProvider';
@@ -28,7 +31,7 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <ThemeProvider>
         <I18nProvider>
           <OnboardingProvider>
