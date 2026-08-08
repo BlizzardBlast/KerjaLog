@@ -1,7 +1,10 @@
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
@@ -13,6 +16,8 @@ import type { ReviewSchedule } from '@/features/onboarding/model';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
+
+const SCREEN_HORIZONTAL_PADDING = 22;
 
 const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
   'within-3-months': 'home.review.within3Months',
@@ -26,6 +31,7 @@ export function HomeScreen() {
   const { theme } = useTheme();
   const { state } = useOnboarding();
   const { t } = useI18n();
+  const insets = useSafeAreaInsets();
   const reviewScheduleLabel = state.reviewSchedule
     ? t(reviewScheduleLabelKeys[state.reviewSchedule])
     : t('home.review.notSet');
@@ -36,7 +42,14 @@ export function HomeScreen() {
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <ScrollView
-        contentContainerStyle={styles.content}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingLeft: Math.max(insets.left, SCREEN_HORIZONTAL_PADDING),
+            paddingRight: Math.max(insets.right, SCREEN_HORIZONTAL_PADDING),
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headingRow}>
@@ -207,10 +220,13 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+    minHeight: 0,
+  },
   content: {
     gap: spacing[4],
     paddingBottom: spacing[8],
-    paddingHorizontal: 22,
     paddingTop: 18,
   },
   headingRow: {
