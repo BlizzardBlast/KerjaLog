@@ -75,13 +75,13 @@ export const typography = {
   display: {
     fontFamily: fontFamilies.bold,
     fontSize: 32,
-    lineHeight: 36,
+    lineHeight: 40,
     letterSpacing: -0.8,
   },
   title: {
     fontFamily: fontFamilies.bold,
     fontSize: 28,
-    lineHeight: 33,
+    lineHeight: 36,
     letterSpacing: -0.55,
   },
   heading: {
