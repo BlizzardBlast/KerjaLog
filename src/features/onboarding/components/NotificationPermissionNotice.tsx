@@ -6,6 +6,8 @@ import { radii, spacing } from '@/design-system/tokens/theme';
 import type { NotificationReminderIssue } from '@/features/onboarding/reminderFeedback';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
+import { openExactAlarmPermissionSettings } from '@/platform/notifications/weeklyReflection';
+import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 const issueCopy: Record<
   NotificationReminderIssue,
@@ -14,6 +16,10 @@ const issueCopy: Record<
   permission: {
     titleKey: 'onboarding.review.notificationPermissionTitle',
     descriptionKey: 'onboarding.review.notificationPermissionDescription',
+  },
+  'exact-alarm': {
+    titleKey: 'onboarding.review.notificationSetupTitle',
+    descriptionKey: 'onboarding.review.notificationSetupDescription',
   },
   runtime: {
     titleKey: 'onboarding.review.notificationSetupTitle',
@@ -33,6 +39,16 @@ export function NotificationPermissionNotice({
   const { theme } = useTheme();
   const { t } = useI18n();
   const copy = issueCopy[issue];
+  const canOpenSettings = issue === 'permission' || issue === 'exact-alarm';
+
+  const handleOpenSettings = () => {
+    const settingsOperation =
+      issue === 'exact-alarm'
+        ? openExactAlarmPermissionSettings()
+        : Linking.openSettings();
+
+    settingsOperation.catch(EMPTY_FUNCTION);
+  };
 
   return (
     <View
@@ -54,12 +70,8 @@ export function NotificationPermissionNotice({
         </Text>
       </View>
 
-      {issue === 'permission' ? (
-        <Button
-          onPress={() => Linking.openSettings()}
-          size="sm"
-          variant="secondary"
-        >
+      {canOpenSettings ? (
+        <Button onPress={handleOpenSettings} size="sm" variant="secondary">
           {t('common.action.openSettings')}
         </Button>
       ) : null}
