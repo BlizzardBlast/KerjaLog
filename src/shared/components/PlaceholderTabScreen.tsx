@@ -17,7 +17,7 @@ export function PlaceholderTabScreen({
   return (
     <SafeAreaView
       edges={['top']}
-      style={[styles.screen, { backgroundColor: theme.colors.canvas }]}
+      style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <View style={styles.content}>
         <Text variant="overline" color="primary">
