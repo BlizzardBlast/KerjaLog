@@ -3,10 +3,9 @@ import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import type { NotificationReminderIssue } from '@/features/onboarding/reminderFeedback';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
-
-export type NotificationReminderIssue = 'permission' | 'runtime' | 'setup';
 
 const issueCopy: Record<
   NotificationReminderIssue,
@@ -38,7 +37,6 @@ export function NotificationPermissionNotice({
   return (
     <View
       accessibilityRole="alert"
-      testID="notification-reminder-notice"
       style={[
         styles.card,
         {
