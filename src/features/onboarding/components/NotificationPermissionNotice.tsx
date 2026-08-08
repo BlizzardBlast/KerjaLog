@@ -38,6 +38,7 @@ export function NotificationPermissionNotice({
   return (
     <View
       accessibilityRole="alert"
+      testID="notification-reminder-notice"
       style={[
         styles.card,
         {
