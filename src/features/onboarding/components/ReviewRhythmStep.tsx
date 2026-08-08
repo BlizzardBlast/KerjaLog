@@ -32,13 +32,13 @@ export function ReviewRhythmStep({
     useState<NotificationReminderIssue | null>(null);
 
   const handleWeeklyReminderChange = async (enabled: boolean) => {
-    setReminderIssue(null);
     setIsUpdatingReminder(true);
 
     try {
       if (!enabled) {
         await disableWeeklyReflectionNotification();
         update({ weeklyReminderEnabled: false });
+        setReminderIssue(null);
         return;
       }
 
@@ -57,6 +57,7 @@ export function ReviewRhythmStep({
       }
 
       update({ weeklyReminderEnabled: true });
+      setReminderIssue(null);
     } catch {
       update({ weeklyReminderEnabled: false });
       setReminderIssue('setup');
