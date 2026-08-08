@@ -7,7 +7,8 @@ const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
 const WEEKLY_REFLECTION_WEEKDAY = 6;
 const WEEKLY_REFLECTION_HOUR = 16;
 const WEEKLY_REFLECTION_MINUTE = 30;
-const EXACT_ALARM_SETTINGS_ACTION = 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM';
+const EXACT_ALARM_SETTINGS_ACTION =
+  'android.settings.REQUEST_SCHEDULE_EXACT_ALARM';
 const ANDROID_EXACT_ALARM_MIN_API = 31;
 
 type NotificationsModule = typeof import('expo-notifications');
