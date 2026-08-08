@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   ActivityIndicator,
@@ -40,10 +40,6 @@ export function OnboardingScreen() {
   const [transitionDirection, setTransitionDirection] =
     useState<OnboardingTransitionDirection>('forward');
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, [state.currentStep]);
-
   if (!isHydrated) {
     return (
       <SafeAreaView
@@ -62,14 +58,20 @@ export function OnboardingScreen() {
   const CurrentStep = stepConfig.Component;
   const canContinue = stepConfig.canContinue(state);
 
+  const resetScroll = () => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  };
+
   const handleBack = () => {
     setTransitionDirection('backward');
+    resetScroll();
     goBack();
   };
 
   const handlePrimaryAction = async () => {
     if (!stepConfig.isFinal) {
       setTransitionDirection('forward');
+      resetScroll();
       goNext();
       return;
     }
