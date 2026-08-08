@@ -1,18 +1,21 @@
 import { isRunningInExpoGo } from 'expo';
 import type { NotificationPermissionsStatus } from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 
 const WEEKLY_REFLECTION_CHANNEL_ID = 'weekly-reflection';
 const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
 const WEEKLY_REFLECTION_WEEKDAY = 6;
 const WEEKLY_REFLECTION_HOUR = 16;
 const WEEKLY_REFLECTION_MINUTE = 30;
+const EXACT_ALARM_SETTINGS_ACTION = 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM';
+const ANDROID_EXACT_ALARM_MIN_API = 31;
 
 type NotificationsModule = typeof import('expo-notifications');
 
 export type WeeklyReflectionEnableResult =
   | 'enabled'
   | 'permission-denied'
+  | 'exact-alarm-permission-required'
   | 'unsupported-runtime';
 
 export type WeeklyReflectionNotificationCopy = {
@@ -41,6 +44,24 @@ function isNotificationPermissionGranted(
     permissions.granted ||
     permissions.ios?.status === notifications.IosAuthorizationStatus.PROVISIONAL
   );
+}
+
+function requiresExactAlarmSpecialAccess(): boolean {
+  return (
+    Platform.OS === 'android' &&
+    Number(Platform.Version) >= ANDROID_EXACT_ALARM_MIN_API
+  );
+}
+
+function isExactAlarmPermissionError(error: unknown): boolean {
+  const message =
+    error instanceof Error
+      ? `${error.name}: ${error.message}`
+      : typeof error === 'object' && error !== null && 'message' in error
+        ? String(error.message)
+        : String(error);
+
+  return /SCHEDULE_EXACT_ALARM|USE_EXACT_ALARM|exact alarm/i.test(message);
 }
 
 async function ensureAndroidNotificationChannel(
@@ -101,6 +122,18 @@ export async function configureNotificationHandling(): Promise<void> {
   });
 }
 
+export async function openExactAlarmPermissionSettings(): Promise<void> {
+  if (!requiresExactAlarmSpecialAccess()) {
+    return;
+  }
+
+  try {
+    await Linking.sendIntent(EXACT_ALARM_SETTINGS_ACTION);
+  } catch {
+    await Linking.openSettings();
+  }
+}
+
 export async function enableWeeklyReflectionNotification(
   copy: WeeklyReflectionNotificationCopy,
 ): Promise<WeeklyReflectionEnableResult> {
@@ -123,21 +156,32 @@ export async function enableWeeklyReflectionNotification(
     WEEKLY_REFLECTION_NOTIFICATION_ID,
   );
 
-  await notifications.scheduleNotificationAsync({
-    identifier: WEEKLY_REFLECTION_NOTIFICATION_ID,
-    content: {
-      title: copy.title,
-      body: copy.body,
-    },
-    trigger: {
-      type: notifications.SchedulableTriggerInputTypes.WEEKLY,
-      weekday: WEEKLY_REFLECTION_WEEKDAY,
-      hour: WEEKLY_REFLECTION_HOUR,
-      minute: WEEKLY_REFLECTION_MINUTE,
-      channelId:
-        Platform.OS === 'android' ? WEEKLY_REFLECTION_CHANNEL_ID : undefined,
-    },
-  });
+  try {
+    await notifications.scheduleNotificationAsync({
+      identifier: WEEKLY_REFLECTION_NOTIFICATION_ID,
+      content: {
+        title: copy.title,
+        body: copy.body,
+      },
+      trigger: {
+        type: notifications.SchedulableTriggerInputTypes.WEEKLY,
+        weekday: WEEKLY_REFLECTION_WEEKDAY,
+        hour: WEEKLY_REFLECTION_HOUR,
+        minute: WEEKLY_REFLECTION_MINUTE,
+        channelId:
+          Platform.OS === 'android' ? WEEKLY_REFLECTION_CHANNEL_ID : undefined,
+      },
+    });
+  } catch (error) {
+    if (
+      requiresExactAlarmSpecialAccess() &&
+      isExactAlarmPermissionError(error)
+    ) {
+      return 'exact-alarm-permission-required';
+    }
+
+    throw error;
+  }
 
   return 'enabled';
 }
