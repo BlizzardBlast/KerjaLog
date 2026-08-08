@@ -1,6 +1,7 @@
 import { themes } from '@/design-system/tokens/theme';
 
 const MINIMUM_NORMAL_TEXT_CONTRAST = 4.5;
+const MINIMUM_NON_TEXT_CONTRAST = 3;
 
 function channelToLinear(value: number): number {
   const normalized = value / 255;
@@ -60,6 +61,23 @@ describe('theme token contrast', () => {
   ])('%s meets WCAG AA normal-text contrast', (_, foreground, background) => {
     expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(
       MINIMUM_NORMAL_TEXT_CONTRAST,
+    );
+  });
+
+  test.each([
+    [
+      'light switch off track',
+      themes.light.colors.controlTrackOff,
+      themes.light.colors.surface,
+    ],
+    [
+      'dark switch off track',
+      themes.dark.colors.controlTrackOff,
+      themes.dark.colors.surface,
+    ],
+  ])('%s remains distinct from its surface', (_, foreground, background) => {
+    expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(
+      MINIMUM_NON_TEXT_CONTRAST,
     );
   });
 });
