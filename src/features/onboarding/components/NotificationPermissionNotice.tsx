@@ -5,9 +5,16 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
 
-export function NotificationPermissionNotice() {
+export type NotificationReminderIssue = 'permission' | 'setup';
+
+export function NotificationPermissionNotice({
+  issue,
+}: {
+  issue: NotificationReminderIssue;
+}) {
   const { theme } = useTheme();
   const { t } = useI18n();
+  const permissionDenied = issue === 'permission';
 
   return (
     <View
@@ -22,15 +29,30 @@ export function NotificationPermissionNotice() {
     >
       <View style={styles.copy}>
         <Text variant="bodyStrong" color="warning">
-          {t('onboarding.review.notificationPermissionTitle')}
+          {t(
+            permissionDenied
+              ? 'onboarding.review.notificationPermissionTitle'
+              : 'onboarding.review.notificationSetupTitle',
+          )}
         </Text>
         <Text variant="caption" color="textMuted">
-          {t('onboarding.review.notificationPermissionDescription')}
+          {t(
+            permissionDenied
+              ? 'onboarding.review.notificationPermissionDescription'
+              : 'onboarding.review.notificationSetupDescription',
+          )}
         </Text>
       </View>
-      <Button onPress={() => Linking.openSettings()} size="sm" variant="secondary">
-        {t('common.action.openSettings')}
-      </Button>
+
+      {permissionDenied ? (
+        <Button
+          onPress={() => Linking.openSettings()}
+          size="sm"
+          variant="secondary"
+        >
+          {t('common.action.openSettings')}
+        </Button>
+      ) : null}
     </View>
   );
 }
