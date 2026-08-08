@@ -23,6 +23,8 @@ export function AppTabs() {
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.border,
             paddingBottom: Math.max(insets.bottom, spacing[2]),
+            paddingLeft: Math.max(insets.left, spacing[2]),
+            paddingRight: Math.max(insets.right, spacing[2]),
           },
         ]}
       >
@@ -45,7 +47,6 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     minHeight: 72,
-    paddingHorizontal: spacing[2],
     paddingTop: spacing[2],
   },
 });
