@@ -22,9 +22,7 @@ export type WeeklyReflectionNotificationCopy = {
 };
 
 function isUnsupportedNotificationRuntime(): boolean {
-  return (
-    Platform.OS === 'web' || (Platform.OS === 'android' && isRunningInExpoGo())
-  );
+  return Platform.OS === 'android' && isRunningInExpoGo();
 }
 
 function loadNotifications(): NotificationsModule | null {
