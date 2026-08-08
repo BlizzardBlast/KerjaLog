@@ -52,6 +52,3 @@ jobs:
 
       - name: Export iOS bundle
         run: pnpm run export:ios
-
-      - name: Export web bundle
-        run: pnpm run export:web
