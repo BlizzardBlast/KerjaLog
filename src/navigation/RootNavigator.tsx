@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 export function RootNavigator() {
   const { theme, resolvedTheme, isHydrated: isThemeHydrated } = useTheme();
@@ -14,11 +13,9 @@ export function RootNavigator() {
   const isReady = isThemeHydrated && isLanguageHydrated && isOnboardingHydrated;
 
   useEffect(() => {
-    if (!isReady) {
-      return;
+    if (isReady) {
+      SplashScreen.hide();
     }
-
-    SplashScreen.hideAsync().catch(EMPTY_FUNCTION);
   }, [isReady]);
 
   if (!isReady) {
