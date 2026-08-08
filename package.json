@@ -3,6 +3,9 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "dependencies": {
     "@expo-google-fonts/manrope": "0.4.2",
     "@expo/ui": "~57.0.9",
