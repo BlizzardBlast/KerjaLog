@@ -17,8 +17,8 @@ const issueCopy: Record<
     descriptionKey: 'onboarding.review.notificationPermissionDescription',
   },
   runtime: {
-    titleKey: 'onboarding.review.notificationRuntimeTitle',
-    descriptionKey: 'onboarding.review.notificationRuntimeDescription',
+    titleKey: 'onboarding.review.notificationSetupTitle',
+    descriptionKey: 'onboarding.review.notificationSetupDescription',
   },
   setup: {
     titleKey: 'onboarding.review.notificationSetupTitle',
