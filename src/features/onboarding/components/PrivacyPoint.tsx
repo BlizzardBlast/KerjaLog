@@ -21,13 +21,14 @@ export function PrivacyPoint({ text }: PrivacyPointProps) {
 
 const styles = StyleSheet.create({
   point: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexDirection: 'row',
     gap: 10,
   },
   dot: {
     borderRadius: 999,
     height: 8,
+    marginTop: 8,
     width: 8,
   },
   text: {
