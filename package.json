@@ -67,7 +67,8 @@
     "clearMocks": true,
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1",
-      "^@react-native-async-storage/async-storage$": "@react-native-async-storage/async-storage/jest/async-storage-mock"
+      "^@react-native-async-storage/async-storage$": "@react-native-async-storage/async-storage/jest/async-storage-mock",
+      "^expo-notifications$": "<rootDir>/tests/mocks/expo-notifications.ts"
     },
     "collectCoverageFrom": [
       "src/**/*.{ts,tsx}",
