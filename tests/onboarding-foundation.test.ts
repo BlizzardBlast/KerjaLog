@@ -38,6 +38,8 @@ describe('onboarding foundation', () => {
 
     expect(DEFAULT_ONBOARDING_STATE.version).toBe(1);
     expect(DEFAULT_ONBOARDING_STATE.completed).toBe(false);
+    expect(DEFAULT_ONBOARDING_STATE.weeklyReminderEnabled).toBe(false);
+    expect(DEFAULT_ONBOARDING_STATE.appLockPreferred).toBe(false);
     expect(ONBOARDING_STEP_ORDER).toContain(
       DEFAULT_ONBOARDING_STATE.currentStep,
     );
