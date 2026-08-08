@@ -40,11 +40,7 @@ function ReviewRhythmHarness() {
   };
 
   return (
-    <ReviewRhythmStep
-      state={state}
-      update={update}
-      hasFinishError={false}
-    />
+    <ReviewRhythmStep state={state} update={update} hasFinishError={false} />
   );
 }
 
