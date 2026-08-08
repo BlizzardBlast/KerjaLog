@@ -22,6 +22,8 @@ export type ThemeColors = {
   danger: string;
   dangerSoft: string;
   onDanger: string;
+  controlTrackOff: string;
+  controlThumb: string;
 };
 
 export type AppTheme = {
@@ -136,6 +138,8 @@ const lightColors: ThemeColors = {
   danger: '#B42318',
   dangerSoft: '#FEECEB',
   onDanger: '#FFFFFF',
+  controlTrackOff: '#D3C9D5',
+  controlThumb: '#FFFDFC',
 };
 
 const darkColors: ThemeColors = {
@@ -157,6 +161,8 @@ const darkColors: ThemeColors = {
   danger: '#FF8177',
   dangerSoft: '#4A2425',
   onDanger: '#151218',
+  controlTrackOff: '#62586A',
+  controlThumb: '#FFFDFC',
 };
 
 export const themes: Record<ResolvedTheme, AppTheme> = {
