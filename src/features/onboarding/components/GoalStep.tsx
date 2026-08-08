@@ -24,6 +24,7 @@ export function GoalStep({ state, update }: OnboardingStepProps) {
             key={option.value}
             title={t(option.titleKey)}
             description={t(option.descriptionKey)}
+            icon={option.icon}
             selected={state.mainGoal === option.value}
             onPress={() => update({ mainGoal: option.value })}
           />
