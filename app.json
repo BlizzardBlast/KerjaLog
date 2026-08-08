@@ -7,6 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kerjalog",
     "userInterfaceStyle": "automatic",
+    "platforms": ["android", "ios"],
     "ios": {
       "icon": "./assets/kerjalog.icon"
     },
@@ -19,10 +20,6 @@
       },
       "predictiveBackGestureEnabled": true,
       "icon": "./assets/images/icon.png"
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
