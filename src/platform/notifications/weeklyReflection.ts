@@ -27,12 +27,12 @@ function isUnsupportedNotificationRuntime(): boolean {
   );
 }
 
-async function loadNotifications(): Promise<NotificationsModule | null> {
+function loadNotifications(): NotificationsModule | null {
   if (isUnsupportedNotificationRuntime()) {
     return null;
   }
 
-  return import('expo-notifications');
+  return require('expo-notifications') as NotificationsModule;
 }
 
 function isNotificationPermissionGranted(
@@ -87,7 +87,7 @@ async function requestNotificationPermissionIfNeeded(
 }
 
 export async function configureNotificationHandling(): Promise<void> {
-  const notifications = await loadNotifications();
+  const notifications = loadNotifications();
 
   if (!notifications) {
     return;
@@ -106,7 +106,7 @@ export async function configureNotificationHandling(): Promise<void> {
 export async function enableWeeklyReflectionNotification(
   copy: WeeklyReflectionNotificationCopy,
 ): Promise<WeeklyReflectionEnableResult> {
-  const notifications = await loadNotifications();
+  const notifications = loadNotifications();
 
   if (!notifications) {
     return 'unsupported-runtime';
@@ -145,7 +145,7 @@ export async function enableWeeklyReflectionNotification(
 }
 
 export async function disableWeeklyReflectionNotification(): Promise<void> {
-  const notifications = await loadNotifications();
+  const notifications = loadNotifications();
 
   if (!notifications) {
     return;
