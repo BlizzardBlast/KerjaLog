@@ -7,13 +7,15 @@ export type SettingToggleProps = {
   title: string;
   description: string;
   value: boolean;
-  onValueChange: (value: boolean) => void;
+  disabled?: boolean;
+  onValueChange: (value: boolean) => void | Promise<void>;
 };
 
 export function SettingToggle({
   title,
   description,
   value,
+  disabled = false,
   onValueChange,
 }: SettingToggleProps) {
   const { theme } = useTheme();
@@ -26,6 +28,7 @@ export function SettingToggle({
           backgroundColor: theme.colors.surface,
           borderColor: theme.colors.border,
         },
+        disabled && styles.disabled,
       ]}
     >
       <View style={styles.copy}>
@@ -37,6 +40,7 @@ export function SettingToggle({
       <Switch
         accessibilityHint={description}
         accessibilityLabel={title}
+        disabled={disabled}
         ios_backgroundColor={theme.colors.surfaceMuted}
         onValueChange={onValueChange}
         thumbColor={theme.colors.surface}
@@ -66,5 +70,8 @@ const styles = StyleSheet.create({
   },
   description: {
     marginTop: 3,
+  },
+  disabled: {
+    opacity: 0.6,
   },
 });
