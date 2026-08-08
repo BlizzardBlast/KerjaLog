@@ -9,9 +9,11 @@ import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import { RootNavigator } from '@/navigation/RootNavigator';
+import { configureNotificationHandling } from '@/platform/notifications/weeklyReflection';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 SplashScreen.preventAutoHideAsync().catch(EMPTY_FUNCTION);
+configureNotificationHandling();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
