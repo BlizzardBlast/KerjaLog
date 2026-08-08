@@ -16,7 +16,6 @@ import type { ReviewSchedule } from '@/features/onboarding/model';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
-import { screenScrollBoundaryStyle } from '@/shared/styles/scroll';
 
 const SCREEN_HORIZONTAL_PADDING = 22;
 
@@ -43,7 +42,7 @@ export function HomeScreen() {
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <ScrollView
-        style={[styles.scrollView, screenScrollBoundaryStyle]}
+        style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
           {
