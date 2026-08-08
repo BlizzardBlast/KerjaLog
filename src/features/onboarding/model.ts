@@ -84,6 +84,6 @@ export const DEFAULT_ONBOARDING_STATE: OnboardingState = {
   version: ONBOARDING_STATE_VERSION,
   currentStep: 'welcome',
   completed: false,
-  weeklyReminderEnabled: true,
-  appLockPreferred: true,
+  weeklyReminderEnabled: false,
+  appLockPreferred: false,
 };
