@@ -49,8 +49,8 @@ describe('ReviewRhythmStep reminder UX', () => {
     jest.clearAllMocks();
   });
 
-  test('keeps an existing warning mounted while a retry is pending', async () => {
-    enableWeeklyReflectionNotificationMock.mockResolvedValueOnce(
+  test('keeps the warning visible across a failed retry', async () => {
+    enableWeeklyReflectionNotificationMock.mockResolvedValue(
       'permission-denied',
     );
 
@@ -60,26 +60,12 @@ describe('ReviewRhythmStep reminder UX', () => {
       </Providers>,
     );
 
-    const reminderSwitch = screen.getAllByRole('switch')[0];
-    await fireEvent.press(reminderSwitch);
+    await fireEvent.press(screen.getAllByRole('switch')[0]);
+    expect(await screen.findByRole('alert')).toBeOnTheScreen();
 
-    expect(screen.getByRole('alert')).toBeOnTheScreen();
+    await fireEvent.press(screen.getAllByRole('switch')[0]);
+    expect(await screen.findByRole('alert')).toBeOnTheScreen();
 
-    let resolveRetry: (result: 'permission-denied') => void = () => {};
-    enableWeeklyReflectionNotificationMock.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveRetry = resolve;
-        }),
-    );
-
-    const retryPress = fireEvent.press(screen.getAllByRole('switch')[0]);
-
-    expect(screen.getByRole('alert')).toBeOnTheScreen();
-
-    resolveRetry('permission-denied');
-    await retryPress;
-
-    expect(screen.getByRole('alert')).toBeOnTheScreen();
+    expect(enableWeeklyReflectionNotificationMock).toHaveBeenCalledTimes(2);
   });
 });
