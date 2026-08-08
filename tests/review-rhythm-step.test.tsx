@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, render, screen } from '@testing-library/react-native';
 import { type ReactNode, useState } from 'react';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { ReviewRhythmStep } from '@/features/onboarding/components/ReviewRhythmStep';
@@ -49,8 +49,8 @@ describe('ReviewRhythmStep reminder UX', () => {
     jest.clearAllMocks();
   });
 
-  test('keeps the warning visible across a failed retry', async () => {
-    enableWeeklyReflectionNotificationMock.mockResolvedValue(
+  test('keeps an existing warning mounted while a retry is pending', async () => {
+    enableWeeklyReflectionNotificationMock.mockResolvedValueOnce(
       'permission-denied',
     );
 
@@ -60,12 +60,39 @@ describe('ReviewRhythmStep reminder UX', () => {
       </Providers>,
     );
 
-    await fireEvent.press(screen.getAllByRole('switch')[0]);
-    expect(await screen.findByRole('alert')).toBeOnTheScreen();
+    const reminderSwitch = screen.getAllByRole('switch')[0];
 
-    await fireEvent.press(screen.getAllByRole('switch')[0]);
-    expect(await screen.findByRole('alert')).toBeOnTheScreen();
+    await act(async () => {
+      await reminderSwitch.props.onPress();
+    });
 
-    expect(enableWeeklyReflectionNotificationMock).toHaveBeenCalledTimes(2);
+    const initialNotice = screen.getByTestId('notification-reminder-notice');
+
+    let resolveRetry!: (result: 'permission-denied') => void;
+    enableWeeklyReflectionNotificationMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRetry = resolve;
+        }),
+    );
+
+    let retryPromise!: Promise<void>;
+    await act(async () => {
+      retryPromise = screen.getAllByRole('switch')[0].props.onPress();
+      await Promise.resolve();
+    });
+
+    expect(screen.getByTestId('notification-reminder-notice')).toBe(
+      initialNotice,
+    );
+
+    await act(async () => {
+      resolveRetry('permission-denied');
+      await retryPromise;
+    });
+
+    expect(screen.getByTestId('notification-reminder-notice')).toBe(
+      initialNotice,
+    );
   });
 });
