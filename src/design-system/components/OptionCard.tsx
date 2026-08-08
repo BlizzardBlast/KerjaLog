@@ -1,12 +1,17 @@
+import { SymbolView } from 'expo-symbols';
+import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 
+export type OptionCardIcon = ComponentProps<typeof SymbolView>['name'];
+
 export type OptionCardProps = {
   title: string;
   description?: string;
+  icon?: OptionCardIcon;
   selected: boolean;
   onPress: () => void;
   disabled?: boolean;
@@ -15,6 +20,7 @@ export type OptionCardProps = {
 export function OptionCard({
   title,
   description,
+  icon,
   selected,
   onPress,
   disabled = false,
@@ -40,23 +46,27 @@ export function OptionCard({
         disabled && styles.disabled,
       ]}
     >
-      <DecorativeView
-        style={[
-          styles.indicator,
-          {
-            backgroundColor: selected
-              ? theme.colors.primary
-              : theme.colors.surfaceSubtle,
-            borderColor: selected ? theme.colors.primary : theme.colors.border,
-          },
-        ]}
-      >
-        {selected ? (
-          <Text variant="label" color="onPrimary">
-            ✓
-          </Text>
-        ) : null}
-      </DecorativeView>
+      {icon ? (
+        <DecorativeView
+          style={[
+            styles.iconContainer,
+            {
+              backgroundColor: selected
+                ? theme.colors.primary
+                : theme.colors.surfaceSubtle,
+            },
+          ]}
+        >
+          <SymbolView
+            name={icon}
+            size={20}
+            tintColor={
+              selected ? theme.colors.onPrimary : theme.colors.textMuted
+            }
+          />
+        </DecorativeView>
+      ) : null}
+
       <View style={styles.copy}>
         <Text variant="bodyStrong">{title}</Text>
         {description ? (
@@ -89,10 +99,9 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
-  indicator: {
+  iconContainer: {
     alignItems: 'center',
     borderRadius: radii.sm,
-    borderWidth: 1,
     height: spacing[10],
     justifyContent: 'center',
     width: spacing[10],
