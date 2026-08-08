@@ -44,7 +44,10 @@ export function OnboardingScreen() {
     return (
       <SafeAreaView
         edges={['top', 'bottom']}
-        style={[styles.loadingScreen, { backgroundColor: theme.colors.surface }]}
+        style={[
+          styles.loadingScreen,
+          { backgroundColor: theme.colors.surface },
+        ]}
       >
         <ActivityIndicator color={theme.colors.primary} size="small" />
         <Text variant="caption" color="textMuted">
