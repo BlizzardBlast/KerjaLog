@@ -1,23 +1,19 @@
-const mockNotifications = {
-  getPermissionsAsync: jest.fn(),
-  requestPermissionsAsync: jest.fn(),
-  setNotificationChannelAsync: jest.fn(),
-  cancelScheduledNotificationAsync: jest.fn(),
-  scheduleNotificationAsync: jest.fn(),
-  setNotificationHandler: jest.fn(),
-};
-
-jest.mock('expo-notifications', () => ({
-  ...mockNotifications,
-  AndroidImportance: { DEFAULT: 3 },
-  IosAuthorizationStatus: { PROVISIONAL: 3 },
-  SchedulableTriggerInputTypes: { WEEKLY: 'weekly' },
-}));
-
+import * as Notifications from 'expo-notifications';
 import {
   disableWeeklyReflectionNotification,
   enableWeeklyReflectionNotification,
 } from '@/platform/notifications/weeklyReflection';
+
+const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);
+const requestPermissionsAsync = jest.mocked(
+  Notifications.requestPermissionsAsync,
+);
+const cancelScheduledNotificationAsync = jest.mocked(
+  Notifications.cancelScheduledNotificationAsync,
+);
+const scheduleNotificationAsync = jest.mocked(
+  Notifications.scheduleNotificationAsync,
+);
 
 const copy = {
   title: 'A gentle weekly check-in',
@@ -28,28 +24,24 @@ const copy = {
 describe('weekly reflection notifications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockNotifications.cancelScheduledNotificationAsync.mockResolvedValue(
-      undefined,
-    );
-    mockNotifications.scheduleNotificationAsync.mockResolvedValue(
-      'kerjalog-weekly-reflection',
-    );
+    cancelScheduledNotificationAsync.mockResolvedValue(undefined);
+    scheduleNotificationAsync.mockResolvedValue('kerjalog-weekly-reflection');
   });
 
   test('requests permission just in time and schedules Friday at 16:30', async () => {
-    mockNotifications.getPermissionsAsync.mockResolvedValue({
+    getPermissionsAsync.mockResolvedValue({
       granted: false,
       canAskAgain: true,
-    });
-    mockNotifications.requestPermissionsAsync.mockResolvedValue({
+    } as Notifications.NotificationPermissionsStatus);
+    requestPermissionsAsync.mockResolvedValue({
       granted: true,
       canAskAgain: true,
-    });
+    } as Notifications.NotificationPermissionsStatus);
 
     await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(true);
 
-    expect(mockNotifications.requestPermissionsAsync).toHaveBeenCalledTimes(1);
-    expect(mockNotifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+    expect(requestPermissionsAsync).toHaveBeenCalledTimes(1);
+    expect(scheduleNotificationAsync).toHaveBeenCalledWith(
       expect.objectContaining({
         identifier: 'kerjalog-weekly-reflection',
         content: {
@@ -67,22 +59,22 @@ describe('weekly reflection notifications', () => {
   });
 
   test('does not schedule when permission cannot be granted', async () => {
-    mockNotifications.getPermissionsAsync.mockResolvedValue({
+    getPermissionsAsync.mockResolvedValue({
       granted: false,
       canAskAgain: false,
-    });
+    } as Notifications.NotificationPermissionsStatus);
 
     await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(false);
 
-    expect(mockNotifications.requestPermissionsAsync).not.toHaveBeenCalled();
-    expect(mockNotifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    expect(requestPermissionsAsync).not.toHaveBeenCalled();
+    expect(scheduleNotificationAsync).not.toHaveBeenCalled();
   });
 
   test('cancels the scheduled weekly reminder when disabled', async () => {
     await disableWeeklyReflectionNotification();
 
-    expect(
-      mockNotifications.cancelScheduledNotificationAsync,
-    ).toHaveBeenCalledWith('kerjalog-weekly-reflection');
+    expect(cancelScheduledNotificationAsync).toHaveBeenCalledWith(
+      'kerjalog-weekly-reflection',
+    );
   });
 });
