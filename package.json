@@ -60,7 +60,8 @@
     "expo:doctor": "pnpm dlx expo-doctor@1.20.1",
     "export:android": "expo export --platform android --output-dir dist/android",
     "export:ios": "expo export --platform ios --output-dir dist/ios",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:ci && pnpm run expo:doctor && pnpm run export:android && pnpm run export:ios"
+    "export:web": "expo export --platform web --output-dir dist/web",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:ci && pnpm run expo:doctor && pnpm run export:android && pnpm run export:ios && pnpm run export:web"
   },
   "jest": {
     "preset": "jest-expo",
