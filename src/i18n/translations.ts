@@ -4,6 +4,9 @@ export const en = {
   'common.action.continue': 'Continue',
   'common.action.finishSetup': 'Finish setup',
   'common.action.startSetup': 'Set up KerjaLog',
+  'common.action.openSettings': 'Open settings',
+  'common.theme.switchToDark': 'Switch to dark theme',
+  'common.theme.switchToLight': 'Switch to light theme',
 
   'tabs.home': 'Home',
   'tabs.history': 'History',
@@ -64,6 +67,7 @@ export const en = {
   'onboarding.language.title': 'Language',
   'onboarding.language.english': 'English',
   'onboarding.language.indonesian': 'Bahasa Indonesia',
+  'onboarding.language.change': 'Change language',
 
   'onboarding.welcome.eyebrow': 'Private work-growth companion',
   'onboarding.welcome.title': 'Turn everyday work into evidence of progress',
@@ -101,7 +105,17 @@ export const en = {
   'onboarding.review.scheduleSection': 'When is your next review likely to be?',
   'onboarding.review.weeklyReminderTitle': 'Weekly reflection reminder',
   'onboarding.review.weeklyReminderDescription':
-    'A short reminder to capture what moved forward that week.',
+    'A local reminder every Friday at 16:30. You can turn it off later.',
+  'onboarding.review.notificationChannelName': 'Weekly reflection',
+  'onboarding.review.notificationTitle': 'A gentle weekly check-in',
+  'onboarding.review.notificationBody':
+    'What did you finish, help with, solve, or learn this week?',
+  'onboarding.review.notificationPermissionTitle': 'Notifications are off',
+  'onboarding.review.notificationPermissionDescription':
+    'KerjaLog asks for notification permission only when you enable this local reminder. You can enable it in system settings.',
+  'onboarding.review.notificationSetupTitle': 'Reminder could not be scheduled',
+  'onboarding.review.notificationSetupDescription':
+    'Your setup is safe, but KerjaLog could not create the local weekly reminder. Try again later.',
   'onboarding.review.appLockTitle': 'Prefer biometric or PIN app lock',
   'onboarding.review.appLockDescription':
     'We will ask before enabling device protection when that feature is configured.',
@@ -184,6 +198,9 @@ export const id: Record<TranslationKey, string> = {
   'common.action.continue': 'Lanjutkan',
   'common.action.finishSetup': 'Selesaikan pengaturan',
   'common.action.startSetup': 'Atur KerjaLog',
+  'common.action.openSettings': 'Buka pengaturan',
+  'common.theme.switchToDark': 'Ganti ke tema gelap',
+  'common.theme.switchToLight': 'Ganti ke tema terang',
 
   'tabs.home': 'Beranda',
   'tabs.history': 'Riwayat',
@@ -243,6 +260,7 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.language.title': 'Bahasa',
   'onboarding.language.english': 'English',
   'onboarding.language.indonesian': 'Bahasa Indonesia',
+  'onboarding.language.change': 'Ganti bahasa',
 
   'onboarding.welcome.eyebrow': 'Pendamping perkembangan kerja pribadi',
   'onboarding.welcome.title':
@@ -285,7 +303,18 @@ export const id: Record<TranslationKey, string> = {
     'Kapan review berikutnya kemungkinan dilakukan?',
   'onboarding.review.weeklyReminderTitle': 'Pengingat refleksi mingguan',
   'onboarding.review.weeklyReminderDescription':
-    'Pengingat singkat untuk mencatat apa yang bergerak maju minggu itu.',
+    'Pengingat lokal setiap Jumat pukul 16.30. Anda dapat mematikannya nanti.',
+  'onboarding.review.notificationChannelName': 'Refleksi mingguan',
+  'onboarding.review.notificationTitle': 'Waktunya check-in mingguan',
+  'onboarding.review.notificationBody':
+    'Apa yang Anda selesaikan, bantu, pecahkan, atau pelajari minggu ini?',
+  'onboarding.review.notificationPermissionTitle': 'Notifikasi belum aktif',
+  'onboarding.review.notificationPermissionDescription':
+    'KerjaLog hanya meminta izin notifikasi saat Anda mengaktifkan pengingat lokal ini. Anda dapat mengaktifkannya melalui pengaturan sistem.',
+  'onboarding.review.notificationSetupTitle':
+    'Pengingat belum dapat dijadwalkan',
+  'onboarding.review.notificationSetupDescription':
+    'Pengaturan Anda tetap aman, tetapi KerjaLog belum dapat membuat pengingat mingguan lokal. Coba lagi nanti.',
   'onboarding.review.appLockTitle': 'Gunakan kunci biometrik atau PIN',
   'onboarding.review.appLockDescription':
     'Kami akan meminta izin sebelum mengaktifkan perlindungan perangkat ketika fitur tersebut sudah tersedia.',
