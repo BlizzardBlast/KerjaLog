@@ -49,9 +49,7 @@ export function OnboardingHeader({
             tintColor={theme.colors.text}
           />
         </Pressable>
-      ) : (
-        <View style={styles.backButtonPlaceholder} />
-      )}
+      ) : null}
 
       <View
         accessibilityLabel={progressText}
@@ -103,10 +101,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: spacing[12],
     justifyContent: 'center',
-    width: spacing[12],
-  },
-  backButtonPlaceholder: {
-    height: spacing[12],
     width: spacing[12],
   },
   pressed: {
