@@ -23,18 +23,14 @@ import {
   type WeeklyReflectionEnableResult,
 } from '@/platform/notifications/weeklyReflection';
 
-function getReminderIssue(
-  result: Exclude<WeeklyReflectionEnableResult, 'enabled'>,
-): NotificationReminderIssue {
-  switch (result) {
-    case 'permission-denied':
-      return 'permission';
-    case 'exact-alarm-permission-required':
-      return 'exact-alarm';
-    case 'unsupported-runtime':
-      return 'runtime';
-  }
-}
+const reminderIssueByResult: Record<
+  Exclude<WeeklyReflectionEnableResult, 'enabled'>,
+  NotificationReminderIssue
+> = {
+  'permission-denied': 'permission',
+  'exact-alarm-permission-required': 'exact-alarm',
+  'unsupported-runtime': 'runtime',
+};
 
 export function ReviewRhythmStep({
   state,
@@ -69,7 +65,7 @@ export function ReviewRhythmStep({
         update({ weeklyReminderEnabled: false });
         dispatchReminderFeedback({
           type: 'failure',
-          issue: getReminderIssue(result),
+          issue: reminderIssueByResult[result],
         });
         return;
       }
