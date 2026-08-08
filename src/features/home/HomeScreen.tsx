@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { ThemeToggleButton } from '@/design-system/components/ThemeToggleButton';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { SectionHeading } from '@/features/home/components/SectionHeading';
@@ -32,20 +33,23 @@ export function HomeScreen() {
   return (
     <SafeAreaView
       edges={['top']}
-      style={[styles.screen, { backgroundColor: theme.colors.canvas }]}
+      style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.headingBlock}>
-          <Text variant="overline" color="primary">
-            {t('home.eyebrow')}
-          </Text>
-          <Text variant="title">{t('home.title')}</Text>
-          <Text variant="body" color="textMuted">
-            {t('home.description')}
-          </Text>
+        <View style={styles.headingRow}>
+          <View style={styles.headingBlock}>
+            <Text variant="overline" color="primary">
+              {t('home.eyebrow')}
+            </Text>
+            <Text variant="title">{t('home.title')}</Text>
+            <Text variant="body" color="textMuted">
+              {t('home.description')}
+            </Text>
+          </View>
+          <ThemeToggleButton />
         </View>
 
         <Button
@@ -209,9 +213,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 18,
   },
+  headingRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: spacing[3],
+  },
   headingBlock: {
+    flex: 1,
     gap: spacing[2],
     marginBottom: spacing[1],
+    minWidth: 0,
   },
   weekCard: {
     borderRadius: 22,
