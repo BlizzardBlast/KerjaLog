@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { OptionCard } from '@/design-system/components/OptionCard';
+import { ToggleSwitch } from '@/design-system/components/ToggleSwitch';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 
 function withTheme(children: ReactNode) {
@@ -72,6 +73,55 @@ describe('design-system interactions', () => {
     await fireEvent.press(option);
 
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  test('ToggleSwitch exposes switch state and toggles consistently', async () => {
+    const onValueChange = jest.fn();
+
+    await render(
+      withTheme(
+        <ToggleSwitch
+          accessibilityLabel="Weekly reminder"
+          onValueChange={onValueChange}
+          value={false}
+        />,
+      ),
+    );
+
+    const toggle = screen.getByRole('switch');
+
+    expect(toggle.props.accessibilityState).toEqual(
+      expect.objectContaining({ checked: false, disabled: false }),
+    );
+
+    await fireEvent.press(toggle);
+
+    expect(onValueChange).toHaveBeenCalledWith(true);
+  });
+
+  test('ToggleSwitch blocks presses while disabled', async () => {
+    const onValueChange = jest.fn();
+
+    await render(
+      withTheme(
+        <ToggleSwitch
+          accessibilityLabel="Weekly reminder"
+          disabled
+          onValueChange={onValueChange}
+          value
+        />,
+      ),
+    );
+
+    const toggle = screen.getByRole('switch');
+
+    expect(toggle.props.accessibilityState).toEqual(
+      expect.objectContaining({ checked: true, disabled: true }),
+    );
+
+    await fireEvent.press(toggle);
+
+    expect(onValueChange).not.toHaveBeenCalled();
   });
 
   test('DecorativeView hides descendants on both native platforms', async () => {
