@@ -42,15 +42,17 @@ export function ReviewRhythmStep({
         return;
       }
 
-      const permissionGranted = await enableWeeklyReflectionNotification({
+      const result = await enableWeeklyReflectionNotification({
         title: t('onboarding.review.notificationTitle'),
         body: t('onboarding.review.notificationBody'),
         channelName: t('onboarding.review.notificationChannelName'),
       });
 
-      if (!permissionGranted) {
+      if (result !== 'enabled') {
         update({ weeklyReminderEnabled: false });
-        setReminderIssue('permission');
+        setReminderIssue(
+          result === 'permission-denied' ? 'permission' : 'runtime',
+        );
         return;
       }
 
