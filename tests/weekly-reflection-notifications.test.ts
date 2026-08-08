@@ -38,7 +38,9 @@ describe('weekly reflection notifications', () => {
       canAskAgain: true,
     } as Notifications.NotificationPermissionsStatus);
 
-    await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(true);
+    await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(
+      'enabled',
+    );
 
     expect(requestPermissionsAsync).toHaveBeenCalledTimes(1);
     expect(scheduleNotificationAsync).toHaveBeenCalledWith(
@@ -64,7 +66,9 @@ describe('weekly reflection notifications', () => {
       canAskAgain: false,
     } as Notifications.NotificationPermissionsStatus);
 
-    await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(false);
+    await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(
+      'permission-denied',
+    );
 
     expect(requestPermissionsAsync).not.toHaveBeenCalled();
     expect(scheduleNotificationAsync).not.toHaveBeenCalled();
