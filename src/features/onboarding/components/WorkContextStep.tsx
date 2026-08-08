@@ -28,6 +28,7 @@ export function WorkContextStep({ state, update }: OnboardingStepProps) {
             key={option.value}
             title={t(option.titleKey)}
             description={t(option.descriptionKey)}
+            icon={option.icon}
             selected={state.workArea === option.value}
             onPress={() => update({ workArea: option.value })}
           />
@@ -40,6 +41,7 @@ export function WorkContextStep({ state, update }: OnboardingStepProps) {
             key={option.value}
             title={t(option.titleKey)}
             description={t(option.descriptionKey)}
+            icon={option.icon}
             selected={state.careerLevel === option.value}
             onPress={() => update({ careerLevel: option.value })}
           />
