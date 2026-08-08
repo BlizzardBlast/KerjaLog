@@ -2,10 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
   type PropsWithChildren,
-  useCallback,
-  useContext,
+  use,
   useEffect,
-  useMemo,
   useState,
 } from 'react';
 import { type TranslationKey, translations } from '@/i18n/translations';
@@ -82,27 +80,26 @@ export function I18nProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setLanguage = useCallback((nextLanguage: Language) => {
+  const setLanguage = (nextLanguage: Language) => {
     setLanguageState(nextLanguage);
     persistLanguage(nextLanguage).catch(EMPTY_FUNCTION);
-  }, []);
+  };
 
-  const t = useCallback(
-    (key: TranslationKey, params?: TranslationParams) =>
-      interpolate(translations[language][key], params),
-    [language],
-  );
+  const t = (key: TranslationKey, params?: TranslationParams) =>
+    interpolate(translations[language][key], params);
 
-  const value = useMemo<I18nContextValue>(
-    () => ({ language, isHydrated, setLanguage, t }),
-    [isHydrated, language, setLanguage, t],
-  );
+  const value: I18nContextValue = {
+    language,
+    isHydrated,
+    setLanguage,
+    t,
+  };
 
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  return <I18nContext value={value}>{children}</I18nContext>;
 }
 
 export function useI18n() {
-  const context = useContext(I18nContext);
+  const context = use(I18nContext);
 
   if (!context) {
     throw new Error('useI18n must be used inside I18nProvider.');

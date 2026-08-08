@@ -1,9 +1,7 @@
 import {
   createContext,
   type PropsWithChildren,
-  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -79,16 +77,16 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
       .catch(EMPTY_FUNCTION);
   }, [isHydrated, state]);
 
-  const currentStepIndex = useMemo(
-    () => Math.max(0, ONBOARDING_STEP_ORDER.indexOf(state.currentStep)),
-    [state.currentStep],
+  const currentStepIndex = Math.max(
+    0,
+    ONBOARDING_STEP_ORDER.indexOf(state.currentStep),
   );
 
-  const update = useCallback((patch: OnboardingPatch) => {
+  const update = (patch: OnboardingPatch) => {
     setState((current) => ({ ...current, ...patch }));
-  }, []);
+  };
 
-  const goNext = useCallback(() => {
+  const goNext = () => {
     setState((current) => {
       const index = ONBOARDING_STEP_ORDER.indexOf(current.currentStep);
       const nextStep =
@@ -101,9 +99,9 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
         currentStep: nextStep,
       };
     });
-  }, []);
+  };
 
-  const goBack = useCallback(() => {
+  const goBack = () => {
     setState((current) => {
       const index = ONBOARDING_STEP_ORDER.indexOf(current.currentStep);
       const previousStep = ONBOARDING_STEP_ORDER[Math.max(index - 1, 0)];
@@ -113,9 +111,9 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
         currentStep: previousStep,
       };
     });
-  }, []);
+  };
 
-  const complete = useCallback(async () => {
+  const complete = async () => {
     if (!hasRequiredOnboardingAnswers(state)) {
       throw new Error('Cannot complete onboarding without required answers.');
     }
@@ -131,24 +129,17 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
 
     skipNextAutosaveRef.current = true;
     setState(completedState);
-  }, [state]);
+  };
 
-  const value = useMemo<OnboardingContextValue>(
-    () => ({
-      state,
-      isHydrated,
-      currentStepIndex,
-      update,
-      goNext,
-      goBack,
-      complete,
-    }),
-    [complete, currentStepIndex, goBack, goNext, isHydrated, state, update],
-  );
+  const value: OnboardingContextValue = {
+    state,
+    isHydrated,
+    currentStepIndex,
+    update,
+    goNext,
+    goBack,
+    complete,
+  };
 
-  return (
-    <OnboardingContext.Provider value={value}>
-      {children}
-    </OnboardingContext.Provider>
-  );
+  return <OnboardingContext value={value}>{children}</OnboardingContext>;
 }

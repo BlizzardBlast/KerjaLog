@@ -2,10 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
   type PropsWithChildren,
-  useCallback,
-  useContext,
+  use,
   useEffect,
-  useMemo,
   useState,
 } from 'react';
 import { useColorScheme } from 'react-native';
@@ -66,10 +64,10 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setMode = useCallback((nextMode: ThemeMode) => {
+  const setMode = (nextMode: ThemeMode) => {
     setModeState(nextMode);
     persistThemeMode(nextMode).catch(EMPTY_FUNCTION);
-  }, []);
+  };
 
   const resolvedTheme: ResolvedTheme =
     mode === 'system'
@@ -78,24 +76,19 @@ export function ThemeProvider({ children }: PropsWithChildren) {
         : 'light'
       : mode;
 
-  const value = useMemo<ThemeContextValue>(
-    () => ({
-      theme: themes[resolvedTheme],
-      mode,
-      resolvedTheme,
-      isHydrated,
-      setMode,
-    }),
-    [isHydrated, mode, resolvedTheme, setMode],
-  );
+  const value: ThemeContextValue = {
+    theme: themes[resolvedTheme],
+    mode,
+    resolvedTheme,
+    isHydrated,
+    setMode,
+  };
 
-  return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-  );
+  return <ThemeContext value={value}>{children}</ThemeContext>;
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
+  const context = use(ThemeContext);
 
   if (!context) {
     throw new Error('useTheme must be used inside ThemeProvider.');
