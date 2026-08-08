@@ -1,19 +1,20 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { OptionCard } from '@/design-system/components/OptionCard';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
-import {
-  NotificationPermissionNotice,
-  type NotificationReminderIssue,
-} from '@/features/onboarding/components/NotificationPermissionNotice';
+import { NotificationPermissionNotice } from '@/features/onboarding/components/NotificationPermissionNotice';
 import { OptionSection } from '@/features/onboarding/components/OptionSection';
 import { SettingToggle } from '@/features/onboarding/components/SettingToggle';
 import { StepHeading } from '@/features/onboarding/components/StepHeading';
 import type { OnboardingStepProps } from '@/features/onboarding/components/types';
 import { reviewScheduleOptions } from '@/features/onboarding/options';
+import {
+  INITIAL_REMINDER_FEEDBACK_STATE,
+  reminderFeedbackReducer,
+} from '@/features/onboarding/reminderFeedback';
 import { useI18n } from '@/i18n/I18nProvider';
 import {
   disableWeeklyReflectionNotification,
@@ -27,18 +28,19 @@ export function ReviewRhythmStep({
 }: OnboardingStepProps) {
   const { theme } = useTheme();
   const { t } = useI18n();
-  const [isUpdatingReminder, setIsUpdatingReminder] = useState(false);
-  const [reminderIssue, setReminderIssue] =
-    useState<NotificationReminderIssue | null>(null);
+  const [reminderFeedback, dispatchReminderFeedback] = useReducer(
+    reminderFeedbackReducer,
+    INITIAL_REMINDER_FEEDBACK_STATE,
+  );
 
   const handleWeeklyReminderChange = async (enabled: boolean) => {
-    setIsUpdatingReminder(true);
+    dispatchReminderFeedback({ type: 'start' });
 
     try {
       if (!enabled) {
         await disableWeeklyReflectionNotification();
         update({ weeklyReminderEnabled: false });
-        setReminderIssue(null);
+        dispatchReminderFeedback({ type: 'success' });
         return;
       }
 
@@ -50,19 +52,18 @@ export function ReviewRhythmStep({
 
       if (result !== 'enabled') {
         update({ weeklyReminderEnabled: false });
-        setReminderIssue(
-          result === 'permission-denied' ? 'permission' : 'runtime',
-        );
+        dispatchReminderFeedback({
+          type: 'failure',
+          issue: result === 'permission-denied' ? 'permission' : 'runtime',
+        });
         return;
       }
 
       update({ weeklyReminderEnabled: true });
-      setReminderIssue(null);
+      dispatchReminderFeedback({ type: 'success' });
     } catch {
       update({ weeklyReminderEnabled: false });
-      setReminderIssue('setup');
-    } finally {
-      setIsUpdatingReminder(false);
+      dispatchReminderFeedback({ type: 'failure', issue: 'setup' });
     }
   };
 
@@ -91,12 +92,12 @@ export function ReviewRhythmStep({
         title={t('onboarding.review.weeklyReminderTitle')}
         description={t('onboarding.review.weeklyReminderDescription')}
         value={state.weeklyReminderEnabled}
-        disabled={isUpdatingReminder}
+        disabled={reminderFeedback.isUpdating}
         onValueChange={handleWeeklyReminderChange}
       />
 
-      {reminderIssue ? (
-        <NotificationPermissionNotice issue={reminderIssue} />
+      {reminderFeedback.issue ? (
+        <NotificationPermissionNotice issue={reminderFeedback.issue} />
       ) : null}
 
       <SettingToggle
