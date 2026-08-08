@@ -72,21 +72,23 @@ export function OnboardingScreen() {
     paddingRight: Math.max(insets.right, SCREEN_HORIZONTAL_PADDING),
   };
 
-  const resetScroll = () => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  const resetScrollAfterStepChange = () => {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    });
   };
 
   const handleBack = () => {
     setTransitionDirection('backward');
-    resetScroll();
     goBack();
+    resetScrollAfterStepChange();
   };
 
   const handlePrimaryAction = async () => {
     if (!stepConfig.isFinal) {
       setTransitionDirection('forward');
-      resetScroll();
       goNext();
+      resetScrollAfterStepChange();
       return;
     }
 
@@ -133,6 +135,8 @@ export function OnboardingScreen() {
             hasFinishError={hasFinishError}
           />
         </OnboardingStepTransition>
+
+        <View style={styles.contentFooterGap} />
       </ScrollView>
 
       <View
@@ -181,8 +185,10 @@ const styles = StyleSheet.create({
     minHeight: 0,
   },
   scrollContent: {
-    paddingBottom: spacing[8],
     paddingTop: 14,
+  },
+  contentFooterGap: {
+    height: spacing[6],
   },
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,
