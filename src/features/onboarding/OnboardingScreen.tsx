@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   ActivityIndicator,
@@ -13,6 +13,10 @@ import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
 import { OnboardingHeader } from '@/features/onboarding/components/OnboardingHeader';
+import {
+  OnboardingStepTransition,
+  type OnboardingTransitionDirection,
+} from '@/features/onboarding/components/OnboardingStepTransition';
 import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -30,14 +34,21 @@ export function OnboardingScreen() {
     goBack,
     complete,
   } = useOnboarding();
+  const scrollRef = useRef<ScrollView>(null);
   const [hasFinishError, setHasFinishError] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [transitionDirection, setTransitionDirection] =
+    useState<OnboardingTransitionDirection>('forward');
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [state.currentStep]);
 
   if (!isHydrated) {
     return (
       <SafeAreaView
         edges={['top', 'bottom']}
-        style={[styles.loadingScreen, { backgroundColor: theme.colors.canvas }]}
+        style={[styles.loadingScreen, { backgroundColor: theme.colors.surface }]}
       >
         <ActivityIndicator color={theme.colors.primary} size="small" />
         <Text variant="caption" color="textMuted">
@@ -51,8 +62,14 @@ export function OnboardingScreen() {
   const CurrentStep = stepConfig.Component;
   const canContinue = stepConfig.canContinue(state);
 
+  const handleBack = () => {
+    setTransitionDirection('backward');
+    goBack();
+  };
+
   const handlePrimaryAction = async () => {
     if (!stepConfig.isFinal) {
+      setTransitionDirection('forward');
       goNext();
       return;
     }
@@ -75,28 +92,37 @@ export function OnboardingScreen() {
   return (
     <SafeAreaView
       edges={['top', 'bottom']}
-      style={[styles.screen, { backgroundColor: theme.colors.canvas }]}
+      style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
-      <OnboardingHeader currentStepIndex={currentStepIndex} onBack={goBack} />
+      <OnboardingHeader
+        currentStepIndex={currentStepIndex}
+        onBack={handleBack}
+      />
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.scrollContent}
         contentInsetAdjustmentBehavior="never"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <CurrentStep
-          state={state}
-          update={update}
-          hasFinishError={hasFinishError}
-        />
+        <OnboardingStepTransition
+          step={state.currentStep}
+          direction={transitionDirection}
+        >
+          <CurrentStep
+            state={state}
+            update={update}
+            hasFinishError={hasFinishError}
+          />
+        </OnboardingStepTransition>
       </ScrollView>
 
       <View
         style={[
           styles.footer,
           {
-            backgroundColor: theme.colors.canvas,
+            backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.border,
           },
         ]}
