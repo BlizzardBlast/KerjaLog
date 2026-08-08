@@ -13,7 +13,7 @@ import { configureNotificationHandling } from '@/platform/notifications/weeklyRe
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 SplashScreen.preventAutoHideAsync().catch(EMPTY_FUNCTION);
-configureNotificationHandling();
+configureNotificationHandling().catch(EMPTY_FUNCTION);
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
