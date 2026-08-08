@@ -4,8 +4,27 @@ import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translations';
 
-export type NotificationReminderIssue = 'permission' | 'setup';
+export type NotificationReminderIssue = 'permission' | 'runtime' | 'setup';
+
+const issueCopy: Record<
+  NotificationReminderIssue,
+  { titleKey: TranslationKey; descriptionKey: TranslationKey }
+> = {
+  permission: {
+    titleKey: 'onboarding.review.notificationPermissionTitle',
+    descriptionKey: 'onboarding.review.notificationPermissionDescription',
+  },
+  runtime: {
+    titleKey: 'onboarding.review.notificationRuntimeTitle',
+    descriptionKey: 'onboarding.review.notificationRuntimeDescription',
+  },
+  setup: {
+    titleKey: 'onboarding.review.notificationSetupTitle',
+    descriptionKey: 'onboarding.review.notificationSetupDescription',
+  },
+};
 
 export function NotificationPermissionNotice({
   issue,
@@ -14,7 +33,7 @@ export function NotificationPermissionNotice({
 }) {
   const { theme } = useTheme();
   const { t } = useI18n();
-  const permissionDenied = issue === 'permission';
+  const copy = issueCopy[issue];
 
   return (
     <View
@@ -29,22 +48,14 @@ export function NotificationPermissionNotice({
     >
       <View style={styles.copy}>
         <Text variant="bodyStrong" color="warning">
-          {t(
-            permissionDenied
-              ? 'onboarding.review.notificationPermissionTitle'
-              : 'onboarding.review.notificationSetupTitle',
-          )}
+          {t(copy.titleKey)}
         </Text>
         <Text variant="caption" color="textMuted">
-          {t(
-            permissionDenied
-              ? 'onboarding.review.notificationPermissionDescription'
-              : 'onboarding.review.notificationSetupDescription',
-          )}
+          {t(copy.descriptionKey)}
         </Text>
       </View>
 
-      {permissionDenied ? (
+      {issue === 'permission' ? (
         <Button
           onPress={() => Linking.openSettings()}
           size="sm"
