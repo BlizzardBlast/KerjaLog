@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { type TranslationKey, translations } from '@/i18n/translations';
+import { type TranslationKey, translations } from '@/i18n/catalog';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 const LANGUAGE_STORAGE_KEY = '@kerjalog/language/v1';
