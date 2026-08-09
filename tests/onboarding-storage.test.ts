@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   DEFAULT_ONBOARDING_STATE,
+  DEFAULT_WEEKLY_REMINDER_SCHEDULE,
   type OnboardingState,
 } from '@/features/onboarding/model';
 import {
@@ -18,6 +19,11 @@ const COMPLETE_STATE: OnboardingState = {
   mainGoal: 'performance-review',
   reviewSchedule: 'within-3-months',
   weeklyReminderEnabled: true,
+  weeklyReminderSchedule: {
+    weekday: 3,
+    hour: 18,
+    minute: 15,
+  },
   appLockPreferred: true,
 };
 
@@ -34,6 +40,37 @@ describe('onboarding storage', () => {
     getItemMock.mockResolvedValueOnce(JSON.stringify(COMPLETE_STATE));
 
     await expect(loadOnboardingState()).resolves.toEqual(COMPLETE_STATE);
+  });
+
+  test('defaults a missing reminder schedule for older v1 state', async () => {
+    const { weeklyReminderSchedule: _, ...legacyState } = COMPLETE_STATE;
+    getItemMock.mockResolvedValueOnce(JSON.stringify(legacyState));
+
+    const state = await loadOnboardingState();
+
+    expect(state.weeklyReminderSchedule).toEqual(
+      DEFAULT_WEEKLY_REMINDER_SCHEDULE,
+    );
+  });
+
+  test.each([
+    { weekday: 0, hour: 16, minute: 30 },
+    { weekday: 8, hour: 16, minute: 30 },
+    { weekday: 6, hour: -1, minute: 30 },
+    { weekday: 6, hour: 24, minute: 30 },
+    { weekday: 6, hour: 16, minute: -1 },
+    { weekday: 6, hour: 16, minute: 60 },
+    { weekday: 'Friday', hour: 16, minute: 30 },
+  ])('sanitizes an invalid reminder schedule %#', async (schedule) => {
+    getItemMock.mockResolvedValueOnce(
+      JSON.stringify({ ...COMPLETE_STATE, weeklyReminderSchedule: schedule }),
+    );
+
+    const state = await loadOnboardingState();
+
+    expect(state.weeklyReminderSchedule).toEqual(
+      DEFAULT_WEEKLY_REMINDER_SCHEDULE,
+    );
   });
 
   test('downgrades completion when a required answer is missing', async () => {
