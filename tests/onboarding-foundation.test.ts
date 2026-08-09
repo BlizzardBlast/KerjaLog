@@ -58,9 +58,9 @@ describe('onboarding foundation', () => {
   });
 
   test('weekly reminder schedule validation accepts only valid local wall-clock values', () => {
-    expect(isValidWeeklyReminderSchedule(DEFAULT_WEEKLY_REMINDER_SCHEDULE)).toBe(
-      true,
-    );
+    expect(
+      isValidWeeklyReminderSchedule(DEFAULT_WEEKLY_REMINDER_SCHEDULE),
+    ).toBe(true);
     expect(REMINDER_WEEKDAYS.every(isReminderWeekday)).toBe(true);
     expect(isReminderWeekday(0)).toBe(false);
     expect(isReminderWeekday(8)).toBe(false);
