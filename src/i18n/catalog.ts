@@ -1,7 +1,4 @@
-import {
-  reminderEn,
-  reminderId,
-} from '@/i18n/reminderTranslations';
+import { reminderEn, reminderId } from '@/i18n/reminderTranslations';
 import { en as baseEn, id as baseId } from '@/i18n/translations';
 
 export const en = {
