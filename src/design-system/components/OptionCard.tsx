@@ -1,9 +1,19 @@
 import { SymbolView } from 'expo-symbols';
 import type { ComponentProps } from 'react';
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  interpolateColor,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { motion } from '@/design-system/tokens/motion';
 import { radii, spacing } from '@/design-system/tokens/theme';
 
 export type OptionCardIcon = ComponentProps<typeof SymbolView>['name'];
@@ -26,6 +36,36 @@ export function OptionCard({
   disabled = false,
 }: OptionCardProps) {
   const { theme } = useTheme();
+  const selectionProgress = useSharedValue(selected ? 1 : 0);
+
+  useEffect(() => {
+    selectionProgress.value = withTiming(selected ? 1 : 0, {
+      duration: motion.duration.state,
+      easing: Easing.out(Easing.cubic),
+      reduceMotion: ReduceMotion.System,
+    });
+  }, [selected, selectionProgress]);
+
+  const cardAnimatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      selectionProgress.value,
+      [0, 1],
+      [theme.colors.surface, theme.colors.primarySoft],
+    ),
+    borderColor: interpolateColor(
+      selectionProgress.value,
+      [0, 1],
+      [theme.colors.border, theme.colors.primary],
+    ),
+  }));
+
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      selectionProgress.value,
+      [0, 1],
+      [theme.colors.surfaceSubtle, theme.colors.primary],
+    ),
+  }));
 
   return (
     <Pressable
@@ -33,48 +73,45 @@ export function OptionCard({
       accessibilityState={{ checked: selected, disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.container,
-        {
-          backgroundColor: selected
-            ? theme.colors.primarySoft
-            : theme.colors.surface,
-          borderColor: selected ? theme.colors.primary : theme.colors.border,
-        },
-        selected && styles.selected,
-        pressed && !disabled && styles.pressed,
-        disabled && styles.disabled,
-      ]}
     >
-      {icon ? (
-        <DecorativeView
+      {({ pressed }) => (
+        <Animated.View
           style={[
-            styles.iconContainer,
-            {
-              backgroundColor: selected
-                ? theme.colors.primary
-                : theme.colors.surfaceSubtle,
-            },
+            styles.container,
+            cardAnimatedStyle,
+            selected && styles.selected,
+            pressed && !disabled && styles.pressed,
+            disabled && styles.disabled,
           ]}
         >
-          <SymbolView
-            name={icon}
-            size={20}
-            tintColor={
-              selected ? theme.colors.onPrimary : theme.colors.textMuted
-            }
-          />
-        </DecorativeView>
-      ) : null}
+          {icon ? (
+            <DecorativeView>
+              <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
+                <SymbolView
+                  name={icon}
+                  size={20}
+                  tintColor={
+                    selected ? theme.colors.onPrimary : theme.colors.textMuted
+                  }
+                />
+              </Animated.View>
+            </DecorativeView>
+          ) : null}
 
-      <View style={styles.copy}>
-        <Text variant="bodyStrong">{title}</Text>
-        {description ? (
-          <Text variant="caption" color="textMuted" style={styles.description}>
-            {description}
-          </Text>
-        ) : null}
-      </View>
+          <View style={styles.copy}>
+            <Text variant="bodyStrong">{title}</Text>
+            {description ? (
+              <Text
+                variant="caption"
+                color="textMuted"
+                style={styles.description}
+              >
+                {description}
+              </Text>
+            ) : null}
+          </View>
+        </Animated.View>
+      )}
     </Pressable>
   );
 }
