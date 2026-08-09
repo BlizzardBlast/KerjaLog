@@ -1,9 +1,15 @@
 import {
   CAREER_LEVELS,
   DEFAULT_ONBOARDING_STATE,
+  DEFAULT_WEEKLY_REMINDER_SCHEDULE,
   hasRequiredOnboardingAnswers,
+  isReminderHour,
+  isReminderMinute,
+  isReminderWeekday,
+  isValidWeeklyReminderSchedule,
   MAIN_GOALS,
   ONBOARDING_STEP_ORDER,
+  REMINDER_WEEKDAYS,
   REVIEW_SCHEDULES,
   WORK_AREAS,
 } from '@/features/onboarding/model';
@@ -14,9 +20,9 @@ import {
   workAreaOptions,
 } from '@/features/onboarding/options';
 import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
-import { en, id } from '@/i18n/translations';
+import { en, id } from '@/i18n/catalog';
 
-function expectUnique(values: readonly string[], label: string) {
+function expectUnique(values: readonly (string | number)[], label: string) {
   expect(new Set(values).size).toBe(values.length);
 
   if (new Set(values).size !== values.length) {
@@ -35,14 +41,35 @@ describe('onboarding foundation', () => {
     expectUnique(CAREER_LEVELS, 'career levels');
     expectUnique(MAIN_GOALS, 'main goals');
     expectUnique(REVIEW_SCHEDULES, 'review schedules');
+    expectUnique(REMINDER_WEEKDAYS, 'reminder weekdays');
 
     expect(DEFAULT_ONBOARDING_STATE.version).toBe(1);
     expect(DEFAULT_ONBOARDING_STATE.completed).toBe(false);
     expect(DEFAULT_ONBOARDING_STATE.weeklyReminderEnabled).toBe(false);
+    expect(DEFAULT_ONBOARDING_STATE.weeklyReminderSchedule).toEqual({
+      weekday: 6,
+      hour: 16,
+      minute: 30,
+    });
     expect(DEFAULT_ONBOARDING_STATE.appLockPreferred).toBe(false);
     expect(ONBOARDING_STEP_ORDER).toContain(
       DEFAULT_ONBOARDING_STATE.currentStep,
     );
+  });
+
+  test('weekly reminder schedule validation accepts only valid local wall-clock values', () => {
+    expect(isValidWeeklyReminderSchedule(DEFAULT_WEEKLY_REMINDER_SCHEDULE)).toBe(
+      true,
+    );
+    expect(REMINDER_WEEKDAYS.every(isReminderWeekday)).toBe(true);
+    expect(isReminderWeekday(0)).toBe(false);
+    expect(isReminderWeekday(8)).toBe(false);
+    expect(isReminderHour(0)).toBe(true);
+    expect(isReminderHour(23)).toBe(true);
+    expect(isReminderHour(24)).toBe(false);
+    expect(isReminderMinute(0)).toBe(true);
+    expect(isReminderMinute(59)).toBe(true);
+    expect(isReminderMinute(60)).toBe(false);
   });
 
   test('localized option arrays exhaustively follow domain values', () => {
