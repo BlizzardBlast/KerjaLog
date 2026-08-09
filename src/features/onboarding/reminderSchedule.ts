@@ -3,7 +3,7 @@ import type {
   WeeklyReminderSchedule,
 } from '@/features/onboarding/model';
 import type { Language } from '@/i18n/I18nProvider';
-import type { TranslationKey } from '@/i18n/translations';
+import type { TranslationKey } from '@/i18n/catalog';
 
 export const reminderWeekdayTranslationKeys: Record<
   ReminderWeekday,
