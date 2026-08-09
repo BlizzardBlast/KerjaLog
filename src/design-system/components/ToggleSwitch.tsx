@@ -1,6 +1,18 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
+import Animated, {
+  Easing,
+  interpolateColor,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { motion } from '@/design-system/tokens/motion';
 import { radii } from '@/design-system/tokens/theme';
+
+const THUMB_TRAVEL = 20;
 
 export type ToggleSwitchProps = {
   accessibilityLabel: string;
@@ -18,6 +30,27 @@ export function ToggleSwitch({
   onValueChange,
 }: ToggleSwitchProps) {
   const { theme } = useTheme();
+  const progress = useSharedValue(value ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withTiming(value ? 1 : 0, {
+      duration: motion.duration.state,
+      easing: Easing.out(Easing.cubic),
+      reduceMotion: ReduceMotion.System,
+    });
+  }, [progress, value]);
+
+  const trackAnimatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [theme.colors.controlTrackOff, theme.colors.primary],
+    ),
+  }));
+
+  const thumbAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: progress.value * THUMB_TRAVEL }],
+  }));
 
   return (
     <Pressable
@@ -33,26 +66,15 @@ export function ToggleSwitch({
         disabled && styles.disabled,
       ]}
     >
-      <View
-        style={[
-          styles.track,
-          {
-            backgroundColor: value
-              ? theme.colors.primary
-              : theme.colors.controlTrackOff,
-          },
-        ]}
-      >
-        <View
+      <Animated.View style={[styles.track, trackAnimatedStyle]}>
+        <Animated.View
           style={[
             styles.thumb,
-            {
-              backgroundColor: theme.colors.controlThumb,
-              transform: [{ translateX: value ? 20 : 0 }],
-            },
+            { backgroundColor: theme.colors.controlThumb },
+            thumbAnimatedStyle,
           ]}
         />
-      </View>
+      </Animated.View>
     </Pressable>
   );
 }
