@@ -21,6 +21,12 @@ const copy = {
   channelName: 'Weekly reflection',
 };
 
+const defaultSchedule = {
+  weekday: 6 as const,
+  hour: 16,
+  minute: 30,
+};
+
 describe('weekly reflection notifications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,7 +34,7 @@ describe('weekly reflection notifications', () => {
     scheduleNotificationAsync.mockResolvedValue('kerjalog-weekly-reflection');
   });
 
-  test('requests permission just in time and schedules Friday at 16:30', async () => {
+  test('requests permission just in time and schedules the selected weekly time', async () => {
     getPermissionsAsync.mockResolvedValue({
       granted: false,
       canAskAgain: true,
@@ -38,9 +44,15 @@ describe('weekly reflection notifications', () => {
       canAskAgain: true,
     } as Notifications.NotificationPermissionsStatus);
 
-    await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(
-      'enabled',
-    );
+    const schedule = {
+      weekday: 3 as const,
+      hour: 18,
+      minute: 15,
+    };
+
+    await expect(
+      enableWeeklyReflectionNotification({ schedule, copy }),
+    ).resolves.toBe('enabled');
 
     expect(requestPermissionsAsync).toHaveBeenCalledTimes(1);
     expect(scheduleNotificationAsync).toHaveBeenCalledWith(
@@ -52,9 +64,9 @@ describe('weekly reflection notifications', () => {
         },
         trigger: expect.objectContaining({
           type: 'weekly',
-          weekday: 6,
-          hour: 16,
-          minute: 30,
+          weekday: schedule.weekday,
+          hour: schedule.hour,
+          minute: schedule.minute,
         }),
       }),
     );
@@ -66,9 +78,9 @@ describe('weekly reflection notifications', () => {
       canAskAgain: false,
     } as Notifications.NotificationPermissionsStatus);
 
-    await expect(enableWeeklyReflectionNotification(copy)).resolves.toBe(
-      'permission-denied',
-    );
+    await expect(
+      enableWeeklyReflectionNotification({ schedule: defaultSchedule, copy }),
+    ).resolves.toBe('permission-denied');
 
     expect(requestPermissionsAsync).not.toHaveBeenCalled();
     expect(scheduleNotificationAsync).not.toHaveBeenCalled();
