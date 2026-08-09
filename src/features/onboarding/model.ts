@@ -43,6 +43,52 @@ export const REVIEW_SCHEDULES = [
 ] as const;
 export type ReviewSchedule = (typeof REVIEW_SCHEDULES)[number];
 
+export const REMINDER_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
+export type ReminderWeekday = (typeof REMINDER_WEEKDAYS)[number];
+
+export type WeeklyReminderSchedule = {
+  weekday: ReminderWeekday;
+  hour: number;
+  minute: number;
+};
+
+export const DEFAULT_WEEKLY_REMINDER_SCHEDULE: WeeklyReminderSchedule = {
+  weekday: 6,
+  hour: 16,
+  minute: 30,
+};
+
+export function isReminderWeekday(value: unknown): value is ReminderWeekday {
+  return (
+    typeof value === 'number' &&
+    REMINDER_WEEKDAYS.includes(value as ReminderWeekday)
+  );
+}
+
+export function isReminderHour(value: unknown): value is number {
+  return Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 23;
+}
+
+export function isReminderMinute(value: unknown): value is number {
+  return Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 59;
+}
+
+export function isValidWeeklyReminderSchedule(
+  value: unknown,
+): value is WeeklyReminderSchedule {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    isReminderWeekday(candidate.weekday) &&
+    isReminderHour(candidate.hour) &&
+    isReminderMinute(candidate.minute)
+  );
+}
+
 export type OnboardingState = {
   version: typeof ONBOARDING_STATE_VERSION;
   currentStep: OnboardingStepId;
@@ -52,6 +98,7 @@ export type OnboardingState = {
   mainGoal?: MainGoal;
   reviewSchedule?: ReviewSchedule;
   weeklyReminderEnabled: boolean;
+  weeklyReminderSchedule: WeeklyReminderSchedule;
   appLockPreferred: boolean;
 };
 
@@ -62,6 +109,7 @@ export type OnboardingEditableState = Pick<
   | 'mainGoal'
   | 'reviewSchedule'
   | 'weeklyReminderEnabled'
+  | 'weeklyReminderSchedule'
   | 'appLockPreferred'
 >;
 
@@ -85,5 +133,6 @@ export const DEFAULT_ONBOARDING_STATE: OnboardingState = {
   currentStep: 'welcome',
   completed: false,
   weeklyReminderEnabled: false,
+  weeklyReminderSchedule: DEFAULT_WEEKLY_REMINDER_SCHEDULE,
   appLockPreferred: false,
 };
