@@ -54,7 +54,9 @@ export function ReminderScheduleCard({
           onPress={() => setDayPickerVisible(true)}
         />
 
-        <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
+        <View
+          style={[styles.divider, { backgroundColor: theme.colors.border }]}
+        />
 
         <ScheduleRow
           label={t('onboarding.review.reminderTimeLabel')}
