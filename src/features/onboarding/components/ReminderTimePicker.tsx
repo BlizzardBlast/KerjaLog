@@ -25,7 +25,9 @@ export function ReminderTimePicker({
   const insets = useSafeAreaInsets();
   const { theme, resolvedTheme } = useTheme();
   const { language, t } = useI18n();
-  const [draftDate, setDraftDate] = useState(() => createReminderTimeDate(value));
+  const [draftDate, setDraftDate] = useState(() =>
+    createReminderTimeDate(value),
+  );
 
   useEffect(() => {
     if (visible) {
@@ -85,11 +87,7 @@ export function ReminderTimePicker({
           </View>
 
           <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={onClose}
-            >
+            <Pressable accessibilityRole="button" hitSlop={8} onPress={onClose}>
               <Text variant="label" color="textMuted">
                 {t('common.action.cancel')}
               </Text>
