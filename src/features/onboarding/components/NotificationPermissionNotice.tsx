@@ -1,7 +1,9 @@
 import { Linking, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { motion } from '@/design-system/tokens/motion';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import type { NotificationReminderIssue } from '@/features/onboarding/reminderFeedback';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -40,6 +42,9 @@ export function NotificationPermissionNotice({
   const { t } = useI18n();
   const copy = issueCopy[issue];
   const canOpenSettings = issue === 'permission' || issue === 'exact-alarm';
+  const entering = FadeIn.duration(motion.duration.feedback).reduceMotion(
+    ReduceMotion.System,
+  );
 
   const handleOpenSettings = () => {
     const settingsOperation =
@@ -51,8 +56,9 @@ export function NotificationPermissionNotice({
   };
 
   return (
-    <View
+    <Animated.View
       accessibilityRole="alert"
+      entering={entering}
       style={[
         styles.card,
         {
@@ -75,7 +81,7 @@ export function NotificationPermissionNotice({
           {t('common.action.openSettings')}
         </Button>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }
 
