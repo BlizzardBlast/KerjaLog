@@ -66,11 +66,21 @@ export function isReminderWeekday(value: unknown): value is ReminderWeekday {
 }
 
 export function isReminderHour(value: unknown): value is number {
-  return Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 23;
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value <= 23
+  );
 }
 
 export function isReminderMinute(value: unknown): value is number {
-  return Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 59;
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value <= 59
+  );
 }
 
 export function isValidWeeklyReminderSchedule(
