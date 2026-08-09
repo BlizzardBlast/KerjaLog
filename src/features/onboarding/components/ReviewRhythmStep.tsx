@@ -1,4 +1,3 @@
-import { useReducer } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { OptionCard } from '@/design-system/components/OptionCard';
 import { Text } from '@/design-system/components/Text';
@@ -7,30 +6,13 @@ import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
 import { NotificationPermissionNotice } from '@/features/onboarding/components/NotificationPermissionNotice';
 import { OptionSection } from '@/features/onboarding/components/OptionSection';
+import { ReminderScheduleCard } from '@/features/onboarding/components/ReminderScheduleCard';
 import { SettingToggle } from '@/features/onboarding/components/SettingToggle';
 import { StepHeading } from '@/features/onboarding/components/StepHeading';
 import type { OnboardingStepProps } from '@/features/onboarding/components/types';
 import { reviewScheduleOptions } from '@/features/onboarding/options';
-import {
-  INITIAL_REMINDER_FEEDBACK_STATE,
-  type NotificationReminderIssue,
-  reminderFeedbackReducer,
-} from '@/features/onboarding/reminderFeedback';
+import { useWeeklyReminderController } from '@/features/onboarding/useWeeklyReminderController';
 import { useI18n } from '@/i18n/I18nProvider';
-import {
-  disableWeeklyReflectionNotification,
-  enableWeeklyReflectionNotification,
-  type WeeklyReflectionEnableResult,
-} from '@/platform/notifications/weeklyReflection';
-
-const reminderIssueByResult: Record<
-  Exclude<WeeklyReflectionEnableResult, 'enabled'>,
-  NotificationReminderIssue
-> = {
-  'permission-denied': 'permission',
-  'exact-alarm-permission-required': 'exact-alarm',
-  'unsupported-runtime': 'runtime',
-};
 
 export function ReviewRhythmStep({
   state,
@@ -39,44 +21,7 @@ export function ReviewRhythmStep({
 }: OnboardingStepProps) {
   const { theme } = useTheme();
   const { t } = useI18n();
-  const [reminderFeedback, dispatchReminderFeedback] = useReducer(
-    reminderFeedbackReducer,
-    INITIAL_REMINDER_FEEDBACK_STATE,
-  );
-
-  const handleWeeklyReminderChange = async (enabled: boolean) => {
-    dispatchReminderFeedback({ type: 'start' });
-
-    try {
-      if (!enabled) {
-        await disableWeeklyReflectionNotification();
-        update({ weeklyReminderEnabled: false });
-        dispatchReminderFeedback({ type: 'success' });
-        return;
-      }
-
-      const result = await enableWeeklyReflectionNotification({
-        title: t('onboarding.review.notificationTitle'),
-        body: t('onboarding.review.notificationBody'),
-        channelName: t('onboarding.review.notificationChannelName'),
-      });
-
-      if (result !== 'enabled') {
-        update({ weeklyReminderEnabled: false });
-        dispatchReminderFeedback({
-          type: 'failure',
-          issue: reminderIssueByResult[result],
-        });
-        return;
-      }
-
-      update({ weeklyReminderEnabled: true });
-      dispatchReminderFeedback({ type: 'success' });
-    } catch {
-      update({ weeklyReminderEnabled: false });
-      dispatchReminderFeedback({ type: 'failure', issue: 'setup' });
-    }
-  };
+  const reminder = useWeeklyReminderController(state, update);
 
   return (
     <View style={styles.content}>
@@ -99,17 +44,25 @@ export function ReviewRhythmStep({
         ))}
       </OptionSection>
 
-      <SettingToggle
-        title={t('onboarding.review.weeklyReminderTitle')}
-        description={t('onboarding.review.weeklyReminderDescription')}
-        value={state.weeklyReminderEnabled}
-        disabled={reminderFeedback.isUpdating}
-        onValueChange={handleWeeklyReminderChange}
-      />
+      <View style={styles.reminderSection}>
+        <SettingToggle
+          title={t('onboarding.review.weeklyReminderTitle')}
+          description={t('onboarding.review.weeklyReminderDescription')}
+          value={state.weeklyReminderEnabled}
+          disabled={reminder.feedback.isUpdating}
+          onValueChange={reminder.setEnabled}
+        />
 
-      {reminderFeedback.issue ? (
-        <NotificationPermissionNotice issue={reminderFeedback.issue} />
-      ) : null}
+        <ReminderScheduleCard
+          schedule={state.weeklyReminderSchedule}
+          disabled={reminder.feedback.isUpdating}
+          onChange={reminder.setSchedule}
+        />
+
+        {reminder.feedback.issue ? (
+          <NotificationPermissionNotice issue={reminder.feedback.issue} />
+        ) : null}
+      </View>
 
       <SettingToggle
         title={t('onboarding.review.appLockTitle')}
@@ -146,6 +99,9 @@ export function ReviewRhythmStep({
 const styles = StyleSheet.create({
   content: {
     gap: spacing[6],
+  },
+  reminderSection: {
+    gap: spacing[3],
   },
   errorCard: {
     borderRadius: radii.md,
