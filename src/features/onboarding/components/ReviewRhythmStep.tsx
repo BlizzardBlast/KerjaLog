@@ -47,7 +47,7 @@ export function ReviewRhythmStep({
       <View style={styles.reminderSection}>
         <SettingToggle
           title={t('onboarding.review.weeklyReminderTitle')}
-          description={t('onboarding.review.weeklyReminderDescription')}
+          description={t('onboarding.review.reminderDescription')}
           value={state.weeklyReminderEnabled}
           disabled={reminder.feedback.isUpdating}
           onValueChange={reminder.setEnabled}
