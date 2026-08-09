@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   CAREER_LEVELS,
   DEFAULT_ONBOARDING_STATE,
+  DEFAULT_WEEKLY_REMINDER_SCHEDULE,
   hasRequiredOnboardingAnswers,
+  isValidWeeklyReminderSchedule,
   MAIN_GOALS,
   ONBOARDING_STATE_VERSION,
   ONBOARDING_STEP_ORDER,
@@ -60,6 +62,11 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
       typeof value.weeklyReminderEnabled === 'boolean'
         ? value.weeklyReminderEnabled
         : DEFAULT_ONBOARDING_STATE.weeklyReminderEnabled,
+    weeklyReminderSchedule: isValidWeeklyReminderSchedule(
+      value.weeklyReminderSchedule,
+    )
+      ? value.weeklyReminderSchedule
+      : DEFAULT_WEEKLY_REMINDER_SCHEDULE,
     appLockPreferred:
       typeof value.appLockPreferred === 'boolean'
         ? value.appLockPreferred
