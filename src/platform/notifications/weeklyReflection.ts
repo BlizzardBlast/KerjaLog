@@ -1,12 +1,10 @@
 import { isRunningInExpoGo } from 'expo';
 import type { NotificationPermissionsStatus } from 'expo-notifications';
 import { Linking, Platform } from 'react-native';
+import type { WeeklyReminderSchedule } from '@/features/onboarding/model';
 
 const WEEKLY_REFLECTION_CHANNEL_ID = 'weekly-reflection';
 const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
-const WEEKLY_REFLECTION_WEEKDAY = 6;
-const WEEKLY_REFLECTION_HOUR = 16;
-const WEEKLY_REFLECTION_MINUTE = 30;
 const EXACT_ALARM_SETTINGS_ACTION =
   'android.settings.REQUEST_SCHEDULE_EXACT_ALARM';
 const ANDROID_EXACT_ALARM_MIN_API = 31;
@@ -23,6 +21,11 @@ export type WeeklyReflectionNotificationCopy = {
   title: string;
   body: string;
   channelName: string;
+};
+
+export type WeeklyReflectionNotificationRequest = {
+  schedule: WeeklyReminderSchedule;
+  copy: WeeklyReflectionNotificationCopy;
 };
 
 function isUnsupportedNotificationRuntime(): boolean {
@@ -135,9 +138,10 @@ export async function openExactAlarmPermissionSettings(): Promise<void> {
   }
 }
 
-export async function enableWeeklyReflectionNotification(
-  copy: WeeklyReflectionNotificationCopy,
-): Promise<WeeklyReflectionEnableResult> {
+export async function enableWeeklyReflectionNotification({
+  schedule,
+  copy,
+}: WeeklyReflectionNotificationRequest): Promise<WeeklyReflectionEnableResult> {
   const notifications = loadNotifications();
 
   if (!notifications) {
@@ -166,9 +170,9 @@ export async function enableWeeklyReflectionNotification(
       },
       trigger: {
         type: notifications.SchedulableTriggerInputTypes.WEEKLY,
-        weekday: WEEKLY_REFLECTION_WEEKDAY,
-        hour: WEEKLY_REFLECTION_HOUR,
-        minute: WEEKLY_REFLECTION_MINUTE,
+        weekday: schedule.weekday,
+        hour: schedule.hour,
+        minute: schedule.minute,
         channelId:
           Platform.OS === 'android' ? WEEKLY_REFLECTION_CHANNEL_ID : undefined,
       },
