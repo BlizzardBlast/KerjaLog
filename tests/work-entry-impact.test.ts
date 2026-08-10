@@ -71,9 +71,9 @@ describe('work entry impact rules', () => {
   });
 
   test('builds a concise title from the original note', () => {
-    expect(buildEntryTitle('  Fixed the reconciliation mismatch. More detail.  ')).toBe(
-      'Fixed the reconciliation mismatch',
-    );
+    expect(
+      buildEntryTitle('  Fixed the reconciliation mismatch. More detail.  '),
+    ).toBe('Fixed the reconciliation mismatch');
     expect(buildEntryTitle('A'.repeat(90), 24)).toBe(`${'A'.repeat(23)}…`);
   });
 });
