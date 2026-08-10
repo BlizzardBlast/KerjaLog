@@ -47,7 +47,9 @@ describe('migrateDatabase', () => {
 
   test('does not advance user_version when the schema migration fails', async () => {
     const database = createDatabase(0);
-    database.execAsync.mockRejectedValueOnce(new Error('schema migration failed'));
+    database.execAsync.mockRejectedValueOnce(
+      new Error('schema migration failed'),
+    );
 
     await expect(migrateDatabase(database.db)).rejects.toThrow(
       'schema migration failed',
