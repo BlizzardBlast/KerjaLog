@@ -231,7 +231,11 @@ function mapJoinedRows(rows: JoinedWorkEntryRow[]): WorkEntry[] {
     const outcomeType =
       row.outcome_type === null
         ? null
-        : expectOneOf(row.outcome_type, OUTCOME_TYPES, 'work entry outcome type');
+        : expectOneOf(
+            row.outcome_type,
+            OUTCOME_TYPES,
+            'work entry outcome type',
+          );
     const status = expectOneOf(row.status, ENTRY_STATUSES, 'work entry status');
     const excludedFromExports = expectBooleanInteger(
       row.excluded_from_exports,
@@ -285,7 +289,9 @@ function mapJoinedRows(rows: JoinedWorkEntryRow[]): WorkEntry[] {
         accumulated.evidenceDetail !== null &&
         accumulated.evidenceDetail !== evidenceTextValue
       ) {
-        throw new Error(`Stored evidence for work entry ${id} is inconsistent.`);
+        throw new Error(
+          `Stored evidence for work entry ${id} is inconsistent.`,
+        );
       }
 
       accumulated.evidenceDetail = evidenceTextValue;
