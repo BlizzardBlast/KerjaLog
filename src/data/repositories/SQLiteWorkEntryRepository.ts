@@ -1,98 +1,30 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/data/database';
-import type {
-  CreateWorkEntry,
-  EntryStatus,
-  EntryType,
-  EvidenceType,
-  OutcomeType,
-  WorkEntry,
+import {
+  type CreateWorkEntry,
+  ENTRY_STATUSES,
+  ENTRY_TYPES,
+  EVIDENCE_TYPES,
+  OUTCOME_TYPES,
+  type WorkEntry,
 } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
 
-type WorkEntryRow = {
+type JoinedWorkEntryRow = {
   id: string;
-  type: EntryType;
+  type: string;
   title: string;
   raw_note: string;
   impact_statement: string | null;
   occurred_at: string;
-  outcome_type: OutcomeType | null;
-  status: EntryStatus;
+  outcome_type: string | null;
+  status: string;
   excluded_from_exports: number;
   created_at: string;
   updated_at: string;
-};
-
-type JoinedWorkEntryRow = WorkEntryRow & {
-  evidence_type: EvidenceType | null;
+  evidence_type: string | null;
   evidence_text_value: string | null;
 };
-
-function mapJoinedRows(rows: JoinedWorkEntryRow[]): WorkEntry[] {
-  const entries = new Map<
-    string,
-    {
-      entry: WorkEntry;
-      evidenceTypes: EvidenceType[];
-      evidenceDetail: string | null;
-    }
-  >();
-
-  for (const row of rows) {
-    let accumulated = entries.get(row.id);
-
-    if (!accumulated) {
-      accumulated = {
-        entry: {
-          id: row.id,
-          type: row.type,
-          title: row.title,
-          rawNote: row.raw_note,
-          impactStatement: row.impact_statement,
-          occurredAt: row.occurred_at,
-          outcomeType: row.outcome_type,
-          status: row.status,
-          evidence: null,
-          excludedFromExports: row.excluded_from_exports === 1,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
-        },
-        evidenceTypes: [],
-        evidenceDetail: null,
-      };
-
-      entries.set(row.id, accumulated);
-    }
-
-    if (
-      row.evidence_type !== null &&
-      !accumulated.evidenceTypes.includes(row.evidence_type)
-    ) {
-      accumulated.evidenceTypes.push(row.evidence_type);
-    }
-
-    if (
-      accumulated.evidenceDetail === null &&
-      row.evidence_text_value !== null
-    ) {
-      accumulated.evidenceDetail = row.evidence_text_value;
-    }
-  }
-
-  return [...entries.values()].map(
-    ({ entry, evidenceTypes, evidenceDetail }) => ({
-      ...entry,
-      evidence:
-        evidenceTypes.length > 0
-          ? {
-              types: evidenceTypes,
-              detail: evidenceDetail ?? '',
-            }
-          : null,
-    }),
-  );
-}
 
 export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntry | null> {
@@ -273,4 +205,146 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       updatedAt: now,
     };
   }
+}
+
+function mapJoinedRows(rows: JoinedWorkEntryRow[]): WorkEntry[] {
+  const entries = new Map<
+    string,
+    {
+      entry: WorkEntry;
+      evidenceTypes: WorkEntry['evidence'] extends infer Evidence
+        ? Evidence extends { types: infer Types }
+          ? Types
+          : never
+        : never;
+      evidenceDetail: string | null;
+    }
+  >();
+
+  for (const row of rows) {
+    const id = expectString(row.id, 'work entry id');
+    const type = expectOneOf(row.type, ENTRY_TYPES, 'work entry type');
+    const title = expectString(row.title, 'work entry title');
+    const rawNote = expectString(row.raw_note, 'work entry raw note');
+    const impactStatement = expectNullableString(
+      row.impact_statement,
+      'work entry impact statement',
+    );
+    const occurredAt = expectString(row.occurred_at, 'work entry occurred at');
+    const outcomeType =
+      row.outcome_type === null
+        ? null
+        : expectOneOf(row.outcome_type, OUTCOME_TYPES, 'work entry outcome type');
+    const status = expectOneOf(row.status, ENTRY_STATUSES, 'work entry status');
+    const excludedFromExports = expectBooleanInteger(
+      row.excluded_from_exports,
+      'work entry excluded from exports',
+    );
+    const createdAt = expectString(row.created_at, 'work entry created at');
+    const updatedAt = expectString(row.updated_at, 'work entry updated at');
+    const evidenceType =
+      row.evidence_type === null
+        ? null
+        : expectOneOf(row.evidence_type, EVIDENCE_TYPES, 'evidence type');
+    const evidenceTextValue = expectNullableString(
+      row.evidence_text_value,
+      'evidence text value',
+    );
+
+    let accumulated = entries.get(id);
+
+    if (!accumulated) {
+      accumulated = {
+        entry: {
+          id,
+          type,
+          title,
+          rawNote,
+          impactStatement,
+          occurredAt,
+          outcomeType,
+          status,
+          evidence: null,
+          excludedFromExports,
+          createdAt,
+          updatedAt,
+        },
+        evidenceTypes: [],
+        evidenceDetail: null,
+      };
+
+      entries.set(id, accumulated);
+    }
+
+    if (
+      evidenceType !== null &&
+      !accumulated.evidenceTypes.includes(evidenceType)
+    ) {
+      accumulated.evidenceTypes.push(evidenceType);
+    }
+
+    if (evidenceTextValue !== null) {
+      if (
+        accumulated.evidenceDetail !== null &&
+        accumulated.evidenceDetail !== evidenceTextValue
+      ) {
+        throw new Error(`Stored evidence for work entry ${id} is inconsistent.`);
+      }
+
+      accumulated.evidenceDetail = evidenceTextValue;
+    }
+  }
+
+  return [...entries.values()].map(
+    ({ entry, evidenceTypes, evidenceDetail }) => ({
+      ...entry,
+      evidence:
+        evidenceTypes.length > 0
+          ? {
+              types: evidenceTypes,
+              detail: evidenceDetail ?? '',
+            }
+          : null,
+    }),
+  );
+}
+
+function expectString(value: unknown, field: string): string {
+  if (typeof value !== 'string') {
+    throw new Error(`Stored ${field} is invalid.`);
+  }
+
+  return value;
+}
+
+function expectNullableString(value: unknown, field: string): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  return expectString(value, field);
+}
+
+function expectBooleanInteger(value: unknown, field: string): boolean {
+  if (value === 0) {
+    return false;
+  }
+
+  if (value === 1) {
+    return true;
+  }
+
+  throw new Error(`Stored ${field} is invalid.`);
+}
+
+function expectOneOf<const Values extends readonly string[]>(
+  value: unknown,
+  values: Values,
+  field: string,
+): Values[number] {
+  if (typeof value !== 'string' || !values.includes(value as Values[number])) {
+    throw new Error(`Stored ${field} is invalid.`);
+  }
+
+  return value as Values[number];
 }
