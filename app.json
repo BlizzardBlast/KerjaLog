@@ -20,6 +20,7 @@
       },
       "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"],
       "predictiveBackGestureEnabled": true,
+      "allowBackup": false,
       "icon": "./assets/images/icon.png"
     },
     "plugins": [
