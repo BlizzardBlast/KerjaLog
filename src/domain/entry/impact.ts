@@ -55,9 +55,10 @@ export function buildEntryTitle(rawNote: string, maxLength = 72): string {
 
   const clipped = firstSentence.slice(0, Math.max(1, maxLength - 1));
   const lastSpace = clipped.lastIndexOf(' ');
-  const safeClip = lastSpace >= Math.floor(maxLength * 0.6)
-    ? clipped.slice(0, lastSpace)
-    : clipped;
+  const safeClip =
+    lastSpace >= Math.floor(maxLength * 0.6)
+      ? clipped.slice(0, lastSpace)
+      : clipped;
 
   return `${trimEndingPunctuation(safeClip)}…`;
 }
