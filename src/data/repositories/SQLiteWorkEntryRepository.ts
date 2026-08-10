@@ -5,6 +5,7 @@ import {
   ENTRY_STATUSES,
   ENTRY_TYPES,
   EVIDENCE_TYPES,
+  type EvidenceType,
   OUTCOME_TYPES,
   type WorkEntry,
 } from '@/domain/entry/model';
@@ -212,11 +213,7 @@ function mapJoinedRows(rows: JoinedWorkEntryRow[]): WorkEntry[] {
     string,
     {
       entry: WorkEntry;
-      evidenceTypes: WorkEntry['evidence'] extends infer Evidence
-        ? Evidence extends { types: infer Types }
-          ? Types
-          : never
-        : never;
+      evidenceTypes: EvidenceType[];
       evidenceDetail: string | null;
     }
   >();
