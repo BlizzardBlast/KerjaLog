@@ -126,7 +126,9 @@ function createLocalId(timestamp: string): string {
   return `${timePart}-${randomPart}`;
 }
 
-function enqueueWrite<Result>(operation: () => Promise<Result>): Promise<Result> {
+function enqueueWrite<Result>(
+  operation: () => Promise<Result>,
+): Promise<Result> {
   const result = writeQueue.then(operation, operation);
   writeQueue = result.then(
     () => undefined,
