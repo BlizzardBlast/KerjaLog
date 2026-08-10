@@ -17,6 +17,11 @@ export type WeeklyReflectionEnableResult =
   | 'exact-alarm-permission-required'
   | 'unsupported-runtime';
 
+export type WeeklyReflectionNotificationStatus =
+  | 'enabled'
+  | 'disabled'
+  | 'unsupported-runtime';
+
 export type WeeklyReflectionNotificationCopy = {
   title: string;
   body: string;
@@ -124,6 +129,28 @@ export async function configureNotificationHandling(): Promise<void> {
       shouldShowList: true,
     }),
   });
+}
+
+export async function getWeeklyReflectionNotificationStatus(): Promise<WeeklyReflectionNotificationStatus> {
+  const notifications = loadNotifications();
+
+  if (!notifications) {
+    return 'unsupported-runtime';
+  }
+
+  const permissions = await notifications.getPermissionsAsync();
+
+  if (!isNotificationPermissionGranted(permissions, notifications)) {
+    return 'disabled';
+  }
+
+  const scheduledNotifications =
+    await notifications.getAllScheduledNotificationsAsync();
+  const isScheduled = scheduledNotifications.some(
+    (request) => request.identifier === WEEKLY_REFLECTION_NOTIFICATION_ID,
+  );
+
+  return isScheduled ? 'enabled' : 'disabled';
 }
 
 export async function openExactAlarmPermissionSettings(): Promise<void> {
