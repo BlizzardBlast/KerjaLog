@@ -7,7 +7,12 @@ const DATABASE_NAME = 'kerjalog.db';
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  databasePromise ??= openDatabase();
+  if (!databasePromise) {
+    databasePromise = openDatabase().catch((error: unknown) => {
+      databasePromise = null;
+      throw error;
+    });
+  }
 
   return databasePromise;
 }
