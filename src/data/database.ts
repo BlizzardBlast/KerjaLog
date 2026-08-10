@@ -2,7 +2,10 @@ import * as SQLite from 'expo-sqlite';
 import { migrateDatabase } from '@/data/migrations/migrateDatabase';
 import { getOrCreateDatabaseKey } from '@/platform/secure-storage/databaseKey';
 
-const DATABASE_NAME = 'kerjalog.db';
+// This filename intentionally differs from the earlier development database.
+// Before SQLCipher was enabled, a plaintext kerjalog.db could have been created
+// on a device. Opening that file as an encrypted database produces SQLITE_NOTADB.
+const DATABASE_NAME = 'kerjalog-encrypted-v1.db';
 
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -19,13 +22,19 @@ export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
   const key = await getOrCreateDatabaseKey();
-  const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
+  const db = await SQLite.openDatabaseAsync(DATABASE_NAME, {
+    // Expo caches same-name native connections for Fast Refresh by default.
+    // SQLCipher must key each newly opened handle before any database page is
+    // accessed, so keep this connection isolated from a stale native handle.
+    useNewConnection: true,
+  });
 
   try {
-    // Must happen before reading/writing any database pages.
-    await db.execAsync(`PRAGMA key = "x'${key}'"`);
+    // Expo documents passphrase keying immediately after open. The value is a
+    // locally generated 256-bit hexadecimal secret, so it contains no SQL
+    // quoting characters and is never derived from user input.
+    await db.execAsync(`PRAGMA key = '${key}'`);
 
-    // Verify that this binary actually contains SQLCipher.
     const cipher = await db.getFirstAsync<{ cipher_version: string }>(
       'PRAGMA cipher_version',
     );
@@ -34,8 +43,8 @@ async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
       throw new Error('SQLCipher is not available in this build.');
     }
 
-    // Forces SQLCipher to actually try reading the database,
-    // therefore detecting a wrong key.
+    // Force SQLCipher to authenticate/decrypt the first database page before
+    // migrations or application queries run. A wrong key fails here.
     await db.getFirstAsync('SELECT count(*) AS count FROM sqlite_master');
 
     await db.execAsync('PRAGMA foreign_keys = ON');
