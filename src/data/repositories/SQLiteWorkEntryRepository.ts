@@ -1,5 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/data/database';
+import { withKeyedTransaction } from '@/data/keyedTransaction';
 import {
   type CreateWorkEntry,
   ENTRY_STATUSES,
@@ -131,7 +132,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
 
-    await db.withExclusiveTransactionAsync(async (transaction) => {
+    await withKeyedTransaction(db, async (transaction) => {
       await transaction.runAsync(
         `
           INSERT INTO work_entries (
