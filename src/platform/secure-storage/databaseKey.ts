@@ -15,7 +15,7 @@ export async function getOrCreateDatabaseKey(): Promise<string> {
     secureStoreOptions,
   );
 
-  if (storedKey) {
+  if (storedKey !== null) {
     if (!DATABASE_KEY_PATTERN.test(storedKey)) {
       throw new Error('Stored database encryption key is invalid.');
     }
