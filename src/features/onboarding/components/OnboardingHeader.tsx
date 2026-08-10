@@ -1,5 +1,6 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
@@ -79,9 +80,11 @@ export function OnboardingHeader({
         ))}
       </View>
 
-      <Text variant="caption" color="textMuted" style={styles.stepCount}>
-        {currentStepIndex + 1}/{ONBOARDING_STEP_ORDER.length}
-      </Text>
+      <DecorativeView>
+        <Text variant="caption" color="textMuted" style={styles.stepCount}>
+          {currentStepIndex + 1}/{ONBOARDING_STEP_ORDER.length}
+        </Text>
+      </DecorativeView>
     </View>
   );
 }
