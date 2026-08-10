@@ -23,6 +23,8 @@ KerjaLog v1 is intentionally:
 - Indonesian- and English-capable;
 - AI-free, backend-free, and cloud-sync-free in the core product-validation milestone.
 
+**Web is not a supported v1 product target.** Do not add web-specific compatibility code, layout workarounds, acceptance criteria, or CI gates when they would add complexity or compromise Android/iOS quality, performance, or maintainability. Shared React Native code may happen to run on web, but that is incidental and is not a release requirement.
+
 The app should **not** become a task manager, time tracker, employer dashboard, social network, or AI wrapper.
 
 ## Current stack
@@ -53,7 +55,7 @@ Start Expo:
 pnpm start
 ```
 
-Run a platform:
+Run a supported platform:
 
 ```bash
 pnpm android

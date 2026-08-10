@@ -1,0 +1,7 @@
+# pnpm 11 applies a one-day release-age gate by default. These exact versions
+# were already committed to this lockfile before CI was introduced, so allow
+# only them through the gate rather than disabling supply-chain verification.
+minimumReleaseAgeExclude:
+  - '@expo/config@57.0.7'
+  - 'caniuse-lite@1.0.30001809'
+  - 'update-browserslist-db@1.3.0'

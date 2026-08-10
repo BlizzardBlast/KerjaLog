@@ -1,0 +1,25 @@
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/design-system/components/Text';
+
+export type SectionHeadingProps = {
+  title: string;
+  description: string;
+};
+
+export function SectionHeading({ title, description }: SectionHeadingProps) {
+  return (
+    <View style={styles.container}>
+      <Text variant="heading">{title}</Text>
+      <Text variant="caption" color="textMuted">
+        {description}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 2,
+    marginTop: 10,
+  },
+});

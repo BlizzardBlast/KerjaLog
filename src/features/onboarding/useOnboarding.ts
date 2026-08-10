@@ -1,0 +1,12 @@
+import { use } from 'react';
+import { OnboardingContext } from '@/features/onboarding/OnboardingProvider';
+
+export function useOnboarding() {
+  const context = use(OnboardingContext);
+
+  if (!context) {
+    throw new Error('useOnboarding must be used inside OnboardingProvider.');
+  }
+
+  return context;
+}
