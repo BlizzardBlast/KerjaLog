@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "platforms": ["android", "ios"],
     "ios": {
-      "icon": "./assets/kerjalog.icon"
+      "icon": "./assets/kerjalog.icon",
+      "bundleIdentifier": "com.anonymous.KerjaLog"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +22,8 @@
       "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"],
       "predictiveBackGestureEnabled": true,
       "allowBackup": false,
-      "icon": "./assets/images/icon.png"
+      "icon": "./assets/images/icon.png",
+      "package": "com.anonymous.KerjaLog"
     },
     "plugins": [
       "expo-router",
