@@ -199,12 +199,7 @@ export function OutcomeStep({
           />
         ))}
       </View>
-      <Button
-        fullWidth
-        disabled={!outcomeType}
-        onPress={onContinue}
-        size="lg"
-      >
+      <Button fullWidth disabled={!outcomeType} onPress={onContinue} size="lg">
         {t('log.outcome.continue')}
       </Button>
     </>
