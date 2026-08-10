@@ -2,7 +2,7 @@
 
 > Status: product and architecture direction for v1
 >
-> Last reviewed: 2026-08-07
+> Last reviewed: 2026-08-10
 
 KerjaLog is a private, local-first career achievement tracker for office workers. It helps people capture everyday work while it is still fresh, understand the impact of that work, preserve evidence, and turn that evidence into useful material for performance reviews, one-on-ones, resumes, and interviews.
 
@@ -258,6 +258,10 @@ Suggested prompts:
 Every prompt must be skippable.
 
 Use local scheduled notifications. Do not require a notification backend.
+
+The reminder is opt-in. The user chooses the weekday and local wall-clock time before enabling it. Friday at 16:30 is only the initial suggestion, not fixed product behavior. Persist the schedule as local weekday/hour/minute fields rather than a UTC timestamp or serialized calendar date.
+
+On Android 12+, precise user-selected reminder times may require the `SCHEDULE_EXACT_ALARM` special app access. Explain why that access is needed before sending the user to the system **Alarms & reminders** screen. If notification permission or the native scheduled request is later removed, reconcile the persisted preference when the app starts or returns to the foreground so an ON state continues to mean that a native reminder is actually scheduled. Do not turn the reminder off merely because the current runtime cannot inspect native reminder state.
 
 Do not use visible streaks or guilt-based messaging for missed weeks.
 
