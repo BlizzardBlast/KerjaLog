@@ -1,5 +1,6 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
@@ -95,9 +96,11 @@ export function ReminderDayPicker({
                     {t(reminderWeekdayTranslationKeys[weekday])}
                   </Text>
                   {selected ? (
-                    <Text variant="bodyStrong" color="primary">
-                      ✓
-                    </Text>
+                    <DecorativeView>
+                      <Text variant="bodyStrong" color="primary">
+                        ✓
+                      </Text>
+                    </DecorativeView>
                   ) : null}
                 </Pressable>
               );
