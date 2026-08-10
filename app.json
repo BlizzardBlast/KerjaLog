@@ -26,6 +26,19 @@
       "expo-router",
       "expo-notifications",
       [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true,
+          "enableFTS": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#7138F2",
@@ -37,9 +50,7 @@
             "backgroundColor": "#151218"
           }
         }
-      ],
-      "expo-sqlite",
-      "expo-secure-store"
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
