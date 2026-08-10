@@ -38,9 +38,7 @@ export function LogChoiceCard({
           backgroundColor: selected
             ? theme.colors.primarySoft
             : theme.colors.surface,
-          borderColor: selected
-            ? theme.colors.primary
-            : theme.colors.border,
+          borderColor: selected ? theme.colors.primary : theme.colors.border,
         },
         selected && styles.selected,
         pressed && styles.pressed,
