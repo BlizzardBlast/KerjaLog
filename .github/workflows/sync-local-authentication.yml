@@ -1,0 +1,46 @@
+name: Sync local authentication dependency
+
+on:
+  push:
+    branches:
+      - feat/log
+    paths:
+      - .github/workflows/sync-local-authentication.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feat/log
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.20.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.18.1
+          cache: pnpm
+
+      - name: Install local authentication
+        run: pnpm add expo-local-authentication@~57.0.1
+
+      - name: Commit dependency files
+        run: |
+          if git diff --quiet -- package.json pnpm-lock.yaml; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml
+          git commit -m "chore: add Expo local authentication"
+          git push origin HEAD:feat/log
