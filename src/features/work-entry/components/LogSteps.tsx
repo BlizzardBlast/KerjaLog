@@ -65,12 +65,7 @@ export function CaptureTypeStep({
           />
         ))}
       </View>
-      <Button
-        fullWidth
-        disabled={!intent}
-        onPress={onContinue}
-        size="lg"
-      >
+      <Button fullWidth disabled={!intent} onPress={onContinue} size="lg">
         {t('log.capture.continue')}
       </Button>
     </>
@@ -122,7 +117,9 @@ export function EventStep({
             theme.typography.body,
             {
               backgroundColor: theme.colors.surface,
-              borderColor: noteError ? theme.colors.danger : theme.colors.border,
+              borderColor: noteError
+                ? theme.colors.danger
+                : theme.colors.border,
               color: theme.colors.text,
             },
           ]}
@@ -160,7 +157,9 @@ export function EventStep({
           {t('log.event.continue')}
         </Button>
       </View>
-      {saveError ? <InlineError>{t('log.impact.saveError')}</InlineError> : null}
+      {saveError ? (
+        <InlineError>{t('log.impact.saveError')}</InlineError>
+      ) : null}
     </>
   );
 }
@@ -396,7 +395,9 @@ export function ImpactStep({
       >
         {t('log.impact.confirm')}
       </Button>
-      {saveError ? <InlineError>{t('log.impact.saveError')}</InlineError> : null}
+      {saveError ? (
+        <InlineError>{t('log.impact.saveError')}</InlineError>
+      ) : null}
     </>
   );
 }
@@ -448,7 +449,9 @@ function getOutcomeLabel(outcomeType: OutcomeType, t: Translate): string {
     return t('log.impact.notKnown');
   }
 
-  const option = outcomeOptions.find((candidate) => candidate.value === outcomeType);
+  const option = outcomeOptions.find(
+    (candidate) => candidate.value === outcomeType,
+  );
   return option ? t(option.titleKey) : t('log.impact.notKnown');
 }
 
