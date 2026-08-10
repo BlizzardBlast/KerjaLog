@@ -1,4 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { withKeyedTransaction } from '@/data/keyedTransaction';
 import { migrateToVersion1 } from '@/data/migrations/001-initial';
 
 const DATABASE_VERSION = 1;
@@ -14,7 +15,7 @@ export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
     return;
   }
 
-  await db.withExclusiveTransactionAsync(async (transaction) => {
+  await withKeyedTransaction(db, async (transaction) => {
     if (version < 1) {
       await migrateToVersion1(transaction);
       version = 1;
