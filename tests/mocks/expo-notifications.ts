@@ -1,5 +1,6 @@
 export const getPermissionsAsync = jest.fn();
 export const requestPermissionsAsync = jest.fn();
+export const getAllScheduledNotificationsAsync = jest.fn();
 export const setNotificationChannelAsync = jest.fn();
 export const cancelScheduledNotificationAsync = jest.fn();
 export const scheduleNotificationAsync = jest.fn();
