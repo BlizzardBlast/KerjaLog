@@ -7,21 +7,25 @@ import { motion } from '@/design-system/tokens/motion';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import type { NotificationReminderIssue } from '@/features/onboarding/reminderFeedback';
 import { useI18n } from '@/i18n/I18nProvider';
-import type { TranslationKey } from '@/i18n/translations';
+import type { TranslationKey } from '@/i18n/catalog';
 import { openExactAlarmPermissionSettings } from '@/platform/notifications/weeklyReflection';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
-const issueCopy: Record<
-  NotificationReminderIssue,
-  { titleKey: TranslationKey; descriptionKey: TranslationKey }
-> = {
+type IssueCopy = {
+  titleKey: TranslationKey;
+  descriptionKey: TranslationKey;
+  actionKey?: TranslationKey;
+};
+
+const issueCopy: Record<NotificationReminderIssue, IssueCopy> = {
   permission: {
     titleKey: 'onboarding.review.notificationPermissionTitle',
     descriptionKey: 'onboarding.review.notificationPermissionDescription',
   },
   'exact-alarm': {
-    titleKey: 'onboarding.review.notificationSetupTitle',
-    descriptionKey: 'onboarding.review.notificationSetupDescription',
+    titleKey: 'onboarding.review.exactAlarmPermissionTitle',
+    descriptionKey: 'onboarding.review.exactAlarmPermissionDescription',
+    actionKey: 'onboarding.review.exactAlarmOpenSettings',
   },
   runtime: {
     titleKey: 'onboarding.review.notificationSetupTitle',
@@ -78,7 +82,7 @@ export function NotificationPermissionNotice({
 
       {canOpenSettings ? (
         <Button onPress={handleOpenSettings} size="sm" variant="secondary">
-          {t('common.action.openSettings')}
+          {t(copy.actionKey ?? 'common.action.openSettings')}
         </Button>
       ) : null}
     </Animated.View>
