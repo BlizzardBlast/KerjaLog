@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { AppState } from 'react-native';
 import {
   DEFAULT_ONBOARDING_STATE,
   hasRequiredOnboardingAnswers,
@@ -16,6 +17,7 @@ import {
   loadOnboardingState,
   saveOnboardingState,
 } from '@/features/onboarding/storage';
+import { getWeeklyReflectionNotificationStatus } from '@/platform/notifications/weeklyReflection';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 export type OnboardingContextValue = {
@@ -76,6 +78,50 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
       .then(() => saveOnboardingState(snapshot))
       .catch(EMPTY_FUNCTION);
   }, [isHydrated, state]);
+
+  useEffect(() => {
+    if (!isHydrated || !state.weeklyReminderEnabled) {
+      return;
+    }
+
+    let ignore = false;
+    let isReconciling = false;
+
+    const reconcileReminderState = async () => {
+      if (isReconciling) {
+        return;
+      }
+
+      isReconciling = true;
+
+      try {
+        const status = await getWeeklyReflectionNotificationStatus();
+
+        if (!ignore && status === 'disabled') {
+          setState((current) =>
+            current.weeklyReminderEnabled
+              ? { ...current, weeklyReminderEnabled: false }
+              : current,
+          );
+        }
+      } finally {
+        isReconciling = false;
+      }
+    };
+
+    reconcileReminderState().catch(EMPTY_FUNCTION);
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        reconcileReminderState().catch(EMPTY_FUNCTION);
+      }
+    });
+
+    return () => {
+      ignore = true;
+      subscription.remove();
+    };
+  }, [isHydrated, state.weeklyReminderEnabled]);
 
   const currentStepIndex = Math.max(
     0,
