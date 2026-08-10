@@ -4,11 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import {
-  radii,
-  spacing,
-  type ThemeColors,
-} from '@/design-system/tokens/theme';
+import { radii, spacing, type ThemeColors } from '@/design-system/tokens/theme';
 import type { EntryStatus, OutcomeType } from '@/domain/entry/model';
 import { outcomeOptions } from '@/features/work-entry/model';
 import { useWorkEntry } from '@/features/work-entry/useWorkEntry';
@@ -190,7 +186,9 @@ function getOutcomeLabel(outcomeType: OutcomeType, t: Translate): string {
     return t('log.impact.notKnown');
   }
 
-  const option = outcomeOptions.find((candidate) => candidate.value === outcomeType);
+  const option = outcomeOptions.find(
+    (candidate) => candidate.value === outcomeType,
+  );
   return option ? t(option.titleKey) : t('log.impact.notKnown');
 }
 
