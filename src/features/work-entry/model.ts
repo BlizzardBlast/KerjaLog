@@ -1,11 +1,11 @@
-import type { ComponentProps } from 'react';
 import type { SymbolView } from 'expo-symbols';
+import type { ComponentProps } from 'react';
+import type { LogEventIntent } from '@/domain/entry/impact';
 import type {
   EntryType,
   EvidenceType,
   OutcomeType,
 } from '@/domain/entry/model';
-import type { LogEventIntent } from '@/domain/entry/impact';
 import type { TranslationKey } from '@/i18n/catalog';
 
 type SymbolName = ComponentProps<typeof SymbolView>['name'];

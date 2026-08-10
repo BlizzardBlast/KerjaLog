@@ -17,8 +17,8 @@ import {
 import type { EvidenceType, OutcomeType } from '@/domain/entry/model';
 import {
   CaptureTypeStep,
-  EvidenceStep,
   EventStep,
+  EvidenceStep,
   ImpactStep,
   OutcomeStep,
 } from '@/features/work-entry/components/LogSteps';

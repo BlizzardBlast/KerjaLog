@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
+  type CreateWorkEntry,
   ENTRY_STATUSES,
   ENTRY_TYPES,
   EVIDENCE_TYPES,
   OUTCOME_TYPES,
-  type CreateWorkEntry,
   type WorkEntry,
   type WorkEntryEvidence,
 } from '@/domain/entry/model';
