@@ -1,5 +1,4 @@
 import * as Crypto from 'expo-crypto';
-import type { SQLiteDatabase } from 'expo-sqlite';
 import { getDatabase } from '@/data/database';
 import { SQLiteWorkEntryRepository } from '@/data/repositories/SQLiteWorkEntryRepository';
 import type { CreateWorkEntry } from '@/domain/entry/model';
