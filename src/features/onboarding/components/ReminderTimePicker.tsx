@@ -87,7 +87,11 @@ export function ReminderTimePicker({
           </View>
 
           <View style={styles.header}>
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={onClose}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onClose}
+              style={styles.headerAction}
+            >
               <Text variant="label" color="textMuted">
                 {t('common.action.cancel')}
               </Text>
@@ -99,11 +103,11 @@ export function ReminderTimePicker({
 
             <Pressable
               accessibilityRole="button"
-              hitSlop={8}
               onPress={() => {
                 onChange(draftDate);
                 onClose();
               }}
+              style={styles.headerAction}
             >
               <Text variant="label" color="primary">
                 {t('common.action.done')}
@@ -159,5 +163,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  headerAction: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    minWidth: 64,
   },
 });
