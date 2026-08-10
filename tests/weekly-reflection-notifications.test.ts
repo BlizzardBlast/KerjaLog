@@ -2,11 +2,15 @@ import * as Notifications from 'expo-notifications';
 import {
   disableWeeklyReflectionNotification,
   enableWeeklyReflectionNotification,
+  getWeeklyReflectionNotificationStatus,
 } from '@/platform/notifications/weeklyReflection';
 
 const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);
 const requestPermissionsAsync = jest.mocked(
   Notifications.requestPermissionsAsync,
+);
+const getAllScheduledNotificationsAsync = jest.mocked(
+  Notifications.getAllScheduledNotificationsAsync,
 );
 const cancelScheduledNotificationAsync = jest.mocked(
   Notifications.cancelScheduledNotificationAsync,
@@ -30,6 +34,7 @@ const defaultSchedule = {
 describe('weekly reflection notifications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getAllScheduledNotificationsAsync.mockResolvedValue([]);
     cancelScheduledNotificationAsync.mockResolvedValue(undefined);
     scheduleNotificationAsync.mockResolvedValue('kerjalog-weekly-reflection');
   });
@@ -84,6 +89,49 @@ describe('weekly reflection notifications', () => {
 
     expect(requestPermissionsAsync).not.toHaveBeenCalled();
     expect(scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+
+  test('reports a persisted reminder as disabled when notification permission is gone', async () => {
+    getPermissionsAsync.mockResolvedValue({
+      granted: false,
+      canAskAgain: false,
+    } as Notifications.NotificationPermissionsStatus);
+
+    await expect(getWeeklyReflectionNotificationStatus()).resolves.toBe(
+      'disabled',
+    );
+
+    expect(getAllScheduledNotificationsAsync).not.toHaveBeenCalled();
+  });
+
+  test('reports a persisted reminder as disabled when its native schedule is gone', async () => {
+    getPermissionsAsync.mockResolvedValue({
+      granted: true,
+      canAskAgain: true,
+    } as Notifications.NotificationPermissionsStatus);
+    getAllScheduledNotificationsAsync.mockResolvedValue([]);
+
+    await expect(getWeeklyReflectionNotificationStatus()).resolves.toBe(
+      'disabled',
+    );
+  });
+
+  test('reports a persisted reminder as enabled while its native schedule still exists', async () => {
+    getPermissionsAsync.mockResolvedValue({
+      granted: true,
+      canAskAgain: true,
+    } as Notifications.NotificationPermissionsStatus);
+    getAllScheduledNotificationsAsync.mockResolvedValue([
+      {
+        identifier: 'kerjalog-weekly-reflection',
+        content: {},
+        trigger: null,
+      },
+    ] as Notifications.NotificationRequest[]);
+
+    await expect(getWeeklyReflectionNotificationStatus()).resolves.toBe(
+      'enabled',
+    );
   });
 
   test('cancels the scheduled weekly reminder when disabled', async () => {
