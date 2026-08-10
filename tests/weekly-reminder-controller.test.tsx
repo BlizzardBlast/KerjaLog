@@ -1,5 +1,5 @@
-import * as Notifications from 'expo-notifications';
 import { act, renderHook } from '@testing-library/react-native';
+import * as Notifications from 'expo-notifications';
 import type { PropsWithChildren } from 'react';
 import { DEFAULT_ONBOARDING_STATE } from '@/features/onboarding/model';
 import { useWeeklyReminderController } from '@/features/onboarding/useWeeklyReminderController';

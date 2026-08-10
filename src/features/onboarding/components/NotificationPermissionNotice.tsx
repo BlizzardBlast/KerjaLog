@@ -6,8 +6,8 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { motion } from '@/design-system/tokens/motion';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import type { NotificationReminderIssue } from '@/features/onboarding/reminderFeedback';
-import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/catalog';
+import { useI18n } from '@/i18n/I18nProvider';
 import { openExactAlarmPermissionSettings } from '@/platform/notifications/weeklyReflection';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
