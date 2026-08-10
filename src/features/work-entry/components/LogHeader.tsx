@@ -27,10 +27,15 @@ export function LogHeader({
 
   return (
     <View style={styles.container}>
-      <View style={styles.progress} accessibilityElementsHidden>
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={{ min: 1, max: totalSteps, now: currentStep }}
+        style={styles.progress}
+      >
         {Array.from({ length: totalSteps }, (_, index) => (
           <View
             key={index}
+            importantForAccessibility="no-hide-descendants"
             style={[
               styles.progressSegment,
               {
