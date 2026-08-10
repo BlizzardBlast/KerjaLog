@@ -11,6 +11,7 @@ import { Text } from '@/design-system/components/Text';
 import { ThemeToggleButton } from '@/design-system/components/ThemeToggleButton';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { AppLockSettingCard } from '@/features/app-lock/AppLockSettingCard';
 import { SectionHeading } from '@/features/home/components/SectionHeading';
 import type { ReviewSchedule } from '@/features/onboarding/model';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
@@ -211,6 +212,8 @@ export function HomeScreen() {
             </Text>
           </View>
         </View>
+
+        <AppLockSettingCard />
       </ScrollView>
     </SafeAreaView>
   );
