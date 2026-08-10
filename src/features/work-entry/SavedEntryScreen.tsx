@@ -4,12 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { radii, spacing } from '@/design-system/tokens/theme';
+import {
+  radii,
+  spacing,
+  type ThemeColors,
+} from '@/design-system/tokens/theme';
 import type { EntryStatus, OutcomeType } from '@/domain/entry/model';
 import { outcomeOptions } from '@/features/work-entry/model';
 import { useWorkEntry } from '@/features/work-entry/useWorkEntry';
-import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/catalog';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type SavedEntryScreenProps = {
   id: string;
@@ -161,21 +165,19 @@ function StatusChip({
   tone: 'success' | 'warning' | 'neutral';
 }) {
   const { theme } = useTheme();
-  const backgroundColor =
-    tone === 'success'
-      ? theme.colors.successSoft
-      : tone === 'warning'
-        ? theme.colors.warningSoft
-        : theme.colors.surfaceSubtle;
-  const textColor =
-    tone === 'success'
-      ? 'success'
-      : tone === 'warning'
-        ? 'warning'
-        : 'textMuted';
+  let backgroundColor = theme.colors.surfaceSubtle;
+  let textColor: keyof ThemeColors = 'textMuted';
+
+  if (tone === 'success') {
+    backgroundColor = theme.colors.successSoft;
+    textColor = 'success';
+  } else if (tone === 'warning') {
+    backgroundColor = theme.colors.warningSoft;
+    textColor = 'warning';
+  }
 
   return (
-    <View style={[styles.chip, { backgroundColor }]}> 
+    <View style={[styles.chip, { backgroundColor }]}>
       <Text variant="caption" color={textColor}>
         {label}
       </Text>
