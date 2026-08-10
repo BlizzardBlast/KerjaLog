@@ -98,7 +98,8 @@ export const logEn = {
   'log.impact.evidencePrefix': 'Evidence',
   'log.impact.editLabel': 'Edit the statement before saving',
   'log.impact.confirm': 'Confirm & save',
-  'log.impact.saveError': 'KerjaLog could not save this entry. Please try again.',
+  'log.impact.saveError':
+    'KerjaLog could not save this entry. Please try again.',
 
   'log.saved.eyebrow': 'Saved work entry',
   'log.saved.loading': 'Loading your entry…',
@@ -123,7 +124,8 @@ export const logId: Record<LogTranslationKey, string> = {
   'log.step': 'Langkah {{current}} dari {{total}}',
   'log.capture.eyebrow': 'Catat cepat',
   'log.capture.title': 'Apa yang terjadi di pekerjaan?',
-  'log.capture.description': 'Pilih yang paling sesuai. Pekerjaan kecil juga berarti.',
+  'log.capture.description':
+    'Pilih yang paling sesuai. Pekerjaan kecil juga berarti.',
   'log.capture.continue': 'Ceritakan yang terjadi',
 
   'log.intent.completed.title': 'Saya menyelesaikan sesuatu',
@@ -218,7 +220,8 @@ export const logId: Record<LogTranslationKey, string> = {
   'log.impact.evidencePrefix': 'Bukti',
   'log.impact.editLabel': 'Edit pernyataan sebelum menyimpan',
   'log.impact.confirm': 'Konfirmasi & simpan',
-  'log.impact.saveError': 'KerjaLog tidak dapat menyimpan catatan ini. Coba lagi.',
+  'log.impact.saveError':
+    'KerjaLog tidak dapat menyimpan catatan ini. Coba lagi.',
 
   'log.saved.eyebrow': 'Catatan kerja tersimpan',
   'log.saved.loading': 'Memuat catatan Anda…',
