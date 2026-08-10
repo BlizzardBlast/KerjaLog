@@ -30,10 +30,7 @@ export function AppLockScreen() {
     >
       <View style={styles.content}>
         <DecorativeView
-          style={[
-            styles.icon,
-            { backgroundColor: theme.colors.primarySoft },
-          ]}
+          style={[styles.icon, { backgroundColor: theme.colors.primarySoft }]}
         >
           <SymbolView
             name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }}
@@ -54,12 +51,7 @@ export function AppLockScreen() {
           </Text>
         </View>
 
-        <Button
-          fullWidth
-          loading={isAuthenticating}
-          onPress={unlock}
-          size="lg"
-        >
+        <Button fullWidth loading={isAuthenticating} onPress={unlock} size="lg">
           {t('appLock.screen.unlock')}
         </Button>
 
