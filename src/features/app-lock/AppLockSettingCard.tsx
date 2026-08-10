@@ -48,13 +48,14 @@ export function AppLockSettingCard() {
     >
       <View style={styles.row}>
         <DecorativeView
-          style={[
-            styles.icon,
-            { backgroundColor: theme.colors.primarySoft },
-          ]}
+          style={[styles.icon, { backgroundColor: theme.colors.primarySoft }]}
         >
           <SymbolView
-            name={{ ios: 'lock.shield.fill', android: 'shield_lock', web: 'lock' }}
+            name={{
+              ios: 'lock.shield.fill',
+              android: 'shield_lock',
+              web: 'lock',
+            }}
             size={22}
             tintColor={theme.colors.primary}
           />
