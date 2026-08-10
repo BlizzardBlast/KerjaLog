@@ -4,6 +4,14 @@ import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 
+const PROGRESS_SEGMENTS = [
+  'capture',
+  'event',
+  'outcome',
+  'evidence',
+  'impact',
+] as const;
+
 type LogHeaderProps = {
   eyebrow: string;
   title: string;
@@ -32,9 +40,9 @@ export function LogHeader({
         accessibilityValue={{ min: 1, max: totalSteps, now: currentStep }}
         style={styles.progress}
       >
-        {Array.from({ length: totalSteps }, (_, index) => (
+        {PROGRESS_SEGMENTS.slice(0, totalSteps).map((segment, index) => (
           <View
-            key={index}
+            key={segment}
             importantForAccessibility="no-hide-descendants"
             style={[
               styles.progressSegment,
