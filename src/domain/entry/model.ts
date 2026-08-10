@@ -63,7 +63,4 @@ export type WorkEntry = {
   updatedAt: string;
 };
 
-export type CreateWorkEntry = Omit<
-  WorkEntry,
-  'id' | 'createdAt' | 'updatedAt'
->;
+export type CreateWorkEntry = Omit<WorkEntry, 'id' | 'createdAt' | 'updatedAt'>;
