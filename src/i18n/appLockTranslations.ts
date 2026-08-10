@@ -12,10 +12,12 @@ export const appLockEn = {
   'appLock.screen.description':
     'Unlock with your enrolled biometrics or device PIN/passcode to continue.',
   'appLock.screen.unlock': 'Unlock KerjaLog',
-  'appLock.screen.cancelled': 'Authentication was cancelled. KerjaLog remains locked.',
+  'appLock.screen.cancelled':
+    'Authentication was cancelled. KerjaLog remains locked.',
   'appLock.screen.failed': 'Authentication failed. Try again.',
   'appLock.auth.prompt': 'Unlock KerjaLog',
-  'appLock.auth.description': 'Confirm that it is you to access your career log.',
+  'appLock.auth.description':
+    'Confirm that it is you to access your career log.',
   'appLock.auth.cancel': 'Cancel',
   'appLock.auth.fallback': 'Use device passcode',
 } as const;
@@ -30,16 +32,19 @@ export const appLockId: Record<AppLockTranslationKey, string> = {
   'appLock.setting.disabled': 'Kunci aplikasi saat ini nonaktif.',
   'appLock.setting.unavailable':
     'Atur PIN/kode sandi perangkat atau biometrik di pengaturan sistem terlebih dahulu.',
-  'appLock.setting.failed': 'KerjaLog tidak dapat mengubah pengaturan kunci aplikasi.',
+  'appLock.setting.failed':
+    'KerjaLog tidak dapat mengubah pengaturan kunci aplikasi.',
   'appLock.screen.eyebrow': 'Privat secara default',
   'appLock.screen.title': 'KerjaLog terkunci',
   'appLock.screen.description':
     'Buka dengan biometrik atau PIN/kode sandi perangkat yang sudah terdaftar untuk melanjutkan.',
   'appLock.screen.unlock': 'Buka KerjaLog',
-  'appLock.screen.cancelled': 'Autentikasi dibatalkan. KerjaLog tetap terkunci.',
+  'appLock.screen.cancelled':
+    'Autentikasi dibatalkan. KerjaLog tetap terkunci.',
   'appLock.screen.failed': 'Autentikasi gagal. Coba lagi.',
   'appLock.auth.prompt': 'Buka KerjaLog',
-  'appLock.auth.description': 'Konfirmasi identitas Anda untuk mengakses catatan karier.',
+  'appLock.auth.description':
+    'Konfirmasi identitas Anda untuk mengakses catatan karier.',
   'appLock.auth.cancel': 'Batal',
   'appLock.auth.fallback': 'Gunakan kode sandi perangkat',
 };
