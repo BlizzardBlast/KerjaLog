@@ -42,6 +42,12 @@
         }
       ],
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow KerjaLog to use Face ID to unlock your private career log."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#7138F2",
