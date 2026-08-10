@@ -104,8 +104,6 @@ export const en = {
     'KerjaLog can help you remember to reflect without streaks, points, or guilt.',
   'onboarding.review.scheduleSection': 'When is your next review likely to be?',
   'onboarding.review.weeklyReminderTitle': 'Weekly reflection reminder',
-  'onboarding.review.weeklyReminderDescription':
-    'A local reminder every Friday at 16:30. You can turn it off later.',
   'onboarding.review.notificationChannelName': 'Weekly reflection',
   'onboarding.review.notificationTitle': 'A gentle weekly check-in',
   'onboarding.review.notificationBody':
@@ -125,7 +123,7 @@ export const en = {
   'onboarding.review.saveError':
     'KerjaLog could not save your setup. Please try again before continuing.',
   'onboarding.review.footerNote':
-    'You can change review timing, reminders, and app protection later.',
+    'Your setup preferences are saved on this device.',
 
   'onboarding.workArea.technologyProduct.title': 'Technology & Product',
   'onboarding.workArea.technologyProduct.description':
@@ -302,8 +300,6 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.review.scheduleSection':
     'Kapan review berikutnya kemungkinan dilakukan?',
   'onboarding.review.weeklyReminderTitle': 'Pengingat refleksi mingguan',
-  'onboarding.review.weeklyReminderDescription':
-    'Pengingat lokal setiap Jumat pukul 16.30. Anda dapat mematikannya nanti.',
   'onboarding.review.notificationChannelName': 'Refleksi mingguan',
   'onboarding.review.notificationTitle': 'Waktunya check-in mingguan',
   'onboarding.review.notificationBody':
@@ -324,7 +320,7 @@ export const id: Record<TranslationKey, string> = {
   'onboarding.review.saveError':
     'KerjaLog tidak dapat menyimpan pengaturan Anda. Coba lagi sebelum melanjutkan.',
   'onboarding.review.footerNote':
-    'Waktu review, pengingat, dan perlindungan aplikasi dapat diubah nanti.',
+    'Preferensi pengaturan Anda disimpan di perangkat ini.',
 
   'onboarding.workArea.technologyProduct.title': 'Teknologi & Produk',
   'onboarding.workArea.technologyProduct.description':
