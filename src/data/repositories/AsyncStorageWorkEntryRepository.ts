@@ -14,6 +14,14 @@ const WORK_ENTRIES_STORAGE_KEY = '@kerjalog/work-entries/v1';
 
 let writeQueue = Promise.resolve();
 
+/**
+ * Transitional local adapter for the first Log slice.
+ *
+ * Keep all callers behind WorkEntryRepository so this can be replaced by the
+ * architecture's SQLCipher-backed SQLite implementation without changing the
+ * feature layer. AsyncStorage does not satisfy the production encryption
+ * requirement and must not be treated as the final persisted source of truth.
+ */
 export class AsyncStorageWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntry | null> {
     const entries = await readEntries();
@@ -22,12 +30,14 @@ export class AsyncStorageWorkEntryRepository implements WorkEntryRepository {
 
   async findRecent(limit: number): Promise<WorkEntry[]> {
     if (!Number.isInteger(limit) || limit < 0) {
-      throw new Error('Recent work entry limit must be a non-negative integer.');
+      throw new Error(
+        'Recent work entry limit must be a non-negative integer.',
+      );
     }
 
     const entries = await readEntries();
-    return entries
-      .toSorted((left, right) => right.occurredAt.localeCompare(left.occurredAt))
+    return [...entries]
+      .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))
       .slice(0, limit);
   }
 
