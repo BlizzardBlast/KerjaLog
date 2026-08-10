@@ -15,11 +15,12 @@ export type DeviceAuthenticationCopy = {
 };
 
 export async function getDeviceAuthenticationAvailability(): Promise<DeviceAuthenticationAvailability> {
-  const [level, hasBiometricHardware, hasEnrolledBiometrics] = await Promise.all([
-    LocalAuthentication.getEnrolledLevelAsync(),
-    LocalAuthentication.hasHardwareAsync(),
-    LocalAuthentication.isEnrolledAsync(),
-  ]);
+  const [level, hasBiometricHardware, hasEnrolledBiometrics] =
+    await Promise.all([
+      LocalAuthentication.getEnrolledLevelAsync(),
+      LocalAuthentication.hasHardwareAsync(),
+      LocalAuthentication.isEnrolledAsync(),
+    ]);
 
   return {
     level,
