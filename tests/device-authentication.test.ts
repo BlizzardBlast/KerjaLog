@@ -17,7 +17,9 @@ jest.mock('expo-local-authentication', () => ({
   isEnrolledAsync: jest.fn(),
 }));
 
-const authenticateAsyncMock = jest.mocked(LocalAuthentication.authenticateAsync);
+const authenticateAsyncMock = jest.mocked(
+  LocalAuthentication.authenticateAsync,
+);
 const getEnrolledLevelAsyncMock = jest.mocked(
   LocalAuthentication.getEnrolledLevelAsync,
 );
