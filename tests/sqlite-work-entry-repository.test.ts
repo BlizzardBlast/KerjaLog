@@ -1,11 +1,19 @@
+import * as Crypto from 'expo-crypto';
+import type { SQLiteDatabase } from 'expo-sqlite';
 import { getDatabase } from '@/data/database';
 import { SQLiteWorkEntryRepository } from '@/data/repositories/SQLiteWorkEntryRepository';
+import type { CreateWorkEntry } from '@/domain/entry/model';
+
+jest.mock('expo-crypto', () => ({
+  randomUUID: jest.fn(),
+}));
 
 jest.mock('@/data/database', () => ({
   getDatabase: jest.fn(),
 }));
 
 const getDatabaseMock = jest.mocked(getDatabase);
+const randomUUIDMock = jest.mocked(Crypto.randomUUID);
 
 const baseRow = {
   id: 'entry-1',
@@ -31,6 +39,29 @@ function useRows(rows: unknown[]) {
   } as unknown as Awaited<ReturnType<typeof getDatabase>>);
 
   return getAllAsync;
+}
+
+function useTransaction() {
+  const transaction = {
+    runAsync: jest.fn().mockResolvedValue({
+      changes: 1,
+      lastInsertRowId: 0,
+    }),
+  };
+  const withExclusiveTransactionAsync = jest.fn(
+    async (operation: (transaction: SQLiteDatabase) => Promise<void>) => {
+      await operation(transaction as unknown as SQLiteDatabase);
+    },
+  );
+
+  getDatabaseMock.mockResolvedValue({
+    withExclusiveTransactionAsync,
+  } as unknown as Awaited<ReturnType<typeof getDatabase>>);
+
+  return {
+    transaction,
+    withExclusiveTransactionAsync,
+  };
 }
 
 describe('SQLiteWorkEntryRepository', () => {
@@ -127,6 +158,69 @@ describe('SQLiteWorkEntryRepository', () => {
     await expect(repository.findRecent(0)).resolves.toEqual([]);
 
     expect(getDatabaseMock).not.toHaveBeenCalled();
+  });
+
+  test('create writes the entry and evidence in one transaction with bound values', async () => {
+    const { transaction, withExclusiveTransactionAsync } = useTransaction();
+    randomUUIDMock
+      .mockReturnValueOnce('entry-created')
+      .mockReturnValueOnce('evidence-deadline')
+      .mockReturnValueOnce('evidence-result');
+    const repository = new SQLiteWorkEntryRepository();
+    const input: CreateWorkEntry = {
+      type: 'contribution',
+      title: 'Helped Finance',
+      rawNote: 'Helped Finance reconcile the monthly report.',
+      impactStatement: 'Helped Finance reconcile the monthly report.',
+      occurredAt: '2026-08-10T08:00:00.000Z',
+      outcomeType: 'person_helped',
+      status: 'review_ready',
+      evidence: {
+        types: ['deadline', 'result'],
+        detail: 'Completed before Friday close',
+      },
+      excludedFromExports: false,
+    };
+
+    const entry = await repository.create(input);
+
+    expect(withExclusiveTransactionAsync).toHaveBeenCalledTimes(1);
+    expect(transaction.runAsync).toHaveBeenCalledTimes(3);
+    expect(transaction.runAsync).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('INSERT INTO work_entries'),
+      expect.objectContaining({
+        $id: 'entry-created',
+        $rawNote: input.rawNote,
+        $excludedFromExports: 0,
+      }),
+    );
+    expect(transaction.runAsync).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('INSERT INTO evidence'),
+      expect.objectContaining({
+        $id: 'evidence-deadline',
+        $entryId: 'entry-created',
+        $type: 'deadline',
+        $textValue: input.evidence?.detail,
+      }),
+    );
+    expect(transaction.runAsync).toHaveBeenNthCalledWith(
+      3,
+      expect.stringContaining('INSERT INTO evidence'),
+      expect.objectContaining({
+        $id: 'evidence-result',
+        $entryId: 'entry-created',
+        $type: 'result',
+        $textValue: input.evidence?.detail,
+      }),
+    );
+    expect(entry).toMatchObject({
+      ...input,
+      id: 'entry-created',
+    });
+    expect(entry.createdAt).toEqual(expect.any(String));
+    expect(entry.updatedAt).toBe(entry.createdAt);
   });
 
   test('rejects invalid persisted domain values', async () => {
