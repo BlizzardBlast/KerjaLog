@@ -1,11 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
+import { DEFAULT_ONBOARDING_STATE } from '@/features/onboarding/model';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 
 const getItemMock = jest.mocked(AsyncStorage.getItem);
 const setItemMock = jest.mocked(AsyncStorage.setItem);
+const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);
+const getAllScheduledNotificationsAsync = jest.mocked(
+  Notifications.getAllScheduledNotificationsAsync,
+);
 
 function wrapper({ children }: PropsWithChildren) {
   return <OnboardingProvider>{children}</OnboardingProvider>;
@@ -69,6 +75,36 @@ describe('OnboardingProvider', () => {
 
     await expect(result.current.complete()).rejects.toThrow(
       'Cannot complete onboarding without required answers.',
+    );
+  });
+
+  test('turns off a persisted reminder when its native schedule no longer exists', async () => {
+    getItemMock.mockResolvedValueOnce(
+      JSON.stringify({
+        ...DEFAULT_ONBOARDING_STATE,
+        weeklyReminderEnabled: true,
+      }),
+    );
+    setItemMock.mockResolvedValue(undefined);
+    getPermissionsAsync.mockResolvedValue({
+      granted: true,
+      canAskAgain: true,
+    } as Notifications.NotificationPermissionsStatus);
+    getAllScheduledNotificationsAsync.mockResolvedValue([]);
+
+    const { result } = await renderHook(() => useOnboarding(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isHydrated).toBe(true);
+      expect(result.current.state.weeklyReminderEnabled).toBe(false);
+    });
+
+    await waitFor(() => {
+      expect(setItemMock).toHaveBeenCalledTimes(1);
+    });
+
+    expect(JSON.parse(String(setItemMock.mock.calls[0]?.[1]))).toEqual(
+      expect.objectContaining({ weeklyReminderEnabled: false }),
     );
   });
 });
