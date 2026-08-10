@@ -42,25 +42,23 @@ function useRows(rows: unknown[]) {
 }
 
 function useTransaction() {
-  const transaction = {
+  const db = {
     runAsync: jest.fn().mockResolvedValue({
       changes: 1,
       lastInsertRowId: 0,
     }),
+    withTransactionAsync: jest.fn(async (operation: () => Promise<void>) => {
+      await operation();
+    }),
   };
-  const withExclusiveTransactionAsync = jest.fn(
-    async (operation: (transaction: SQLiteDatabase) => Promise<void>) => {
-      await operation(transaction as unknown as SQLiteDatabase);
-    },
+
+  getDatabaseMock.mockResolvedValue(
+    db as unknown as Awaited<ReturnType<typeof getDatabase>>,
   );
 
-  getDatabaseMock.mockResolvedValue({
-    withExclusiveTransactionAsync,
-  } as unknown as Awaited<ReturnType<typeof getDatabase>>);
-
   return {
-    transaction,
-    withExclusiveTransactionAsync,
+    db,
+    withTransactionAsync: db.withTransactionAsync,
   };
 }
 
@@ -160,8 +158,8 @@ describe('SQLiteWorkEntryRepository', () => {
     expect(getDatabaseMock).not.toHaveBeenCalled();
   });
 
-  test('create writes the entry and evidence in one transaction with bound values', async () => {
-    const { transaction, withExclusiveTransactionAsync } = useTransaction();
+  test('create writes the entry and evidence on the keyed handle with bound values', async () => {
+    const { db, withTransactionAsync } = useTransaction();
     randomUUIDMock
       .mockReturnValueOnce('entry-created')
       .mockReturnValueOnce('evidence-deadline')
@@ -184,9 +182,9 @@ describe('SQLiteWorkEntryRepository', () => {
 
     const entry = await repository.create(input);
 
-    expect(withExclusiveTransactionAsync).toHaveBeenCalledTimes(1);
-    expect(transaction.runAsync).toHaveBeenCalledTimes(3);
-    expect(transaction.runAsync).toHaveBeenNthCalledWith(
+    expect(withTransactionAsync).toHaveBeenCalledTimes(1);
+    expect(db.runAsync).toHaveBeenCalledTimes(3);
+    expect(db.runAsync).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('INSERT INTO work_entries'),
       expect.objectContaining({
@@ -195,7 +193,7 @@ describe('SQLiteWorkEntryRepository', () => {
         $excludedFromExports: 0,
       }),
     );
-    expect(transaction.runAsync).toHaveBeenNthCalledWith(
+    expect(db.runAsync).toHaveBeenNthCalledWith(
       2,
       expect.stringContaining('INSERT INTO evidence'),
       expect.objectContaining({
@@ -205,7 +203,7 @@ describe('SQLiteWorkEntryRepository', () => {
         $textValue: input.evidence?.detail,
       }),
     );
-    expect(transaction.runAsync).toHaveBeenNthCalledWith(
+    expect(db.runAsync).toHaveBeenNthCalledWith(
       3,
       expect.stringContaining('INSERT INTO evidence'),
       expect.objectContaining({
