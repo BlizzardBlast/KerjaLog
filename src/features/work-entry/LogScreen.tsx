@@ -11,6 +11,7 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
 import {
   buildImpactStatement,
+  hasIncompleteEvidence,
   type ImpactBuilderCopy,
   type LogEventIntent,
 } from '@/domain/entry/impact';
@@ -101,7 +102,7 @@ export function LogScreen() {
 
   function updateEvidenceDetail(value: string) {
     setEvidenceDetail(value);
-    if (!value.trim() || evidenceTypes.length > 0) {
+    if (!hasIncompleteEvidence(evidenceTypes, value)) {
       setEvidenceError(false);
     }
   }
@@ -114,7 +115,7 @@ export function LogScreen() {
     const nextEvidenceTypes = skipEvidence ? [] : evidenceTypes;
     const nextEvidenceDetail = skipEvidence ? '' : evidenceDetail;
 
-    if (nextEvidenceDetail.trim() && nextEvidenceTypes.length === 0) {
+    if (hasIncompleteEvidence(nextEvidenceTypes, nextEvidenceDetail)) {
       setEvidenceError(true);
       return;
     }
