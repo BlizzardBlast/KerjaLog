@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Modal } from 'react-native';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { AppLockScreen } from '@/features/app-lock/AppLockScreen';
 import { useAppLock } from '@/features/app-lock/AppLockProvider';
@@ -35,15 +36,8 @@ export function RootNavigator() {
   }
 
   const statusBarStyle = resolvedTheme === 'dark' ? 'light' : 'dark';
-
-  if (onboardingState.completed && appLockEnabled && appLocked) {
-    return (
-      <>
-        <StatusBar style={statusBarStyle} />
-        <AppLockScreen />
-      </>
-    );
-  }
+  const shouldShowAppLock =
+    onboardingState.completed && appLockEnabled && appLocked;
 
   return (
     <>
@@ -55,6 +49,14 @@ export function RootNavigator() {
           headerShown: false,
         }}
       />
+      <Modal
+        animationType="none"
+        onRequestClose={() => undefined}
+        presentationStyle="fullScreen"
+        visible={shouldShowAppLock}
+      >
+        <AppLockScreen />
+      </Modal>
     </>
   );
 }
