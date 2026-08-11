@@ -55,18 +55,26 @@ describe('useLogFlow', () => {
 
     await act(async () => {
       result.current.selectIntent('completed');
+    });
+    await act(async () => {
       result.current.continueFromType();
     });
     await act(async () => {
       result.current.updateRawNote('Prepared the weekly report');
+    });
+    await act(async () => {
       result.current.continueFromEvent();
     });
     await act(async () => {
       result.current.selectOutcome('deadline_met');
+    });
+    await act(async () => {
       result.current.continueFromOutcome();
     });
     await act(async () => {
       result.current.toggleEvidenceType('deadline');
+    });
+    await act(async () => {
       result.current.continueFromEvidence();
     });
 
@@ -75,6 +83,8 @@ describe('useLogFlow', () => {
 
     await act(async () => {
       result.current.updateEvidenceDetail('Finished before Friday close');
+    });
+    await act(async () => {
       result.current.continueFromEvidence();
     });
 
@@ -99,6 +109,8 @@ describe('useLogFlow', () => {
 
     await act(async () => {
       result.current.selectIntent('completed');
+    });
+    await act(async () => {
       result.current.continueFromType();
     });
     await act(async () => {
