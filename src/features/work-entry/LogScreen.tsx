@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -32,15 +32,15 @@ export function LogScreen() {
     },
     [router],
   );
+  const handleStepChanged = useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []);
   const flow = useLogFlow({
     impactCopy,
     onExit: handleExit,
     onSaved: handleSaved,
+    onStepChanged: handleStepChanged,
   });
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, [flow.step]);
 
   const frame = {
     backLabel: t('log.back'),
