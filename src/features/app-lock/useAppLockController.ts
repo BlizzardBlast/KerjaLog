@@ -37,6 +37,10 @@ export function useAppLockController(): AppLockContextValue {
       })
       .catch(() => {
         if (!ignore) {
+          // The preference is privacy-sensitive: if it cannot be read, require
+          // device authentication rather than assuming App Lock was disabled.
+          setEnabledState(true);
+          setLocked(true);
           setError('storage-failed');
         }
       })
