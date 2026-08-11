@@ -61,9 +61,7 @@ export function ReviewScheduleSection({
           />
         </DecorativeView>
         <View style={styles.reviewCopy}>
-          <Text variant="bodyStrong">
-            {t('home.review.performanceReview')}
-          </Text>
+          <Text variant="bodyStrong">{t('home.review.performanceReview')}</Text>
           <Text variant="caption" color="textMuted">
             {reviewScheduleLabel}
           </Text>
