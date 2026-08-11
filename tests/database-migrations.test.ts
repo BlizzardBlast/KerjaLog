@@ -45,6 +45,17 @@ describe('migrateDatabase', () => {
     expect(database.execAsync).not.toHaveBeenCalled();
   });
 
+  test('rejects a database schema newer than this app understands', async () => {
+    const database = createDatabase(2);
+
+    await expect(migrateDatabase(database.db)).rejects.toThrow(
+      'Database schema version 2 is newer than supported version 1.',
+    );
+
+    expect(database.withTransactionAsync).not.toHaveBeenCalled();
+    expect(database.execAsync).not.toHaveBeenCalled();
+  });
+
   test('does not advance user_version when the schema migration fails', async () => {
     const database = createDatabase(0);
     database.execAsync.mockRejectedValueOnce(
