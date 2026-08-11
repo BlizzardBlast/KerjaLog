@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import type { WorkEntry } from '@/domain/entry/model';
-import type { WorkEntryReader } from '@/domain/entry/repository';
+import type { WorkEntryByIdReader } from '@/domain/entry/repository';
 
 export type WorkEntryLoadState =
   | { status: 'loading' }
@@ -11,7 +11,7 @@ export type WorkEntryLoadState =
 
 export function useWorkEntry(
   id: string,
-  repository: WorkEntryReader = workEntryRepository,
+  repository: WorkEntryByIdReader = workEntryRepository,
 ): WorkEntryLoadState {
   const [state, setState] = useState<WorkEntryLoadState>({ status: 'loading' });
 
