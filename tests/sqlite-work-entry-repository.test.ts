@@ -40,6 +40,16 @@ function useRows(rows: unknown[]) {
   return getAllAsync;
 }
 
+function useCount(count: number) {
+  const getFirstAsync = jest.fn().mockResolvedValue({ count });
+
+  getDatabaseMock.mockResolvedValue({
+    getFirstAsync,
+  } as unknown as Awaited<ReturnType<typeof getDatabase>>);
+
+  return getFirstAsync;
+}
+
 function useTransaction() {
   const db = {
     runAsync: jest.fn().mockResolvedValue({
@@ -154,6 +164,28 @@ describe('SQLiteWorkEntryRepository', () => {
     );
     await expect(repository.findRecent(0)).resolves.toEqual([]);
 
+    expect(getDatabaseMock).not.toHaveBeenCalled();
+  });
+
+  test('countSince binds a validated ISO timestamp', async () => {
+    const getFirstAsync = useCount(4);
+    const repository = new SQLiteWorkEntryRepository();
+    const boundary = '2026-08-10T17:00:00.000Z';
+
+    await expect(repository.countSince(boundary)).resolves.toBe(4);
+
+    expect(getFirstAsync).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE occurred_at >= $occurredAtInclusive'),
+      { $occurredAtInclusive: boundary },
+    );
+  });
+
+  test('countSince rejects invalid boundaries without opening the database', async () => {
+    const repository = new SQLiteWorkEntryRepository();
+
+    await expect(repository.countSince('not-a-date')).rejects.toThrow(
+      'Work entry count boundary must be an ISO timestamp.',
+    );
     expect(getDatabaseMock).not.toHaveBeenCalled();
   });
 
