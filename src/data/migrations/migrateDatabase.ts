@@ -11,7 +11,13 @@ export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
 
   let version = result?.user_version ?? 0;
 
-  if (version >= DATABASE_VERSION) {
+  if (version > DATABASE_VERSION) {
+    throw new Error(
+      `Database schema version ${version} is newer than supported version ${DATABASE_VERSION}.`,
+    );
+  }
+
+  if (version === DATABASE_VERSION) {
     return;
   }
 
