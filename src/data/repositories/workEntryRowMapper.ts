@@ -43,7 +43,7 @@ export function mapJoinedWorkEntryRows(
       row.impact_statement,
       'work entry impact statement',
     );
-    const occurredAt = expectNonEmptyString(
+    const occurredAt = expectIsoTimestamp(
       row.occurred_at,
       'work entry occurred at',
     );
@@ -60,11 +60,11 @@ export function mapJoinedWorkEntryRows(
       row.excluded_from_exports,
       'work entry excluded from exports',
     );
-    const createdAt = expectNonEmptyString(
+    const createdAt = expectIsoTimestamp(
       row.created_at,
       'work entry created at',
     );
-    const updatedAt = expectNonEmptyString(
+    const updatedAt = expectIsoTimestamp(
       row.updated_at,
       'work entry updated at',
     );
@@ -178,6 +178,17 @@ function expectNonEmptyString(value: unknown, field: string): string {
   }
 
   return value;
+}
+
+function expectIsoTimestamp(value: unknown, field: string): string {
+  const timestamp = expectNonEmptyString(value, field);
+  const parsed = new Date(timestamp);
+
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString() !== timestamp) {
+    throw new Error(`Stored ${field} is invalid.`);
+  }
+
+  return timestamp;
 }
 
 function expectNullableNonEmptyString(
