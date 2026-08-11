@@ -15,7 +15,13 @@ import {
   type SaveWorkEntryDraft,
 } from '@/features/work-entry/saveWorkEntry';
 
-export const LOG_STEPS = ['type', 'event', 'outcome', 'evidence', 'impact'] as const;
+export const LOG_STEPS = [
+  'type',
+  'event',
+  'outcome',
+  'evidence',
+  'impact',
+] as const;
 export type LogStep = (typeof LOG_STEPS)[number];
 
 type SaveEntry = (draft: SaveWorkEntryDraft) => Promise<WorkEntry>;
