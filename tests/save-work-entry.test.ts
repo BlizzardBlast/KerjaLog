@@ -1,10 +1,8 @@
-import type { WorkEntryRepository } from '@/domain/entry/repository';
+import type { WorkEntryWriter } from '@/domain/entry/repository';
 import { saveWorkEntry } from '@/features/work-entry/saveWorkEntry';
 
-function createRepository(): jest.Mocked<WorkEntryRepository> {
+function createRepository(): jest.Mocked<WorkEntryWriter> {
   return {
-    findById: jest.fn(),
-    findRecent: jest.fn(),
     create: jest.fn(async (input) => ({
       ...input,
       id: 'entry-1',
