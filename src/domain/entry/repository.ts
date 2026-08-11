@@ -1,9 +1,17 @@
 import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
 
-export interface WorkEntryReader {
+export interface WorkEntryByIdReader {
   findById(id: string): Promise<WorkEntry | null>;
-  findRecent(limit: number): Promise<WorkEntry[]>;
 }
+
+export interface RecentWorkEntryReader {
+  findRecent(limit: number): Promise<WorkEntry[]>;
+  countSince(occurredAtInclusive: string): Promise<number>;
+}
+
+export interface WorkEntryReader
+  extends WorkEntryByIdReader,
+    RecentWorkEntryReader {}
 
 export interface WorkEntryWriter {
   create(input: CreateWorkEntry): Promise<WorkEntry>;
