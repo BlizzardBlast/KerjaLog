@@ -1,12 +1,12 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/data/database';
 import { withKeyedTransaction } from '@/data/keyedTransaction';
-import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
-import type { WorkEntryRepository } from '@/domain/entry/repository';
 import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
 } from '@/data/repositories/workEntryRowMapper';
+import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
+import type { WorkEntryRepository } from '@/domain/entry/repository';
 
 export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntry | null> {
@@ -106,6 +106,30 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     return mapJoinedWorkEntryRows(rows);
   }
 
+  async countSince(occurredAtInclusive: string): Promise<number> {
+    if (!isIsoTimestamp(occurredAtInclusive)) {
+      throw new Error('Work entry count boundary must be an ISO timestamp.');
+    }
+
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<{ count: number }>(
+      `
+        SELECT COUNT(*) AS count
+        FROM work_entries
+        WHERE occurred_at >= $occurredAtInclusive
+      `,
+      {
+        $occurredAtInclusive: occurredAtInclusive,
+      },
+    );
+
+    if (!Number.isInteger(row?.count) || (row?.count ?? -1) < 0) {
+      throw new Error('Stored work entry count is invalid.');
+    }
+
+    return row.count;
+  }
+
   async create(input: CreateWorkEntry): Promise<WorkEntry> {
     const db = await getDatabase();
     const id = Crypto.randomUUID();
@@ -186,4 +210,10 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       updatedAt: now,
     };
   }
+}
+
+function isIsoTimestamp(value: string): boolean {
+  const parsed = new Date(value);
+
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value;
 }
