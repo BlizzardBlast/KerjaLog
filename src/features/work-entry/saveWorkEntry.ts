@@ -11,7 +11,7 @@ import type {
   OutcomeType,
   WorkEntry,
 } from '@/domain/entry/model';
-import type { WorkEntryRepository } from '@/domain/entry/repository';
+import type { WorkEntryWriter } from '@/domain/entry/repository';
 import { entryTypeByIntent } from '@/features/work-entry/model';
 
 export type SaveWorkEntryDraft = {
@@ -25,7 +25,7 @@ export type SaveWorkEntryDraft = {
 
 export async function saveWorkEntry(
   draft: SaveWorkEntryDraft,
-  repository: WorkEntryRepository = workEntryRepository,
+  repository: WorkEntryWriter = workEntryRepository,
 ): Promise<WorkEntry> {
   const rawNote = draft.rawNote.trim();
   if (!rawNote) {
