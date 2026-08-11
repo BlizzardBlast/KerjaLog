@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { radii, spacing, type ThemeColors } from '@/design-system/tokens/theme';
-import type { EntryStatus, OutcomeType } from '@/domain/entry/model';
-import { outcomeOptions } from '@/features/work-entry/model';
+import { spacing } from '@/design-system/tokens/theme';
+import type { EntryStatus } from '@/domain/entry/model';
+import { EntrySection } from '@/features/work-entry/components/EntrySection';
+import { StatusChip } from '@/features/work-entry/components/StatusChip';
+import { getOutcomeLabel } from '@/features/work-entry/outcomeLabel';
 import { useWorkEntry } from '@/features/work-entry/useWorkEntry';
 import type { TranslationKey } from '@/i18n/catalog';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -14,11 +16,6 @@ import { useI18n } from '@/i18n/I18nProvider';
 type SavedEntryScreenProps = {
   id: string;
 };
-
-type Translate = (
-  key: TranslationKey,
-  params?: Record<string, string | number>,
-) => string;
 
 const statusLabelKeyByStatus: Record<EntryStatus, TranslationKey> = {
   quick_note: 'log.saved.quickNote',
@@ -122,76 +119,6 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
   );
 }
 
-function EntrySection({
-  title,
-  value,
-  emphasized = false,
-}: {
-  title: string;
-  value: string;
-  emphasized?: boolean;
-}) {
-  const { theme } = useTheme();
-
-  return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: emphasized
-            ? theme.colors.primarySoft
-            : theme.colors.surface,
-          borderColor: emphasized ? theme.colors.primary : theme.colors.border,
-        },
-      ]}
-    >
-      <Text variant="overline" color={emphasized ? 'primary' : 'textMuted'}>
-        {title}
-      </Text>
-      <Text variant={emphasized ? 'bodyStrong' : 'body'}>{value}</Text>
-    </View>
-  );
-}
-
-function StatusChip({
-  label,
-  tone,
-}: {
-  label: string;
-  tone: 'success' | 'warning' | 'neutral';
-}) {
-  const { theme } = useTheme();
-  let backgroundColor = theme.colors.surfaceSubtle;
-  let textColor: keyof ThemeColors = 'textMuted';
-
-  if (tone === 'success') {
-    backgroundColor = theme.colors.successSoft;
-    textColor = 'success';
-  } else if (tone === 'warning') {
-    backgroundColor = theme.colors.warningSoft;
-    textColor = 'warning';
-  }
-
-  return (
-    <View style={[styles.chip, { backgroundColor }]}>
-      <Text variant="caption" color={textColor}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-function getOutcomeLabel(outcomeType: OutcomeType, t: Translate): string {
-  if (outcomeType === 'unsure') {
-    return t('log.impact.notKnown');
-  }
-
-  const option = outcomeOptions.find(
-    (candidate) => candidate.value === outcomeType,
-  );
-  return option ? t(option.titleKey) : t('log.impact.notKnown');
-}
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -219,16 +146,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing[2],
-  },
-  chip: {
-    borderRadius: radii.full,
-    paddingHorizontal: spacing[3],
-    paddingVertical: 6,
-  },
-  card: {
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    gap: spacing[2],
-    padding: spacing[4],
   },
 });
