@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,167 +9,45 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
-import {
-  buildImpactStatement,
-  hasIncompleteEvidence,
-  type ImpactBuilderCopy,
-  type LogEventIntent,
-} from '@/domain/entry/impact';
-import type { EvidenceType, OutcomeType } from '@/domain/entry/model';
-import {
-  CaptureTypeStep,
-  EventStep,
-  EvidenceStep,
-  ImpactStep,
-  OutcomeStep,
-} from '@/features/work-entry/components/LogSteps';
-import { saveWorkEntry } from '@/features/work-entry/saveWorkEntry';
-import type { TranslationKey } from '@/i18n/catalog';
+import type { WorkEntry } from '@/domain/entry/model';
+import { CaptureTypeStep } from '@/features/work-entry/components/CaptureTypeStep';
+import { EventStep } from '@/features/work-entry/components/EventStep';
+import { EvidenceStep } from '@/features/work-entry/components/EvidenceStep';
+import { ImpactStep } from '@/features/work-entry/components/ImpactStep';
+import { OutcomeStep } from '@/features/work-entry/components/OutcomeStep';
+import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
+import { useLogFlow } from '@/features/work-entry/useLogFlow';
 import { useI18n } from '@/i18n/I18nProvider';
-
-const STEPS = ['type', 'event', 'outcome', 'evidence', 'impact'] as const;
-type LogStep = (typeof STEPS)[number];
-
-type Translate = (
-  key: TranslationKey,
-  params?: Record<string, string | number>,
-) => string;
 
 export function LogScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useI18n();
   const scrollRef = useRef<ScrollView>(null);
-  const [step, setStep] = useState<LogStep>('type');
-  const [intent, setIntent] = useState<LogEventIntent | null>(null);
-  const [rawNote, setRawNote] = useState('');
-  const [outcomeType, setOutcomeType] = useState<OutcomeType | null>(null);
-  const [evidenceTypes, setEvidenceTypes] = useState<EvidenceType[]>([]);
-  const [evidenceDetail, setEvidenceDetail] = useState('');
-  const [impactStatement, setImpactStatement] = useState('');
-  const [noteError, setNoteError] = useState(false);
-  const [evidenceError, setEvidenceError] = useState(false);
-  const [saveError, setSaveError] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const currentStep = STEPS.indexOf(step) + 1;
+  const impactCopy = useMemo(() => createImpactBuilderCopy(t), [t]);
+  const handleExit = useCallback(() => router.replace('/home'), [router]);
+  const handleSaved = useCallback(
+    (entry: WorkEntry) => {
+      router.replace({ pathname: '/entry/[id]', params: { id: entry.id } });
+    },
+    [router],
+  );
+  const flow = useLogFlow({
+    impactCopy,
+    onExit: handleExit,
+    onSaved: handleSaved,
+  });
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [flow.step]);
+
   const frame = {
     backLabel: t('log.back'),
-    currentStep,
-    totalSteps: STEPS.length,
-    onBack: goBack,
+    currentStep: flow.currentStep,
+    totalSteps: flow.totalSteps,
+    onBack: flow.goBack,
   };
-
-  function moveToStep(nextStep: LogStep) {
-    setStep(nextStep);
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }
-
-  function goBack() {
-    const currentIndex = STEPS.indexOf(step);
-    if (currentIndex <= 0) {
-      router.replace('/home');
-      return;
-    }
-
-    moveToStep(STEPS[currentIndex - 1]);
-  }
-
-  function updateRawNote(value: string) {
-    setRawNote(value);
-    if (value.trim()) {
-      setNoteError(false);
-    }
-  }
-
-  function goToOutcome() {
-    if (!rawNote.trim()) {
-      setNoteError(true);
-      return;
-    }
-
-    setNoteError(false);
-    moveToStep('outcome');
-  }
-
-  function toggleEvidenceType(type: EvidenceType) {
-    setEvidenceTypes((current) =>
-      current.includes(type)
-        ? current.filter((candidate) => candidate !== type)
-        : [...current, type],
-    );
-    setEvidenceError(false);
-  }
-
-  function updateEvidenceDetail(value: string) {
-    setEvidenceDetail(value);
-    if (!hasIncompleteEvidence(evidenceTypes, value)) {
-      setEvidenceError(false);
-    }
-  }
-
-  function goToImpact(skipEvidence = false) {
-    if (!intent || !outcomeType) {
-      return;
-    }
-
-    const nextEvidenceTypes = skipEvidence ? [] : evidenceTypes;
-    const nextEvidenceDetail = skipEvidence ? '' : evidenceDetail;
-
-    if (hasIncompleteEvidence(nextEvidenceTypes, nextEvidenceDetail)) {
-      setEvidenceError(true);
-      return;
-    }
-
-    if (skipEvidence) {
-      setEvidenceTypes([]);
-      setEvidenceDetail('');
-    }
-
-    setEvidenceError(false);
-    setImpactStatement(
-      buildImpactStatement(
-        {
-          intent,
-          rawNote,
-          outcomeType,
-          evidenceDetail: nextEvidenceDetail,
-        },
-        createImpactBuilderCopy(t),
-      ),
-    );
-    moveToStep('impact');
-  }
-
-  async function save(quickNote: boolean) {
-    if (!intent || !rawNote.trim()) {
-      setNoteError(true);
-      return;
-    }
-
-    if (!quickNote && !outcomeType) {
-      return;
-    }
-
-    setSaving(true);
-    setSaveError(false);
-
-    try {
-      const entry = await saveWorkEntry({
-        intent,
-        rawNote,
-        outcomeType: quickNote ? null : outcomeType,
-        evidenceTypes: quickNote ? [] : evidenceTypes,
-        evidenceDetail: quickNote ? '' : evidenceDetail,
-        impactStatement: quickNote ? null : impactStatement,
-      });
-
-      router.replace({ pathname: '/entry/[id]', params: { id: entry.id } });
-    } catch {
-      setSaveError(true);
-    } finally {
-      setSaving(false);
-    }
-  }
 
   return (
     <SafeAreaView
@@ -186,61 +64,61 @@ export function LogScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {step === 'type' ? (
+          {flow.step === 'type' ? (
             <CaptureTypeStep
               {...frame}
-              intent={intent}
-              onContinue={() => moveToStep('event')}
-              onSelect={setIntent}
+              intent={flow.intent}
+              onContinue={flow.continueFromType}
+              onSelect={flow.selectIntent}
               t={t}
             />
           ) : null}
-          {step === 'event' ? (
+          {flow.step === 'event' ? (
             <EventStep
               {...frame}
-              noteError={noteError}
-              onContinue={goToOutcome}
-              onRawNoteChange={updateRawNote}
-              onSaveQuick={() => save(true)}
-              rawNote={rawNote}
-              saveError={saveError}
-              saving={saving}
+              noteError={flow.noteError}
+              onContinue={flow.continueFromEvent}
+              onRawNoteChange={flow.updateRawNote}
+              onSaveQuick={flow.saveQuick}
+              rawNote={flow.rawNote}
+              saveError={flow.saveError}
+              saving={flow.saving}
               t={t}
             />
           ) : null}
-          {step === 'outcome' ? (
+          {flow.step === 'outcome' ? (
             <OutcomeStep
               {...frame}
-              onContinue={() => moveToStep('evidence')}
-              onSelect={setOutcomeType}
-              outcomeType={outcomeType}
+              onContinue={flow.continueFromOutcome}
+              onSelect={flow.selectOutcome}
+              outcomeType={flow.outcomeType}
               t={t}
             />
           ) : null}
-          {step === 'evidence' ? (
+          {flow.step === 'evidence' ? (
             <EvidenceStep
               {...frame}
-              evidenceDetail={evidenceDetail}
-              evidenceError={evidenceError}
-              evidenceTypes={evidenceTypes}
-              onContinue={() => goToImpact(false)}
-              onDetailChange={updateEvidenceDetail}
-              onSkip={() => goToImpact(true)}
-              onToggleType={toggleEvidenceType}
+              evidenceDetail={flow.evidenceDetail}
+              evidenceError={flow.evidenceError}
+              evidenceTypes={flow.evidenceTypes}
+              onContinue={flow.continueFromEvidence}
+              onDetailChange={flow.updateEvidenceDetail}
+              onSkip={flow.skipEvidence}
+              onToggleType={flow.toggleEvidenceType}
               t={t}
             />
           ) : null}
-          {step === 'impact' && outcomeType ? (
+          {flow.step === 'impact' && flow.outcomeType ? (
             <ImpactStep
               {...frame}
-              evidenceDetail={evidenceDetail}
-              impactStatement={impactStatement}
-              onImpactStatementChange={setImpactStatement}
-              onSave={() => save(false)}
-              outcomeType={outcomeType}
-              rawNote={rawNote}
-              saveError={saveError}
-              saving={saving}
+              evidenceDetail={flow.evidenceDetail}
+              impactStatement={flow.impactStatement}
+              onImpactStatementChange={flow.updateImpactStatement}
+              onSave={flow.saveDeveloped}
+              outcomeType={flow.outcomeType}
+              rawNote={flow.rawNote}
+              saveError={flow.saveError}
+              saving={flow.saving}
               t={t}
             />
           ) : null}
@@ -248,32 +126,6 @@ export function LogScreen() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
-
-function createImpactBuilderCopy(t: Translate): ImpactBuilderCopy {
-  return {
-    intentLead: {
-      completed: t('log.intent.completed.title'),
-      solved: t('log.intent.solved.title'),
-      helped: t('log.intent.helped.title'),
-      feedback: t('log.intent.feedback.title'),
-      learned: t('log.intent.learned.title'),
-      ownership: t('log.intent.ownership.title'),
-      challenge: t('log.intent.challenge.title'),
-    },
-    outcomeLabel: {
-      deadline_met: t('log.outcome.deadlineMet.title'),
-      error_fixed_or_prevented: t('log.outcome.errorFixed.title'),
-      work_faster: t('log.outcome.workFaster.title'),
-      work_clearer: t('log.outcome.workClearer.title'),
-      person_helped: t('log.outcome.personHelped.title'),
-      risk_reduced: t('log.outcome.riskReduced.title'),
-      decision_enabled: t('log.outcome.decisionEnabled.title'),
-      skill_gained: t('log.outcome.skillGained.title'),
-    },
-    outcomePrefix: t('log.impact.outcomePrefix'),
-    evidencePrefix: t('log.impact.evidencePrefix'),
-  };
 }
 
 const styles = StyleSheet.create({
