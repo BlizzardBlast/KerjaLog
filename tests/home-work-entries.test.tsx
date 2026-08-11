@@ -4,6 +4,16 @@ import type { RecentWorkEntryReader } from '@/domain/entry/repository';
 import { getStartOfLocalWeekIso } from '@/features/home/homePeriod';
 import { useHomeWorkEntries } from '@/features/home/useHomeWorkEntries';
 
+jest.mock('expo-router', () => {
+  const React = jest.requireActual<typeof import('react')>('react');
+
+  return {
+    useFocusEffect: (effect: () => void | (() => void)) => {
+      React.useEffect(effect, [effect]);
+    },
+  };
+});
+
 const recentEntry: WorkEntry = {
   id: 'entry-1',
   type: 'contribution',
