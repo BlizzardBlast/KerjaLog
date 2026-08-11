@@ -42,7 +42,9 @@ describe('work entry impact rules', () => {
 
   test('requires evidence type and detail to be supplied together', () => {
     expect(hasIncompleteEvidence([], '')).toBe(false);
-    expect(hasIncompleteEvidence(['deadline'], 'Finished on Friday')).toBe(false);
+    expect(hasIncompleteEvidence(['deadline'], 'Finished on Friday')).toBe(
+      false,
+    );
     expect(hasIncompleteEvidence(['deadline'], '')).toBe(true);
     expect(hasIncompleteEvidence([], 'Finished on Friday')).toBe(true);
   });
