@@ -10,7 +10,7 @@
     "platforms": ["android", "ios"],
     "ios": {
       "icon": "./assets/kerjalog.icon",
-      "bundleIdentifier": "com.anonymous.KerjaLog"
+      "bundleIdentifier": "com.blizzardblast.kerjalog"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
       "predictiveBackGestureEnabled": true,
       "allowBackup": false,
       "icon": "./assets/images/icon.png",
-      "package": "com.anonymous.KerjaLog"
+      "package": "com.blizzardblast.kerjalog"
     },
     "plugins": [
       "expo-router",
@@ -47,6 +47,7 @@
           "faceIDPermission": "Allow KerjaLog to use Face ID to unlock your private career log."
         }
       ],
+      "./plugins/with-ios-database-backup-exclusion",
       [
         "expo-splash-screen",
         {
