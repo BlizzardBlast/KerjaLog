@@ -1,3 +1,4 @@
+import * as LocalAuthentication from 'expo-local-authentication';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import {
   readAppLockEnabled,
@@ -37,9 +38,10 @@ describe('useAppLockController', () => {
     jest.clearAllMocks();
     writeAppLockEnabledMock.mockResolvedValue(undefined);
     getDeviceAuthenticationAvailabilityMock.mockResolvedValue({
+      level: LocalAuthentication.SecurityLevel.SECRET,
+      hasBiometricHardware: false,
+      hasEnrolledBiometrics: false,
       canAuthenticate: true,
-      hasHardware: true,
-      isEnrolled: true,
     });
     authenticateDeviceMock.mockResolvedValue({ success: true });
   });
