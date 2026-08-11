@@ -76,7 +76,7 @@ export const logEn = {
   'log.evidence.detailPlaceholder':
     'Example: 7 duplicate entries were removed before the report was submitted.',
   'log.evidence.detailHelp':
-    'Select at least one evidence type if you add a detail.',
+    'Pair each evidence selection with a useful detail, or clear the evidence selections.',
   'log.evidence.skip': 'Skip evidence',
   'log.evidence.continue': 'Preview my impact',
 
@@ -198,7 +198,7 @@ export const logId: Record<LogTranslationKey, string> = {
   'log.evidence.detailPlaceholder':
     'Contoh: 7 entri duplikat dihapus sebelum laporan dikirim.',
   'log.evidence.detailHelp':
-    'Pilih setidaknya satu jenis bukti jika Anda menambahkan detail.',
+    'Pasangkan pilihan bukti dengan detail yang berguna, atau kosongkan pilihan bukti.',
   'log.evidence.skip': 'Lewati bukti',
   'log.evidence.continue': 'Pratinjau dampak saya',
 
