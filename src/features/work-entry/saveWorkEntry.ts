@@ -2,6 +2,7 @@ import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import {
   buildEntryTitle,
   deriveEntryStatus,
+  hasIncompleteEvidence,
   hasUsefulEvidence,
   type LogEventIntent,
 } from '@/domain/entry/impact';
@@ -33,6 +34,11 @@ export async function saveWorkEntry(
 
   const evidenceTypes = [...new Set(draft.evidenceTypes)];
   const evidenceDetail = draft.evidenceDetail.trim();
+
+  if (hasIncompleteEvidence(evidenceTypes, evidenceDetail)) {
+    throw new Error('Evidence requires both a type and a supporting detail.');
+  }
+
   const hasEvidence = hasUsefulEvidence(evidenceTypes, evidenceDetail);
   const now = new Date().toISOString();
 
