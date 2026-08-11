@@ -29,7 +29,9 @@ type AccumulatedWorkEntry = {
   evidenceDetail: string | null;
 };
 
-export function mapJoinedWorkEntryRows(rows: JoinedWorkEntryRow[]): WorkEntry[] {
+export function mapJoinedWorkEntryRows(
+  rows: JoinedWorkEntryRow[],
+): WorkEntry[] {
   const entries = new Map<string, AccumulatedWorkEntry>();
 
   for (const row of rows) {
@@ -142,7 +144,9 @@ function toWorkEntry({
   }
 
   if (evidenceDetail === null) {
-    throw new Error(`Stored evidence for work entry ${entry.id} is incomplete.`);
+    throw new Error(
+      `Stored evidence for work entry ${entry.id} is incomplete.`,
+    );
   }
 
   return {
