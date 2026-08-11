@@ -123,7 +123,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       },
     );
 
-    if (!Number.isInteger(row?.count) || (row?.count ?? -1) < 0) {
+    if (!row || !Number.isInteger(row.count) || row.count < 0) {
       throw new Error('Stored work entry count is invalid.');
     }
 
