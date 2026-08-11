@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import type { WorkEntry } from '@/domain/entry/model';
+import type { WorkEntryReader } from '@/domain/entry/repository';
 
 export type WorkEntryLoadState =
   | { status: 'loading' }
@@ -8,14 +9,17 @@ export type WorkEntryLoadState =
   | { status: 'not-found' }
   | { status: 'error' };
 
-export function useWorkEntry(id: string): WorkEntryLoadState {
+export function useWorkEntry(
+  id: string,
+  repository: WorkEntryReader = workEntryRepository,
+): WorkEntryLoadState {
   const [state, setState] = useState<WorkEntryLoadState>({ status: 'loading' });
 
   useEffect(() => {
     let ignore = false;
     setState({ status: 'loading' });
 
-    workEntryRepository
+    repository
       .findById(id)
       .then((entry) => {
         if (ignore) {
@@ -33,7 +37,7 @@ export function useWorkEntry(id: string): WorkEntryLoadState {
     return () => {
       ignore = true;
     };
-  }, [id]);
+  }, [id, repository]);
 
   return state;
 }
