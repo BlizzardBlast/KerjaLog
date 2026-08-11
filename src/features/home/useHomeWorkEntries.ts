@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import type { WorkEntry } from '@/domain/entry/model';
 import type { RecentWorkEntryReader } from '@/domain/entry/repository';
@@ -21,31 +22,33 @@ export function useHomeWorkEntries(
   const [state, setState] = useState<HomeWorkEntriesState>({
     status: 'loading',
   });
-  const weekStart = getStartOfLocalWeekIso();
 
-  useEffect(() => {
-    let ignore = false;
-    setState({ status: 'loading' });
+  useFocusEffect(
+    useCallback(() => {
+      let ignore = false;
+      const weekStart = getStartOfLocalWeekIso();
+      setState({ status: 'loading' });
 
-    Promise.all([
-      repository.findRecent(RECENT_ENTRY_LIMIT),
-      repository.countSince(weekStart),
-    ])
-      .then(([recentEntries, thisWeekCount]) => {
-        if (!ignore) {
-          setState({ status: 'loaded', recentEntries, thisWeekCount });
-        }
-      })
-      .catch(() => {
-        if (!ignore) {
-          setState({ status: 'error' });
-        }
-      });
+      Promise.all([
+        repository.findRecent(RECENT_ENTRY_LIMIT),
+        repository.countSince(weekStart),
+      ])
+        .then(([recentEntries, thisWeekCount]) => {
+          if (!ignore) {
+            setState({ status: 'loaded', recentEntries, thisWeekCount });
+          }
+        })
+        .catch(() => {
+          if (!ignore) {
+            setState({ status: 'error' });
+          }
+        });
 
-    return () => {
-      ignore = true;
-    };
-  }, [repository, weekStart]);
+      return () => {
+        ignore = true;
+      };
+    }, [repository]),
+  );
 
   return state;
 }
