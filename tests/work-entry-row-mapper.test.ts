@@ -67,4 +67,15 @@ describe('mapJoinedWorkEntryRows', () => {
       ]),
     ).toThrow('Stored work entry title is invalid.');
   });
+
+  test('rejects malformed persisted timestamps', () => {
+    expect(() =>
+      mapJoinedWorkEntryRows([
+        {
+          ...baseRow,
+          occurred_at: 'yesterday',
+        },
+      ]),
+    ).toThrow('Stored work entry occurred at is invalid.');
+  });
 });
