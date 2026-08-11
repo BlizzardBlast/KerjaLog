@@ -9,6 +9,12 @@ const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
 };
 
+function assertValidDatabaseKey(key: string, source: string): void {
+  if (!DATABASE_KEY_PATTERN.test(key)) {
+    throw new Error(`${source} database encryption key is invalid.`);
+  }
+}
+
 export async function getStoredDatabaseKey(): Promise<string | null> {
   const storedKey = await SecureStore.getItemAsync(
     DATABASE_KEY_NAME,
@@ -33,10 +39,4 @@ export async function generateDatabaseKey(): Promise<string> {
 export async function storeDatabaseKey(key: string): Promise<void> {
   assertValidDatabaseKey(key, 'Generated');
   await SecureStore.setItemAsync(DATABASE_KEY_NAME, key, secureStoreOptions);
-}
-
-function assertValidDatabaseKey(key: string, source: string): void {
-  if (!DATABASE_KEY_PATTERN.test(key)) {
-    throw new Error(`${source} database encryption key is invalid.`);
-  }
 }

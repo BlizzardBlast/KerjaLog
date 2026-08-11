@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Modal } from 'react-native';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { AppLockScreen } from '@/features/app-lock/AppLockScreen';
 import { useAppLock } from '@/features/app-lock/AppLockProvider';
+import { AppLockScreen } from '@/features/app-lock/AppLockScreen';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 
