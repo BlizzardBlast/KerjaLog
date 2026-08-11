@@ -4,6 +4,7 @@ import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { InlineError } from '@/features/work-entry/components/InlineError';
+import { LogHeader } from '@/features/work-entry/components/LogHeader';
 import type {
   LogStepFrameProps,
   Translate,
