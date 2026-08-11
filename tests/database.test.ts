@@ -1,10 +1,15 @@
 import * as SQLite from 'expo-sqlite';
 import { getDatabase } from '@/data/database';
 import { migrateDatabase } from '@/data/migrations/migrateDatabase';
-import { getOrCreateDatabaseKey } from '@/platform/secure-storage/databaseKey';
+import {
+  generateDatabaseKey,
+  getStoredDatabaseKey,
+  storeDatabaseKey,
+} from '@/platform/secure-storage/databaseKey';
 
 jest.mock('expo-sqlite', () => ({
   openDatabaseAsync: jest.fn(),
+  deleteDatabaseAsync: jest.fn(),
 }));
 
 jest.mock('@/data/migrations/migrateDatabase', () => ({
@@ -12,12 +17,16 @@ jest.mock('@/data/migrations/migrateDatabase', () => ({
 }));
 
 jest.mock('@/platform/secure-storage/databaseKey', () => ({
-  getOrCreateDatabaseKey: jest.fn(),
+  generateDatabaseKey: jest.fn(),
+  getStoredDatabaseKey: jest.fn(),
+  storeDatabaseKey: jest.fn(),
 }));
 
 const openDatabaseAsyncMock = jest.mocked(SQLite.openDatabaseAsync);
 const migrateDatabaseMock = jest.mocked(migrateDatabase);
-const getOrCreateDatabaseKeyMock = jest.mocked(getOrCreateDatabaseKey);
+const generateDatabaseKeyMock = jest.mocked(generateDatabaseKey);
+const getStoredDatabaseKeyMock = jest.mocked(getStoredDatabaseKey);
+const storeDatabaseKeyMock = jest.mocked(storeDatabaseKey);
 
 test('opens an isolated encrypted database and keys it before reading pages', async () => {
   const key = 'ab'.repeat(32);
@@ -33,12 +42,14 @@ test('opens an isolated encrypted database and keys it before reading pages', as
     closeAsync,
   } as unknown as SQLite.SQLiteDatabase;
 
-  getOrCreateDatabaseKeyMock.mockResolvedValue(key);
+  getStoredDatabaseKeyMock.mockResolvedValue(key);
   openDatabaseAsyncMock.mockResolvedValue(db);
   migrateDatabaseMock.mockResolvedValue(undefined);
 
   await expect(getDatabase()).resolves.toBe(db);
 
+  expect(generateDatabaseKeyMock).not.toHaveBeenCalled();
+  expect(storeDatabaseKeyMock).not.toHaveBeenCalled();
   expect(openDatabaseAsyncMock).toHaveBeenCalledWith(
     'kerjalog-encrypted-v1.db',
     { useNewConnection: true },
