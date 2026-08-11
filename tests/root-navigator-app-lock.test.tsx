@@ -68,25 +68,25 @@ describe('RootNavigator app lock', () => {
     mockStackUnmounts = 0;
   });
 
-  test('keeps the navigation tree mounted while showing the lock screen', () => {
-    const view = render(<RootNavigator />);
+  test('keeps the navigation tree mounted while showing the lock screen', async () => {
+    const view = await render(<RootNavigator />);
 
     expect(mockStackMounts).toBe(1);
     expect(mockStackUnmounts).toBe(0);
 
     mockAppLockState.locked = true;
-    view.rerender(<RootNavigator />);
+    await view.rerender(<RootNavigator />);
 
     expect(mockStackMounts).toBe(1);
     expect(mockStackUnmounts).toBe(0);
 
     mockAppLockState.locked = false;
-    view.rerender(<RootNavigator />);
+    await view.rerender(<RootNavigator />);
 
     expect(mockStackMounts).toBe(1);
     expect(mockStackUnmounts).toBe(0);
 
-    view.unmount();
+    await view.unmount();
     expect(mockStackUnmounts).toBe(1);
   });
 });
