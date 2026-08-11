@@ -93,6 +93,16 @@ export function hasUsefulEvidence(
   return evidenceTypes.length > 0 && evidenceDetail.trim().length > 0;
 }
 
+export function hasIncompleteEvidence(
+  evidenceTypes: EvidenceType[],
+  evidenceDetail: string,
+): boolean {
+  const hasTypes = evidenceTypes.length > 0;
+  const hasDetail = evidenceDetail.trim().length > 0;
+
+  return hasTypes !== hasDetail;
+}
+
 function normalizeWhitespace(value: string): string {
   return value.trim().replace(/\s+/gu, ' ');
 }
