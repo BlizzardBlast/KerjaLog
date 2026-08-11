@@ -24,6 +24,7 @@ type UseLogFlowOptions = {
   impactCopy: ImpactBuilderCopy;
   onExit: () => void;
   onSaved: (entry: WorkEntry) => void;
+  onStepChanged?: () => void;
   saveEntry?: SaveEntry;
 };
 
@@ -31,6 +32,7 @@ export function useLogFlow({
   impactCopy,
   onExit,
   onSaved,
+  onStepChanged,
   saveEntry = (draft) => saveWorkEntry(draft),
 }: UseLogFlowOptions) {
   const [step, setStep] = useState<LogStep>('type');
@@ -49,6 +51,7 @@ export function useLogFlow({
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);
+    onStepChanged?.();
   }
 
   function goBack() {
