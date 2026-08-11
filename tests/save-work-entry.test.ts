@@ -60,6 +60,40 @@ describe('saveWorkEntry', () => {
     expect(entry.excludedFromExports).toBe(true);
   });
 
+  test.each([
+    {
+      evidenceTypes: ['deadline'] as const,
+      evidenceDetail: '',
+    },
+    {
+      evidenceTypes: [] as const,
+      evidenceDetail: 'Completed before Friday close',
+    },
+  ])(
+    'rejects incomplete evidence instead of silently discarding it',
+    async ({ evidenceTypes, evidenceDetail }) => {
+      const repository = createRepository();
+
+      await expect(
+        saveWorkEntry(
+          {
+            intent: 'completed',
+            rawNote: 'Prepared the monthly report',
+            outcomeType: 'deadline_met',
+            evidenceTypes: [...evidenceTypes],
+            evidenceDetail,
+            impactStatement: 'Prepared the monthly report on time.',
+          },
+          repository,
+        ),
+      ).rejects.toThrow(
+        'Evidence requires both a type and a supporting detail.',
+      );
+
+      expect(repository.create).not.toHaveBeenCalled();
+    },
+  );
+
   test('rejects an empty note before writing', async () => {
     const repository = createRepository();
 
