@@ -55,9 +55,7 @@ export function HomeScreen() {
         ) : (
           <ThisWeekCard
             entryCount={
-              workEntries.status === 'loaded'
-                ? workEntries.thisWeekCount
-                : null
+              workEntries.status === 'loaded' ? workEntries.thisWeekCount : null
             }
           />
         )}
