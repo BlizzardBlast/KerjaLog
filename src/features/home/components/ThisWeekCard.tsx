@@ -4,9 +4,17 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
 
-export function ThisWeekCard() {
+type ThisWeekCardProps = {
+  entryCount: number | null;
+};
+
+export function ThisWeekCard({ entryCount }: ThisWeekCardProps) {
   const { theme } = useTheme();
   const { t } = useI18n();
+  const countLabel =
+    entryCount === null
+      ? t('home.thisWeek.loading')
+      : t('home.thisWeek.entryCount', { count: entryCount });
 
   return (
     <View
@@ -29,7 +37,7 @@ export function ThisWeekCard() {
           style={[styles.countPill, { backgroundColor: theme.colors.surface }]}
         >
           <Text variant="label" color="primary">
-            {t('home.thisWeek.zeroEntries')}
+            {countLabel}
           </Text>
         </View>
       </View>
