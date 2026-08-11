@@ -58,7 +58,9 @@ describe('home work entry data', () => {
 
   test('surfaces repository failures without pretending the data is empty', async () => {
     const repository = createRepository();
-    repository.findRecent.mockRejectedValueOnce(new Error('database unavailable'));
+    repository.findRecent.mockRejectedValueOnce(
+      new Error('database unavailable'),
+    );
     const { result } = await renderHook(() => useHomeWorkEntries(repository));
 
     await waitFor(() => expect(result.current.status).toBe('error'));
