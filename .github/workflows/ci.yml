@@ -47,6 +47,13 @@ jobs:
       - name: Expo Doctor
         run: pnpm run expo:doctor
 
+      - name: Verify generated native configuration
+        run: |
+          pnpm exec expo prebuild --clean --no-install
+          grep -q 'resourceValues.isExcludedFromBackup = true' ios/*/AppDelegate.swift
+          grep -q '"expo.sqlite.useSQLCipher": "true"' ios/Podfile.properties.json
+          grep -q 'expo.sqlite.useSQLCipher=true' android/gradle.properties
+
       - name: Export Android bundle
         run: pnpm run export:android
 
