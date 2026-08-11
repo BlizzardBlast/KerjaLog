@@ -2,6 +2,7 @@ import {
   buildEntryTitle,
   buildImpactStatement,
   deriveEntryStatus,
+  hasIncompleteEvidence,
   type ImpactBuilderCopy,
 } from '@/domain/entry/impact';
 
@@ -37,6 +38,13 @@ describe('work entry impact rules', () => {
     expect(deriveEntryStatus('deadline_met', 'Finished on Friday')).toBe(
       'review_ready',
     );
+  });
+
+  test('requires evidence type and detail to be supplied together', () => {
+    expect(hasIncompleteEvidence([], '')).toBe(false);
+    expect(hasIncompleteEvidence(['deadline'], 'Finished on Friday')).toBe(false);
+    expect(hasIncompleteEvidence(['deadline'], '')).toBe(true);
+    expect(hasIncompleteEvidence([], 'Finished on Friday')).toBe(true);
   });
 
   test('structures only facts the user supplied or confirmed', () => {
