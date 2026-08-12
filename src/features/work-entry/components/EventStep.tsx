@@ -8,7 +8,7 @@ import { LogHeader } from '@/features/work-entry/components/LogHeader';
 import type {
   LogStepFrameProps,
   Translate,
-} from '@/features/work-entry/components/LogStepFrame';
+} from '@/features/work-entry/components/logStepTypes';
 import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 
@@ -103,12 +103,3 @@ export function EventStep({
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  textarea: {
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    minHeight: 156,
-    padding: spacing[4],
-  },
-});
