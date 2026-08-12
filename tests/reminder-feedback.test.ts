@@ -44,14 +44,14 @@ describe('reminder feedback state', () => {
     });
   });
 
-  test('tracks exact alarm access separately from notification permission', () => {
+  test('represents inexact delivery as an informational notice rather than setup failure', () => {
     expect(
       reminderFeedbackReducer(INITIAL_REMINDER_FEEDBACK_STATE, {
-        type: 'failure',
-        issue: 'exact-alarm',
+        type: 'notice',
+        issue: 'inexact-alarm',
       }),
     ).toEqual({
-      issue: 'exact-alarm',
+      issue: 'inexact-alarm',
       isUpdating: false,
     });
   });
