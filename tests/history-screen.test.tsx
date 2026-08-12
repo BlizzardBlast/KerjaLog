@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { View } from 'react-native';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { EMPTY_WORK_ENTRY_HISTORY_FILTERS } from '@/domain/entry/history';
 import type { WorkEntry } from '@/domain/entry/model';
@@ -16,12 +15,23 @@ jest.mock('expo-symbols', () => ({
   SymbolView: () => null,
 }));
 
-jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children, ...props }: { children: React.ReactNode }) => (
-    <View {...props}>{children}</View>
-  ),
-  useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
-}));
+jest.mock('react-native-safe-area-context', () => {
+  const React = jest.requireActual<typeof import('react')>('react');
+  const { View } = jest.requireActual<typeof import('react-native')>(
+    'react-native',
+  );
+
+  return {
+    SafeAreaView: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode;
+      [key: string]: unknown;
+    }) => React.createElement(View, props, children),
+    useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+  };
+});
 
 jest.mock('@/features/history/useHistoryEntries', () => ({
   useHistoryEntries: () => mockUseHistoryEntries(),
