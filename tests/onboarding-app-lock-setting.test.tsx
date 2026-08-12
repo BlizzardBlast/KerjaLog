@@ -80,7 +80,7 @@ describe('OnboardingAppLockSetting', () => {
     await fireEvent.press(screen.getByRole('switch'));
 
     await waitFor(() => expect(updateEnabled).toHaveBeenCalledWith(true));
-    expect(screen.getByRole('switch')).toHaveAccessibilityState({
+    expect(screen.getByRole('switch').props.accessibilityState).toMatchObject({
       checked: false,
     });
   });
