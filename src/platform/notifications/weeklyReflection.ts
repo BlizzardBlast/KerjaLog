@@ -1,15 +1,12 @@
 import { isRunningInExpoGo } from 'expo';
 import type { NotificationPermissionsStatus } from 'expo-notifications';
-import { Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import type { ReminderPrecision } from '@/domain/reminder/model';
 import type { WeeklyReminderSchedule } from '@/features/onboarding/model';
 import { getWeeklyReminderPrecision } from '@/platform/notifications/exactAlarmAccess';
 
 const WEEKLY_REFLECTION_CHANNEL_ID = 'weekly-reflection';
 const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
-const EXACT_ALARM_SETTINGS_ACTION =
-  'android.settings.REQUEST_SCHEDULE_EXACT_ALARM';
-const ANDROID_EXACT_ALARM_MIN_API = 31;
 
 type NotificationsModule = typeof import('expo-notifications');
 
@@ -55,13 +52,6 @@ function isNotificationPermissionGranted(
   return (
     permissions.granted ||
     permissions.ios?.status === notifications.IosAuthorizationStatus.PROVISIONAL
-  );
-}
-
-function requiresExactAlarmSpecialAccess(): boolean {
-  return (
-    Platform.OS === 'android' &&
-    Number(Platform.Version) >= ANDROID_EXACT_ALARM_MIN_API
   );
 }
 
@@ -153,18 +143,6 @@ export async function getWeeklyReflectionNotificationStatus(): Promise<WeeklyRef
   }
 
   return enabledResultForPrecision(getWeeklyReminderPrecision());
-}
-
-export async function openExactAlarmPermissionSettings(): Promise<void> {
-  if (!requiresExactAlarmSpecialAccess()) {
-    return;
-  }
-
-  try {
-    await Linking.sendIntent(EXACT_ALARM_SETTINGS_ACTION);
-  } catch {
-    await Linking.openSettings();
-  }
 }
 
 export async function enableWeeklyReflectionNotification({
