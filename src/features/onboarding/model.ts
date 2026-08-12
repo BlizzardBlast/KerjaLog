@@ -109,7 +109,6 @@ export type OnboardingState = {
   reviewSchedule?: ReviewSchedule;
   weeklyReminderEnabled: boolean;
   weeklyReminderSchedule: WeeklyReminderSchedule;
-  appLockPreferred: boolean;
 };
 
 export type OnboardingEditableState = Pick<
@@ -120,7 +119,6 @@ export type OnboardingEditableState = Pick<
   | 'reviewSchedule'
   | 'weeklyReminderEnabled'
   | 'weeklyReminderSchedule'
-  | 'appLockPreferred'
 >;
 
 export type OnboardingPatch = Partial<OnboardingEditableState>;
@@ -144,5 +142,4 @@ export const DEFAULT_ONBOARDING_STATE: OnboardingState = {
   completed: false,
   weeklyReminderEnabled: false,
   weeklyReminderSchedule: DEFAULT_WEEKLY_REMINDER_SCHEDULE,
-  appLockPreferred: false,
 };
