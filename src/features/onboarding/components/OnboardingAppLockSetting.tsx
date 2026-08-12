@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { spacing } from '@/design-system/tokens/theme';
 import { AppLockSettingFeedback } from '@/features/app-lock/AppLockSettingFeedback';
@@ -7,23 +6,15 @@ import { SettingToggle } from '@/features/onboarding/components/SettingToggle';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type OnboardingAppLockSettingProps = {
-  preferred: boolean;
   onPreferenceChange: (preferred: boolean) => void;
 };
 
 export function OnboardingAppLockSetting({
-  preferred,
   onPreferenceChange,
 }: OnboardingAppLockSettingProps) {
   const { t } = useI18n();
   const { enabled, error, isUpdating, updateEnabled } =
     useAppLockSettingControl();
-
-  useEffect(() => {
-    if (preferred !== enabled) {
-      onPreferenceChange(enabled);
-    }
-  }, [enabled, onPreferenceChange, preferred]);
 
   const handleValueChange = async (nextEnabled: boolean) => {
     const didChange = await updateEnabled(nextEnabled);
