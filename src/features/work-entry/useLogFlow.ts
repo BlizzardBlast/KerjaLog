@@ -1,5 +1,11 @@
 import { useRef, useState } from 'react';
 import {
+  EMPTY_WORK_ENTRY_DRAFT,
+  hasWorkEntryDraftContent,
+  type WorkEntryDraft,
+  WORK_ENTRY_DRAFT_STEPS,
+} from '@/domain/entry/draft';
+import {
   buildImpactStatement,
   hasIncompleteEvidence,
   type ImpactBuilderCopy,
@@ -15,53 +21,68 @@ import {
   type SaveWorkEntryDraft,
 } from '@/features/work-entry/saveWorkEntry';
 
-export const LOG_STEPS = [
-  'type',
-  'event',
-  'outcome',
-  'evidence',
-  'impact',
-] as const;
+export const LOG_STEPS = WORK_ENTRY_DRAFT_STEPS;
 export type LogStep = (typeof LOG_STEPS)[number];
 
 type SaveEntry = (draft: SaveWorkEntryDraft) => Promise<WorkEntry>;
+type CompleteSavedEntry = (entry: WorkEntry) => Promise<void> | void;
 
 type UseLogFlowOptions = {
   impactCopy: ImpactBuilderCopy;
+  initialDraft?: WorkEntryDraft | null;
   onExit: () => void;
-  onSaved: (entry: WorkEntry) => void;
+  onSaved: CompleteSavedEntry;
   onStepChanged?: () => void;
   saveEntry?: SaveEntry;
 };
 
 export function useLogFlow({
   impactCopy,
+  initialDraft = null,
   onExit,
   onSaved,
   onStepChanged,
   saveEntry = (draft) => saveWorkEntry(draft),
 }: UseLogFlowOptions) {
-  const [step, setStep] = useState<LogStep>('type');
-  const [intent, setIntent] = useState<LogEventIntent | null>(null);
-  const [rawNote, setRawNote] = useState('');
-  const [outcomeType, setOutcomeType] = useState<OutcomeType | null>(null);
-  const [evidenceTypes, setEvidenceTypes] = useState<EvidenceType[]>([]);
-  const [evidenceDetail, setEvidenceDetail] = useState('');
-  const [impactStatement, setImpactStatement] = useState('');
+  const startingDraft = initialDraft ?? EMPTY_WORK_ENTRY_DRAFT;
+  const [step, setStep] = useState<LogStep>(startingDraft.step);
+  const [intent, setIntent] = useState<LogEventIntent | null>(
+    startingDraft.intent,
+  );
+  const [rawNote, setRawNote] = useState(startingDraft.rawNote);
+  const [outcomeType, setOutcomeType] = useState<OutcomeType | null>(
+    startingDraft.outcomeType,
+  );
+  const [evidenceTypes, setEvidenceTypes] = useState<EvidenceType[]>(
+    startingDraft.evidenceTypes,
+  );
+  const [evidenceDetail, setEvidenceDetail] = useState(
+    startingDraft.evidenceDetail,
+  );
+  const [impactStatement, setImpactStatement] = useState(
+    startingDraft.impactStatement,
+  );
   const [noteError, setNoteError] = useState(false);
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const [completionError, setCompletionError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [hasCommittedEntry, setHasCommittedEntry] = useState(false);
   const saveInProgressRef = useRef(false);
+  const committedEntryRef = useRef<WorkEntry | null>(null);
 
   const currentStep = LOG_STEPS.indexOf(step) + 1;
+  const draft: WorkEntryDraft = {
+    step,
+    intent,
+    rawNote,
+    outcomeType,
+    evidenceTypes,
+    evidenceDetail,
+    impactStatement,
+  };
   const hasUnsavedDraft =
-    intent !== null ||
-    rawNote.trim().length > 0 ||
-    outcomeType !== null ||
-    evidenceTypes.length > 0 ||
-    evidenceDetail.trim().length > 0 ||
-    impactStatement.trim().length > 0;
+    !hasCommittedEntry && hasWorkEntryDraftContent(draft);
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);
@@ -177,8 +198,24 @@ export function useLogFlow({
     setSaveError(false);
   }
 
+  async function completeCommittedEntry(entry: WorkEntry): Promise<void> {
+    setCompletionError(false);
+
+    try {
+      await onSaved(entry);
+    } catch {
+      setCompletionError(true);
+    }
+  }
+
   async function save(quickNote: boolean) {
     if (saveInProgressRef.current) {
+      return;
+    }
+
+    const alreadyCommitted = committedEntryRef.current;
+    if (alreadyCommitted) {
+      await completeCommittedEntry(alreadyCommitted);
       return;
     }
 
@@ -194,9 +231,11 @@ export function useLogFlow({
     saveInProgressRef.current = true;
     setSaving(true);
     setSaveError(false);
+    setCompletionError(false);
 
+    let entry: WorkEntry;
     try {
-      const entry = await saveEntry({
+      entry = await saveEntry({
         intent,
         rawNote,
         outcomeType: quickNote ? null : outcomeType,
@@ -204,21 +243,26 @@ export function useLogFlow({
         evidenceDetail: quickNote ? '' : evidenceDetail,
         impactStatement: quickNote ? null : impactStatement,
       });
-
-      onSaved(entry);
     } catch {
       setSaveError(true);
+      return;
     } finally {
       saveInProgressRef.current = false;
       setSaving(false);
     }
+
+    committedEntryRef.current = entry;
+    setHasCommittedEntry(true);
+    await completeCommittedEntry(entry);
   }
 
   return {
     step,
     currentStep,
     totalSteps: LOG_STEPS.length,
+    draft,
     hasUnsavedDraft,
+    hasCommittedEntry,
     intent,
     rawNote,
     outcomeType,
@@ -228,6 +272,7 @@ export function useLogFlow({
     noteError,
     evidenceError,
     saveError,
+    completionError,
     saving,
     goBack,
     selectIntent,
@@ -243,5 +288,9 @@ export function useLogFlow({
     updateImpactStatement,
     saveQuick: () => save(true),
     saveDeveloped: () => save(false),
+    retryCompletion: () => {
+      const entry = committedEntryRef.current;
+      return entry ? completeCommittedEntry(entry) : Promise.resolve();
+    },
   };
 }
