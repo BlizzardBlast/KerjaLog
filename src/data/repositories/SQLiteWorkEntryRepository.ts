@@ -1,6 +1,9 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/data/database';
-import { withKeyedTransaction } from '@/data/keyedTransaction';
+import {
+  withKeyedDatabaseAccess,
+  withKeyedTransaction,
+} from '@/data/keyedTransaction';
 import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
@@ -12,34 +15,36 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntry | null> {
     const db = await getDatabase();
 
-    const rows = await db.getAllAsync<JoinedWorkEntryRow>(
-      `
-        SELECT
-          work_entries.id,
-          work_entries.type,
-          work_entries.title,
-          work_entries.raw_note,
-          work_entries.impact_statement,
-          work_entries.occurred_at,
-          work_entries.outcome_type,
-          work_entries.status,
-          work_entries.excluded_from_exports,
-          work_entries.created_at,
-          work_entries.updated_at,
-          evidence.type AS evidence_type,
-          evidence.text_value AS evidence_text_value
-        FROM work_entries
-        LEFT JOIN evidence
-          ON evidence.entry_id = work_entries.id
-        WHERE work_entries.id = $id
-        ORDER BY evidence.created_at ASC
-      `,
-      {
-        $id: id,
-      },
-    );
+    return withKeyedDatabaseAccess(async () => {
+      const rows = await db.getAllAsync<JoinedWorkEntryRow>(
+        `
+          SELECT
+            work_entries.id,
+            work_entries.type,
+            work_entries.title,
+            work_entries.raw_note,
+            work_entries.impact_statement,
+            work_entries.occurred_at,
+            work_entries.outcome_type,
+            work_entries.status,
+            work_entries.excluded_from_exports,
+            work_entries.created_at,
+            work_entries.updated_at,
+            evidence.type AS evidence_type,
+            evidence.text_value AS evidence_text_value
+          FROM work_entries
+          LEFT JOIN evidence
+            ON evidence.entry_id = work_entries.id
+          WHERE work_entries.id = $id
+          ORDER BY evidence.created_at ASC
+        `,
+        {
+          $id: id,
+        },
+      );
 
-    return mapJoinedWorkEntryRows(rows)[0] ?? null;
+      return mapJoinedWorkEntryRows(rows)[0] ?? null;
+    });
   }
 
   async findRecent(limit: number): Promise<WorkEntry[]> {
@@ -55,55 +60,57 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 
     const db = await getDatabase();
 
-    const rows = await db.getAllAsync<JoinedWorkEntryRow>(
-      `
-        WITH recent_entries AS (
+    return withKeyedDatabaseAccess(async () => {
+      const rows = await db.getAllAsync<JoinedWorkEntryRow>(
+        `
+          WITH recent_entries AS (
+            SELECT
+              id,
+              type,
+              title,
+              raw_note,
+              impact_statement,
+              occurred_at,
+              outcome_type,
+              status,
+              excluded_from_exports,
+              created_at,
+              updated_at
+            FROM work_entries
+            ORDER BY
+              occurred_at DESC,
+              created_at DESC
+            LIMIT $limit
+          )
           SELECT
-            id,
-            type,
-            title,
-            raw_note,
-            impact_statement,
-            occurred_at,
-            outcome_type,
-            status,
-            excluded_from_exports,
-            created_at,
-            updated_at
-          FROM work_entries
+            recent_entries.id,
+            recent_entries.type,
+            recent_entries.title,
+            recent_entries.raw_note,
+            recent_entries.impact_statement,
+            recent_entries.occurred_at,
+            recent_entries.outcome_type,
+            recent_entries.status,
+            recent_entries.excluded_from_exports,
+            recent_entries.created_at,
+            recent_entries.updated_at,
+            evidence.type AS evidence_type,
+            evidence.text_value AS evidence_text_value
+          FROM recent_entries
+          LEFT JOIN evidence
+            ON evidence.entry_id = recent_entries.id
           ORDER BY
-            occurred_at DESC,
-            created_at DESC
-          LIMIT $limit
-        )
-        SELECT
-          recent_entries.id,
-          recent_entries.type,
-          recent_entries.title,
-          recent_entries.raw_note,
-          recent_entries.impact_statement,
-          recent_entries.occurred_at,
-          recent_entries.outcome_type,
-          recent_entries.status,
-          recent_entries.excluded_from_exports,
-          recent_entries.created_at,
-          recent_entries.updated_at,
-          evidence.type AS evidence_type,
-          evidence.text_value AS evidence_text_value
-        FROM recent_entries
-        LEFT JOIN evidence
-          ON evidence.entry_id = recent_entries.id
-        ORDER BY
-          recent_entries.occurred_at DESC,
-          recent_entries.created_at DESC,
-          evidence.created_at ASC
-      `,
-      {
-        $limit: limit,
-      },
-    );
+            recent_entries.occurred_at DESC,
+            recent_entries.created_at DESC,
+            evidence.created_at ASC
+        `,
+        {
+          $limit: limit,
+        },
+      );
 
-    return mapJoinedWorkEntryRows(rows);
+      return mapJoinedWorkEntryRows(rows);
+    });
   }
 
   async countSince(occurredAtInclusive: string): Promise<number> {
@@ -112,22 +119,25 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     }
 
     const db = await getDatabase();
-    const row = await db.getFirstAsync<{ count: number }>(
-      `
-        SELECT COUNT(*) AS count
-        FROM work_entries
-        WHERE occurred_at >= $occurredAtInclusive
-      `,
-      {
-        $occurredAtInclusive: occurredAtInclusive,
-      },
-    );
 
-    if (!row || !Number.isInteger(row.count) || row.count < 0) {
-      throw new Error('Stored work entry count is invalid.');
-    }
+    return withKeyedDatabaseAccess(async () => {
+      const row = await db.getFirstAsync<{ count: number }>(
+        `
+          SELECT COUNT(*) AS count
+          FROM work_entries
+          WHERE occurred_at >= $occurredAtInclusive
+        `,
+        {
+          $occurredAtInclusive: occurredAtInclusive,
+        },
+      );
 
-    return row.count;
+      if (!row || !Number.isInteger(row.count) || row.count < 0) {
+        throw new Error('Stored work entry count is invalid.');
+      }
+
+      return row.count;
+    });
   }
 
   async create(input: CreateWorkEntry): Promise<WorkEntry> {
