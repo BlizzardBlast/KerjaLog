@@ -79,7 +79,9 @@ describe('useAppLockController', () => {
 
   test('stays locked when native screen privacy cannot be established', async () => {
     readAppLockEnabledMock.mockResolvedValue(true);
-    setScreenPrivacyMock.mockRejectedValueOnce(new Error('privacy unavailable'));
+    setScreenPrivacyMock.mockRejectedValueOnce(
+      new Error('privacy unavailable'),
+    );
     const { result } = await renderHook(() => useAppLockController());
 
     await waitFor(() => expect(result.current.isHydrated).toBe(true));
@@ -101,9 +103,9 @@ describe('useAppLockController', () => {
 
     expect(setScreenPrivacyMock).toHaveBeenCalledWith(true);
     expect(writeAppLockEnabledMock).toHaveBeenCalledWith(true);
-    expect(
-      setScreenPrivacyMock.mock.invocationCallOrder[0],
-    ).toBeLessThan(writeAppLockEnabledMock.mock.invocationCallOrder[0] ?? 0);
+    expect(setScreenPrivacyMock.mock.invocationCallOrder[0]).toBeLessThan(
+      writeAppLockEnabledMock.mock.invocationCallOrder[0] ?? 0,
+    );
     expect(result.current.enabled).toBe(true);
   });
 });
