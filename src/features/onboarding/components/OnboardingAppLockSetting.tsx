@@ -5,23 +5,13 @@ import { useAppLockSettingControl } from '@/features/app-lock/useAppLockSettingC
 import { SettingToggle } from '@/features/onboarding/components/SettingToggle';
 import { useI18n } from '@/i18n/I18nProvider';
 
-type OnboardingAppLockSettingProps = {
-  onPreferenceChange: (preferred: boolean) => void;
-};
-
-export function OnboardingAppLockSetting({
-  onPreferenceChange,
-}: OnboardingAppLockSettingProps) {
+export function OnboardingAppLockSetting() {
   const { t } = useI18n();
   const { enabled, error, isUpdating, updateEnabled } =
     useAppLockSettingControl();
 
   const handleValueChange = async (nextEnabled: boolean) => {
-    const didChange = await updateEnabled(nextEnabled);
-
-    if (didChange) {
-      onPreferenceChange(nextEnabled);
-    }
+    await updateEnabled(nextEnabled);
   };
 
   return (
