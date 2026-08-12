@@ -15,7 +15,11 @@ export interface WorkEntryReader
     RecentWorkEntryReader {}
 
 export interface WorkEntryWriter {
-  create(input: CreateWorkEntry): Promise<WorkEntry>;
+  /**
+   * Atomically persists a captured work entry and consumes the active encrypted
+   * capture draft in the same database transaction.
+   */
+  commit(input: CreateWorkEntry): Promise<WorkEntry>;
 }
 
 export interface WorkEntryRepository extends WorkEntryReader, WorkEntryWriter {}
