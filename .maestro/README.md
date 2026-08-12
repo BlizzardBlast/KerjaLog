@@ -1,6 +1,6 @@
 # KerjaLog native journey checks
 
-Run these against a clean Android/iOS development build. The automated core flow assumes the device language is English.
+Run these against clean Android/iOS development builds. The automated flows assume the device language is English.
 
 ## Automated core flow
 
@@ -9,6 +9,14 @@ maestro test .maestro/log-entry.yaml
 ```
 
 The core flow covers onboarding, Log capture, native Back protection inside the wizard, save, Home refresh, and saved-entry rendering.
+
+## Automated encrypted draft recovery
+
+```bash
+maestro test .maestro/draft-recovery.yaml
+```
+
+This flow creates a partial Log draft, stops and relaunches KerjaLog, reopens capture, and verifies that the free-form draft text was restored from encrypted SQLCipher storage rather than AsyncStorage.
 
 ## Native security scenario
 
