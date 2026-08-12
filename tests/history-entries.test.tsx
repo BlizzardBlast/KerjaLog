@@ -40,7 +40,7 @@ function createRepository(): jest.Mocked<WorkEntryHistoryReader> {
 describe('History entries controller', () => {
   test('loads History through the narrow read capability', async () => {
     const repository = createRepository();
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -57,7 +57,7 @@ describe('History entries controller', () => {
 
   test('combines practical filters without copying entries into global state', async () => {
     const repository = createRepository();
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -84,7 +84,7 @@ describe('History entries controller', () => {
     repository.findHistory
       .mockRejectedValueOnce(new Error('database unavailable'))
       .mockResolvedValueOnce([entry]);
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('error'));
     expect(result.current.state.entries).toEqual([]);
