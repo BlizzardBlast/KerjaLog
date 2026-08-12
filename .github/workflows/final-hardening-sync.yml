@@ -1,0 +1,74 @@
+name: Final hardening sync
+
+on:
+  push:
+    branches:
+      - feat/log
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feat/log
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.20.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.18.1
+
+      - name: Update architecture notes
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'docs/PRODUCT_AND_ARCHITECTURE.md';
+          let text = fs.readFileSync(path, 'utf8');
+
+          const exactOld = 'On Android 12+, precise user-selected reminder times may require the `SCHEDULE_EXACT_ALARM` special app access. Explain why that access is needed before sending the user to the system **Alarms & reminders** screen. If notification permission or the native scheduled request is later removed, reconcile the persisted preference when the app starts or returns to the foreground so an ON state continues to mean that a native reminder is actually scheduled. Do not turn the reminder off merely because the current runtime cannot inspect native reminder state.';
+          const exactNew = 'On Android 12+, precise user-selected reminder times may use the `SCHEDULE_EXACT_ALARM` special app access. Treat that access as an optional precision upgrade rather than a prerequisite for reminders: Expo SDK 57 falls back to an inexact `setAndAllowWhileIdle` alarm when exact access is unavailable. Keep the reminder enabled in that case, clearly tell the user that delivery is approximate, and offer **Alarms & reminders** settings only if they want exact timing. Persist the last observed reminder precision and reconcile it when the app starts or returns to the foreground so permission grants/revocations re-arm the native reminder in the correct mode. If notification permission or the native scheduled request itself is removed, reconcile the persisted ON/OFF state. Do not turn the reminder off merely because the current runtime cannot inspect native reminder state.';
+          if (!text.includes(exactOld)) throw new Error('Exact alarm architecture paragraph not found');
+          text = text.replace(exactOld, exactNew);
+
+          const localFirstAnchor = '- **DO** keep work entries local by default.\n';
+          const localFirstInsert = `${localFirstAnchor}- **DO** keep unsaved free-form Log drafts recoverable across process death by storing the single active draft inside encrypted SQLite; never put draft text in AsyncStorage.\n- **DO** exclude the encrypted SQLite directory from automatic platform backup where supported, while treating OS backup-exclusion metadata as best-effort and SQLCipher as the confidentiality boundary.\n`;
+          if (!text.includes(localFirstAnchor)) throw new Error('Privacy architecture anchor not found');
+          text = text.replace(localFirstAnchor, localFirstInsert);
+
+          fs.writeFileSync(path, text);
+          NODE
+
+      - name: Regenerate lockfile
+        run: pnpm install --lockfile-only
+
+      - name: Format repository
+        run: pnpm format
+
+      - name: Remove temporary workflow
+        run: git rm .github/workflows/final-hardening-sync.yml
+
+      - name: Commit generated changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/PRODUCT_AND_ARCHITECTURE.md pnpm-lock.yaml .
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "chore: sync final hardening artifacts"
+          git push origin HEAD:feat/log
