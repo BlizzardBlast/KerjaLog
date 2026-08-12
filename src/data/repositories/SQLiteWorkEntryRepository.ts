@@ -8,7 +8,14 @@ import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
 } from '@/data/repositories/workEntryRowMapper';
-import type { WorkEntryHistoryQuery } from '@/domain/entry/history';
+import {
+  HISTORY_PAGE_MAX_SIZE,
+  HISTORY_SEARCH_MAX_LENGTH,
+  HISTORY_SEARCH_MAX_TERMS,
+  type WorkEntryHistoryCursor,
+  type WorkEntryHistoryPage,
+  type WorkEntryHistoryQuery,
+} from '@/domain/entry/history';
 import {
   type CreateWorkEntry,
   ENTRY_TYPES,
@@ -86,7 +93,8 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             FROM work_entries
             ORDER BY
               occurred_at DESC,
-              created_at DESC
+              created_at DESC,
+              id DESC
             LIMIT $limit
           )
           SELECT
@@ -109,6 +117,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           ORDER BY
             recent_entries.occurred_at DESC,
             recent_entries.created_at DESC,
+            recent_entries.id DESC,
             evidence.created_at ASC
         `,
         {
@@ -120,26 +129,29 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     });
   }
 
-  async findHistory(query: WorkEntryHistoryQuery): Promise<WorkEntry[]> {
+  async findHistory(
+    query: WorkEntryHistoryQuery,
+  ): Promise<WorkEntryHistoryPage> {
     validateHistoryQuery(query);
 
     const trimmedSearchText = query.searchText.trim();
     const searchQuery = buildFtsSearchQuery(trimmedSearchText);
 
     if (trimmedSearchText && searchQuery === null) {
-      return [];
+      return { entries: [], nextCursor: null };
     }
 
     const whereClauses: string[] = [];
-    const parameters: Record<string, string | number | null> = {};
+    const parameters: Record<string, string | number | null> = {
+      $limitPlusOne: query.limit + 1,
+    };
 
     if (searchQuery !== null) {
       whereClauses.push(`
-        EXISTS (
-          SELECT 1
+        work_entries.id IN (
+          SELECT entry_id
           FROM work_entry_history_fts
-          WHERE work_entry_history_fts.entry_id = work_entries.id
-            AND work_entry_history_fts MATCH $searchQuery
+          WHERE work_entry_history_fts MATCH $searchQuery
         )
       `);
       parameters.$searchQuery = searchQuery;
@@ -162,6 +174,26 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 
     if (query.filters.reviewReadyOnly) {
       whereClauses.push("work_entries.status = 'review_ready'");
+    }
+
+    if (query.cursor !== null) {
+      whereClauses.push(`
+        (
+          work_entries.occurred_at < $cursorOccurredAt
+          OR (
+            work_entries.occurred_at = $cursorOccurredAt
+            AND work_entries.created_at < $cursorCreatedAt
+          )
+          OR (
+            work_entries.occurred_at = $cursorOccurredAt
+            AND work_entries.created_at = $cursorCreatedAt
+            AND work_entries.id < $cursorId
+          )
+        )
+      `);
+      parameters.$cursorOccurredAt = query.cursor.occurredAt;
+      parameters.$cursorCreatedAt = query.cursor.createdAt;
+      parameters.$cursorId = query.cursor.id;
     }
 
     const whereSql =
@@ -188,7 +220,9 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             ${whereSql}
             ORDER BY
               work_entries.occurred_at DESC,
-              work_entries.created_at DESC
+              work_entries.created_at DESC,
+              work_entries.id DESC
+            LIMIT $limitPlusOne
           )
           SELECT
             matching_entries.id,
@@ -210,12 +244,22 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           ORDER BY
             matching_entries.occurred_at DESC,
             matching_entries.created_at DESC,
+            matching_entries.id DESC,
             evidence.created_at ASC
         `,
         parameters,
       );
 
-      return mapJoinedWorkEntryRows(rows);
+      const matchingEntries = mapJoinedWorkEntryRows(rows);
+      const hasMore = matchingEntries.length > query.limit;
+      const entries = matchingEntries.slice(0, query.limit);
+      const lastEntry = entries.at(-1);
+
+      return {
+        entries,
+        nextCursor:
+          hasMore && lastEntry ? createHistoryCursor(lastEntry) : null,
+      };
     });
   }
 
@@ -337,8 +381,13 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 }
 
 function validateHistoryQuery(query: WorkEntryHistoryQuery): void {
-  if (typeof query.searchText !== 'string') {
-    throw new Error('History search text must be a string.');
+  if (
+    typeof query.searchText !== 'string' ||
+    query.searchText.length > HISTORY_SEARCH_MAX_LENGTH
+  ) {
+    throw new Error(
+      `History search text must be at most ${HISTORY_SEARCH_MAX_LENGTH} characters.`,
+    );
   }
 
   const { entryType, hasEvidence, reviewReadyOnly } = query.filters;
@@ -353,16 +402,49 @@ function validateHistoryQuery(query: WorkEntryHistoryQuery): void {
   ) {
     throw new Error('History boolean filters are invalid.');
   }
+
+  if (
+    !Number.isInteger(query.limit) ||
+    query.limit <= 0 ||
+    query.limit > HISTORY_PAGE_MAX_SIZE
+  ) {
+    throw new Error(
+      `History page size must be an integer between 1 and ${HISTORY_PAGE_MAX_SIZE}.`,
+    );
+  }
+
+  if (query.cursor !== null) {
+    validateHistoryCursor(query.cursor);
+  }
+}
+
+function validateHistoryCursor(cursor: WorkEntryHistoryCursor): void {
+  if (
+    !isIsoTimestamp(cursor.occurredAt) ||
+    !isIsoTimestamp(cursor.createdAt) ||
+    !cursor.id.trim()
+  ) {
+    throw new Error('History cursor is invalid.');
+  }
 }
 
 export function buildFtsSearchQuery(searchText: string): string | null {
   const terms = searchText.normalize('NFKC').match(/[\p{L}\p{N}]+/gu) ?? [];
+  const boundedTerms = terms.slice(0, HISTORY_SEARCH_MAX_TERMS);
 
-  if (terms.length === 0) {
+  if (boundedTerms.length === 0) {
     return null;
   }
 
-  return terms.map((term) => `"${term}"*`).join(' AND ');
+  return boundedTerms.map((term) => `"${term}"*`).join(' AND ');
+}
+
+function createHistoryCursor(entry: WorkEntry): WorkEntryHistoryCursor {
+  return {
+    occurredAt: entry.occurredAt,
+    createdAt: entry.createdAt,
+    id: entry.id,
+  };
 }
 
 function isIsoTimestamp(value: string): boolean {
