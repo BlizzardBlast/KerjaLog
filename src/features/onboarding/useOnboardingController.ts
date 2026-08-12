@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
+import type { ReminderPrecision } from '@/domain/reminder/model';
 import {
   DEFAULT_ONBOARDING_STATE,
   hasRequiredOnboardingAnswers,
@@ -11,7 +12,13 @@ import {
   loadOnboardingState,
   saveOnboardingState,
 } from '@/features/onboarding/storage';
-import { getWeeklyReflectionNotificationStatus } from '@/platform/notifications/weeklyReflection';
+import { useI18n } from '@/i18n/I18nProvider';
+import {
+  enableWeeklyReflectionNotification,
+  getWeeklyReflectionNotificationStatus,
+  type WeeklyReflectionEnableResult,
+  type WeeklyReflectionNotificationStatus,
+} from '@/platform/notifications/weeklyReflection';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 export type OnboardingContextValue = {
@@ -25,6 +32,7 @@ export type OnboardingContextValue = {
 };
 
 export function useOnboardingController(): OnboardingContextValue {
+  const { t } = useI18n();
   const [state, setState] = useState<OnboardingState>(DEFAULT_ONBOARDING_STATE);
   const [isHydrated, setIsHydrated] = useState(false);
   const writeQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -87,12 +95,47 @@ export function useOnboardingController(): OnboardingContextValue {
       try {
         const status = await getWeeklyReflectionNotificationStatus();
 
-        if (!ignore && status === 'disabled') {
+        if (ignore || status === 'unsupported-runtime') {
+          return;
+        }
+
+        if (status === 'disabled') {
           setState((current) =>
             current.weeklyReminderEnabled
-              ? { ...current, weeklyReminderEnabled: false }
+              ? {
+                  ...current,
+                  weeklyReminderEnabled: false,
+                  weeklyReminderPrecision: null,
+                }
               : current,
           );
+          return;
+        }
+
+        const observedPrecision = precisionFromStatus(status);
+        if (state.weeklyReminderPrecision === observedPrecision) {
+          return;
+        }
+
+        const result = await enableWeeklyReflectionNotification({
+          schedule: state.weeklyReminderSchedule,
+          copy: {
+            title: t('onboarding.review.notificationTitle'),
+            body: t('onboarding.review.notificationBody'),
+            channelName: t('onboarding.review.notificationChannelName'),
+          },
+        });
+
+        if (!ignore) {
+          setState((current) => applyReminderResult(current, result));
+        }
+      } catch {
+        if (!ignore) {
+          setState((current) => ({
+            ...current,
+            weeklyReminderEnabled: false,
+            weeklyReminderPrecision: null,
+          }));
         }
       } finally {
         isReconciling = false;
@@ -111,7 +154,13 @@ export function useOnboardingController(): OnboardingContextValue {
       ignore = true;
       subscription.remove();
     };
-  }, [isHydrated, state.weeklyReminderEnabled]);
+  }, [
+    isHydrated,
+    state.weeklyReminderEnabled,
+    state.weeklyReminderPrecision,
+    state.weeklyReminderSchedule,
+    t,
+  ]);
 
   const currentStepIndex = Math.max(
     0,
@@ -175,5 +224,34 @@ export function useOnboardingController(): OnboardingContextValue {
     goNext,
     goBack,
     complete,
+  };
+}
+
+function precisionFromStatus(
+  status: Extract<
+    WeeklyReflectionNotificationStatus,
+    'enabled-exact' | 'enabled-inexact'
+  >,
+): ReminderPrecision {
+  return status === 'enabled-exact' ? 'exact' : 'inexact';
+}
+
+function applyReminderResult(
+  state: OnboardingState,
+  result: WeeklyReflectionEnableResult,
+): OnboardingState {
+  if (result === 'enabled-exact' || result === 'enabled-inexact') {
+    return {
+      ...state,
+      weeklyReminderEnabled: true,
+      weeklyReminderPrecision:
+        result === 'enabled-exact' ? 'exact' : 'inexact',
+    };
+  }
+
+  return {
+    ...state,
+    weeklyReminderEnabled: false,
+    weeklyReminderPrecision: null,
   };
 }
