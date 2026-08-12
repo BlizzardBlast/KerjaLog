@@ -1,6 +1,6 @@
 export type NotificationReminderIssue =
   | 'permission'
-  | 'exact-alarm'
+  | 'inexact-alarm'
   | 'runtime'
   | 'setup';
 
@@ -12,6 +12,7 @@ export type ReminderFeedbackState = {
 export type ReminderFeedbackAction =
   | { type: 'start' }
   | { type: 'success' }
+  | { type: 'notice'; issue: NotificationReminderIssue }
   | { type: 'failure'; issue: NotificationReminderIssue };
 
 export const INITIAL_REMINDER_FEEDBACK_STATE: ReminderFeedbackState = {
@@ -34,6 +35,7 @@ export function reminderFeedbackReducer(
         issue: null,
         isUpdating: false,
       };
+    case 'notice':
     case 'failure':
       return {
         issue: action.issue,
