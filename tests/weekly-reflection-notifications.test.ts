@@ -1,10 +1,16 @@
 import * as Notifications from 'expo-notifications';
+import { getWeeklyReminderPrecision } from '@/platform/notifications/exactAlarmAccess';
 import {
   disableWeeklyReflectionNotification,
   enableWeeklyReflectionNotification,
   getWeeklyReflectionNotificationStatus,
 } from '@/platform/notifications/weeklyReflection';
 
+jest.mock('@/platform/notifications/exactAlarmAccess', () => ({
+  getWeeklyReminderPrecision: jest.fn(),
+}));
+
+const getWeeklyReminderPrecisionMock = jest.mocked(getWeeklyReminderPrecision);
 const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);
 const requestPermissionsAsync = jest.mocked(
   Notifications.requestPermissionsAsync,
@@ -34,6 +40,7 @@ const defaultSchedule = {
 describe('weekly reflection notifications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getWeeklyReminderPrecisionMock.mockReturnValue('exact');
     getAllScheduledNotificationsAsync.mockResolvedValue([]);
     cancelScheduledNotificationAsync.mockResolvedValue(undefined);
     scheduleNotificationAsync.mockResolvedValue('kerjalog-weekly-reflection');
@@ -57,7 +64,7 @@ describe('weekly reflection notifications', () => {
 
     await expect(
       enableWeeklyReflectionNotification({ schedule, copy }),
-    ).resolves.toBe('enabled');
+    ).resolves.toBe('enabled-exact');
 
     expect(requestPermissionsAsync).toHaveBeenCalledTimes(1);
     expect(scheduleNotificationAsync).toHaveBeenCalledWith(
@@ -77,7 +84,21 @@ describe('weekly reflection notifications', () => {
     );
   });
 
-  test('does not schedule when permission cannot be granted', async () => {
+  test('keeps the reminder scheduled with inexact delivery when exact access is unavailable', async () => {
+    getWeeklyReminderPrecisionMock.mockReturnValue('inexact');
+    getPermissionsAsync.mockResolvedValue({
+      granted: true,
+      canAskAgain: true,
+    } as Notifications.NotificationPermissionsStatus);
+
+    await expect(
+      enableWeeklyReflectionNotification({ schedule: defaultSchedule, copy }),
+    ).resolves.toBe('enabled-inexact');
+
+    expect(scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not schedule when notification permission cannot be granted', async () => {
     getPermissionsAsync.mockResolvedValue({
       granted: false,
       canAskAgain: false,
@@ -116,7 +137,7 @@ describe('weekly reflection notifications', () => {
     );
   });
 
-  test('reports a persisted reminder as enabled while its native schedule still exists', async () => {
+  test('reports the current precision while the native schedule exists', async () => {
     getPermissionsAsync.mockResolvedValue({
       granted: true,
       canAskAgain: true,
@@ -130,7 +151,13 @@ describe('weekly reflection notifications', () => {
     ] as Notifications.NotificationRequest[]);
 
     await expect(getWeeklyReflectionNotificationStatus()).resolves.toBe(
-      'enabled',
+      'enabled-exact',
+    );
+
+    getWeeklyReminderPrecisionMock.mockReturnValue('inexact');
+
+    await expect(getWeeklyReflectionNotificationStatus()).resolves.toBe(
+      'enabled-inexact',
     );
   });
 

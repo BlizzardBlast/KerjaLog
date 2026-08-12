@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isReminderPrecision } from '@/domain/reminder/model';
 import {
   CAREER_LEVELS,
   DEFAULT_ONBOARDING_STATE,
@@ -21,7 +22,7 @@ const ONBOARDING_STORAGE_KEY = '@kerjalog/onboarding/v1';
  * progress. Never add free-form work content, employer identifiers, salary,
  * feedback, project names, evidence, attachments, or generated career text to
  * this state. Those belong behind KerjaLog's encrypted SQLite persistence
- * boundary when product data storage is introduced.
+ * boundary.
  */
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -44,6 +45,10 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
     return DEFAULT_ONBOARDING_STATE;
   }
 
+  const weeklyReminderEnabled =
+    typeof value.weeklyReminderEnabled === 'boolean'
+      ? value.weeklyReminderEnabled
+      : DEFAULT_ONBOARDING_STATE.weeklyReminderEnabled;
   const sanitizedState: OnboardingState = {
     version: ONBOARDING_STATE_VERSION,
     currentStep: isStep(value.currentStep)
@@ -58,19 +63,17 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
     reviewSchedule: hasValue(REVIEW_SCHEDULES, value.reviewSchedule)
       ? value.reviewSchedule
       : undefined,
-    weeklyReminderEnabled:
-      typeof value.weeklyReminderEnabled === 'boolean'
-        ? value.weeklyReminderEnabled
-        : DEFAULT_ONBOARDING_STATE.weeklyReminderEnabled,
+    weeklyReminderEnabled,
     weeklyReminderSchedule: isValidWeeklyReminderSchedule(
       value.weeklyReminderSchedule,
     )
       ? value.weeklyReminderSchedule
       : DEFAULT_WEEKLY_REMINDER_SCHEDULE,
-    appLockPreferred:
-      typeof value.appLockPreferred === 'boolean'
-        ? value.appLockPreferred
-        : DEFAULT_ONBOARDING_STATE.appLockPreferred,
+    weeklyReminderPrecision:
+      weeklyReminderEnabled &&
+      isReminderPrecision(value.weeklyReminderPrecision)
+        ? value.weeklyReminderPrecision
+        : null,
   };
 
   return {

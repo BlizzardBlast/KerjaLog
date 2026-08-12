@@ -261,7 +261,7 @@ Use local scheduled notifications. Do not require a notification backend.
 
 The reminder is opt-in. The user chooses the weekday and local wall-clock time before enabling it. Friday at 16:30 is only the initial suggestion, not fixed product behavior. Persist the schedule as local weekday/hour/minute fields rather than a UTC timestamp or serialized calendar date.
 
-On Android 12+, precise user-selected reminder times may require the `SCHEDULE_EXACT_ALARM` special app access. Explain why that access is needed before sending the user to the system **Alarms & reminders** screen. If notification permission or the native scheduled request is later removed, reconcile the persisted preference when the app starts or returns to the foreground so an ON state continues to mean that a native reminder is actually scheduled. Do not turn the reminder off merely because the current runtime cannot inspect native reminder state.
+On Android 12+, precise user-selected reminder times may use the `SCHEDULE_EXACT_ALARM` special app access. Treat that access as an optional precision upgrade rather than a prerequisite for reminders: Expo SDK 57 falls back to an inexact `setAndAllowWhileIdle` alarm when exact access is unavailable. Keep the reminder enabled in that case, clearly tell the user that delivery is approximate, and offer **Alarms & reminders** settings only if they want exact timing. Persist the last observed reminder precision and reconcile it when the app starts or returns to the foreground so permission grants/revocations re-arm the native reminder in the correct mode. If notification permission or the native scheduled request itself is removed, reconcile the persisted ON/OFF state. Do not turn the reminder off merely because the current runtime cannot inspect native reminder state.
 
 Do not use visible streaks or guilt-based messaging for missed weeks.
 
@@ -367,6 +367,8 @@ The following is intentionally prescriptive.
 ### Privacy and security
 
 - **DO** keep work entries local by default.
+- **DO** keep unsaved free-form Log drafts recoverable across process death by storing the single active draft inside encrypted SQLite; never put draft text in AsyncStorage.
+- **DO** exclude the encrypted SQLite directory from automatic platform backup where supported, while treating OS backup-exclusion metadata as best-effort and SQLCipher as the confidentiality boundary.
 - **DO** encrypt the SQLite database with SQLCipher on Android and iOS.
 - **DO** generate the database key locally and store only the key in SecureStore.
 - **DO** offer an app lock using device biometrics/passcode-capable platform authentication.

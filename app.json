@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "platforms": ["android", "ios"],
     "ios": {
-      "icon": "./assets/kerjalog.icon"
+      "icon": "./assets/kerjalog.icon",
+      "bundleIdentifier": "com.blizzardblast.kerjalog"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,11 +21,33 @@
       },
       "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"],
       "predictiveBackGestureEnabled": true,
-      "icon": "./assets/images/icon.png"
+      "allowBackup": false,
+      "icon": "./assets/images/icon.png",
+      "package": "com.blizzardblast.kerjalog"
     },
     "plugins": [
       "expo-router",
       "expo-notifications",
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true,
+          "enableFTS": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow KerjaLog to use Face ID to unlock your private career log."
+        }
+      ],
+      "./plugins/with-ios-database-backup-exclusion",
       [
         "expo-splash-screen",
         {

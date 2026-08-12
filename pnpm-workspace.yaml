@@ -1,7 +1,28 @@
-# pnpm 11 applies a one-day release-age gate by default. These exact versions
-# were already committed to this lockfile before CI was introduced, so allow
-# only them through the gate rather than disabling supply-chain verification.
+# Keep Expo native modules on the single SDK-compatible constants release even
+# when an older package manifest still points at the previous patch version.
+overrides:
+  expo-constants: 57.0.10
+
+# pnpm 11 applies a one-day release-age gate by default. Keep narrow exact-version
+# exceptions for packages already required by the committed Expo SDK lockfile
+# instead of disabling supply-chain verification globally.
 minimumReleaseAgeExclude:
+  - '@expo/cli@57.0.14'
   - '@expo/config@57.0.7'
+  - '@expo/fingerprint@0.20.7'
+  - '@expo/inline-modules@0.1.5'
+  - '@expo/local-build-cache-provider@57.0.6'
+  - '@expo/metro-config@57.0.8'
+  - '@expo/metro-runtime@57.0.9'
+  - '@expo/prebuild-config@57.0.11'
+  - '@expo/ui@57.0.10'
   - 'caniuse-lite@1.0.30001809'
+  - 'expo-asset@57.0.10'
+  - 'expo-constants@57.0.10'
+  - 'expo-notifications@57.0.10'
+  - 'expo-router@57.0.12'
+  - 'expo-server@57.0.2'
+  - 'expo-splash-screen@57.0.6'
+  - 'expo@57.0.12'
+  - 'jest-expo@57.0.4'
   - 'update-browserslist-db@1.3.0'

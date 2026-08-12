@@ -1,0 +1,25 @@
+appId: com.blizzardblast.kerjalog
+name: Encrypted Log draft recovery
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Turn everyday work into evidence of progress"
+- tapOn: "Set up KerjaLog"
+- tapOn: "Technology & Product"
+- tapOn: "Junior individual contributor"
+- tapOn: "Continue"
+- tapOn: "Remember what I worked on"
+- tapOn: "Continue"
+- tapOn: "Within the next 3 months"
+- tapOn: "Finish setup"
+- tapOn: "Log something"
+- tapOn: "I completed something"
+- tapOn: "Describe what happened"
+- tapOn: "Write it the way you remember it"
+- inputText: "Draft that must survive a process restart."
+- hideKeyboard
+- stopApp
+- launchApp
+- assertVisible: "Your work matters—even when it feels routine."
+- tapOn: "Log something"
+- assertVisible: "Draft that must survive a process restart."

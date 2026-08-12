@@ -41,11 +41,17 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: React Compiler healthcheck
+        run: pnpm run compiler:check
+
       - name: Test
         run: pnpm test:ci
 
       - name: Expo Doctor
         run: pnpm run expo:doctor
+
+      - name: Verify generated native configuration
+        run: pnpm run native:check
 
       - name: Export Android bundle
         run: pnpm run export:android

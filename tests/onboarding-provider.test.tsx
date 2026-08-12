@@ -1,24 +1,44 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import * as Notifications from 'expo-notifications';
 import type { PropsWithChildren } from 'react';
 import { DEFAULT_ONBOARDING_STATE } from '@/features/onboarding/model';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
+import { I18nProvider } from '@/i18n/I18nProvider';
+import { getWeeklyReminderPrecision } from '@/platform/notifications/exactAlarmAccess';
 
+jest.mock('@/platform/notifications/exactAlarmAccess', () => ({
+  getWeeklyReminderPrecision: jest.fn(),
+}));
+
+const getWeeklyReminderPrecisionMock = jest.mocked(getWeeklyReminderPrecision);
 const getItemMock = jest.mocked(AsyncStorage.getItem);
 const setItemMock = jest.mocked(AsyncStorage.setItem);
 const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);
 const getAllScheduledNotificationsAsync = jest.mocked(
   Notifications.getAllScheduledNotificationsAsync,
 );
+const cancelScheduledNotificationAsync = jest.mocked(
+  Notifications.cancelScheduledNotificationAsync,
+);
+const scheduleNotificationAsync = jest.mocked(
+  Notifications.scheduleNotificationAsync,
+);
 
 function wrapper({ children }: PropsWithChildren) {
-  return <OnboardingProvider>{children}</OnboardingProvider>;
+  return (
+    <I18nProvider>
+      <OnboardingProvider>{children}</OnboardingProvider>
+    </I18nProvider>
+  );
 }
 
 beforeEach(() => {
   jest.clearAllMocks();
+  getWeeklyReminderPrecisionMock.mockReturnValue('exact');
+  cancelScheduledNotificationAsync.mockResolvedValue(undefined);
+  scheduleNotificationAsync.mockResolvedValue('kerjalog-weekly-reflection');
 });
 
 describe('OnboardingProvider', () => {
@@ -83,6 +103,7 @@ describe('OnboardingProvider', () => {
       JSON.stringify({
         ...DEFAULT_ONBOARDING_STATE,
         weeklyReminderEnabled: true,
+        weeklyReminderPrecision: 'exact',
       }),
     );
     setItemMock.mockResolvedValue(undefined);
@@ -99,12 +120,49 @@ describe('OnboardingProvider', () => {
       expect(result.current.state.weeklyReminderEnabled).toBe(false);
     });
 
+    expect(result.current.state.weeklyReminderPrecision).toBeNull();
+
     await waitFor(() => {
       expect(setItemMock).toHaveBeenCalledTimes(1);
     });
 
     expect(JSON.parse(String(setItemMock.mock.calls[0]?.[1]))).toEqual(
-      expect.objectContaining({ weeklyReminderEnabled: false }),
+      expect.objectContaining({
+        weeklyReminderEnabled: false,
+        weeklyReminderPrecision: null,
+      }),
     );
+  });
+
+  test('re-arms an exact reminder as inexact when special access is revoked', async () => {
+    getWeeklyReminderPrecisionMock.mockReturnValue('inexact');
+    getItemMock.mockResolvedValueOnce(
+      JSON.stringify({
+        ...DEFAULT_ONBOARDING_STATE,
+        weeklyReminderEnabled: true,
+        weeklyReminderPrecision: 'exact',
+      }),
+    );
+    setItemMock.mockResolvedValue(undefined);
+    getPermissionsAsync.mockResolvedValue({
+      granted: true,
+      canAskAgain: true,
+    } as Notifications.NotificationPermissionsStatus);
+    getAllScheduledNotificationsAsync.mockResolvedValue([
+      {
+        identifier: 'kerjalog-weekly-reflection',
+        content: {},
+        trigger: null,
+      },
+    ] as Notifications.NotificationRequest[]);
+
+    const { result } = await renderHook(() => useOnboarding(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.state.weeklyReminderPrecision).toBe('inexact');
+    });
+
+    expect(result.current.state.weeklyReminderEnabled).toBe(true);
+    expect(scheduleNotificationAsync).toHaveBeenCalledTimes(1);
   });
 });

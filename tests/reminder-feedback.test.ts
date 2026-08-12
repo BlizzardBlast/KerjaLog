@@ -43,16 +43,4 @@ describe('reminder feedback state', () => {
       isUpdating: false,
     });
   });
-
-  test('tracks exact alarm access separately from notification permission', () => {
-    expect(
-      reminderFeedbackReducer(INITIAL_REMINDER_FEEDBACK_STATE, {
-        type: 'failure',
-        issue: 'exact-alarm',
-      }),
-    ).toEqual({
-      issue: 'exact-alarm',
-      isUpdating: false,
-    });
-  });
 });

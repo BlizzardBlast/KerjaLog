@@ -1,0 +1,34 @@
+appId: com.blizzardblast.kerjalog
+name: Core Log entry journey
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Turn everyday work into evidence of progress"
+- tapOn: "Set up KerjaLog"
+- tapOn: "Technology & Product"
+- tapOn: "Junior individual contributor"
+- tapOn: "Continue"
+- tapOn: "Remember what I worked on"
+- tapOn: "Continue"
+- tapOn: "Within the next 3 months"
+- tapOn: "Finish setup"
+- assertVisible: "Your work matters—even when it feels routine."
+- tapOn: "Log something"
+- tapOn: "I completed something"
+- tapOn: "Describe what happened"
+- tapOn: "Write it the way you remember it"
+- inputText: "Prepared the weekly status report before the team deadline."
+- back
+- assertVisible: "What happened at work?"
+- tapOn: "Describe what happened"
+- assertVisible: "Prepared the weekly status report before the team deadline."
+- tapOn: "Find the outcome"
+- tapOn: "A deadline was met"
+- tapOn: "Add supporting evidence"
+- tapOn: "Skip evidence"
+- assertVisible: "See the value inside the work"
+- tapOn: "Confirm & save"
+- assertVisible: "Saved work entry"
+- assertVisible: "Prepared the weekly status report before the team deadline."
+- tapOn: "Back to Home"
+- assertVisible: "Prepared the weekly status report before the team deadline"

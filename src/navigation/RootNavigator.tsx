@@ -2,15 +2,28 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Modal } from 'react-native';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { useAppLock } from '@/features/app-lock/AppLockProvider';
+import { AppLockScreen } from '@/features/app-lock/AppLockScreen';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 
 export function RootNavigator() {
   const { theme, resolvedTheme, isHydrated: isThemeHydrated } = useTheme();
   const { isHydrated: isLanguageHydrated } = useI18n();
-  const { isHydrated: isOnboardingHydrated } = useOnboarding();
-  const isReady = isThemeHydrated && isLanguageHydrated && isOnboardingHydrated;
+  const { state: onboardingState, isHydrated: isOnboardingHydrated } =
+    useOnboarding();
+  const {
+    enabled: appLockEnabled,
+    locked: appLocked,
+    isHydrated: isAppLockHydrated,
+  } = useAppLock();
+  const isReady =
+    isThemeHydrated &&
+    isLanguageHydrated &&
+    isOnboardingHydrated &&
+    isAppLockHydrated;
 
   useEffect(() => {
     if (isReady) {
@@ -22,9 +35,13 @@ export function RootNavigator() {
     return null;
   }
 
+  const statusBarStyle = resolvedTheme === 'dark' ? 'light' : 'dark';
+  const shouldShowAppLock =
+    onboardingState.completed && appLockEnabled && appLocked;
+
   return (
     <>
-      <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={statusBarStyle} />
       <Stack
         screenOptions={{
           animation: 'slide_from_right',
@@ -32,6 +49,14 @@ export function RootNavigator() {
           headerShown: false,
         }}
       />
+      <Modal
+        animationType="none"
+        onRequestClose={() => undefined}
+        presentationStyle="fullScreen"
+        visible={shouldShowAppLock}
+      >
+        <AppLockScreen />
+      </Modal>
     </>
   );
 }

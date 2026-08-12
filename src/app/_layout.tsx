@@ -9,6 +9,7 @@ import {
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
+import { AppLockProvider } from '@/features/app-lock/AppLockProvider';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import { RootNavigator } from '@/navigation/RootNavigator';
@@ -35,7 +36,9 @@ export default function RootLayout() {
       <ThemeProvider>
         <I18nProvider>
           <OnboardingProvider>
-            <RootNavigator />
+            <AppLockProvider>
+              <RootNavigator />
+            </AppLockProvider>
           </OnboardingProvider>
         </I18nProvider>
       </ThemeProvider>

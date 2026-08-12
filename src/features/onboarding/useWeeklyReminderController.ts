@@ -17,11 +17,13 @@ import {
 } from '@/platform/notifications/weeklyReflection';
 
 const reminderIssueByResult: Record<
-  Exclude<WeeklyReflectionEnableResult, 'enabled'>,
+  Extract<
+    WeeklyReflectionEnableResult,
+    'permission-denied' | 'unsupported-runtime'
+  >,
   NotificationReminderIssue
 > = {
   'permission-denied': 'permission',
-  'exact-alarm-permission-required': 'exact-alarm',
   'unsupported-runtime': 'runtime',
 };
 
@@ -47,32 +49,48 @@ export function useWeeklyReminderController(
       },
     });
 
+  const applyEnableResult = (result: WeeklyReflectionEnableResult) => {
+    if (result === 'enabled-exact' || result === 'enabled-inexact') {
+      update({
+        weeklyReminderEnabled: true,
+        weeklyReminderPrecision:
+          result === 'enabled-exact' ? 'exact' : 'inexact',
+      });
+      dispatchFeedback({ type: 'success' });
+      return;
+    }
+
+    update({
+      weeklyReminderEnabled: false,
+      weeklyReminderPrecision: null,
+    });
+    dispatchFeedback({
+      type: 'failure',
+      issue: reminderIssueByResult[result],
+    });
+  };
+
   const setEnabled = async (enabled: boolean) => {
     dispatchFeedback({ type: 'start' });
 
     try {
       if (!enabled) {
         await disableWeeklyReflectionNotification();
-        update({ weeklyReminderEnabled: false });
+        update({
+          weeklyReminderEnabled: false,
+          weeklyReminderPrecision: null,
+        });
         dispatchFeedback({ type: 'success' });
         return;
       }
 
       const result = await enableForSchedule(state.weeklyReminderSchedule);
-
-      if (result !== 'enabled') {
-        update({ weeklyReminderEnabled: false });
-        dispatchFeedback({
-          type: 'failure',
-          issue: reminderIssueByResult[result],
-        });
-        return;
-      }
-
-      update({ weeklyReminderEnabled: true });
-      dispatchFeedback({ type: 'success' });
+      applyEnableResult(result);
     } catch {
-      update({ weeklyReminderEnabled: false });
+      update({
+        weeklyReminderEnabled: false,
+        weeklyReminderPrecision: null,
+      });
       dispatchFeedback({ type: 'failure', issue: 'setup' });
     }
   };
@@ -88,19 +106,12 @@ export function useWeeklyReminderController(
 
     try {
       const result = await enableForSchedule(schedule);
-
-      if (result !== 'enabled') {
-        update({ weeklyReminderEnabled: false });
-        dispatchFeedback({
-          type: 'failure',
-          issue: reminderIssueByResult[result],
-        });
-        return;
-      }
-
-      dispatchFeedback({ type: 'success' });
+      applyEnableResult(result);
     } catch {
-      update({ weeklyReminderEnabled: false });
+      update({
+        weeklyReminderEnabled: false,
+        weeklyReminderPrecision: null,
+      });
       dispatchFeedback({ type: 'failure', issue: 'setup' });
     }
   };

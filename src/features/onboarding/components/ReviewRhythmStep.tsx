@@ -5,6 +5,7 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
 import { NotificationPermissionNotice } from '@/features/onboarding/components/NotificationPermissionNotice';
+import { OnboardingAppLockSetting } from '@/features/onboarding/components/OnboardingAppLockSetting';
 import { OptionSection } from '@/features/onboarding/components/OptionSection';
 import { ReminderScheduleCard } from '@/features/onboarding/components/ReminderScheduleCard';
 import { SettingToggle } from '@/features/onboarding/components/SettingToggle';
@@ -12,6 +13,7 @@ import { StepHeading } from '@/features/onboarding/components/StepHeading';
 import type { OnboardingStepProps } from '@/features/onboarding/components/types';
 import { reviewScheduleOptions } from '@/features/onboarding/options';
 import { useWeeklyReminderController } from '@/features/onboarding/useWeeklyReminderController';
+import { InexactReminderNotice } from '@/features/reminder/InexactReminderNotice';
 import { useI18n } from '@/i18n/I18nProvider';
 
 export function ReviewRhythmStep({
@@ -59,17 +61,16 @@ export function ReviewRhythmStep({
           onChange={reminder.setSchedule}
         />
 
+        {state.weeklyReminderEnabled &&
+        state.weeklyReminderPrecision === 'inexact' ? (
+          <InexactReminderNotice />
+        ) : null}
         {reminder.feedback.issue ? (
           <NotificationPermissionNotice issue={reminder.feedback.issue} />
         ) : null}
       </View>
 
-      <SettingToggle
-        title={t('onboarding.review.appLockTitle')}
-        description={t('onboarding.review.appLockDescription')}
-        value={state.appLockPreferred}
-        onValueChange={(appLockPreferred) => update({ appLockPreferred })}
-      />
+      <OnboardingAppLockSetting />
 
       <InfoCard
         title={t('onboarding.review.privacyTitle')}
@@ -78,7 +79,8 @@ export function ReviewRhythmStep({
 
       {hasFinishError ? (
         <View
-          accessibilityRole="alert"
+          role="alert"
+          accessibilityLiveRegion="polite"
           style={[
             styles.errorCard,
             {
