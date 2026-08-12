@@ -53,7 +53,7 @@ export function HistorySearchField({
           <Pressable
             accessibilityLabel={t('history.search.clear')}
             accessibilityRole="button"
-            hitSlop={4}
+            hitSlop={spacing[1]}
             onPress={() => onChangeText('')}
             style={({ pressed }) => [
               styles.clearButton,
@@ -84,11 +84,11 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     borderWidth: 1,
     minHeight: 52,
-    paddingLeft: 44,
-    paddingRight: 52,
+    paddingLeft: spacing[10],
+    paddingRight: spacing[12],
   },
   searchIcon: {
-    left: 14,
+    left: spacing[3],
     position: 'absolute',
     zIndex: 1,
   },
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: 'center',
     position: 'absolute',
-    right: 4,
+    right: spacing[1],
     width: 44,
   },
   pressed: {
