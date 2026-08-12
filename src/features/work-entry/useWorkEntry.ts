@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import type { WorkEntry } from '@/domain/entry/model';
 import type { WorkEntryByIdReader } from '@/domain/entry/repository';
@@ -19,34 +19,38 @@ export function useWorkEntry(
   repository: WorkEntryByIdReader = workEntryRepository,
 ): WorkEntryLoader {
   const [state, setState] = useState<WorkEntryLoadState>({ status: 'loading' });
-  const [requestVersion, setRequestVersion] = useState(0);
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
-    let ignore = false;
+  const load = useCallback(async () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
     setState({ status: 'loading' });
 
-    repository
-      .findById(id)
-      .then((entry) => {
-        if (ignore) {
-          return;
-        }
+    try {
+      const entry = await repository.findById(id);
 
+      if (requestId === requestIdRef.current) {
         setState(entry ? { status: 'loaded', entry } : { status: 'not-found' });
-      })
-      .catch(() => {
-        if (!ignore) {
-          setState({ status: 'error' });
-        }
-      });
+      }
+    } catch {
+      if (requestId === requestIdRef.current) {
+        setState({ status: 'error' });
+      }
+    }
+  }, [id, repository]);
+
+  useEffect(() => {
+    void load();
 
     return () => {
-      ignore = true;
+      requestIdRef.current += 1;
     };
-  }, [id, repository, requestVersion]);
+  }, [load]);
 
   return {
     state,
-    retry: () => setRequestVersion((current) => current + 1),
+    retry: () => {
+      void load();
+    },
   };
 }
