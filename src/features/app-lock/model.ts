@@ -2,7 +2,8 @@ export type AppLockError =
   | 'unavailable'
   | 'cancelled'
   | 'authentication-failed'
-  | 'storage-failed';
+  | 'storage-failed'
+  | 'privacy-failed';
 
 export type AppLockContextValue = {
   enabled: boolean;
