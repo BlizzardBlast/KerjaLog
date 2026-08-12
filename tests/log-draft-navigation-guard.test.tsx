@@ -47,7 +47,7 @@ describe('useLogDraftNavigationGuard', () => {
       }),
     );
 
-    act(() => {
+    await act(async () => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
@@ -67,7 +67,7 @@ describe('useLogDraftNavigationGuard', () => {
       }),
     );
 
-    act(() => {
+    await act(async () => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
@@ -85,7 +85,7 @@ describe('useLogDraftNavigationGuard', () => {
     const discardButton = buttons?.find(
       (button) => button.text === copy.discard,
     );
-    act(() => {
+    await act(async () => {
       discardButton?.onPress?.();
     });
 
@@ -106,7 +106,7 @@ describe('useLogDraftNavigationGuard', () => {
       }),
     );
 
-    act(() => {
+    await act(async () => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
