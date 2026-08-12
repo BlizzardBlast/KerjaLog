@@ -23,7 +23,10 @@ import {
   groupHistoryEntries,
   type HistorySection,
 } from '@/features/history/historyGrouping';
-import { useHistoryEntries } from '@/features/history/useHistoryEntries';
+import {
+  type HistoryEntriesState,
+  useHistoryEntries,
+} from '@/features/history/useHistoryEntries';
 import { useI18n } from '@/i18n/I18nProvider';
 
 const SCREEN_HORIZONTAL_PADDING = 22;
@@ -55,6 +58,8 @@ export function HistoryScreen() {
         keyExtractor={(entry) => entry.id}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
+        onEndReached={controller.loadMore}
+        onEndReachedThreshold={0.5}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
@@ -101,14 +106,10 @@ export function HistoryScreen() {
           />
         }
         ListFooterComponent={
-          controller.state.status === 'loading' &&
-          controller.state.entries.length > 0 ? (
-            <ActivityIndicator
-              accessibilityLabel={t('history.loading')}
-              color={theme.colors.primary}
-              style={styles.footerLoader}
-            />
-          ) : null
+          <HistoryListFooter
+            onRetry={controller.retryLoadMore}
+            state={controller.state}
+          />
         }
       />
     </SafeAreaView>
@@ -117,12 +118,14 @@ export function HistoryScreen() {
 
 function HistoryMonthHeader({ section }: { section: HistorySection }) {
   const { t } = useI18n();
+  const count = section.data.length;
+  const countKey = count === 1 ? 'history.entryCount' : 'history.entriesCount';
 
   return (
     <View style={styles.monthHeader}>
       <Text variant="heading">{section.title}</Text>
       <Text variant="caption" color="textMuted">
-        {t('history.entriesCount', { count: section.data.length })}
+        {t(countKey, { count })}
       </Text>
     </View>
   );
@@ -212,6 +215,56 @@ function HistoryEmptyContent({
   );
 }
 
+function HistoryListFooter({
+  onRetry,
+  state,
+}: {
+  onRetry: () => void;
+  state: HistoryEntriesState;
+}) {
+  const { theme } = useTheme();
+  const { t } = useI18n();
+
+  if (
+    (state.status === 'loading' && state.entries.length > 0) ||
+    (state.status === 'loaded' && state.isLoadingMore)
+  ) {
+    return (
+      <ActivityIndicator
+        accessibilityLabel={t('history.loadingMore')}
+        color={theme.colors.primary}
+        style={styles.footerLoader}
+      />
+    );
+  }
+
+  if (state.status === 'loaded' && state.loadMoreError) {
+    return (
+      <View style={styles.loadMoreError}>
+        <Text variant="caption" color="textMuted">
+          {t('history.loadMoreError')}
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={({ pressed }) => [
+            styles.loadMoreRetryButton,
+            {
+              backgroundColor: theme.colors.surfaceSubtle,
+              borderColor: theme.colors.border,
+            },
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text variant="label">{t('history.loadMoreRetry')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  return null;
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -260,6 +313,19 @@ const styles = StyleSheet.create({
   },
   footerLoader: {
     marginTop: spacing[4],
+  },
+  loadMoreError: {
+    alignItems: 'center',
+    gap: spacing[2],
+    marginTop: spacing[4],
+  },
+  loadMoreRetryButton: {
+    alignItems: 'center',
+    borderRadius: radii.md,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 44,
+    paddingHorizontal: spacing[4],
   },
   pressed: {
     opacity: 0.78,
