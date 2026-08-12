@@ -30,10 +30,10 @@ export function InexactReminderNotice() {
     >
       <View style={styles.copy}>
         <Text variant="bodyStrong" color="warning">
-          {t('onboarding.review.inexactAlarmTitle')}
+          {t('reminder.inexact.title')}
         </Text>
         <Text variant="caption" color="textMuted">
-          {t('onboarding.review.inexactAlarmDescription')}
+          {t('reminder.inexact.description')}
         </Text>
       </View>
       <Button
@@ -43,7 +43,7 @@ export function InexactReminderNotice() {
         size="sm"
         variant="secondary"
       >
-        {t('onboarding.review.inexactAlarmOpenSettings')}
+        {t('reminder.inexact.useExact')}
       </Button>
     </Animated.View>
   );
