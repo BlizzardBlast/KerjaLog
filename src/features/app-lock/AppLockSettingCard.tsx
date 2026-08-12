@@ -1,40 +1,19 @@
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { ToggleSwitch } from '@/design-system/components/ToggleSwitch';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
-import { useAppLock } from '@/features/app-lock/AppLockProvider';
+import { AppLockSettingFeedback } from '@/features/app-lock/AppLockSettingFeedback';
+import { useAppLockSettingControl } from '@/features/app-lock/useAppLockSettingControl';
 import { useI18n } from '@/i18n/I18nProvider';
 
 export function AppLockSettingCard() {
   const { theme } = useTheme();
   const { t } = useI18n();
-  const { enabled, error, isAuthenticating, setEnabled, clearError } =
-    useAppLock();
-  const [changing, setChanging] = useState(false);
-
-  const updateEnabled = async (nextEnabled: boolean) => {
-    setChanging(true);
-    clearError();
-
-    try {
-      await setEnabled(nextEnabled);
-    } finally {
-      setChanging(false);
-    }
-  };
-
-  const message =
-    error === 'unavailable'
-      ? t('appLock.setting.unavailable')
-      : error
-        ? t('appLock.setting.failed')
-        : enabled
-          ? t('appLock.setting.enabled')
-          : t('appLock.setting.disabled');
+  const { enabled, error, isUpdating, updateEnabled } =
+    useAppLockSettingControl();
 
   return (
     <View
@@ -71,19 +50,13 @@ export function AppLockSettingCard() {
         <ToggleSwitch
           accessibilityLabel={t('appLock.setting.title')}
           accessibilityHint={t('appLock.setting.description')}
-          disabled={changing || isAuthenticating}
+          disabled={isUpdating}
           onValueChange={updateEnabled}
           value={enabled}
         />
       </View>
 
-      <Text
-        accessibilityLiveRegion="polite"
-        variant="caption"
-        color={error ? 'danger' : 'textMuted'}
-      >
-        {message}
-      </Text>
+      <AppLockSettingFeedback enabled={enabled} error={error} />
     </View>
   );
 }
