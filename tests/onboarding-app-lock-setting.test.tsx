@@ -35,10 +35,7 @@ describe('OnboardingAppLockSetting', () => {
 
     await render(
       <ThemeProvider>
-        <OnboardingAppLockSetting
-          preferred={false}
-          onPreferenceChange={jest.fn()}
-        />
+        <OnboardingAppLockSetting onPreferenceChange={jest.fn()} />
       </ThemeProvider>,
     );
 
@@ -58,7 +55,6 @@ describe('OnboardingAppLockSetting', () => {
     await render(
       <ThemeProvider>
         <OnboardingAppLockSetting
-          preferred={false}
           onPreferenceChange={onPreferenceChange}
         />
       </ThemeProvider>,
@@ -83,7 +79,6 @@ describe('OnboardingAppLockSetting', () => {
     await render(
       <ThemeProvider>
         <OnboardingAppLockSetting
-          preferred={false}
           onPreferenceChange={onPreferenceChange}
         />
       </ThemeProvider>,
