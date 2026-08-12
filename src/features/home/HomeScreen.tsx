@@ -18,6 +18,7 @@ import { ReviewScheduleSection } from '@/features/home/components/ReviewSchedule
 import { ThisWeekCard } from '@/features/home/components/ThisWeekCard';
 import { useHomeWorkEntries } from '@/features/home/useHomeWorkEntries';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
+import { InexactReminderNotice } from '@/features/reminder/InexactReminderNotice';
 
 const SCREEN_HORIZONTAL_PADDING = 22;
 
@@ -78,6 +79,10 @@ export function HomeScreen() {
         ) : null}
 
         <ReviewScheduleSection reviewSchedule={state.reviewSchedule} />
+        {state.weeklyReminderEnabled &&
+        state.weeklyReminderPrecision === 'inexact' ? (
+          <InexactReminderNotice />
+        ) : null}
         <AppLockSettingCard />
       </ScrollView>
     </SafeAreaView>
