@@ -21,7 +21,9 @@ type ActiveDraftRow = {
   impact_statement: unknown;
 };
 
-export class SQLiteWorkEntryDraftRepository implements WorkEntryDraftRepository {
+export class SQLiteWorkEntryDraftRepository
+  implements WorkEntryDraftRepository
+{
   async loadActive(): Promise<WorkEntryDraft | null> {
     const db = await getDatabase();
 

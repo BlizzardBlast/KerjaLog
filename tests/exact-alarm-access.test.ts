@@ -6,7 +6,9 @@ describe('weekly reminder precision', () => {
   });
 
   test('falls back to inexact scheduling on Android 12+ without special access', () => {
-    expect(resolveWeeklyReminderPrecision('android', 36, false)).toBe('inexact');
+    expect(resolveWeeklyReminderPrecision('android', 36, false)).toBe(
+      'inexact',
+    );
   });
 
   test('does not require exact-alarm special access before Android 12', () => {

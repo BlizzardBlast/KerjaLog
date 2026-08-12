@@ -1,7 +1,4 @@
-import {
-  LOG_EVENT_INTENTS,
-  type LogEventIntent,
-} from '@/domain/entry/impact';
+import { LOG_EVENT_INTENTS, type LogEventIntent } from '@/domain/entry/impact';
 import {
   EVIDENCE_TYPES,
   type EvidenceType,
@@ -50,7 +47,9 @@ export function hasWorkEntryDraftContent(draft: WorkEntryDraft): boolean {
   );
 }
 
-export function isWorkEntryDraftStep(value: unknown): value is WorkEntryDraftStep {
+export function isWorkEntryDraftStep(
+  value: unknown,
+): value is WorkEntryDraftStep {
   return (
     typeof value === 'string' &&
     WORK_ENTRY_DRAFT_STEPS.includes(value as WorkEntryDraftStep)
@@ -59,14 +58,19 @@ export function isWorkEntryDraftStep(value: unknown): value is WorkEntryDraftSte
 
 export function isLogEventIntent(value: unknown): value is LogEventIntent {
   return (
-    typeof value === 'string' && LOG_EVENT_INTENTS.includes(value as LogEventIntent)
+    typeof value === 'string' &&
+    LOG_EVENT_INTENTS.includes(value as LogEventIntent)
   );
 }
 
 export function isOutcomeType(value: unknown): value is OutcomeType {
-  return typeof value === 'string' && OUTCOME_TYPES.includes(value as OutcomeType);
+  return (
+    typeof value === 'string' && OUTCOME_TYPES.includes(value as OutcomeType)
+  );
 }
 
 export function isEvidenceType(value: unknown): value is EvidenceType {
-  return typeof value === 'string' && EVIDENCE_TYPES.includes(value as EvidenceType);
+  return (
+    typeof value === 'string' && EVIDENCE_TYPES.includes(value as EvidenceType)
+  );
 }

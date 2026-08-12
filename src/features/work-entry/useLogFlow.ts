@@ -81,8 +81,7 @@ export function useLogFlow({
     evidenceDetail,
     impactStatement,
   };
-  const hasUnsavedDraft =
-    !hasCommittedEntry && hasWorkEntryDraftContent(draft);
+  const hasUnsavedDraft = !hasCommittedEntry && hasWorkEntryDraftContent(draft);
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);

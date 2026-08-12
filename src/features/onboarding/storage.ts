@@ -70,7 +70,8 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
       ? value.weeklyReminderSchedule
       : DEFAULT_WEEKLY_REMINDER_SCHEDULE,
     weeklyReminderPrecision:
-      weeklyReminderEnabled && isReminderPrecision(value.weeklyReminderPrecision)
+      weeklyReminderEnabled &&
+      isReminderPrecision(value.weeklyReminderPrecision)
         ? value.weeklyReminderPrecision
         : null,
   };

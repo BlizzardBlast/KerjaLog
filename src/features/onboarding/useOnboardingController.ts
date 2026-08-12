@@ -244,8 +244,7 @@ function applyReminderResult(
     return {
       ...state,
       weeklyReminderEnabled: true,
-      weeklyReminderPrecision:
-        result === 'enabled-exact' ? 'exact' : 'inexact',
+      weeklyReminderPrecision: result === 'enabled-exact' ? 'exact' : 'inexact',
     };
   }
 
