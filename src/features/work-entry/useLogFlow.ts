@@ -26,6 +26,7 @@ export type LogStep = (typeof LOG_STEPS)[number];
 
 type SaveEntry = (draft: SaveWorkEntryDraft) => Promise<WorkEntry>;
 type CompleteSavedEntry = (entry: WorkEntry) => Promise<void> | void;
+type PrepareForCommit = (draft: WorkEntryDraft) => Promise<void> | void;
 
 type UseLogFlowOptions = {
   impactCopy: ImpactBuilderCopy;
@@ -33,6 +34,8 @@ type UseLogFlowOptions = {
   onExit: () => void;
   onSaved: CompleteSavedEntry;
   onStepChanged?: () => void;
+  prepareForCommit?: PrepareForCommit;
+  onCommitFailed?: () => void;
   saveEntry?: SaveEntry;
 };
 
@@ -42,6 +45,8 @@ export function useLogFlow({
   onExit,
   onSaved,
   onStepChanged,
+  prepareForCommit,
+  onCommitFailed,
   saveEntry = (draft) => saveWorkEntry(draft),
 }: UseLogFlowOptions) {
   const startingDraft = initialDraft ?? EMPTY_WORK_ENTRY_DRAFT;
@@ -234,6 +239,9 @@ export function useLogFlow({
 
     let entry: WorkEntry;
     try {
+      // Freeze and flush the latest encrypted draft before committing. The
+      // repository then consumes that draft atomically with the new entry.
+      await prepareForCommit?.(draft);
       entry = await saveEntry({
         intent,
         rawNote,
@@ -243,6 +251,7 @@ export function useLogFlow({
         impactStatement: quickNote ? null : impactStatement,
       });
     } catch {
+      onCommitFailed?.();
       setSaveError(true);
       return;
     } finally {
