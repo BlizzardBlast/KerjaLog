@@ -9,7 +9,10 @@ private func excludeKerjaLogDatabaseFromBackup() {
     for: .documentDirectory,
     in: .userDomainMask
   ).first else {
-    preconditionFailure("KerjaLog could not resolve its documents directory.")
+    NSLog(
+      "KerjaLog could not resolve its documents directory; encrypted database backup exclusion was not applied."
+    )
+    return
   }
 
   var sqliteDirectory = documentsDirectory.appendingPathComponent(
@@ -26,7 +29,7 @@ private func excludeKerjaLogDatabaseFromBackup() {
     resourceValues.isExcludedFromBackup = true
     try sqliteDirectory.setResourceValues(resourceValues)
   } catch {
-    preconditionFailure(
+    NSLog(
       "KerjaLog could not exclude its encrypted database from backup: \\(error.localizedDescription)"
     )
   }
@@ -41,7 +44,10 @@ function applyDatabaseBackupExclusion(contents) {
     if (!nextContents.includes(importAnchor)) {
       throw new Error('Unable to add Foundation import to the iOS AppDelegate.');
     }
-    nextContents = nextContents.replace(importAnchor, `import Foundation\n${importAnchor}`);
+    nextContents = nextContents.replace(
+      importAnchor,
+      `import Foundation\n${importAnchor}`,
+    );
   }
 
   if (!nextContents.includes(CALL.trim())) {
