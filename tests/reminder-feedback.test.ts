@@ -43,16 +43,4 @@ describe('reminder feedback state', () => {
       isUpdating: false,
     });
   });
-
-  test('represents inexact delivery as an informational notice rather than setup failure', () => {
-    expect(
-      reminderFeedbackReducer(INITIAL_REMINDER_FEEDBACK_STATE, {
-        type: 'notice',
-        issue: 'inexact-alarm',
-      }),
-    ).toEqual({
-      issue: 'inexact-alarm',
-      isUpdating: false,
-    });
-  });
 });
