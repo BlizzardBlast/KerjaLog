@@ -1,3 +1,5 @@
+import type { ReminderPrecision } from '@/domain/reminder/model';
+
 export const ONBOARDING_STATE_VERSION = 1 as const;
 
 export const ONBOARDING_STEP_ORDER = [
@@ -109,6 +111,7 @@ export type OnboardingState = {
   reviewSchedule?: ReviewSchedule;
   weeklyReminderEnabled: boolean;
   weeklyReminderSchedule: WeeklyReminderSchedule;
+  weeklyReminderPrecision: ReminderPrecision | null;
 };
 
 export type OnboardingEditableState = Pick<
@@ -119,6 +122,7 @@ export type OnboardingEditableState = Pick<
   | 'reviewSchedule'
   | 'weeklyReminderEnabled'
   | 'weeklyReminderSchedule'
+  | 'weeklyReminderPrecision'
 >;
 
 export type OnboardingPatch = Partial<OnboardingEditableState>;
@@ -142,4 +146,5 @@ export const DEFAULT_ONBOARDING_STATE: OnboardingState = {
   completed: false,
   weeklyReminderEnabled: false,
   weeklyReminderSchedule: DEFAULT_WEEKLY_REMINDER_SCHEDULE,
+  weeklyReminderPrecision: null,
 };
