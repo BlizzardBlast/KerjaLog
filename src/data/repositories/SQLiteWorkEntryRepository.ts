@@ -11,6 +11,8 @@ import {
 import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
 
+const ACTIVE_DRAFT_ID = 1;
+
 export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntry | null> {
     const db = await getDatabase();
@@ -140,7 +142,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     });
   }
 
-  async create(input: CreateWorkEntry): Promise<WorkEntry> {
+  async commit(input: CreateWorkEntry): Promise<WorkEntry> {
     const db = await getDatabase();
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
@@ -211,6 +213,14 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           },
         );
       }
+
+      // Consuming the active draft is part of the same durable commit as the
+      // new entry. A process death can therefore never leave both a committed
+      // entry and a recoverable draft that would save the same work twice.
+      await transaction.runAsync(
+        'DELETE FROM active_work_entry_draft WHERE id = $activeDraftId',
+        { $activeDraftId: ACTIVE_DRAFT_ID },
+      );
     });
 
     return {
