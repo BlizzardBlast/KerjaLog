@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { migrateDatabase } from '@/data/migrations/migrateDatabase';
+import { assertEncryptedStorageRuntimeSupported } from '@/platform/runtime/encryptedStorageRuntime';
 import {
   generateDatabaseKey,
   getStoredDatabaseKey,
@@ -25,6 +26,8 @@ export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
+  assertEncryptedStorageRuntimeSupported();
+
   const storedKey = await getStoredDatabaseKey();
   const key = storedKey ?? (await generateDatabaseKey());
   const db = await SQLite.openDatabaseAsync(DATABASE_NAME, {
