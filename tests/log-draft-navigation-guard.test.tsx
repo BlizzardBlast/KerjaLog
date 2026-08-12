@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { useLogDraftNavigationGuard } from '@/features/work-entry/useLogDraftNavigationGuard';
 
@@ -29,6 +29,10 @@ const copy = {
 
 const removeAction = { type: 'GO_BACK' };
 
+async function waitForGuardRegistration() {
+  await waitFor(() => expect(mockPreventRemoveHandler).toBeDefined());
+}
+
 describe('useLogDraftNavigationGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,6 +50,7 @@ describe('useLogDraftNavigationGuard', () => {
         copy,
       }),
     );
+    await waitForGuardRegistration();
 
     await act(async () => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
@@ -66,6 +71,7 @@ describe('useLogDraftNavigationGuard', () => {
         copy,
       }),
     );
+    await waitForGuardRegistration();
 
     await act(async () => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
@@ -105,6 +111,7 @@ describe('useLogDraftNavigationGuard', () => {
         copy,
       }),
     );
+    await waitForGuardRegistration();
 
     await act(async () => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
