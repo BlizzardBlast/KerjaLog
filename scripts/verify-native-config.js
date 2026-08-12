@@ -26,6 +26,10 @@ const androidGradleProperties = fs.readFileSync(
   path.resolve('android/gradle.properties'),
   'utf8',
 );
+const androidManifest = fs.readFileSync(
+  path.resolve('android/app/src/main/AndroidManifest.xml'),
+  'utf8',
+);
 
 assertIncludes(
   appDelegate,
@@ -42,6 +46,11 @@ assertIncludes(
   androidGradleProperties,
   'expo.sqlite.useSQLCipher=true',
   'Android Gradle properties',
+);
+assertIncludes(
+  androidManifest,
+  'android.permission.SCHEDULE_EXACT_ALARM',
+  'Android manifest',
 );
 
 console.log('Generated native configuration verified.');
