@@ -112,10 +112,10 @@ function getStatusPalette(
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    borderRadius: radii.lg,
     borderWidth: 1,
     gap: spacing[3],
-    padding: 15,
+    padding: spacing[4],
   },
   topRow: {
     alignItems: 'flex-start',
