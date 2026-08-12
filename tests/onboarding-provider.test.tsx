@@ -5,6 +5,7 @@ import type { PropsWithChildren } from 'react';
 import { DEFAULT_ONBOARDING_STATE } from '@/features/onboarding/model';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
+import { I18nProvider } from '@/i18n/I18nProvider';
 
 const getItemMock = jest.mocked(AsyncStorage.getItem);
 const setItemMock = jest.mocked(AsyncStorage.setItem);
@@ -14,7 +15,11 @@ const getAllScheduledNotificationsAsync = jest.mocked(
 );
 
 function wrapper({ children }: PropsWithChildren) {
-  return <OnboardingProvider>{children}</OnboardingProvider>;
+  return (
+    <I18nProvider>
+      <OnboardingProvider>{children}</OnboardingProvider>
+    </I18nProvider>
+  );
 }
 
 beforeEach(() => {
@@ -83,6 +88,7 @@ describe('OnboardingProvider', () => {
       JSON.stringify({
         ...DEFAULT_ONBOARDING_STATE,
         weeklyReminderEnabled: true,
+        weeklyReminderPrecision: 'exact',
       }),
     );
     setItemMock.mockResolvedValue(undefined);
@@ -99,12 +105,17 @@ describe('OnboardingProvider', () => {
       expect(result.current.state.weeklyReminderEnabled).toBe(false);
     });
 
+    expect(result.current.state.weeklyReminderPrecision).toBeNull();
+
     await waitFor(() => {
       expect(setItemMock).toHaveBeenCalledTimes(1);
     });
 
     expect(JSON.parse(String(setItemMock.mock.calls[0]?.[1]))).toEqual(
-      expect.objectContaining({ weeklyReminderEnabled: false }),
+      expect.objectContaining({
+        weeklyReminderEnabled: false,
+        weeklyReminderPrecision: null,
+      }),
     );
   });
 });
