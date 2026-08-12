@@ -56,5 +56,7 @@ function compareEntriesNewestFirst(left: WorkEntry, right: WorkEntry): number {
     return occurredDifference;
   }
 
-  return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+  return (
+    new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+  );
 }
