@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
@@ -41,11 +42,11 @@ export function useHistoryEntries(
   const [filters, setFilters] = useState<WorkEntryHistoryFilters>(
     EMPTY_WORK_ENTRY_HISTORY_FILTERS,
   );
-  const [reloadVersion, setReloadVersion] = useState(0);
   const [state, setState] = useState<HistoryEntriesState>({
     status: 'loading',
     entries: [],
   });
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -65,32 +66,37 @@ export function useHistoryEntries(
     [debouncedSearchText, filters],
   );
 
+  const loadHistory = useCallback(() => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
+    setState((current) => ({
+      status: 'loading',
+      entries: current.status === 'error' ? [] : current.entries,
+    }));
+
+    repository
+      .findHistory(query)
+      .then((entries) => {
+        if (requestIdRef.current === requestId) {
+          setState({ status: 'loaded', entries });
+        }
+      })
+      .catch(() => {
+        if (requestIdRef.current === requestId) {
+          setState({ status: 'error', entries: [] });
+        }
+      });
+  }, [query, repository]);
+
   useFocusEffect(
     useCallback(() => {
-      let ignore = false;
-
-      setState((current) => ({
-        status: 'loading',
-        entries: current.status === 'error' ? [] : current.entries,
-      }));
-
-      repository
-        .findHistory(query)
-        .then((entries) => {
-          if (!ignore) {
-            setState({ status: 'loaded', entries });
-          }
-        })
-        .catch(() => {
-          if (!ignore) {
-            setState({ status: 'error', entries: [] });
-          }
-        });
+      loadHistory();
 
       return () => {
-        ignore = true;
+        requestIdRef.current += 1;
       };
-    }, [query, reloadVersion, repository]),
+    }, [loadHistory]),
   );
 
   const setEntryType = useCallback((entryType: EntryType | null) => {
@@ -115,10 +121,6 @@ export function useHistoryEntries(
     setFilters(EMPTY_WORK_ENTRY_HISTORY_FILTERS);
   }, []);
 
-  const retry = useCallback(() => {
-    setReloadVersion((current) => current + 1);
-  }, []);
-
   return {
     searchText,
     setSearchText,
@@ -127,7 +129,7 @@ export function useHistoryEntries(
     toggleEvidence,
     toggleReviewReady,
     clearFilters,
-    retry,
+    retry: loadHistory,
     state,
   };
 }
