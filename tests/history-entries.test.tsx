@@ -124,7 +124,7 @@ describe('History entries controller', () => {
     );
   });
 
-  test('debounces search before querying the repository', async () => {
+  test('debounces search and exposes pending query state', async () => {
     const repository = createRepository();
     const { result } = await renderHook(() => useHistoryEntries(repository));
 
@@ -135,6 +135,7 @@ describe('History entries controller', () => {
       result.current.setSearchText('finance');
     });
 
+    expect(result.current.isSearchPending).toBe(true);
     expect(repository.findHistory).toHaveBeenCalledTimes(1);
 
     await act(async () => {
@@ -152,6 +153,7 @@ describe('History entries controller', () => {
         expect.objectContaining({ searchText: 'finance' }),
       ),
     );
+    await waitFor(() => expect(result.current.isSearchPending).toBe(false));
   });
 
   test('ignores an older request that resolves after a newer query', async () => {
@@ -209,6 +211,41 @@ describe('History entries controller', () => {
     expect(
       result.current.state.status === 'loaded' && result.current.state.hasMore,
     ).toBe(false);
+  });
+
+  test('requires an explicit retry after a load-more failure', async () => {
+    const repository = createRepository();
+    repository.findHistory
+      .mockResolvedValueOnce(page([entry], cursor))
+      .mockRejectedValueOnce(new Error('next page unavailable'))
+      .mockResolvedValueOnce(page([secondEntry]));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
+
+    await waitFor(() => expect(result.current.state.status).toBe('loaded'));
+
+    await act(async () => {
+      result.current.loadMore();
+    });
+    await waitFor(() =>
+      expect(
+        result.current.state.status === 'loaded' &&
+          result.current.state.loadMoreError,
+      ).toBe(true),
+    );
+    expect(repository.findHistory).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      result.current.loadMore();
+    });
+    expect(repository.findHistory).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      result.current.retryLoadMore();
+    });
+    await waitFor(() =>
+      expect(result.current.state.entries).toEqual([entry, secondEntry]),
+    );
+    expect(repository.findHistory).toHaveBeenCalledTimes(3);
   });
 
   test('surfaces repository failures and retries explicitly', async () => {
