@@ -3,7 +3,7 @@ import { saveWorkEntry } from '@/features/work-entry/saveWorkEntry';
 
 function createRepository(): jest.Mocked<WorkEntryWriter> {
   return {
-    create: jest.fn(async (input) => ({
+    commit: jest.fn(async (input) => ({
       ...input,
       id: 'entry-1',
       createdAt: '2026-08-10T00:00:00.000Z',
@@ -36,6 +36,7 @@ describe('saveWorkEntry', () => {
       detail: 'Completed before Friday close',
     });
     expect(entry.excludedFromExports).toBe(false);
+    expect(repository.commit).toHaveBeenCalledTimes(1);
   });
 
   test('keeps challenges out of exports by default', async () => {
@@ -88,7 +89,7 @@ describe('saveWorkEntry', () => {
         'Evidence requires both a type and a supporting detail.',
       );
 
-      expect(repository.create).not.toHaveBeenCalled();
+      expect(repository.commit).not.toHaveBeenCalled();
     },
   );
 
@@ -109,6 +110,6 @@ describe('saveWorkEntry', () => {
       ),
     ).rejects.toThrow('A work entry requires a note.');
 
-    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.commit).not.toHaveBeenCalled();
   });
 });
