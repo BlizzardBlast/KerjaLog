@@ -66,7 +66,6 @@ export function ReviewRhythmStep({
       </View>
 
       <OnboardingAppLockSetting
-        preferred={state.appLockPreferred}
         onPreferenceChange={(appLockPreferred) => update({ appLockPreferred })}
       />
 
