@@ -24,10 +24,6 @@ export function ReviewRhythmStep({
   const { theme } = useTheme();
   const { t } = useI18n();
   const reminder = useWeeklyReminderController(state, update);
-  const reminderFailure =
-    reminder.feedback.issue && reminder.feedback.issue !== 'inexact-alarm'
-      ? reminder.feedback.issue
-      : null;
 
   return (
     <View style={styles.content}>
@@ -69,8 +65,8 @@ export function ReviewRhythmStep({
         state.weeklyReminderPrecision === 'inexact' ? (
           <InexactReminderNotice />
         ) : null}
-        {reminderFailure ? (
-          <NotificationPermissionNotice issue={reminderFailure} />
+        {reminder.feedback.issue ? (
+          <NotificationPermissionNotice issue={reminder.feedback.issue} />
         ) : null}
       </View>
 
