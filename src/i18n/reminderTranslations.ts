@@ -10,10 +10,10 @@ export const reminderEn = {
   'onboarding.review.reminderTimeAccessibility': 'Change reflection time',
   'onboarding.review.reminderDayPickerTitle': 'Reflection day',
   'onboarding.review.reminderTimePickerTitle': 'Reflection time',
-  'onboarding.review.inexactAlarmTitle': 'Using an approximate reminder time',
-  'onboarding.review.inexactAlarmDescription':
+  'reminder.inexact.title': 'Using an approximate reminder time',
+  'reminder.inexact.description':
     'KerjaLog will still remind you around the time you chose. Allow Alarms & reminders if you want the reminder to arrive at the exact time.',
-  'onboarding.review.inexactAlarmOpenSettings': 'Use exact reminder time',
+  'reminder.inexact.useExact': 'Use exact reminder time',
   'weekday.sunday': 'Sunday',
   'weekday.monday': 'Monday',
   'weekday.tuesday': 'Tuesday',
@@ -38,11 +38,10 @@ export const reminderId: Record<ReminderTranslationKey, string> = {
   'onboarding.review.reminderTimeAccessibility': 'Ubah waktu refleksi',
   'onboarding.review.reminderDayPickerTitle': 'Hari refleksi',
   'onboarding.review.reminderTimePickerTitle': 'Waktu refleksi',
-  'onboarding.review.inexactAlarmTitle':
-    'Menggunakan waktu pengingat perkiraan',
-  'onboarding.review.inexactAlarmDescription':
+  'reminder.inexact.title': 'Menggunakan waktu pengingat perkiraan',
+  'reminder.inexact.description':
     'KerjaLog tetap akan mengingatkan sekitar waktu yang Anda pilih. Izinkan Alarm & pengingat jika Anda ingin pengingat muncul tepat pada waktunya.',
-  'onboarding.review.inexactAlarmOpenSettings': 'Gunakan waktu pengingat tepat',
+  'reminder.inexact.useExact': 'Gunakan waktu pengingat tepat',
   'weekday.sunday': 'Minggu',
   'weekday.monday': 'Senin',
   'weekday.tuesday': 'Selasa',
