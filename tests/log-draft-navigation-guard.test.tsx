@@ -2,21 +2,21 @@ import { act, renderHook } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { useLogDraftNavigationGuard } from '@/features/work-entry/useLogDraftNavigationGuard';
 
-const dispatch = jest.fn();
-let preventRemoveHandler:
+const mockDispatch = jest.fn();
+let mockPreventRemoveHandler:
   | ((event: { data: { action: { type: string } } }) => void)
   | undefined;
 
 jest.mock('expo-router', () => ({
-  useNavigation: () => ({ dispatch }),
+  useNavigation: () => ({ dispatch: mockDispatch }),
 }));
 
 jest.mock('expo-router/react-navigation', () => ({
   usePreventRemove: (
     _preventRemove: boolean,
-    handler: typeof preventRemoveHandler,
+    handler: typeof mockPreventRemoveHandler,
   ) => {
-    preventRemoveHandler = handler;
+    mockPreventRemoveHandler = handler;
   },
 }));
 
@@ -32,7 +32,7 @@ const removeAction = { type: 'GO_BACK' };
 describe('useLogDraftNavigationGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    preventRemoveHandler = undefined;
+    mockPreventRemoveHandler = undefined;
   });
 
   test('turns native route removal into an internal wizard back step', async () => {
@@ -48,11 +48,11 @@ describe('useLogDraftNavigationGuard', () => {
     );
 
     act(() => {
-      preventRemoveHandler?.({ data: { action: removeAction } });
+      mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
     expect(onInternalBack).toHaveBeenCalledTimes(1);
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
   test('asks before discarding a dirty draft from the first step', async () => {
@@ -68,7 +68,7 @@ describe('useLogDraftNavigationGuard', () => {
     );
 
     act(() => {
-      preventRemoveHandler?.({ data: { action: removeAction } });
+      mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
     expect(alertSpy).toHaveBeenCalledWith(
@@ -79,7 +79,7 @@ describe('useLogDraftNavigationGuard', () => {
         expect.objectContaining({ text: copy.discard, style: 'destructive' }),
       ]),
     );
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
 
     const buttons = alertSpy.mock.calls[0]?.[2];
     const discardButton = buttons?.find(
@@ -89,7 +89,7 @@ describe('useLogDraftNavigationGuard', () => {
       discardButton?.onPress?.();
     });
 
-    expect(dispatch).toHaveBeenCalledWith(removeAction);
+    expect(mockDispatch).toHaveBeenCalledWith(removeAction);
     alertSpy.mockRestore();
   });
 
@@ -107,10 +107,10 @@ describe('useLogDraftNavigationGuard', () => {
     );
 
     act(() => {
-      preventRemoveHandler?.({ data: { action: removeAction } });
+      mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
-    expect(dispatch).toHaveBeenCalledWith(removeAction);
+    expect(mockDispatch).toHaveBeenCalledWith(removeAction);
     expect(allowNextRemovalRef.current).toBe(false);
     expect(alertSpy).not.toHaveBeenCalled();
     alertSpy.mockRestore();
