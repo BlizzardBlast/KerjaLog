@@ -17,9 +17,8 @@ jest.mock('expo-symbols', () => ({
 
 jest.mock('react-native-safe-area-context', () => {
   const React = jest.requireActual<typeof import('react')>('react');
-  const { View } = jest.requireActual<typeof import('react-native')>(
-    'react-native',
-  );
+  const { View } =
+    jest.requireActual<typeof import('react-native')>('react-native');
 
   return {
     SafeAreaView: ({
