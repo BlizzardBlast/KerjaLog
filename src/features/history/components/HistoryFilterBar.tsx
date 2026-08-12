@@ -1,0 +1,148 @@
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/design-system/components/Text';
+import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
+import {
+  hasWorkEntryHistoryFilters,
+  type WorkEntryHistoryFilters,
+} from '@/domain/entry/history';
+import { ENTRY_TYPES, type EntryType } from '@/domain/entry/model';
+import { getHistoryEntryTypeKey } from '@/features/history/historyCopy';
+import { useI18n } from '@/i18n/I18nProvider';
+
+type HistoryFilterBarProps = {
+  filters: WorkEntryHistoryFilters;
+  onEntryTypeChange: (entryType: EntryType | null) => void;
+  onEvidenceToggle: () => void;
+  onReviewReadyToggle: () => void;
+  onClear: () => void;
+};
+
+export function HistoryFilterBar({
+  filters,
+  onEntryTypeChange,
+  onEvidenceToggle,
+  onReviewReadyToggle,
+  onClear,
+}: HistoryFilterBarProps) {
+  const { t } = useI18n();
+  const [showEntryTypes, setShowEntryTypes] = useState(
+    filters.entryType !== null,
+  );
+  const hasFilters = hasWorkEntryHistoryFilters(filters);
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        accessibilityLabel={t('history.filters.label')}
+        horizontal
+        contentContainerStyle={styles.row}
+        showsHorizontalScrollIndicator={false}
+      >
+        <FilterChip
+          label={t('history.filters.all')}
+          selected={!hasFilters}
+          onPress={() => {
+            onClear();
+            setShowEntryTypes(false);
+          }}
+        />
+        <FilterChip
+          label={t('history.filters.entryType')}
+          selected={filters.entryType !== null}
+          onPress={() => setShowEntryTypes((current) => !current)}
+        />
+        <FilterChip
+          label={t('history.filters.evidence')}
+          selected={filters.hasEvidence}
+          onPress={onEvidenceToggle}
+        />
+        <FilterChip
+          label={t('history.filters.reviewReady')}
+          selected={filters.reviewReadyOnly}
+          onPress={onReviewReadyToggle}
+        />
+      </ScrollView>
+
+      {showEntryTypes ? (
+        <ScrollView
+          accessibilityLabel={t('history.filters.entryTypesLabel')}
+          horizontal
+          contentContainerStyle={styles.row}
+          showsHorizontalScrollIndicator={false}
+        >
+          {ENTRY_TYPES.map((entryType) => (
+            <FilterChip
+              key={entryType}
+              label={t(getHistoryEntryTypeKey(entryType))}
+              selected={filters.entryType === entryType}
+              onPress={() =>
+                onEntryTypeChange(
+                  filters.entryType === entryType ? null : entryType,
+                )
+              }
+            />
+          ))}
+        </ScrollView>
+      ) : null}
+    </View>
+  );
+}
+
+type FilterChipProps = {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+};
+
+function FilterChip({ label, selected, onPress }: FilterChipProps) {
+  const { theme } = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.chip,
+        {
+          backgroundColor: selected
+            ? theme.colors.primarySoft
+            : theme.colors.surface,
+          borderColor: selected ? theme.colors.primary : theme.colors.border,
+        },
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text
+        variant="label"
+        color={selected ? 'primary' : 'textMuted'}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    gap: spacing[2],
+  },
+  row: {
+    gap: spacing[2],
+    paddingRight: spacing[4],
+  },
+  chip: {
+    alignItems: 'center',
+    borderRadius: radii.full,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 44,
+    paddingHorizontal: spacing[4],
+  },
+  pressed: {
+    opacity: 0.76,
+  },
+});

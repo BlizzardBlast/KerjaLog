@@ -1,4 +1,5 @@
 import type { WorkEntryDraft } from '@/domain/entry/draft';
+import type { WorkEntryHistoryQuery } from '@/domain/entry/history';
 import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
 
 export interface WorkEntryByIdReader {
@@ -10,9 +11,14 @@ export interface RecentWorkEntryReader {
   countSince(occurredAtInclusive: string): Promise<number>;
 }
 
+export interface WorkEntryHistoryReader {
+  findHistory(query: WorkEntryHistoryQuery): Promise<WorkEntry[]>;
+}
+
 export interface WorkEntryReader
   extends WorkEntryByIdReader,
-    RecentWorkEntryReader {}
+    RecentWorkEntryReader,
+    WorkEntryHistoryReader {}
 
 export interface WorkEntryWriter {
   /**

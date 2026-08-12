@@ -1,0 +1,271 @@
+import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  SectionList,
+  StyleSheet,
+  View,
+} from 'react-native';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import { Text } from '@/design-system/components/Text';
+import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
+import { hasWorkEntryHistoryFilters } from '@/domain/entry/history';
+import type { WorkEntry } from '@/domain/entry/model';
+import { HistoryEntryCard } from '@/features/history/components/HistoryEntryCard';
+import { HistoryFilterBar } from '@/features/history/components/HistoryFilterBar';
+import { HistorySearchField } from '@/features/history/components/HistorySearchField';
+import {
+  groupHistoryEntries,
+  type HistorySection,
+} from '@/features/history/historyGrouping';
+import { useHistoryEntries } from '@/features/history/useHistoryEntries';
+import { useI18n } from '@/i18n/I18nProvider';
+
+const SCREEN_HORIZONTAL_PADDING = 22;
+
+export function HistoryScreen() {
+  const router = useRouter();
+  const { theme } = useTheme();
+  const { language, t } = useI18n();
+  const insets = useSafeAreaInsets();
+  const controller = useHistoryEntries();
+  const locale = language === 'id' ? 'id-ID' : 'en-US';
+  const sections = useMemo(
+    () => groupHistoryEntries(controller.state.entries, locale),
+    [controller.state.entries, locale],
+  );
+  const hasActiveQuery =
+    controller.searchText.trim().length > 0 ||
+    hasWorkEntryHistoryFilters(controller.filters);
+  const openEntry = (id: string) =>
+    router.push({ pathname: '/entry/[id]', params: { id } });
+
+  return (
+    <SafeAreaView
+      edges={['top']}
+      style={[styles.screen, { backgroundColor: theme.colors.surface }]}
+    >
+      <SectionList<WorkEntry, HistorySection>
+        sections={sections}
+        keyExtractor={(entry) => entry.id}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        stickySectionHeadersEnabled={false}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingLeft: Math.max(insets.left, SCREEN_HORIZONTAL_PADDING),
+            paddingRight: Math.max(insets.right, SCREEN_HORIZONTAL_PADDING),
+          },
+        ]}
+        ListHeaderComponent={
+          <View style={styles.headerContent}>
+            <View style={styles.heading}>
+              <Text variant="overline" color="primary">
+                {t('history.eyebrow')}
+              </Text>
+              <Text variant="title">{t('history.title')}</Text>
+              <Text color="textMuted">{t('history.description')}</Text>
+            </View>
+            <HistorySearchField
+              value={controller.searchText}
+              onChangeText={controller.setSearchText}
+            />
+            <HistoryFilterBar
+              filters={controller.filters}
+              onEntryTypeChange={controller.setEntryType}
+              onEvidenceToggle={controller.toggleEvidence}
+              onReviewReadyToggle={controller.toggleReviewReady}
+              onClear={controller.clearFilters}
+            />
+          </View>
+        }
+        renderSectionHeader={({ section }) => (
+          <HistoryMonthHeader section={section} />
+        )}
+        renderItem={({ item }) => (
+          <HistoryEntryCard entry={item} onPress={() => openEntry(item.id)} />
+        )}
+        ItemSeparatorComponent={EntrySeparator}
+        ListEmptyComponent={
+          <HistoryEmptyContent
+            hasActiveQuery={hasActiveQuery}
+            onRetry={controller.retry}
+            status={controller.state.status}
+          />
+        }
+        ListFooterComponent={
+          controller.state.status === 'loading' &&
+          controller.state.entries.length > 0 ? (
+            <ActivityIndicator
+              accessibilityLabel={t('history.loading')}
+              color={theme.colors.primary}
+              style={styles.footerLoader}
+            />
+          ) : null
+        }
+      />
+    </SafeAreaView>
+  );
+}
+
+function HistoryMonthHeader({ section }: { section: HistorySection }) {
+  const { t } = useI18n();
+
+  return (
+    <View style={styles.monthHeader}>
+      <Text variant="heading">{section.title}</Text>
+      <Text variant="caption" color="textMuted">
+        {t('history.entriesCount', { count: section.data.length })}
+      </Text>
+    </View>
+  );
+}
+
+function EntrySeparator() {
+  return <View style={styles.entrySeparator} />;
+}
+
+type HistoryEmptyContentProps = {
+  hasActiveQuery: boolean;
+  onRetry: () => void;
+  status: 'loading' | 'loaded' | 'error';
+};
+
+function HistoryEmptyContent({
+  hasActiveQuery,
+  onRetry,
+  status,
+}: HistoryEmptyContentProps) {
+  const { theme } = useTheme();
+  const { t } = useI18n();
+
+  if (status === 'loading') {
+    return (
+      <View
+        accessible
+        accessibilityLabel={t('history.loading')}
+        style={styles.stateContainer}
+      >
+        <ActivityIndicator color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <View
+        style={[
+          styles.stateCard,
+          {
+            backgroundColor: theme.colors.surfaceSubtle,
+            borderColor: theme.colors.border,
+          },
+        ]}
+      >
+        <Text variant="heading">{t('history.error.title')}</Text>
+        <Text color="textMuted">{t('history.error.description')}</Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={({ pressed }) => [
+            styles.retryButton,
+            { backgroundColor: theme.colors.primary },
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text variant="label" color="onPrimary">
+            {t('history.error.retry')}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={[
+        styles.stateCard,
+        {
+          backgroundColor: theme.colors.surfaceSubtle,
+          borderColor: theme.colors.border,
+        },
+      ]}
+    >
+      <Text variant="heading">
+        {t(
+          hasActiveQuery
+            ? 'history.noMatches.title'
+            : 'history.empty.title',
+        )}
+      </Text>
+      <Text color="textMuted">
+        {t(
+          hasActiveQuery
+            ? 'history.noMatches.description'
+            : 'history.empty.description',
+        )}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  content: {
+    paddingBottom: spacing[8],
+    paddingTop: 18,
+  },
+  headerContent: {
+    gap: spacing[5],
+    marginBottom: spacing[5],
+  },
+  heading: {
+    gap: spacing[2],
+  },
+  monthHeader: {
+    alignItems: 'baseline',
+    flexDirection: 'row',
+    gap: spacing[3],
+    justifyContent: 'space-between',
+    paddingBottom: spacing[3],
+    paddingTop: spacing[5],
+  },
+  entrySeparator: {
+    height: 10,
+  },
+  stateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 180,
+  },
+  stateCard: {
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    gap: spacing[2],
+    padding: spacing[5],
+  },
+  retryButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    borderRadius: radii.md,
+    justifyContent: 'center',
+    marginTop: spacing[2],
+    minHeight: 48,
+    paddingHorizontal: spacing[4],
+  },
+  footerLoader: {
+    marginTop: spacing[4],
+  },
+  pressed: {
+    opacity: 0.78,
+  },
+});
