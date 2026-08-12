@@ -135,17 +135,18 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
     throw new Error('Stored work entry draft text is invalid.');
   }
 
-  const evidenceTypes = parseEvidenceTypes(row.evidence_types);
-
-  return {
+  const draft: WorkEntryDraft = {
     step: row.step,
     intent: row.intent,
     rawNote: row.raw_note,
     outcomeType: row.outcome_type,
-    evidenceTypes,
+    evidenceTypes: parseEvidenceTypes(row.evidence_types),
     evidenceDetail: row.evidence_detail,
     impactStatement: row.impact_statement,
   };
+
+  assertDraftProgression(draft);
+  return draft;
 }
 
 function parseEvidenceTypes(value: unknown): WorkEntryDraft['evidenceTypes'] {
@@ -169,4 +170,22 @@ function parseEvidenceTypes(value: unknown): WorkEntryDraft['evidenceTypes'] {
   }
 
   return parsed;
+}
+
+function assertDraftProgression(draft: WorkEntryDraft): void {
+  const stepIndex = ['type', 'event', 'outcome', 'evidence', 'impact'].indexOf(
+    draft.step,
+  );
+
+  if (stepIndex >= 1 && draft.intent === null) {
+    throw new Error('Stored work entry draft is missing its event type.');
+  }
+
+  if (stepIndex >= 2 && draft.rawNote.trim().length === 0) {
+    throw new Error('Stored work entry draft is missing its note.');
+  }
+
+  if (stepIndex >= 3 && draft.outcomeType === null) {
+    throw new Error('Stored work entry draft is missing its outcome.');
+  }
 }
