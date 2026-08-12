@@ -1,9 +1,4 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { useAppLockSettingControl } from '@/features/app-lock/useAppLockSettingControl';
 import { OnboardingAppLockSetting } from '@/features/onboarding/components/OnboardingAppLockSetting';
@@ -35,16 +30,15 @@ describe('OnboardingAppLockSetting', () => {
 
     await render(
       <ThemeProvider>
-        <OnboardingAppLockSetting onPreferenceChange={jest.fn()} />
+        <OnboardingAppLockSetting />
       </ThemeProvider>,
     );
 
     expect(screen.getByText('appLock.setting.unavailable')).toBeTruthy();
   });
 
-  test('stores the onboarding preference only after the real App Lock change succeeds', async () => {
+  test('changes the real App Lock setting instead of an onboarding copy', async () => {
     const updateEnabled = jest.fn().mockResolvedValue(true);
-    const onPreferenceChange = jest.fn();
     useAppLockSettingControlMock.mockReturnValue({
       enabled: false,
       error: null,
@@ -54,19 +48,17 @@ describe('OnboardingAppLockSetting', () => {
 
     await render(
       <ThemeProvider>
-        <OnboardingAppLockSetting onPreferenceChange={onPreferenceChange} />
+        <OnboardingAppLockSetting />
       </ThemeProvider>,
     );
 
     await fireEvent.press(screen.getByRole('switch'));
 
     await waitFor(() => expect(updateEnabled).toHaveBeenCalledWith(true));
-    expect(onPreferenceChange).toHaveBeenCalledWith(true);
   });
 
-  test('does not claim App Lock is preferred when device authentication fails', async () => {
+  test('leaves the control off when the real App Lock change fails', async () => {
     const updateEnabled = jest.fn().mockResolvedValue(false);
-    const onPreferenceChange = jest.fn();
     useAppLockSettingControlMock.mockReturnValue({
       enabled: false,
       error: 'unavailable',
@@ -76,13 +68,13 @@ describe('OnboardingAppLockSetting', () => {
 
     await render(
       <ThemeProvider>
-        <OnboardingAppLockSetting onPreferenceChange={onPreferenceChange} />
+        <OnboardingAppLockSetting />
       </ThemeProvider>,
     );
 
     await fireEvent.press(screen.getByRole('switch'));
 
     await waitFor(() => expect(updateEnabled).toHaveBeenCalledWith(true));
-    expect(onPreferenceChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('switch').props.value).toBe(false);
   });
 });
