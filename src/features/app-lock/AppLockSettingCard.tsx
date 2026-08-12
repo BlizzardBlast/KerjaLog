@@ -15,6 +15,10 @@ export function AppLockSettingCard() {
   const { enabled, error, isUpdating, updateEnabled } =
     useAppLockSettingControl();
 
+  const handleValueChange = async (nextEnabled: boolean): Promise<void> => {
+    await updateEnabled(nextEnabled);
+  };
+
   return (
     <View
       style={[
@@ -51,7 +55,7 @@ export function AppLockSettingCard() {
           accessibilityLabel={t('appLock.setting.title')}
           accessibilityHint={t('appLock.setting.description')}
           disabled={isUpdating}
-          onValueChange={updateEnabled}
+          onValueChange={handleValueChange}
           value={enabled}
         />
       </View>
