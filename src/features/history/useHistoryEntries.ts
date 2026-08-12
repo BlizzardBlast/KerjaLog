@@ -43,6 +43,10 @@ export function useHistoryEntries(
   const requestIdRef = useRef(0);
 
   useEffect(() => {
+    if (searchText === debouncedSearchText) {
+      return;
+    }
+
     const timeout = setTimeout(() => {
       setDebouncedSearchText(searchText);
     }, SEARCH_DEBOUNCE_MS);
@@ -50,7 +54,7 @@ export function useHistoryEntries(
     return () => {
       clearTimeout(timeout);
     };
-  }, [searchText]);
+  }, [debouncedSearchText, searchText]);
 
   const query = useMemo<WorkEntryHistoryQuery>(
     () => ({
