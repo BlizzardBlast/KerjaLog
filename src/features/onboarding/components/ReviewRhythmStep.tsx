@@ -65,9 +65,7 @@ export function ReviewRhythmStep({
         ) : null}
       </View>
 
-      <OnboardingAppLockSetting
-        onPreferenceChange={(appLockPreferred) => update({ appLockPreferred })}
-      />
+      <OnboardingAppLockSetting />
 
       <InfoCard
         title={t('onboarding.review.privacyTitle')}
@@ -76,7 +74,8 @@ export function ReviewRhythmStep({
 
       {hasFinishError ? (
         <View
-          accessibilityRole="alert"
+          role="alert"
+          accessibilityLiveRegion="polite"
           style={[
             styles.errorCard,
             {
