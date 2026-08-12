@@ -50,21 +50,13 @@ export function useWeeklyReminderController(
     });
 
   const applyEnableResult = (result: WeeklyReflectionEnableResult) => {
-    if (result === 'enabled-exact') {
+    if (result === 'enabled-exact' || result === 'enabled-inexact') {
       update({
         weeklyReminderEnabled: true,
-        weeklyReminderPrecision: 'exact',
+        weeklyReminderPrecision:
+          result === 'enabled-exact' ? 'exact' : 'inexact',
       });
       dispatchFeedback({ type: 'success' });
-      return;
-    }
-
-    if (result === 'enabled-inexact') {
-      update({
-        weeklyReminderEnabled: true,
-        weeklyReminderPrecision: 'inexact',
-      });
-      dispatchFeedback({ type: 'notice', issue: 'inexact-alarm' });
       return;
     }
 
