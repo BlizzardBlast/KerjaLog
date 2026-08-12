@@ -27,18 +27,24 @@ class KerjaLogAlarmPermissionsModule : Module() {
 
     Function("openExactAlarmSettings") {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-        return@Function
-      }
+        false
+      } else {
+        val context = appContext.reactContext
 
-      val context = appContext.reactContext ?: return@Function
-      val intent = Intent(
-        Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-        Uri.parse("package:${context.packageName}"),
-      ).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      }
+        if (context == null) {
+          false
+        } else {
+          val intent = Intent(
+            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+            Uri.parse("package:${context.packageName}"),
+          ).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+          }
 
-      context.startActivity(intent)
+          context.startActivity(intent)
+          true
+        }
+      }
     }
   }
 }
