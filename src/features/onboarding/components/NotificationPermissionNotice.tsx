@@ -10,17 +10,12 @@ import type { TranslationKey } from '@/i18n/catalog';
 import { useI18n } from '@/i18n/I18nProvider';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
-type NotificationReminderFailure = Exclude<
-  NotificationReminderIssue,
-  'inexact-alarm'
->;
-
 type IssueCopy = {
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
 };
 
-const issueCopy: Record<NotificationReminderFailure, IssueCopy> = {
+const issueCopy: Record<NotificationReminderIssue, IssueCopy> = {
   permission: {
     titleKey: 'onboarding.review.notificationPermissionTitle',
     descriptionKey: 'onboarding.review.notificationPermissionDescription',
@@ -38,7 +33,7 @@ const issueCopy: Record<NotificationReminderFailure, IssueCopy> = {
 export function NotificationPermissionNotice({
   issue,
 }: {
-  issue: NotificationReminderFailure;
+  issue: NotificationReminderIssue;
 }) {
   const { theme } = useTheme();
   const { t } = useI18n();
