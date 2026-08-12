@@ -13,6 +13,7 @@ import {
   authenticateDevice,
   getDeviceAuthenticationAvailability,
 } from '@/platform/authentication/deviceAuthentication';
+import { setAppLockScreenPrivacyEnabled } from '@/platform/privacy/screenPrivacy';
 
 export function useAppLockController(): AppLockContextValue {
   const { t } = useI18n();
@@ -26,29 +27,46 @@ export function useAppLockController(): AppLockContextValue {
   useEffect(() => {
     let ignore = false;
 
-    readAppLockEnabled()
-      .then((storedEnabled) => {
-        if (ignore) {
-          return;
+    const hydrate = async () => {
+      try {
+        const storedEnabled = await readAppLockEnabled();
+
+        if (storedEnabled) {
+          try {
+            await setAppLockScreenPrivacyEnabled(true);
+          } catch {
+            if (!ignore) {
+              setEnabledState(true);
+              setLocked(true);
+              setError('privacy-failed');
+            }
+            return;
+          }
         }
 
-        setEnabledState(storedEnabled);
-        setLocked(storedEnabled);
-      })
-      .catch(() => {
         if (!ignore) {
-          // The preference is privacy-sensitive: if it cannot be read, require
-          // device authentication rather than assuming App Lock was disabled.
+          setEnabledState(storedEnabled);
+          setLocked(storedEnabled);
+        }
+      } catch {
+        // The preference is privacy-sensitive: if it cannot be read, require
+        // device authentication and best-effort native screen protection rather
+        // than assuming App Lock was disabled.
+        await setAppLockScreenPrivacyEnabled(true).catch(() => undefined);
+
+        if (!ignore) {
           setEnabledState(true);
           setLocked(true);
           setError('storage-failed');
         }
-      })
-      .finally(() => {
+      } finally {
         if (!ignore) {
           setIsHydrated(true);
         }
-      });
+      }
+    };
+
+    hydrate().catch(() => undefined);
 
     return () => {
       ignore = true;
@@ -120,16 +138,54 @@ export function useAppLockController(): AppLockContextValue {
         return false;
       }
 
-      try {
-        await writeAppLockEnabled(nextEnabled);
-        setEnabledState(nextEnabled);
-        setLocked(false);
-        setError(null);
-        return true;
-      } catch {
-        setError('storage-failed');
-        return false;
+      if (nextEnabled) {
+        try {
+          await setAppLockScreenPrivacyEnabled(true);
+        } catch {
+          setError('privacy-failed');
+          return false;
+        }
+
+        try {
+          await writeAppLockEnabled(true);
+        } catch {
+          try {
+            await setAppLockScreenPrivacyEnabled(false);
+          } catch {
+            setError('privacy-failed');
+            return false;
+          }
+
+          setError('storage-failed');
+          return false;
+        }
+      } else {
+        try {
+          await writeAppLockEnabled(false);
+        } catch {
+          setError('storage-failed');
+          return false;
+        }
+
+        try {
+          await setAppLockScreenPrivacyEnabled(false);
+        } catch {
+          try {
+            await writeAppLockEnabled(true);
+          } catch {
+            setError('storage-failed');
+            return false;
+          }
+
+          setError('privacy-failed');
+          return false;
+        }
       }
+
+      setEnabledState(nextEnabled);
+      setLocked(false);
+      setError(null);
+      return true;
     },
     [authenticate, enabled],
   );
@@ -138,6 +194,13 @@ export function useAppLockController(): AppLockContextValue {
     if (!enabled) {
       setLocked(false);
       return true;
+    }
+
+    try {
+      await setAppLockScreenPrivacyEnabled(true);
+    } catch {
+      setError('privacy-failed');
+      return false;
     }
 
     const authenticated = await authenticate();
