@@ -6,6 +6,9 @@ export type HistorySection = {
   data: WorkEntry[];
 };
 
+const monthFormatters = new Map<string, Intl.DateTimeFormat>();
+const entryDateFormatters = new Map<string, Intl.DateTimeFormat>();
+
 /**
  * Groups entries that are already ordered newest-first by the repository.
  * Keeping ordering in the data layer avoids duplicating pagination semantics in UI code.
@@ -15,6 +18,7 @@ export function groupHistoryEntries(
   locale: string,
 ): HistorySection[] {
   const sections = new Map<string, HistorySection>();
+  const monthFormatter = getMonthFormatter(locale);
 
   for (const entry of entries) {
     const occurredAt = new Date(entry.occurredAt);
@@ -30,10 +34,7 @@ export function groupHistoryEntries(
 
     sections.set(key, {
       key,
-      title: new Intl.DateTimeFormat(locale, {
-        month: 'long',
-        year: 'numeric',
-      }).format(occurredAt),
+      title: monthFormatter.format(occurredAt),
       data: [entry],
     });
   }
@@ -45,8 +46,33 @@ export function formatHistoryEntryDate(
   occurredAt: string,
   locale: string,
 ): string {
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'short',
-  }).format(new Date(occurredAt));
+  return getEntryDateFormatter(locale).format(new Date(occurredAt));
+}
+
+function getMonthFormatter(locale: string): Intl.DateTimeFormat {
+  let formatter = monthFormatters.get(locale);
+
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      month: 'long',
+      year: 'numeric',
+    });
+    monthFormatters.set(locale, formatter);
+  }
+
+  return formatter;
+}
+
+function getEntryDateFormatter(locale: string): Intl.DateTimeFormat {
+  let formatter = entryDateFormatters.get(locale);
+
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+    });
+    entryDateFormatters.set(locale, formatter);
+  }
+
+  return formatter;
 }
