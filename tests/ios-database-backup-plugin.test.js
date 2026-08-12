@@ -23,7 +23,7 @@ class AppDelegate: ExpoAppDelegate {
 `;
 
 describe('withIosDatabaseBackupExclusion', () => {
-  test('marks the Expo SQLite directory as excluded from iOS backup', () => {
+  test('marks the Expo SQLite directory as excluded from iOS backup without launch-time traps', () => {
     const result = applyDatabaseBackupExclusion(appDelegateTemplate);
 
     expect(result).toContain('import Foundation');
@@ -31,6 +31,8 @@ describe('withIosDatabaseBackupExclusion', () => {
     expect(result).toContain('"SQLite"');
     expect(result).toContain('resourceValues.isExcludedFromBackup = true');
     expect(result).toContain('try sqliteDirectory.setResourceValues(resourceValues)');
+    expect(result).toContain('NSLog(');
+    expect(result).not.toContain('preconditionFailure(');
   });
 
   test('is idempotent when prebuild applies the plugin again', () => {
