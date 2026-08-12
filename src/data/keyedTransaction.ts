@@ -1,29 +1,47 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-let transactionQueue: Promise<void> = Promise.resolve();
+let databaseAccessQueue: Promise<void> = Promise.resolve();
 
 /**
- * Runs a transaction on the exact database handle that has already been keyed.
+ * Serializes application access to the keyed SQLCipher connection.
  *
- * Expo SDK 57's withExclusiveTransactionAsync opens a second native connection.
- * SQLCipher keys are connection-local, so that second connection would be
- * unkeyed and fail as soon as it touches the encrypted database. Keep encrypted
- * transactions on the original handle and serialize them here instead.
+ * Expo's non-exclusive transaction API can include queries that execute on the
+ * same connection while a transaction is open. KerjaLog intentionally uses one
+ * already-keyed connection, so reads and writes must share this scheduler rather
+ * than allowing an unrelated read to participate in another operation's
+ * transaction accidentally.
  */
-export async function withKeyedTransaction<T>(
-  db: SQLiteDatabase,
-  task: (db: SQLiteDatabase) => Promise<T>,
+export async function withKeyedDatabaseAccess<T>(
+  task: () => Promise<T>,
 ): Promise<T> {
-  const waitForPrevious = transactionQueue;
+  const waitForPrevious = databaseAccessQueue;
   let releaseCurrent: () => void = () => undefined;
 
-  transactionQueue = new Promise<void>((resolve) => {
+  databaseAccessQueue = new Promise<void>((resolve) => {
     releaseCurrent = resolve;
   });
 
   await waitForPrevious;
 
   try {
+    return await task();
+  } finally {
+    releaseCurrent();
+  }
+}
+
+/**
+ * Runs a transaction on the exact database handle that has already been keyed.
+ *
+ * Expo SDK 57's withExclusiveTransactionAsync opens a second native connection.
+ * SQLCipher keys are connection-local, so that second connection would be
+ * unkeyed and fail as soon as it touches the encrypted database.
+ */
+export async function withKeyedTransaction<T>(
+  db: SQLiteDatabase,
+  task: (db: SQLiteDatabase) => Promise<T>,
+): Promise<T> {
+  return withKeyedDatabaseAccess(async () => {
     let result: T | undefined;
 
     await db.withTransactionAsync(async () => {
@@ -31,7 +49,5 @@ export async function withKeyedTransaction<T>(
     });
 
     return result as T;
-  } finally {
-    releaseCurrent();
-  }
+  });
 }
