@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   buildImpactStatement,
   hasIncompleteEvidence,
@@ -52,8 +52,16 @@ export function useLogFlow({
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const saveInProgressRef = useRef(false);
 
   const currentStep = LOG_STEPS.indexOf(step) + 1;
+  const hasUnsavedDraft =
+    intent !== null ||
+    rawNote.trim().length > 0 ||
+    outcomeType !== null ||
+    evidenceTypes.length > 0 ||
+    evidenceDetail.trim().length > 0 ||
+    impactStatement.trim().length > 0;
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);
@@ -170,7 +178,7 @@ export function useLogFlow({
   }
 
   async function save(quickNote: boolean) {
-    if (saving) {
+    if (saveInProgressRef.current) {
       return;
     }
 
@@ -183,6 +191,7 @@ export function useLogFlow({
       return;
     }
 
+    saveInProgressRef.current = true;
     setSaving(true);
     setSaveError(false);
 
@@ -200,6 +209,7 @@ export function useLogFlow({
     } catch {
       setSaveError(true);
     } finally {
+      saveInProgressRef.current = false;
       setSaving(false);
     }
   }
@@ -208,6 +218,7 @@ export function useLogFlow({
     step,
     currentStep,
     totalSteps: LOG_STEPS.length,
+    hasUnsavedDraft,
     intent,
     rawNote,
     outcomeType,
