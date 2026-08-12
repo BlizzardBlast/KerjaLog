@@ -39,6 +39,7 @@ export type HistoryEntriesState =
 
 export type HistoryEntriesController = {
   searchText: string;
+  isSearchPending: boolean;
   setSearchText: (value: string) => void;
   filters: WorkEntryHistoryFilters;
   setEntryType: (entryType: EntryType | null) => void;
@@ -70,6 +71,7 @@ export function useHistoryEntries(
   const nextCursorRef = useRef<WorkEntryHistoryCursor | null>(null);
   const hasMoreRef = useRef(false);
   const isLoadingMoreRef = useRef(false);
+  const loadMoreErrorRef = useRef(false);
 
   useEffect(() => {
     if (searchText === debouncedSearchText) {
@@ -99,6 +101,7 @@ export function useHistoryEntries(
     nextCursorRef.current = null;
     hasMoreRef.current = false;
     isLoadingMoreRef.current = false;
+    loadMoreErrorRef.current = false;
 
     setState((current) => ({
       status: 'loading',
@@ -151,7 +154,12 @@ export function useHistoryEntries(
   const loadMore = useCallback(() => {
     const cursor = nextCursorRef.current;
 
-    if (cursor === null || !hasMoreRef.current || isLoadingMoreRef.current) {
+    if (
+      cursor === null ||
+      !hasMoreRef.current ||
+      isLoadingMoreRef.current ||
+      loadMoreErrorRef.current
+    ) {
       return;
     }
 
@@ -178,6 +186,7 @@ export function useHistoryEntries(
         nextCursorRef.current = page.nextCursor;
         hasMoreRef.current = page.nextCursor !== null;
         isLoadingMoreRef.current = false;
+        loadMoreErrorRef.current = false;
 
         setState((current) => {
           if (current.status !== 'loaded') {
@@ -204,6 +213,7 @@ export function useHistoryEntries(
         }
 
         isLoadingMoreRef.current = false;
+        loadMoreErrorRef.current = true;
 
         setState((current) =>
           current.status === 'loaded'
@@ -213,6 +223,15 @@ export function useHistoryEntries(
       });
   }, [query, repository]);
 
+  const retryLoadMore = useCallback(() => {
+    if (!loadMoreErrorRef.current || isLoadingMoreRef.current) {
+      return;
+    }
+
+    loadMoreErrorRef.current = false;
+    loadMore();
+  }, [loadMore]);
+
   useFocusEffect(
     useCallback(() => {
       loadFirstPage();
@@ -220,6 +239,7 @@ export function useHistoryEntries(
       return () => {
         requestIdRef.current += 1;
         isLoadingMoreRef.current = false;
+        loadMoreErrorRef.current = false;
       };
     }, [loadFirstPage]),
   );
@@ -252,6 +272,7 @@ export function useHistoryEntries(
 
   return {
     searchText,
+    isSearchPending: searchText !== debouncedSearchText,
     setSearchText,
     filters,
     setEntryType,
@@ -260,7 +281,7 @@ export function useHistoryEntries(
     clearFilters,
     retry: loadFirstPage,
     loadMore,
-    retryLoadMore: loadMore,
+    retryLoadMore,
     state,
   };
 }
