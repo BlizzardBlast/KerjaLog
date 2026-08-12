@@ -43,6 +43,25 @@ const savedEntry: WorkEntry = {
 };
 
 describe('useLogFlow', () => {
+  test('reports an unsaved draft as soon as the user starts the flow', async () => {
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved: jest.fn(),
+        saveEntry: jest.fn(),
+      }),
+    );
+
+    expect(result.current.hasUnsavedDraft).toBe(false);
+
+    await act(async () => {
+      result.current.selectIntent('completed');
+    });
+
+    expect(result.current.hasUnsavedDraft).toBe(true);
+  });
+
   test('keeps incomplete evidence on the evidence step until it is complete', async () => {
     const { result } = await renderHook(() =>
       useLogFlow({
@@ -109,13 +128,9 @@ describe('useLogFlow', () => {
 
     await act(async () => {
       result.current.selectIntent('completed');
-    });
-    await act(async () => {
-      result.current.continueFromType();
-    });
-    await act(async () => {
       result.current.updateRawNote('  Prepared the weekly report  ');
     });
+
     await act(async () => {
       await result.current.saveQuick();
     });
@@ -131,5 +146,45 @@ describe('useLogFlow', () => {
     expect(onSaved).toHaveBeenCalledWith(savedEntry);
     expect(result.current.saveError).toBe(false);
     expect(result.current.saving).toBe(false);
+  });
+
+  test('prevents rapid duplicate save submissions before React rerenders', async () => {
+    let resolveSave: ((entry: WorkEntry) => void) | undefined;
+    const saveEntry = jest.fn(
+      () =>
+        new Promise<WorkEntry>((resolve) => {
+          resolveSave = resolve;
+        }),
+    );
+    const onSaved = jest.fn();
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved,
+        saveEntry,
+      }),
+    );
+
+    await act(async () => {
+      result.current.selectIntent('completed');
+      result.current.updateRawNote('Prepared the weekly report');
+    });
+
+    let firstSave: Promise<void> | undefined;
+    let secondSave: Promise<void> | undefined;
+    await act(async () => {
+      firstSave = result.current.saveQuick();
+      secondSave = result.current.saveQuick();
+    });
+
+    expect(saveEntry).toHaveBeenCalledTimes(1);
+
+    resolveSave?.(savedEntry);
+    await act(async () => {
+      await Promise.all([firstSave, secondSave]);
+    });
+
+    expect(onSaved).toHaveBeenCalledTimes(1);
   });
 });
