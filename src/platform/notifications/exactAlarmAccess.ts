@@ -14,9 +14,21 @@ const exactAlarmAccessModule =
     : null;
 
 export function getWeeklyReminderPrecision(): ReminderPrecision {
-  if (Platform.OS !== 'android' || Number(Platform.Version) < 31) {
+  return resolveWeeklyReminderPrecision(
+    Platform.OS,
+    Number(Platform.Version),
+    exactAlarmAccessModule?.canScheduleExactAlarms() ?? false,
+  );
+}
+
+export function resolveWeeklyReminderPrecision(
+  platform: string,
+  platformVersion: number,
+  canScheduleExactAlarms: boolean,
+): ReminderPrecision {
+  if (platform !== 'android' || platformVersion < 31) {
     return 'exact';
   }
 
-  return exactAlarmAccessModule?.canScheduleExactAlarms() ? 'exact' : 'inexact';
+  return canScheduleExactAlarms ? 'exact' : 'inexact';
 }
