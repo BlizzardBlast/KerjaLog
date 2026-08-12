@@ -20,8 +20,6 @@ export function getHistoryEntryTypeKey(type: EntryType): TranslationKey {
   return ENTRY_TYPE_KEYS[type];
 }
 
-export function getHistoryEntryStatusKey(
-  status: EntryStatus,
-): TranslationKey {
+export function getHistoryEntryStatusKey(status: EntryStatus): TranslationKey {
   return ENTRY_STATUS_KEYS[status];
 }
