@@ -9,11 +9,17 @@ export type WorkEntryLoadState =
   | { status: 'not-found' }
   | { status: 'error' };
 
+export type WorkEntryLoader = {
+  state: WorkEntryLoadState;
+  retry: () => void;
+};
+
 export function useWorkEntry(
   id: string,
   repository: WorkEntryByIdReader = workEntryRepository,
-): WorkEntryLoadState {
+): WorkEntryLoader {
   const [state, setState] = useState<WorkEntryLoadState>({ status: 'loading' });
+  const [requestVersion, setRequestVersion] = useState(0);
 
   useEffect(() => {
     let ignore = false;
@@ -37,7 +43,10 @@ export function useWorkEntry(
     return () => {
       ignore = true;
     };
-  }, [id, repository]);
+  }, [id, repository, requestVersion]);
 
-  return state;
+  return {
+    state,
+    retry: () => setRequestVersion((current) => current + 1),
+  };
 }
