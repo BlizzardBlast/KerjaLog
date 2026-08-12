@@ -22,6 +22,7 @@ import {
   type WorkEntry,
 } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
+import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 
 const ACTIVE_DRAFT_ID = 1;
 
@@ -264,7 +265,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 
   async countSince(occurredAtInclusive: string): Promise<number> {
-    if (!isIsoTimestamp(occurredAtInclusive)) {
+    if (!isCanonicalIsoTimestamp(occurredAtInclusive)) {
       throw new Error('Work entry count boundary must be an ISO timestamp.');
     }
 
@@ -291,6 +292,12 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 
   async commit(input: CreateWorkEntry): Promise<WorkEntry> {
+    if (!isCanonicalIsoTimestamp(input.occurredAt)) {
+      throw new Error(
+        'Work entry occurred at must be a canonical ISO timestamp.',
+      );
+    }
+
     const db = await getDatabase();
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
@@ -420,8 +427,8 @@ function validateHistoryQuery(query: WorkEntryHistoryQuery): void {
 
 function validateHistoryCursor(cursor: WorkEntryHistoryCursor): void {
   if (
-    !isIsoTimestamp(cursor.occurredAt) ||
-    !isIsoTimestamp(cursor.createdAt) ||
+    !isCanonicalIsoTimestamp(cursor.occurredAt) ||
+    !isCanonicalIsoTimestamp(cursor.createdAt) ||
     !cursor.id.trim()
   ) {
     throw new Error('History cursor is invalid.');
@@ -445,10 +452,4 @@ function createHistoryCursor(entry: WorkEntry): WorkEntryHistoryCursor {
     createdAt: entry.createdAt,
     id: entry.id,
   };
-}
-
-function isIsoTimestamp(value: string): boolean {
-  const parsed = new Date(value);
-
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value;
 }
