@@ -54,9 +54,7 @@ describe('OnboardingAppLockSetting', () => {
 
     await render(
       <ThemeProvider>
-        <OnboardingAppLockSetting
-          onPreferenceChange={onPreferenceChange}
-        />
+        <OnboardingAppLockSetting onPreferenceChange={onPreferenceChange} />
       </ThemeProvider>,
     );
 
@@ -78,9 +76,7 @@ describe('OnboardingAppLockSetting', () => {
 
     await render(
       <ThemeProvider>
-        <OnboardingAppLockSetting
-          onPreferenceChange={onPreferenceChange}
-        />
+        <OnboardingAppLockSetting onPreferenceChange={onPreferenceChange} />
       </ThemeProvider>,
     );
 
