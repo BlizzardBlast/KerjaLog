@@ -49,10 +49,14 @@ describe('migrateDatabase', () => {
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       4,
-      expect.stringContaining('CREATE VIRTUAL TABLE work_entry_history_fts USING fts5'),
+      expect.stringContaining(
+        'CREATE VIRTUAL TABLE work_entry_history_fts USING fts5',
+      ),
     );
     expect(database.execAsync.mock.calls[3]?.[0]).toEqual(
-      expect.stringContaining('CREATE TRIGGER work_entry_history_evidence_after_update'),
+      expect.stringContaining(
+        'CREATE TRIGGER work_entry_history_evidence_after_update',
+      ),
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       5,
@@ -76,7 +80,9 @@ describe('migrateDatabase', () => {
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       3,
-      expect.stringContaining('CREATE VIRTUAL TABLE work_entry_history_fts USING fts5'),
+      expect.stringContaining(
+        'CREATE VIRTUAL TABLE work_entry_history_fts USING fts5',
+      ),
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       4,
@@ -96,7 +102,9 @@ describe('migrateDatabase', () => {
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining('CREATE VIRTUAL TABLE work_entry_history_fts USING fts5'),
+      expect.stringContaining(
+        'CREATE VIRTUAL TABLE work_entry_history_fts USING fts5',
+      ),
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       3,
@@ -112,7 +120,9 @@ describe('migrateDatabase', () => {
     expect(database.withTransactionAsync).toHaveBeenCalledTimes(1);
     expect(database.execAsync).toHaveBeenNthCalledWith(
       1,
-      expect.stringContaining('CREATE VIRTUAL TABLE work_entry_history_fts USING fts5'),
+      expect.stringContaining(
+        'CREATE VIRTUAL TABLE work_entry_history_fts USING fts5',
+      ),
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       2,
