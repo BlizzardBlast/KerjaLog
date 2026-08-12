@@ -19,7 +19,9 @@ export function AppLockScreen() {
       ? t('appLock.setting.unavailable')
       : error === 'cancelled'
         ? t('appLock.screen.cancelled')
-        : error === 'authentication-failed' || error === 'storage-failed'
+        : error === 'authentication-failed' ||
+            error === 'storage-failed' ||
+            error === 'privacy-failed'
           ? t('appLock.screen.failed')
           : null;
 
@@ -57,6 +59,7 @@ export function AppLockScreen() {
 
         {errorMessage ? (
           <Text
+            role="alert"
             accessibilityLiveRegion="polite"
             variant="caption"
             color="danger"
