@@ -8,24 +8,22 @@ import { radii, spacing } from '@/design-system/tokens/theme';
 import type { NotificationReminderIssue } from '@/features/onboarding/reminderFeedback';
 import type { TranslationKey } from '@/i18n/catalog';
 import { useI18n } from '@/i18n/I18nProvider';
-import { openExactAlarmPermissionSettings } from '@/platform/notifications/weeklyReflection';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
+
+type NotificationReminderFailure = Exclude<
+  NotificationReminderIssue,
+  'inexact-alarm'
+>;
 
 type IssueCopy = {
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
-  actionKey?: TranslationKey;
 };
 
-const issueCopy: Record<NotificationReminderIssue, IssueCopy> = {
+const issueCopy: Record<NotificationReminderFailure, IssueCopy> = {
   permission: {
     titleKey: 'onboarding.review.notificationPermissionTitle',
     descriptionKey: 'onboarding.review.notificationPermissionDescription',
-  },
-  'inexact-alarm': {
-    titleKey: 'onboarding.review.inexactAlarmTitle',
-    descriptionKey: 'onboarding.review.inexactAlarmDescription',
-    actionKey: 'onboarding.review.inexactAlarmOpenSettings',
   },
   runtime: {
     titleKey: 'onboarding.review.notificationSetupTitle',
@@ -40,28 +38,18 @@ const issueCopy: Record<NotificationReminderIssue, IssueCopy> = {
 export function NotificationPermissionNotice({
   issue,
 }: {
-  issue: NotificationReminderIssue;
+  issue: NotificationReminderFailure;
 }) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const copy = issueCopy[issue];
-  const canOpenSettings = issue === 'permission' || issue === 'inexact-alarm';
   const entering = FadeIn.duration(motion.duration.feedback).reduceMotion(
     ReduceMotion.System,
   );
 
-  const handleOpenSettings = () => {
-    const settingsOperation =
-      issue === 'inexact-alarm'
-        ? openExactAlarmPermissionSettings()
-        : Linking.openSettings();
-
-    settingsOperation.catch(EMPTY_FUNCTION);
-  };
-
   return (
     <Animated.View
-      accessibilityRole={issue === 'inexact-alarm' ? 'text' : 'alert'}
+      accessibilityRole="alert"
       entering={entering}
       style={[
         styles.card,
@@ -80,9 +68,15 @@ export function NotificationPermissionNotice({
         </Text>
       </View>
 
-      {canOpenSettings ? (
-        <Button onPress={handleOpenSettings} size="sm" variant="secondary">
-          {t(copy.actionKey ?? 'common.action.openSettings')}
+      {issue === 'permission' ? (
+        <Button
+          onPress={() => {
+            Linking.openSettings().catch(EMPTY_FUNCTION);
+          }}
+          size="sm"
+          variant="secondary"
+        >
+          {t('common.action.openSettings')}
         </Button>
       ) : null}
     </Animated.View>
