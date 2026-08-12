@@ -36,7 +36,7 @@ function createEntry(overrides: Partial<WorkEntry> = {}): WorkEntry {
 }
 
 describe('HistoryEntryCard', () => {
-  test('renders persisted evidence and review readiness', async () => {
+  test('renders persisted evidence and exposes the detail-navigation hint', async () => {
     await render(
       <ThemeProvider>
         <HistoryEntryCard entry={createEntry()} onPress={jest.fn()} />
@@ -49,6 +49,10 @@ describe('HistoryEntryCard', () => {
     expect(screen.getByText('7 duplicate entries removed.')).toBeTruthy();
     expect(screen.getByText('history.status.reviewReady')).toBeTruthy();
     expect(screen.getByText(/history.type.problemSolved/u)).toBeTruthy();
+    expect(screen.getByRole('button').props.accessibilityLabel).toBeUndefined();
+    expect(screen.getByRole('button').props.accessibilityHint).toBe(
+      'history.entry.openHint',
+    );
   });
 
   test('marks challenge entries as private and remains actionable', async () => {
