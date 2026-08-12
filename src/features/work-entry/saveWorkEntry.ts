@@ -12,7 +12,7 @@ import type {
   WorkEntry,
 } from '@/domain/entry/model';
 import type { WorkEntryWriter } from '@/domain/entry/repository';
-import { entryTypeByIntent } from '@/features/work-entry/model';
+import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
 
 export type SaveWorkEntryDraft = {
   intent: LogEventIntent;
