@@ -103,7 +103,7 @@ describe('weekly reminder controller', () => {
     });
   });
 
-  test('keeps an enabled reminder and surfaces an inexact delivery notice', async () => {
+  test('keeps an enabled reminder in inexact mode without treating it as a failure', async () => {
     getWeeklyReminderPrecisionMock.mockReturnValue('inexact');
     getPermissionsAsync.mockResolvedValue({
       granted: true,
@@ -125,7 +125,7 @@ describe('weekly reminder controller', () => {
       weeklyReminderPrecision: 'inexact',
     });
     expect(result.current.feedback).toEqual({
-      issue: 'inexact-alarm',
+      issue: null,
       isUpdating: false,
     });
   });
