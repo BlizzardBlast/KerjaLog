@@ -23,6 +23,7 @@ export function AppLockSettingFeedback({
 
   return (
     <Text
+      role={error ? 'alert' : undefined}
       accessibilityLiveRegion="polite"
       variant="caption"
       color={error ? 'danger' : 'textMuted'}
