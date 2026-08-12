@@ -29,7 +29,7 @@ import {
 } from '@/features/history/useHistoryEntries';
 import { useI18n } from '@/i18n/I18nProvider';
 
-const SCREEN_HORIZONTAL_PADDING = 22;
+const SCREEN_HORIZONTAL_PADDING = spacing[6];
 
 export function HistoryScreen() {
   const router = useRouter();
@@ -101,12 +101,14 @@ export function HistoryScreen() {
         ListEmptyComponent={
           <HistoryEmptyContent
             hasActiveQuery={hasActiveQuery}
+            isSearchPending={controller.isSearchPending}
             onRetry={controller.retry}
             status={controller.state.status}
           />
         }
         ListFooterComponent={
           <HistoryListFooter
+            isSearchPending={controller.isSearchPending}
             onRetry={controller.retryLoadMore}
             state={controller.state}
           />
@@ -117,16 +119,9 @@ export function HistoryScreen() {
 }
 
 function HistoryMonthHeader({ section }: { section: HistorySection }) {
-  const { t } = useI18n();
-  const count = section.data.length;
-  const countKey = count === 1 ? 'history.entryCount' : 'history.entriesCount';
-
   return (
     <View style={styles.monthHeader}>
       <Text variant="heading">{section.title}</Text>
-      <Text variant="caption" color="textMuted">
-        {t(countKey, { count })}
-      </Text>
     </View>
   );
 }
@@ -137,23 +132,27 @@ function EntrySeparator() {
 
 type HistoryEmptyContentProps = {
   hasActiveQuery: boolean;
+  isSearchPending: boolean;
   onRetry: () => void;
   status: 'loading' | 'loaded' | 'error';
 };
 
 function HistoryEmptyContent({
   hasActiveQuery,
+  isSearchPending,
   onRetry,
   status,
 }: HistoryEmptyContentProps) {
   const { theme } = useTheme();
   const { t } = useI18n();
 
-  if (status === 'loading') {
+  if (status === 'loading' || isSearchPending) {
     return (
       <View
         accessible
-        accessibilityLabel={t('history.loading')}
+        accessibilityLabel={t(
+          isSearchPending ? 'history.updating' : 'history.loading',
+        )}
         style={styles.stateContainer}
       >
         <ActivityIndicator color={theme.colors.primary} />
@@ -216,9 +215,11 @@ function HistoryEmptyContent({
 }
 
 function HistoryListFooter({
+  isSearchPending,
   onRetry,
   state,
 }: {
+  isSearchPending: boolean;
   onRetry: () => void;
   state: HistoryEntriesState;
 }) {
@@ -226,9 +227,19 @@ function HistoryListFooter({
   const { t } = useI18n();
 
   if (
-    (state.status === 'loading' && state.entries.length > 0) ||
-    (state.status === 'loaded' && state.isLoadingMore)
+    isSearchPending ||
+    (state.status === 'loading' && state.entries.length > 0)
   ) {
+    return (
+      <ActivityIndicator
+        accessibilityLabel={t('history.updating')}
+        color={theme.colors.primary}
+        style={styles.footerLoader}
+      />
+    );
+  }
+
+  if (state.status === 'loaded' && state.isLoadingMore) {
     return (
       <ActivityIndicator
         accessibilityLabel={t('history.loadingMore')}
@@ -271,7 +282,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: spacing[8],
-    paddingTop: 18,
+    paddingTop: spacing[5],
   },
   headerContent: {
     gap: spacing[5],
@@ -281,15 +292,11 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   monthHeader: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
-    gap: spacing[3],
-    justifyContent: 'space-between',
     paddingBottom: spacing[3],
     paddingTop: spacing[5],
   },
   entrySeparator: {
-    height: 10,
+    height: spacing[3],
   },
   stateContainer: {
     alignItems: 'center',
