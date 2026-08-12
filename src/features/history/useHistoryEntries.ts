@@ -3,6 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import {
   EMPTY_WORK_ENTRY_HISTORY_FILTERS,
+  HISTORY_PAGE_SIZE,
+  HISTORY_SEARCH_MAX_LENGTH,
+  type WorkEntryHistoryCursor,
   type WorkEntryHistoryFilters,
   type WorkEntryHistoryQuery,
 } from '@/domain/entry/history';
@@ -12,9 +15,27 @@ import type { WorkEntryHistoryReader } from '@/domain/entry/repository';
 const SEARCH_DEBOUNCE_MS = 250;
 
 export type HistoryEntriesState =
-  | { status: 'loading'; entries: WorkEntry[] }
-  | { status: 'loaded'; entries: WorkEntry[] }
-  | { status: 'error'; entries: [] };
+  | {
+      status: 'loading';
+      entries: WorkEntry[];
+      hasMore: false;
+      isLoadingMore: false;
+      loadMoreError: false;
+    }
+  | {
+      status: 'loaded';
+      entries: WorkEntry[];
+      hasMore: boolean;
+      isLoadingMore: boolean;
+      loadMoreError: boolean;
+    }
+  | {
+      status: 'error';
+      entries: [];
+      hasMore: false;
+      isLoadingMore: false;
+      loadMoreError: false;
+    };
 
 export type HistoryEntriesController = {
   searchText: string;
@@ -25,13 +46,15 @@ export type HistoryEntriesController = {
   toggleReviewReady: () => void;
   clearFilters: () => void;
   retry: () => void;
+  loadMore: () => void;
+  retryLoadMore: () => void;
   state: HistoryEntriesState;
 };
 
 export function useHistoryEntries(
   repository: WorkEntryHistoryReader = workEntryRepository,
 ): HistoryEntriesController {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchTextState] = useState('');
   const [debouncedSearchText, setDebouncedSearchText] = useState('');
   const [filters, setFilters] = useState<WorkEntryHistoryFilters>(
     EMPTY_WORK_ENTRY_HISTORY_FILTERS,
@@ -39,8 +62,14 @@ export function useHistoryEntries(
   const [state, setState] = useState<HistoryEntriesState>({
     status: 'loading',
     entries: [],
+    hasMore: false,
+    isLoadingMore: false,
+    loadMoreError: false,
   });
   const requestIdRef = useRef(0);
+  const nextCursorRef = useRef<WorkEntryHistoryCursor | null>(null);
+  const hasMoreRef = useRef(false);
+  const isLoadingMoreRef = useRef(false);
 
   useEffect(() => {
     if (searchText === debouncedSearchText) {
@@ -56,7 +85,7 @@ export function useHistoryEntries(
     };
   }, [debouncedSearchText, searchText]);
 
-  const query = useMemo<WorkEntryHistoryQuery>(
+  const query = useMemo<Omit<WorkEntryHistoryQuery, 'cursor' | 'limit'>>(
     () => ({
       searchText: debouncedSearchText,
       filters,
@@ -64,38 +93,140 @@ export function useHistoryEntries(
     [debouncedSearchText, filters],
   );
 
-  const loadHistory = useCallback(() => {
+  const loadFirstPage = useCallback(() => {
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
+    nextCursorRef.current = null;
+    hasMoreRef.current = false;
+    isLoadingMoreRef.current = false;
 
     setState((current) => ({
       status: 'loading',
       entries: current.status === 'error' ? [] : current.entries,
+      hasMore: false,
+      isLoadingMore: false,
+      loadMoreError: false,
     }));
 
     repository
-      .findHistory(query)
-      .then((entries) => {
-        if (requestIdRef.current === requestId) {
-          setState({ status: 'loaded', entries });
+      .findHistory({
+        ...query,
+        cursor: null,
+        limit: HISTORY_PAGE_SIZE,
+      })
+      .then((page) => {
+        if (requestIdRef.current !== requestId) {
+          return;
         }
+
+        nextCursorRef.current = page.nextCursor;
+        hasMoreRef.current = page.nextCursor !== null;
+
+        setState({
+          status: 'loaded',
+          entries: page.entries,
+          hasMore: page.nextCursor !== null,
+          isLoadingMore: false,
+          loadMoreError: false,
+        });
       })
       .catch(() => {
-        if (requestIdRef.current === requestId) {
-          setState({ status: 'error', entries: [] });
+        if (requestIdRef.current !== requestId) {
+          return;
         }
+
+        nextCursorRef.current = null;
+        hasMoreRef.current = false;
+
+        setState({
+          status: 'error',
+          entries: [],
+          hasMore: false,
+          isLoadingMore: false,
+          loadMoreError: false,
+        });
+      });
+  }, [query, repository]);
+
+  const loadMore = useCallback(() => {
+    const cursor = nextCursorRef.current;
+
+    if (cursor === null || !hasMoreRef.current || isLoadingMoreRef.current) {
+      return;
+    }
+
+    const requestId = requestIdRef.current;
+    isLoadingMoreRef.current = true;
+
+    setState((current) =>
+      current.status === 'loaded'
+        ? { ...current, isLoadingMore: true, loadMoreError: false }
+        : current,
+    );
+
+    repository
+      .findHistory({
+        ...query,
+        cursor,
+        limit: HISTORY_PAGE_SIZE,
+      })
+      .then((page) => {
+        if (requestIdRef.current !== requestId) {
+          return;
+        }
+
+        nextCursorRef.current = page.nextCursor;
+        hasMoreRef.current = page.nextCursor !== null;
+        isLoadingMoreRef.current = false;
+
+        setState((current) => {
+          if (current.status !== 'loaded') {
+            return current;
+          }
+
+          const existingIds = new Set(current.entries.map((entry) => entry.id));
+          const newEntries = page.entries.filter(
+            (entry) => !existingIds.has(entry.id),
+          );
+
+          return {
+            status: 'loaded',
+            entries: [...current.entries, ...newEntries],
+            hasMore: page.nextCursor !== null,
+            isLoadingMore: false,
+            loadMoreError: false,
+          };
+        });
+      })
+      .catch(() => {
+        if (requestIdRef.current !== requestId) {
+          return;
+        }
+
+        isLoadingMoreRef.current = false;
+
+        setState((current) =>
+          current.status === 'loaded'
+            ? { ...current, isLoadingMore: false, loadMoreError: true }
+            : current,
+        );
       });
   }, [query, repository]);
 
   useFocusEffect(
     useCallback(() => {
-      loadHistory();
+      loadFirstPage();
 
       return () => {
         requestIdRef.current += 1;
+        isLoadingMoreRef.current = false;
       };
-    }, [loadHistory]),
+    }, [loadFirstPage]),
   );
+
+  const setSearchText = useCallback((value: string) => {
+    setSearchTextState(value.slice(0, HISTORY_SEARCH_MAX_LENGTH));
+  }, []);
 
   const setEntryType = useCallback((entryType: EntryType | null) => {
     setFilters((current) => ({ ...current, entryType }));
@@ -127,7 +258,9 @@ export function useHistoryEntries(
     toggleEvidence,
     toggleReviewReady,
     clearFilters,
-    retry: loadHistory,
+    retry: loadFirstPage,
+    loadMore,
+    retryLoadMore: loadMore,
     state,
   };
 }
