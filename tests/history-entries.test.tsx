@@ -61,7 +61,7 @@ describe('History entries controller', () => {
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
-    act(() => {
+    await act(async () => {
       result.current.setEntryType('problem_solved');
       result.current.toggleEvidence();
       result.current.toggleReviewReady();
@@ -89,7 +89,7 @@ describe('History entries controller', () => {
     await waitFor(() => expect(result.current.state.status).toBe('error'));
     expect(result.current.state.entries).toEqual([]);
 
-    act(() => {
+    await act(async () => {
       result.current.retry();
     });
 
