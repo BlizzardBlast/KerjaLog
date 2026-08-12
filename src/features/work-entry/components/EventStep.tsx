@@ -103,3 +103,12 @@ export function EventStep({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  textarea: {
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    minHeight: 156,
+    padding: spacing[4],
+  },
+});
