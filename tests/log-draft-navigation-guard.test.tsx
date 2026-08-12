@@ -46,6 +46,7 @@ describe('useLogDraftNavigationGuard', () => {
         hasUnsavedDraft: true,
         currentStep: 3,
         onInternalBack,
+        onDiscard: jest.fn().mockResolvedValue(true),
         allowNextRemovalRef: { current: false },
         copy,
       }),
@@ -60,13 +61,15 @@ describe('useLogDraftNavigationGuard', () => {
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 
-  test('asks before discarding a dirty draft from the first step', async () => {
+  test('clears persisted draft before allowing explicit discard', async () => {
+    const onDiscard = jest.fn().mockResolvedValue(true);
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
     await renderHook(() =>
       useLogDraftNavigationGuard({
         hasUnsavedDraft: true,
         currentStep: 1,
         onInternalBack: jest.fn(),
+        onDiscard,
         allowNextRemovalRef: { current: false },
         copy,
       }),
@@ -77,15 +80,38 @@ describe('useLogDraftNavigationGuard', () => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(
-      copy.title,
-      copy.description,
-      expect.arrayContaining([
-        expect.objectContaining({ text: copy.keepEditing, style: 'cancel' }),
-        expect.objectContaining({ text: copy.discard, style: 'destructive' }),
-      ]),
+    const buttons = alertSpy.mock.calls[0]?.[2];
+    const discardButton = buttons?.find(
+      (button) => button.text === copy.discard,
     );
-    expect(mockDispatch).not.toHaveBeenCalled();
+    await act(async () => {
+      discardButton?.onPress?.();
+      await Promise.resolve();
+    });
+
+    expect(onDiscard).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith(removeAction);
+    alertSpy.mockRestore();
+  });
+
+  test('keeps the route when encrypted draft cleanup fails', async () => {
+    const onDiscard = jest.fn().mockResolvedValue(false);
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
+    await renderHook(() =>
+      useLogDraftNavigationGuard({
+        hasUnsavedDraft: true,
+        currentStep: 1,
+        onInternalBack: jest.fn(),
+        onDiscard,
+        allowNextRemovalRef: { current: false },
+        copy,
+      }),
+    );
+    await waitForGuardRegistration();
+
+    await act(async () => {
+      mockPreventRemoveHandler?.({ data: { action: removeAction } });
+    });
 
     const buttons = alertSpy.mock.calls[0]?.[2];
     const discardButton = buttons?.find(
@@ -93,9 +119,11 @@ describe('useLogDraftNavigationGuard', () => {
     );
     await act(async () => {
       discardButton?.onPress?.();
+      await Promise.resolve();
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith(removeAction);
+    expect(onDiscard).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
 
@@ -107,6 +135,7 @@ describe('useLogDraftNavigationGuard', () => {
         hasUnsavedDraft: true,
         currentStep: 5,
         onInternalBack: jest.fn(),
+        onDiscard: jest.fn().mockResolvedValue(true),
         allowNextRemovalRef,
         copy,
       }),
