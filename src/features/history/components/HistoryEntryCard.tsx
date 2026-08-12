@@ -32,7 +32,7 @@ export function HistoryEntryCard({ entry, onPress }: HistoryEntryCardProps) {
 
   return (
     <Pressable
-      accessibilityLabel={`${entry.title}. ${statusLabel}. ${meta}`}
+      accessibilityHint={t('history.entry.openHint')}
       accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [
