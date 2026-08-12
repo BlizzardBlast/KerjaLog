@@ -227,8 +227,8 @@ function HistoryListFooter({
   const { t } = useI18n();
 
   if (
-    isSearchPending ||
-    (state.status === 'loading' && state.entries.length > 0)
+    state.entries.length > 0 &&
+    (isSearchPending || state.status === 'loading')
   ) {
     return (
       <ActivityIndicator
