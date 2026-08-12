@@ -41,16 +41,23 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
     impactCopy,
     initialDraft,
     onExit: () => router.replace('/home'),
-    onSaved: async (entry) => {
+    prepareForCommit: async (draft) => {
+      // Prevent a debounce/AppState flush from being queued behind the final
+      // commit, then persist the latest snapshot before the repository commits
+      // the entry and consumes this draft in one SQLCipher transaction.
       draftPersistenceSuspendedRef.current = true;
 
       try {
-        await workEntryDraftRepository.clearActive();
+        await workEntryDraftRepository.saveActive(draft);
       } catch (error) {
         draftPersistenceSuspendedRef.current = false;
         throw error;
       }
-
+    },
+    onCommitFailed: () => {
+      draftPersistenceSuspendedRef.current = false;
+    },
+    onSaved: (entry) => {
       allowNextRemovalRef.current = true;
 
       try {
