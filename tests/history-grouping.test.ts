@@ -4,11 +4,7 @@ import {
   groupHistoryEntries,
 } from '@/features/history/historyGrouping';
 
-function createEntry(
-  id: string,
-  occurredAt: string,
-  createdAt = occurredAt,
-): WorkEntry {
+function createEntry(id: string, occurredAt: string): WorkEntry {
   return {
     id,
     type: 'contribution',
@@ -20,17 +16,17 @@ function createEntry(
     status: 'quick_note',
     evidence: null,
     excludedFromExports: false,
-    createdAt,
-    updatedAt: createdAt,
+    createdAt: occurredAt,
+    updatedAt: occurredAt,
   };
 }
 
 describe('History grouping', () => {
-  test('groups entries by local calendar month and sorts newest first', () => {
+  test('groups entries while preserving repository newest-first order', () => {
     const entries = [
-      createEntry('july', '2026-07-31T08:00:00.000Z'),
       createEntry('august-newer', '2026-08-10T08:00:00.000Z'),
       createEntry('august-older', '2026-08-01T08:00:00.000Z'),
+      createEntry('july', '2026-07-31T08:00:00.000Z'),
     ];
 
     const sections = groupHistoryEntries(entries, 'en-US');
@@ -45,19 +41,17 @@ describe('History grouping', () => {
     expect(sections[1]?.data.map((entry) => entry.id)).toEqual(['july']);
   });
 
-  test('uses creation time as a stable tie breaker for equal occurrence times', () => {
-    const occurredAt = '2026-08-10T08:00:00.000Z';
-    const sections = groupHistoryEntries(
-      [
-        createEntry('older-created', occurredAt, '2026-08-10T08:01:00.000Z'),
-        createEntry('newer-created', occurredAt, '2026-08-10T08:02:00.000Z'),
-      ],
-      'en-US',
-    );
+  test('does not reorder entries because pagination ordering belongs to the repository', () => {
+    const entries = [
+      createEntry('first', '2026-08-01T08:00:00.000Z'),
+      createEntry('second', '2026-08-10T08:00:00.000Z'),
+    ];
+
+    const sections = groupHistoryEntries(entries, 'en-US');
 
     expect(sections[0]?.data.map((entry) => entry.id)).toEqual([
-      'newer-created',
-      'older-created',
+      'first',
+      'second',
     ]);
   });
 
