@@ -160,24 +160,27 @@ export function useAppLockController(): AppLockContextValue {
           return false;
         }
       } else {
+        // Remove native privacy first, while the durable preference is still
+        // enabled. If persisting the disabled state fails, restore privacy and
+        // keep the next launch fail-closed because storage still says enabled.
         try {
-          await writeAppLockEnabled(false);
+          await setAppLockScreenPrivacyEnabled(false);
         } catch {
-          setError('storage-failed');
+          setError('privacy-failed');
           return false;
         }
 
         try {
-          await setAppLockScreenPrivacyEnabled(false);
+          await writeAppLockEnabled(false);
         } catch {
           try {
-            await writeAppLockEnabled(true);
+            await setAppLockScreenPrivacyEnabled(true);
           } catch {
-            setError('storage-failed');
+            setError('privacy-failed');
             return false;
           }
 
-          setError('privacy-failed');
+          setError('storage-failed');
           return false;
         }
       }
