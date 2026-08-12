@@ -1,7 +1,6 @@
 import { requireOptionalNativeModule } from 'expo';
 import { Platform } from 'react-native';
-
-export type WeeklyReminderPrecision = 'exact' | 'inexact';
+import type { ReminderPrecision } from '@/domain/reminder/model';
 
 type ExactAlarmAccessNativeModule = {
   canScheduleExactAlarms(): boolean;
@@ -14,7 +13,7 @@ const exactAlarmAccessModule =
       )
     : null;
 
-export function getWeeklyReminderPrecision(): WeeklyReminderPrecision {
+export function getWeeklyReminderPrecision(): ReminderPrecision {
   if (Platform.OS !== 'android' || Number(Platform.Version) < 31) {
     return 'exact';
   }
