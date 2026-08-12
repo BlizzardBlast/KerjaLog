@@ -13,6 +13,7 @@ import { StepHeading } from '@/features/onboarding/components/StepHeading';
 import type { OnboardingStepProps } from '@/features/onboarding/components/types';
 import { reviewScheduleOptions } from '@/features/onboarding/options';
 import { useWeeklyReminderController } from '@/features/onboarding/useWeeklyReminderController';
+import { InexactReminderNotice } from '@/features/reminder/InexactReminderNotice';
 import { useI18n } from '@/i18n/I18nProvider';
 
 export function ReviewRhythmStep({
@@ -23,12 +24,10 @@ export function ReviewRhythmStep({
   const { theme } = useTheme();
   const { t } = useI18n();
   const reminder = useWeeklyReminderController(state, update);
-  const reminderIssue =
-    state.weeklyReminderEnabled && state.weeklyReminderPrecision === 'inexact'
-      ? 'inexact-alarm'
-      : reminder.feedback.issue === 'inexact-alarm'
-        ? null
-        : reminder.feedback.issue;
+  const reminderFailure =
+    reminder.feedback.issue && reminder.feedback.issue !== 'inexact-alarm'
+      ? reminder.feedback.issue
+      : null;
 
   return (
     <View style={styles.content}>
@@ -66,8 +65,12 @@ export function ReviewRhythmStep({
           onChange={reminder.setSchedule}
         />
 
-        {reminderIssue ? (
-          <NotificationPermissionNotice issue={reminderIssue} />
+        {state.weeklyReminderEnabled &&
+        state.weeklyReminderPrecision === 'inexact' ? (
+          <InexactReminderNotice />
+        ) : null}
+        {reminderFailure ? (
+          <NotificationPermissionNotice issue={reminderFailure} />
         ) : null}
       </View>
 
