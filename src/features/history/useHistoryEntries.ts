@@ -1,11 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import {
   EMPTY_WORK_ENTRY_HISTORY_FILTERS,
