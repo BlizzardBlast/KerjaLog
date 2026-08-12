@@ -1,3 +1,4 @@
+import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
 
 export interface WorkEntryByIdReader {
@@ -18,3 +19,16 @@ export interface WorkEntryWriter {
 }
 
 export interface WorkEntryRepository extends WorkEntryReader, WorkEntryWriter {}
+
+export interface WorkEntryDraftReader {
+  loadActive(): Promise<WorkEntryDraft | null>;
+}
+
+export interface WorkEntryDraftWriter {
+  saveActive(draft: WorkEntryDraft): Promise<void>;
+  clearActive(): Promise<void>;
+}
+
+export interface WorkEntryDraftRepository
+  extends WorkEntryDraftReader,
+    WorkEntryDraftWriter {}
