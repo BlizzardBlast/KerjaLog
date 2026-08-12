@@ -17,8 +17,8 @@ export function OnboardingAppLockSetting() {
   return (
     <View style={styles.container}>
       <SettingToggle
-        title={t('onboarding.review.appLockTitle')}
-        description={t('onboarding.review.appLockDescription')}
+        title={t('appLock.setting.title')}
+        description={t('appLock.setting.description')}
         value={enabled}
         disabled={isUpdating}
         onValueChange={handleValueChange}
