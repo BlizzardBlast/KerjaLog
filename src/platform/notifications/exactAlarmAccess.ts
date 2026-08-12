@@ -4,6 +4,7 @@ import type { ReminderPrecision } from '@/domain/reminder/model';
 
 type ExactAlarmAccessNativeModule = {
   canScheduleExactAlarms(): boolean;
+  openExactAlarmSettings(): void;
 };
 
 const exactAlarmAccessModule =
@@ -19,6 +20,14 @@ export function getWeeklyReminderPrecision(): ReminderPrecision {
     Number(Platform.Version),
     exactAlarmAccessModule?.canScheduleExactAlarms() ?? false,
   );
+}
+
+export async function openExactAlarmPermissionSettings(): Promise<void> {
+  if (Platform.OS !== 'android' || Number(Platform.Version) < 31) {
+    return;
+  }
+
+  exactAlarmAccessModule?.openExactAlarmSettings();
 }
 
 export function resolveWeeklyReminderPrecision(
