@@ -35,13 +35,22 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
   const { t } = useI18n();
   const scrollRef = useRef<ScrollView>(null);
   const allowNextRemovalRef = useRef(false);
+  const draftPersistenceSuspendedRef = useRef(false);
   const impactCopy = createImpactBuilderCopy(t);
   const flow = useLogFlow({
     impactCopy,
     initialDraft,
     onExit: () => router.replace('/home'),
     onSaved: async (entry) => {
-      await workEntryDraftRepository.clearActive();
+      draftPersistenceSuspendedRef.current = true;
+
+      try {
+        await workEntryDraftRepository.clearActive();
+      } catch (error) {
+        draftPersistenceSuspendedRef.current = false;
+        throw error;
+      }
+
       allowNextRemovalRef.current = true;
 
       try {
@@ -58,6 +67,7 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
   const draftPersistenceError = usePersistedLogDraft({
     draft: flow.draft,
     enabled: !flow.hasCommittedEntry,
+    suspendedRef: draftPersistenceSuspendedRef,
   });
 
   useLogDraftNavigationGuard({
@@ -65,10 +75,13 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
     currentStep: flow.currentStep,
     onInternalBack: flow.goBack,
     onDiscard: async () => {
+      draftPersistenceSuspendedRef.current = true;
+
       try {
         await workEntryDraftRepository.clearActive();
         return true;
       } catch {
+        draftPersistenceSuspendedRef.current = false;
         Alert.alert(
           t('log.discard.clearErrorTitle'),
           t('log.discard.clearErrorDescription'),
