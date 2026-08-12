@@ -51,6 +51,7 @@ describe('onboarding foundation', () => {
       hour: 16,
       minute: 30,
     });
+    expect(DEFAULT_ONBOARDING_STATE.weeklyReminderPrecision).toBeNull();
     expect(DEFAULT_ONBOARDING_STATE).not.toHaveProperty('appLockPreferred');
     expect(ONBOARDING_STEP_ORDER).toContain(
       DEFAULT_ONBOARDING_STATE.currentStep,
