@@ -134,7 +134,9 @@ describe('useAppLockController', () => {
 
     await waitFor(() => expect(result.current.isHydrated).toBe(true));
     jest.clearAllMocks();
-    writeAppLockEnabledMock.mockRejectedValueOnce(new Error('storage unavailable'));
+    writeAppLockEnabledMock.mockRejectedValueOnce(
+      new Error('storage unavailable'),
+    );
 
     await act(async () => {
       await expect(result.current.setEnabled(false)).resolves.toBe(false);
