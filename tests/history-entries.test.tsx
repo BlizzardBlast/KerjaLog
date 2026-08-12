@@ -1,4 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import type {
+  WorkEntryHistoryCursor,
+  WorkEntryHistoryPage,
+} from '@/domain/entry/history';
 import type { WorkEntry } from '@/domain/entry/model';
 import type { WorkEntryHistoryReader } from '@/domain/entry/repository';
 import { useHistoryEntries } from '@/features/history/useHistoryEntries';
@@ -31,13 +35,50 @@ const entry: WorkEntry = {
   updatedAt: '2026-08-06T08:01:00.000Z',
 };
 
+const secondEntry: WorkEntry = {
+  ...entry,
+  id: 'entry-2',
+  title: 'Second entry',
+  occurredAt: '2026-08-05T08:00:00.000Z',
+  createdAt: '2026-08-05T08:01:00.000Z',
+  updatedAt: '2026-08-05T08:01:00.000Z',
+};
+
+const cursor: WorkEntryHistoryCursor = {
+  occurredAt: entry.occurredAt,
+  createdAt: entry.createdAt,
+  id: entry.id,
+};
+
+function page(
+  entries: WorkEntry[],
+  nextCursor: WorkEntryHistoryCursor | null = null,
+): WorkEntryHistoryPage {
+  return { entries, nextCursor };
+}
+
 function createRepository(): jest.Mocked<WorkEntryHistoryReader> {
   return {
-    findHistory: jest.fn().mockResolvedValue([entry]),
+    findHistory: jest.fn().mockResolvedValue(page([entry])),
   };
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+
+  return { promise, resolve, reject };
+}
+
 describe('History entries controller', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   test('loads History through the narrow read capability', async () => {
     const repository = createRepository();
     const { result } = await renderHook(() => useHistoryEntries(repository));
@@ -51,6 +92,8 @@ describe('History entries controller', () => {
         hasEvidence: false,
         reviewReadyOnly: false,
       },
+      cursor: null,
+      limit: 50,
     });
     expect(result.current.state.entries).toEqual([entry]);
   });
@@ -75,15 +118,102 @@ describe('History entries controller', () => {
           hasEvidence: true,
           reviewReadyOnly: true,
         },
+        cursor: null,
+        limit: 50,
       }),
     );
+  });
+
+  test('debounces search before querying the repository', async () => {
+    const repository = createRepository();
+    const { result } = await renderHook(() => useHistoryEntries(repository));
+
+    await waitFor(() => expect(result.current.state.status).toBe('loaded'));
+    jest.useFakeTimers();
+
+    await act(async () => {
+      result.current.setSearchText('finance');
+    });
+
+    expect(repository.findHistory).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      jest.advanceTimersByTime(249);
+    });
+    expect(repository.findHistory).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+    });
+    jest.useRealTimers();
+
+    await waitFor(() =>
+      expect(repository.findHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ searchText: 'finance' }),
+      ),
+    );
+  });
+
+  test('ignores an older request that resolves after a newer query', async () => {
+    const first = deferred<WorkEntryHistoryPage>();
+    const second = deferred<WorkEntryHistoryPage>();
+    const repository: jest.Mocked<WorkEntryHistoryReader> = {
+      findHistory: jest
+        .fn()
+        .mockReturnValueOnce(first.promise)
+        .mockReturnValueOnce(second.promise),
+    };
+    const { result } = await renderHook(() => useHistoryEntries(repository));
+
+    await act(async () => {
+      result.current.setEntryType('problem_solved');
+    });
+
+    await waitFor(() => expect(repository.findHistory).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      second.resolve(page([secondEntry]));
+    });
+    await waitFor(() =>
+      expect(result.current.state.entries).toEqual([secondEntry]),
+    );
+
+    await act(async () => {
+      first.resolve(page([entry]));
+    });
+
+    expect(result.current.state.entries).toEqual([secondEntry]);
+  });
+
+  test('loads the next cursor page and appends unique entries', async () => {
+    const repository = createRepository();
+    repository.findHistory
+      .mockResolvedValueOnce(page([entry], cursor))
+      .mockResolvedValueOnce(page([secondEntry]));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
+
+    await waitFor(() => expect(result.current.state.status).toBe('loaded'));
+
+    await act(async () => {
+      result.current.loadMore();
+    });
+
+    await waitFor(() =>
+      expect(result.current.state.entries).toEqual([entry, secondEntry]),
+    );
+    expect(repository.findHistory).toHaveBeenLastCalledWith(
+      expect.objectContaining({ cursor }),
+    );
+    expect(
+      result.current.state.status === 'loaded' && result.current.state.hasMore,
+    ).toBe(false);
   });
 
   test('surfaces repository failures and retries explicitly', async () => {
     const repository = createRepository();
     repository.findHistory
       .mockRejectedValueOnce(new Error('database unavailable'))
-      .mockResolvedValueOnce([entry]);
+      .mockResolvedValueOnce(page([entry]));
     const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('error'));
