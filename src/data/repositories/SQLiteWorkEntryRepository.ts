@@ -3,7 +3,7 @@ import { getDatabase } from '@/data/database';
 import {
   withKeyedDatabaseAccess,
   withKeyedTransaction,
-} from '@/data/keyedTransaction';
+} from '@/data/keyedDatabaseAccess';
 import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
