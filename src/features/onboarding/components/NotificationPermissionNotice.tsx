@@ -22,10 +22,10 @@ const issueCopy: Record<NotificationReminderIssue, IssueCopy> = {
     titleKey: 'onboarding.review.notificationPermissionTitle',
     descriptionKey: 'onboarding.review.notificationPermissionDescription',
   },
-  'exact-alarm': {
-    titleKey: 'onboarding.review.exactAlarmPermissionTitle',
-    descriptionKey: 'onboarding.review.exactAlarmPermissionDescription',
-    actionKey: 'onboarding.review.exactAlarmOpenSettings',
+  'inexact-alarm': {
+    titleKey: 'onboarding.review.inexactAlarmTitle',
+    descriptionKey: 'onboarding.review.inexactAlarmDescription',
+    actionKey: 'onboarding.review.inexactAlarmOpenSettings',
   },
   runtime: {
     titleKey: 'onboarding.review.notificationSetupTitle',
@@ -45,14 +45,14 @@ export function NotificationPermissionNotice({
   const { theme } = useTheme();
   const { t } = useI18n();
   const copy = issueCopy[issue];
-  const canOpenSettings = issue === 'permission' || issue === 'exact-alarm';
+  const canOpenSettings = issue === 'permission' || issue === 'inexact-alarm';
   const entering = FadeIn.duration(motion.duration.feedback).reduceMotion(
     ReduceMotion.System,
   );
 
   const handleOpenSettings = () => {
     const settingsOperation =
-      issue === 'exact-alarm'
+      issue === 'inexact-alarm'
         ? openExactAlarmPermissionSettings()
         : Linking.openSettings();
 
@@ -61,7 +61,7 @@ export function NotificationPermissionNotice({
 
   return (
     <Animated.View
-      accessibilityRole="alert"
+      accessibilityRole={issue === 'inexact-alarm' ? 'text' : 'alert'}
       entering={entering}
       style={[
         styles.card,
