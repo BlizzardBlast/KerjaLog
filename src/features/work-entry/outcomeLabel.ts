@@ -1,6 +1,6 @@
 import type { OutcomeType } from '@/domain/entry/model';
-import { outcomeOptions } from '@/features/work-entry/model';
-import type { Translate } from '@/features/work-entry/components/LogStepFrame';
+import type { Translate } from '@/features/work-entry/components/logStepTypes';
+import { outcomeOptions } from '@/features/work-entry/options';
 
 export function getOutcomeLabel(
   outcomeType: OutcomeType,
