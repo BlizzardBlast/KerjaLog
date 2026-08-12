@@ -49,6 +49,7 @@ export function HistoryFilterBar({
           }}
         />
         <FilterChip
+          expanded={showEntryTypes}
           label={t('history.filters.entryType')}
           selected={filters.entryType !== null}
           onPress={() => setShowEntryTypes((current) => !current)}
@@ -91,18 +92,24 @@ export function HistoryFilterBar({
 }
 
 type FilterChipProps = {
+  expanded?: boolean;
   label: string;
   selected: boolean;
   onPress: () => void;
 };
 
-function FilterChip({ label, selected, onPress }: FilterChipProps) {
+function FilterChip({
+  expanded,
+  label,
+  selected,
+  onPress,
+}: FilterChipProps) {
   const { theme } = useTheme();
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ selected }}
+      accessibilityState={{ expanded, selected }}
       onPress={onPress}
       style={({ pressed }) => [
         styles.chip,
