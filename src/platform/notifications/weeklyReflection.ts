@@ -1,7 +1,9 @@
 import { isRunningInExpoGo } from 'expo';
 import type { NotificationPermissionsStatus } from 'expo-notifications';
 import { Linking, Platform } from 'react-native';
+import type { ReminderPrecision } from '@/domain/reminder/model';
 import type { WeeklyReminderSchedule } from '@/features/onboarding/model';
+import { getWeeklyReminderPrecision } from '@/platform/notifications/exactAlarmAccess';
 
 const WEEKLY_REFLECTION_CHANNEL_ID = 'weekly-reflection';
 const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
@@ -12,13 +14,14 @@ const ANDROID_EXACT_ALARM_MIN_API = 31;
 type NotificationsModule = typeof import('expo-notifications');
 
 export type WeeklyReflectionEnableResult =
-  | 'enabled'
+  | 'enabled-exact'
+  | 'enabled-inexact'
   | 'permission-denied'
-  | 'exact-alarm-permission-required'
   | 'unsupported-runtime';
 
 export type WeeklyReflectionNotificationStatus =
-  | 'enabled'
+  | 'enabled-exact'
+  | 'enabled-inexact'
   | 'disabled'
   | 'unsupported-runtime';
 
@@ -62,15 +65,10 @@ function requiresExactAlarmSpecialAccess(): boolean {
   );
 }
 
-function isExactAlarmPermissionError(error: unknown): boolean {
-  const message =
-    error instanceof Error
-      ? `${error.name}: ${error.message}`
-      : typeof error === 'object' && error !== null && 'message' in error
-        ? String(error.message)
-        : String(error);
-
-  return /SCHEDULE_EXACT_ALARM|USE_EXACT_ALARM|exact alarm/i.test(message);
+function enabledResultForPrecision(
+  precision: ReminderPrecision,
+): Extract<WeeklyReflectionEnableResult, `enabled-${string}`> {
+  return precision === 'exact' ? 'enabled-exact' : 'enabled-inexact';
 }
 
 async function ensureAndroidNotificationChannel(
@@ -150,7 +148,11 @@ export async function getWeeklyReflectionNotificationStatus(): Promise<WeeklyRef
     (request) => request.identifier === WEEKLY_REFLECTION_NOTIFICATION_ID,
   );
 
-  return isScheduled ? 'enabled' : 'disabled';
+  if (!isScheduled) {
+    return 'disabled';
+  }
+
+  return enabledResultForPrecision(getWeeklyReminderPrecision());
 }
 
 export async function openExactAlarmPermissionSettings(): Promise<void> {
@@ -188,34 +190,27 @@ export async function enableWeeklyReflectionNotification({
     WEEKLY_REFLECTION_NOTIFICATION_ID,
   );
 
-  try {
-    await notifications.scheduleNotificationAsync({
-      identifier: WEEKLY_REFLECTION_NOTIFICATION_ID,
-      content: {
-        title: copy.title,
-        body: copy.body,
-      },
-      trigger: {
-        type: notifications.SchedulableTriggerInputTypes.WEEKLY,
-        weekday: schedule.weekday,
-        hour: schedule.hour,
-        minute: schedule.minute,
-        channelId:
-          Platform.OS === 'android' ? WEEKLY_REFLECTION_CHANNEL_ID : undefined,
-      },
-    });
-  } catch (error) {
-    if (
-      requiresExactAlarmSpecialAccess() &&
-      isExactAlarmPermissionError(error)
-    ) {
-      return 'exact-alarm-permission-required';
-    }
+  await notifications.scheduleNotificationAsync({
+    identifier: WEEKLY_REFLECTION_NOTIFICATION_ID,
+    content: {
+      title: copy.title,
+      body: copy.body,
+    },
+    trigger: {
+      type: notifications.SchedulableTriggerInputTypes.WEEKLY,
+      weekday: schedule.weekday,
+      hour: schedule.hour,
+      minute: schedule.minute,
+      channelId:
+        Platform.OS === 'android' ? WEEKLY_REFLECTION_CHANNEL_ID : undefined,
+    },
+  });
 
-    throw error;
-  }
-
-  return 'enabled';
+  // Expo SDK 57's Android scheduler checks canScheduleExactAlarms() and falls
+  // back to setAndAllowWhileIdle() when exact access is unavailable. There is
+  // no separate inexact-alarm permission to request; report the mode so the UI
+  // can tell the user when delivery is approximate instead of exact.
+  return enabledResultForPrecision(getWeeklyReminderPrecision());
 }
 
 export async function disableWeeklyReflectionNotification(): Promise<void> {
