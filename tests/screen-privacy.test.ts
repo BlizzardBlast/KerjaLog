@@ -18,7 +18,9 @@ const disableIosPrivacyMock = jest.mocked(
 const preventScreenCaptureMock = jest.mocked(
   ScreenCapture.preventScreenCaptureAsync,
 );
-const allowScreenCaptureMock = jest.mocked(ScreenCapture.allowScreenCaptureAsync);
+const allowScreenCaptureMock = jest.mocked(
+  ScreenCapture.allowScreenCaptureAsync,
+);
 
 const originalPlatform = Platform.OS;
 
