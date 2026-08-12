@@ -6,7 +6,7 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { motion } from '@/design-system/tokens/motion';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
-import { openExactAlarmPermissionSettings } from '@/platform/notifications/weeklyReflection';
+import { openExactAlarmPermissionSettings } from '@/platform/notifications/exactAlarmAccess';
 import { EMPTY_FUNCTION } from '@/shared/utils/function';
 
 export function InexactReminderNotice() {
