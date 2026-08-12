@@ -42,7 +42,7 @@ export async function saveWorkEntry(
   const hasEvidence = hasUsefulEvidence(evidenceTypes, evidenceDetail);
   const now = new Date().toISOString();
 
-  return repository.create({
+  return repository.commit({
     type: entryTypeByIntent[draft.intent],
     title: buildEntryTitle(rawNote),
     rawNote,
