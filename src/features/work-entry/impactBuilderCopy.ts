@@ -1,5 +1,5 @@
 import type { ImpactBuilderCopy } from '@/domain/entry/impact';
-import type { Translate } from '@/features/work-entry/components/LogStepFrame';
+import type { Translate } from '@/features/work-entry/components/logStepTypes';
 
 export function createImpactBuilderCopy(t: Translate): ImpactBuilderCopy {
   return {
