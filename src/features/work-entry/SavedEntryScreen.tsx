@@ -27,7 +27,7 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useI18n();
-  const state = useWorkEntry(id);
+  const { state, retry } = useWorkEntry(id);
 
   if (state.status === 'loading') {
     return (
@@ -43,7 +43,7 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
     );
   }
 
-  if (state.status === 'not-found' || state.status === 'error') {
+  if (state.status === 'not-found') {
     return (
       <SafeAreaView
         edges={['top', 'bottom']}
@@ -58,6 +58,40 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
         <Button onPress={() => router.replace('/home')}>
           {t('log.saved.backHome')}
         </Button>
+      </SafeAreaView>
+    );
+  }
+
+  if (state.status === 'error') {
+    return (
+      <SafeAreaView
+        edges={['top', 'bottom']}
+        style={[styles.centered, { backgroundColor: theme.colors.surface }]}
+      >
+        <Text variant="title" style={styles.centeredText}>
+          {t('log.saved.errorTitle')}
+        </Text>
+        <Text
+          role="alert"
+          accessibilityLiveRegion="polite"
+          variant="body"
+          color="textMuted"
+          style={styles.centeredText}
+        >
+          {t('log.saved.errorDescription')}
+        </Text>
+        <View style={styles.errorActions}>
+          <Button fullWidth onPress={retry}>
+            {t('log.saved.retry')}
+          </Button>
+          <Button
+            fullWidth
+            onPress={() => router.replace('/home')}
+            variant="secondary"
+          >
+            {t('log.saved.backHome')}
+          </Button>
+        </View>
       </SafeAreaView>
     );
   }
@@ -132,6 +166,12 @@ const styles = StyleSheet.create({
   },
   centeredText: {
     textAlign: 'center',
+  },
+  errorActions: {
+    alignSelf: 'stretch',
+    gap: spacing[2],
+    maxWidth: 360,
+    width: '100%',
   },
   content: {
     gap: spacing[4],
