@@ -23,9 +23,17 @@ export function usePersistedLogDraft({
   const [hasPersistenceError, setHasPersistenceError] = useState(false);
   const latestDraftRef = useRef(draft);
   const enabledRef = useRef(enabled);
+  const mountedRef = useRef(true);
 
   latestDraftRef.current = draft;
   enabledRef.current = enabled;
+
+  useEffect(
+    () => () => {
+      mountedRef.current = false;
+    },
+    [],
+  );
 
   const persistDraft = useCallback(
     async (draftToPersist: WorkEntryDraft) => {
@@ -39,9 +47,14 @@ export function usePersistedLogDraft({
         } else {
           await repository.clearActive();
         }
-        setHasPersistenceError(false);
+
+        if (mountedRef.current) {
+          setHasPersistenceError(false);
+        }
       } catch {
-        setHasPersistenceError(true);
+        if (mountedRef.current) {
+          setHasPersistenceError(true);
+        }
       }
     },
     [repository],
