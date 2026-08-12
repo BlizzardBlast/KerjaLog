@@ -87,6 +87,27 @@ describe('usePersistedLogDraft', () => {
     expect(repository.clearActive).not.toHaveBeenCalled();
   });
 
+  test('synchronously suspends queued persistence during commit or discard finalization', async () => {
+    const repository = createRepository();
+    const suspendedRef = { current: true };
+    await renderHook(() =>
+      usePersistedLogDraft({
+        draft,
+        enabled: true,
+        suspendedRef,
+        repository,
+      }),
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(350);
+      await Promise.resolve();
+    });
+
+    expect(repository.saveActive).not.toHaveBeenCalled();
+    expect(repository.clearActive).not.toHaveBeenCalled();
+  });
+
   test('surfaces encrypted draft persistence failures', async () => {
     const repository = createRepository();
     repository.saveActive.mockRejectedValueOnce(new Error('disk unavailable'));
