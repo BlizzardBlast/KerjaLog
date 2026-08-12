@@ -6,14 +6,17 @@ export type HistorySection = {
   data: WorkEntry[];
 };
 
+/**
+ * Groups entries that are already ordered newest-first by the repository.
+ * Keeping ordering in the data layer avoids duplicating pagination semantics in UI code.
+ */
 export function groupHistoryEntries(
-  entries: WorkEntry[],
+  entries: readonly WorkEntry[],
   locale: string,
 ): HistorySection[] {
-  const sortedEntries = [...entries].sort(compareEntriesNewestFirst);
   const sections = new Map<string, HistorySection>();
 
-  for (const entry of sortedEntries) {
+  for (const entry of entries) {
     const occurredAt = new Date(entry.occurredAt);
     const key = `${occurredAt.getFullYear()}-${String(
       occurredAt.getMonth() + 1,
@@ -46,17 +49,4 @@ export function formatHistoryEntryDate(
     day: 'numeric',
     month: 'short',
   }).format(new Date(occurredAt));
-}
-
-function compareEntriesNewestFirst(left: WorkEntry, right: WorkEntry): number {
-  const occurredDifference =
-    new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime();
-
-  if (occurredDifference !== 0) {
-    return occurredDifference;
-  }
-
-  return (
-    new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-  );
 }
