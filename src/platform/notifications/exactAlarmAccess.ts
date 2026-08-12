@@ -4,7 +4,7 @@ import type { ReminderPrecision } from '@/domain/reminder/model';
 
 type ExactAlarmAccessNativeModule = {
   canScheduleExactAlarms(): boolean;
-  openExactAlarmSettings(): void;
+  openExactAlarmSettings(): boolean;
 };
 
 const exactAlarmAccessModule =
