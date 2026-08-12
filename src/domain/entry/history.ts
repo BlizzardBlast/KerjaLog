@@ -26,8 +26,6 @@ export function hasWorkEntryHistoryFilters(
   filters: WorkEntryHistoryFilters,
 ): boolean {
   return (
-    filters.entryType !== null ||
-    filters.hasEvidence ||
-    filters.reviewReadyOnly
+    filters.entryType !== null || filters.hasEvidence || filters.reviewReadyOnly
   );
 }
