@@ -82,7 +82,9 @@ describe('useLogDraftNavigationGuard', () => {
     expect(dispatch).not.toHaveBeenCalled();
 
     const buttons = alertSpy.mock.calls[0]?.[2];
-    const discardButton = buttons?.find((button) => button.text === copy.discard);
+    const discardButton = buttons?.find(
+      (button) => button.text === copy.discard,
+    );
     act(() => {
       discardButton?.onPress?.();
     });
