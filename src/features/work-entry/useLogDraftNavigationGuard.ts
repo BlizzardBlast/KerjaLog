@@ -17,6 +17,7 @@ type UseLogDraftNavigationGuardOptions = {
   hasUnsavedDraft: boolean;
   currentStep: number;
   onInternalBack: () => void;
+  onDiscard: () => Promise<boolean>;
   allowNextRemovalRef: MutableFlag;
   copy: LogDraftNavigationCopy;
 };
@@ -25,6 +26,7 @@ export function useLogDraftNavigationGuard({
   hasUnsavedDraft,
   currentStep,
   onInternalBack,
+  onDiscard,
   allowNextRemovalRef,
   copy,
 }: UseLogDraftNavigationGuardOptions): void {
@@ -50,7 +52,13 @@ export function useLogDraftNavigationGuard({
       {
         text: copy.discard,
         style: 'destructive',
-        onPress: () => navigation.dispatch(data.action),
+        onPress: () => {
+          void onDiscard().then((discarded) => {
+            if (discarded) {
+              navigation.dispatch(data.action);
+            }
+          });
+        },
       },
     ]);
   });
