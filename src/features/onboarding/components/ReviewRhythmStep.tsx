@@ -5,6 +5,7 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
 import { NotificationPermissionNotice } from '@/features/onboarding/components/NotificationPermissionNotice';
+import { OnboardingAppLockSetting } from '@/features/onboarding/components/OnboardingAppLockSetting';
 import { OptionSection } from '@/features/onboarding/components/OptionSection';
 import { ReminderScheduleCard } from '@/features/onboarding/components/ReminderScheduleCard';
 import { SettingToggle } from '@/features/onboarding/components/SettingToggle';
@@ -64,11 +65,9 @@ export function ReviewRhythmStep({
         ) : null}
       </View>
 
-      <SettingToggle
-        title={t('onboarding.review.appLockTitle')}
-        description={t('onboarding.review.appLockDescription')}
-        value={state.appLockPreferred}
-        onValueChange={(appLockPreferred) => update({ appLockPreferred })}
+      <OnboardingAppLockSetting
+        preferred={state.appLockPreferred}
+        onPreferenceChange={(appLockPreferred) => update({ appLockPreferred })}
       />
 
       <InfoCard
