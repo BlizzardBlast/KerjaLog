@@ -21,7 +21,7 @@ const ONBOARDING_STORAGE_KEY = '@kerjalog/onboarding/v1';
  * progress. Never add free-form work content, employer identifiers, salary,
  * feedback, project names, evidence, attachments, or generated career text to
  * this state. Those belong behind KerjaLog's encrypted SQLite persistence
- * boundary when product data storage is introduced.
+ * boundary.
  */
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -67,10 +67,6 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
     )
       ? value.weeklyReminderSchedule
       : DEFAULT_WEEKLY_REMINDER_SCHEDULE,
-    appLockPreferred:
-      typeof value.appLockPreferred === 'boolean'
-        ? value.appLockPreferred
-        : DEFAULT_ONBOARDING_STATE.appLockPreferred,
   };
 
   return {
