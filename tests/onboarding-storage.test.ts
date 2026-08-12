@@ -24,7 +24,6 @@ const COMPLETE_STATE: OnboardingState = {
     hour: 18,
     minute: 15,
   },
-  appLockPreferred: true,
 };
 
 const getItemMock = jest.mocked(AsyncStorage.getItem);
@@ -40,6 +39,17 @@ describe('onboarding storage', () => {
     getItemMock.mockResolvedValueOnce(JSON.stringify(COMPLETE_STATE));
 
     await expect(loadOnboardingState()).resolves.toEqual(COMPLETE_STATE);
+  });
+
+  test('ignores the legacy duplicated App Lock preference', async () => {
+    getItemMock.mockResolvedValueOnce(
+      JSON.stringify({ ...COMPLETE_STATE, appLockPreferred: true }),
+    );
+
+    const state = await loadOnboardingState();
+
+    expect(state).toEqual(COMPLETE_STATE);
+    expect(state).not.toHaveProperty('appLockPreferred');
   });
 
   test('defaults a missing reminder schedule for older v1 state', async () => {
