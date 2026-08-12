@@ -1,6 +1,11 @@
 export const logEn = {
   'log.back': 'Back',
   'log.step': 'Step {{current}} of {{total}}',
+  'log.discard.title': 'Discard this draft?',
+  'log.discard.description':
+    'This work entry has not been saved yet. If you leave now, your draft will be lost.',
+  'log.discard.keepEditing': 'Keep editing',
+  'log.discard.confirm': 'Discard draft',
   'log.capture.eyebrow': 'Quick capture',
   'log.capture.title': 'What happened at work?',
   'log.capture.description': 'Choose the closest match. Small work counts.',
@@ -105,7 +110,11 @@ export const logEn = {
   'log.saved.loading': 'Loading your entry…',
   'log.saved.notFoundTitle': 'Entry not found',
   'log.saved.notFoundDescription':
-    'This work entry could not be loaded from this device.',
+    'This work entry is no longer available on this device.',
+  'log.saved.errorTitle': 'Couldn’t load this entry',
+  'log.saved.errorDescription':
+    'KerjaLog could not read this entry from encrypted storage. Please try again.',
+  'log.saved.retry': 'Try again',
   'log.saved.backHome': 'Back to Home',
   'log.saved.private': 'Private by default',
   'log.saved.quickNote': 'Quick note',
@@ -122,6 +131,11 @@ export type LogTranslationKey = keyof typeof logEn;
 export const logId: Record<LogTranslationKey, string> = {
   'log.back': 'Kembali',
   'log.step': 'Langkah {{current}} dari {{total}}',
+  'log.discard.title': 'Buang draf ini?',
+  'log.discard.description':
+    'Catatan kerja ini belum disimpan. Jika Anda keluar sekarang, draf ini akan hilang.',
+  'log.discard.keepEditing': 'Lanjut mengedit',
+  'log.discard.confirm': 'Buang draf',
   'log.capture.eyebrow': 'Catat cepat',
   'log.capture.title': 'Apa yang terjadi di pekerjaan?',
   'log.capture.description':
@@ -227,7 +241,11 @@ export const logId: Record<LogTranslationKey, string> = {
   'log.saved.loading': 'Memuat catatan Anda…',
   'log.saved.notFoundTitle': 'Catatan tidak ditemukan',
   'log.saved.notFoundDescription':
-    'Catatan kerja ini tidak dapat dimuat dari perangkat ini.',
+    'Catatan kerja ini sudah tidak tersedia di perangkat ini.',
+  'log.saved.errorTitle': 'Catatan tidak dapat dimuat',
+  'log.saved.errorDescription':
+    'KerjaLog tidak dapat membaca catatan ini dari penyimpanan terenkripsi. Silakan coba lagi.',
+  'log.saved.retry': 'Coba lagi',
   'log.saved.backHome': 'Kembali ke Beranda',
   'log.saved.private': 'Privat secara default',
   'log.saved.quickNote': 'Catatan cepat',
