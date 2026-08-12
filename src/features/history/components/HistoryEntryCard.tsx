@@ -2,11 +2,7 @@ import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import {
-  radii,
-  spacing,
-  type ThemeColors,
-} from '@/design-system/tokens/theme';
+import { radii, spacing, type ThemeColors } from '@/design-system/tokens/theme';
 import type { EntryStatus, WorkEntry } from '@/domain/entry/model';
 import {
   getHistoryEntryStatusKey,
