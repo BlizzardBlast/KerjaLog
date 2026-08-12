@@ -10,11 +10,10 @@ export const reminderEn = {
   'onboarding.review.reminderTimeAccessibility': 'Change reflection time',
   'onboarding.review.reminderDayPickerTitle': 'Reflection day',
   'onboarding.review.reminderTimePickerTitle': 'Reflection time',
-  'onboarding.review.exactAlarmPermissionTitle':
-    'Precise reminder access needed',
-  'onboarding.review.exactAlarmPermissionDescription':
-    'To remind you at the exact time you selected, allow KerjaLog to set alarms and reminders.',
-  'onboarding.review.exactAlarmOpenSettings': 'Open Alarms & reminders',
+  'onboarding.review.inexactAlarmTitle': 'Using an approximate reminder time',
+  'onboarding.review.inexactAlarmDescription':
+    'KerjaLog will still remind you around the time you chose. Allow Alarms & reminders if you want the reminder to arrive at the exact time.',
+  'onboarding.review.inexactAlarmOpenSettings': 'Use exact reminder time',
   'weekday.sunday': 'Sunday',
   'weekday.monday': 'Monday',
   'weekday.tuesday': 'Tuesday',
@@ -39,11 +38,11 @@ export const reminderId: Record<ReminderTranslationKey, string> = {
   'onboarding.review.reminderTimeAccessibility': 'Ubah waktu refleksi',
   'onboarding.review.reminderDayPickerTitle': 'Hari refleksi',
   'onboarding.review.reminderTimePickerTitle': 'Waktu refleksi',
-  'onboarding.review.exactAlarmPermissionTitle':
-    'Akses pengingat tepat waktu diperlukan',
-  'onboarding.review.exactAlarmPermissionDescription':
-    'Agar KerjaLog dapat mengingatkan tepat pada waktu yang Anda pilih, izinkan KerjaLog mengatur alarm dan pengingat.',
-  'onboarding.review.exactAlarmOpenSettings': 'Buka Alarm & pengingat',
+  'onboarding.review.inexactAlarmTitle':
+    'Menggunakan waktu pengingat perkiraan',
+  'onboarding.review.inexactAlarmDescription':
+    'KerjaLog tetap akan mengingatkan sekitar waktu yang Anda pilih. Izinkan Alarm & pengingat jika Anda ingin pengingat muncul tepat pada waktunya.',
+  'onboarding.review.inexactAlarmOpenSettings': 'Gunakan waktu pengingat tepat',
   'weekday.sunday': 'Minggu',
   'weekday.monday': 'Senin',
   'weekday.tuesday': 'Selasa',
