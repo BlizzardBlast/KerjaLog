@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { HISTORY_SEARCH_MAX_LENGTH } from '@/domain/entry/history';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type HistorySearchFieldProps = {
@@ -32,6 +33,7 @@ export function HistorySearchField({
           accessibilityLabel={t('history.search.label')}
           autoCapitalize="none"
           autoCorrect={false}
+          maxLength={HISTORY_SEARCH_MAX_LENGTH}
           onChangeText={onChangeText}
           placeholder={t('history.search.placeholder')}
           placeholderTextColor={theme.colors.textMuted}
