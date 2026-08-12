@@ -17,7 +17,9 @@ export async function setAppLockScreenPrivacyEnabled(
 
   if (Platform.OS === 'android') {
     if (enabled) {
-      await ScreenCapture.preventScreenCaptureAsync(APP_LOCK_SCREEN_CAPTURE_KEY);
+      await ScreenCapture.preventScreenCaptureAsync(
+        APP_LOCK_SCREEN_CAPTURE_KEY,
+      );
     } else {
       await ScreenCapture.allowScreenCaptureAsync(APP_LOCK_SCREEN_CAPTURE_KEY);
     }
