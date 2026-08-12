@@ -58,6 +58,7 @@
     "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
     "compiler:check": "react-compiler-healthcheck",
+    "schema:check": "node scripts/verify-initial-schema.mjs",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -66,7 +67,7 @@
     "native:check": "expo prebuild --clean --no-install && node scripts/verify-native-config.js && cd android && ./gradlew :app:compileDebugKotlin --no-daemon",
     "export:android": "expo export --platform android --output-dir dist/android",
     "export:ios": "expo export --platform ios --output-dir dist/ios",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm run schema:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios"
   },
   "jest": {
     "preset": "jest-expo",
