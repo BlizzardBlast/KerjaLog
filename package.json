@@ -21,6 +21,7 @@
     "expo-local-authentication": "~57.0.2",
     "expo-notifications": "~57.0.10",
     "expo-router": "~57.0.12",
+    "expo-screen-capture": "~56.0.4",
     "expo-secure-store": "~57.0.1",
     "expo-splash-screen": "~57.0.6",
     "expo-sqlite": "~57.0.1",
@@ -54,14 +55,16 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
+    "compiler:check": "pnpm dlx react-compiler-healthcheck@1.0.0",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci",
     "expo:doctor": "pnpm dlx expo-doctor@1.20.1",
+    "native:check": "expo prebuild --clean --no-install && node scripts/verify-native-config.js",
     "export:android": "expo export --platform android --output-dir dist/android",
     "export:ios": "expo export --platform ios --output-dir dist/ios",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:ci && pnpm run expo:doctor && pnpm run export:android && pnpm run export:ios"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios"
   },
   "jest": {
     "preset": "jest-expo",
