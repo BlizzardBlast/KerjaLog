@@ -1,4 +1,9 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { useAppLockSettingControl } from '@/features/app-lock/useAppLockSettingControl';
 import { OnboardingAppLockSetting } from '@/features/onboarding/components/OnboardingAppLockSetting';
