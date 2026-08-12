@@ -102,13 +102,16 @@ describe('History work entry repository', () => {
 
     const [sql, parameters] = getAllAsync.mock.calls[0] ?? [];
     expect(sql).toEqual(expect.stringContaining('MATCH $searchQuery'));
-    expect(sql).toEqual(expect.stringContaining('work_entries.type = $entryType'));
+    expect(sql).toEqual(
+      expect.stringContaining('work_entries.type = $entryType'),
+    );
     expect(sql).toEqual(expect.stringContaining('history_evidence.entry_id'));
-    expect(sql).toEqual(expect.stringContaining("work_entries.status = 'review_ready'"));
+    expect(sql).toEqual(
+      expect.stringContaining("work_entries.status = 'review_ready'"),
+    );
     expect(sql).not.toContain(query.searchText);
     expect(parameters).toEqual({
-      $searchQuery:
-        '"Finance"* AND "closing"* AND "OR"* AND "1"* AND "1"*',
+      $searchQuery: '"Finance"* AND "closing"* AND "OR"* AND "1"* AND "1"*',
       $entryType: 'contribution',
     });
   });
