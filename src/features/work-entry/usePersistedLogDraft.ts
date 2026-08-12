@@ -9,15 +9,21 @@ import type { WorkEntryDraftWriter } from '@/domain/entry/repository';
 
 const DRAFT_SAVE_DEBOUNCE_MS = 350;
 
+type MutableFlag = {
+  current: boolean;
+};
+
 type UsePersistedLogDraftOptions = {
   draft: WorkEntryDraft;
   enabled: boolean;
+  suspendedRef?: MutableFlag;
   repository?: WorkEntryDraftWriter;
 };
 
 export function usePersistedLogDraft({
   draft,
   enabled,
+  suspendedRef,
   repository = workEntryDraftRepository,
 }: UsePersistedLogDraftOptions): boolean {
   const [hasPersistenceError, setHasPersistenceError] = useState(false);
@@ -38,7 +44,7 @@ export function usePersistedLogDraft({
 
   const persistDraft = useCallback(
     async (draftToPersist: WorkEntryDraft) => {
-      if (!enabledRef.current) {
+      if (!enabledRef.current || suspendedRef?.current) {
         return;
       }
 
@@ -58,11 +64,11 @@ export function usePersistedLogDraft({
         }
       }
     },
-    [repository],
+    [repository, suspendedRef],
   );
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || suspendedRef?.current) {
       return;
     }
 
@@ -71,17 +77,21 @@ export function usePersistedLogDraft({
     }, DRAFT_SAVE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
-  }, [draft, enabled, persistDraft]);
+  }, [draft, enabled, persistDraft, suspendedRef]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
-      if (nextState !== 'active' && enabledRef.current) {
+      if (
+        nextState !== 'active' &&
+        enabledRef.current &&
+        !suspendedRef?.current
+      ) {
         void persistDraft(latestDraftRef.current);
       }
     });
 
     return () => subscription.remove();
-  }, [persistDraft]);
+  }, [persistDraft, suspendedRef]);
 
   return hasPersistenceError;
 }
