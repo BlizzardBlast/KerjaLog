@@ -1,4 +1,5 @@
 import { act, renderHook } from '@testing-library/react-native';
+import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { ImpactBuilderCopy } from '@/domain/entry/impact';
 import type { WorkEntry } from '@/domain/entry/model';
 import { useLogFlow } from '@/features/work-entry/useLogFlow';
@@ -59,6 +60,31 @@ describe('useLogFlow', () => {
       result.current.selectIntent('completed');
     });
 
+    expect(result.current.hasUnsavedDraft).toBe(true);
+  });
+
+  test('restores wizard state from an encrypted draft snapshot', async () => {
+    const initialDraft: WorkEntryDraft = {
+      step: 'evidence',
+      intent: 'solved',
+      rawNote: 'Fixed duplicate records before submission.',
+      outcomeType: 'error_fixed_or_prevented',
+      evidenceTypes: ['number'],
+      evidenceDetail: '7 duplicate records fixed.',
+      impactStatement: '',
+    };
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        initialDraft,
+        onExit: jest.fn(),
+        onSaved: jest.fn(),
+        saveEntry: jest.fn(),
+      }),
+    );
+
+    expect(result.current.draft).toEqual(initialDraft);
+    expect(result.current.currentStep).toBe(4);
     expect(result.current.hasUnsavedDraft).toBe(true);
   });
 
@@ -145,7 +171,46 @@ describe('useLogFlow', () => {
     });
     expect(onSaved).toHaveBeenCalledWith(savedEntry);
     expect(result.current.saveError).toBe(false);
+    expect(result.current.completionError).toBe(false);
     expect(result.current.saving).toBe(false);
+  });
+
+  test('does not recreate an entry when post-commit completion fails', async () => {
+    const saveEntry = jest.fn().mockResolvedValue(savedEntry);
+    const onSaved = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('navigation unavailable'))
+      .mockResolvedValueOnce(undefined);
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved,
+        saveEntry,
+      }),
+    );
+
+    await act(async () => {
+      result.current.selectIntent('completed');
+      result.current.updateRawNote('Prepared the weekly report');
+    });
+
+    await act(async () => {
+      await result.current.saveQuick();
+    });
+
+    expect(saveEntry).toHaveBeenCalledTimes(1);
+    expect(result.current.saveError).toBe(false);
+    expect(result.current.completionError).toBe(true);
+    expect(result.current.hasUnsavedDraft).toBe(false);
+
+    await act(async () => {
+      await result.current.retryCompletion();
+    });
+
+    expect(saveEntry).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledTimes(2);
+    expect(result.current.completionError).toBe(false);
   });
 
   test('prevents rapid duplicate save submissions before React rerenders', async () => {
