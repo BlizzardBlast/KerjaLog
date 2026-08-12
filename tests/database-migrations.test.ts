@@ -19,7 +19,7 @@ function createDatabase(version: number) {
 }
 
 describe('migrateDatabase', () => {
-  test('runs the initial schema and advances user_version on the keyed handle', async () => {
+  test('runs v1 and v2 schemas before advancing user_version', async () => {
     const database = createDatabase(0);
 
     await migrateDatabase(database.db);
@@ -32,12 +32,38 @@ describe('migrateDatabase', () => {
     );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       2,
-      'PRAGMA user_version = 1',
+      expect.stringContaining('CREATE TABLE work_entries_v2'),
+    );
+    expect(database.execAsync.mock.calls[1]?.[0]).toEqual(
+      expect.stringContaining('UNIQUE (entry_id, type)'),
+    );
+    expect(database.execAsync.mock.calls[1]?.[0]).toEqual(
+      expect.stringContaining('excluded_from_exports IN (0, 1)'),
+    );
+    expect(database.execAsync).toHaveBeenNthCalledWith(
+      3,
+      'PRAGMA user_version = 2',
+    );
+  });
+
+  test('upgrades an existing v1 database through only the hardening migration', async () => {
+    const database = createDatabase(1);
+
+    await migrateDatabase(database.db);
+
+    expect(database.withTransactionAsync).toHaveBeenCalledTimes(1);
+    expect(database.execAsync).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('CREATE TABLE work_entries_v2'),
+    );
+    expect(database.execAsync).toHaveBeenNthCalledWith(
+      2,
+      'PRAGMA user_version = 2',
     );
   });
 
   test('does not rerun migrations when the database is current', async () => {
-    const database = createDatabase(1);
+    const database = createDatabase(2);
 
     await migrateDatabase(database.db);
 
@@ -46,18 +72,18 @@ describe('migrateDatabase', () => {
   });
 
   test('rejects a database schema newer than this app understands', async () => {
-    const database = createDatabase(2);
+    const database = createDatabase(3);
 
     await expect(migrateDatabase(database.db)).rejects.toThrow(
-      'Database schema version 2 is newer than supported version 1.',
+      'Database schema version 3 is newer than supported version 2.',
     );
 
     expect(database.withTransactionAsync).not.toHaveBeenCalled();
     expect(database.execAsync).not.toHaveBeenCalled();
   });
 
-  test('does not advance user_version when the schema migration fails', async () => {
-    const database = createDatabase(0);
+  test('does not advance user_version when a schema migration fails', async () => {
+    const database = createDatabase(1);
     database.execAsync.mockRejectedValueOnce(
       new Error('schema migration failed'),
     );
