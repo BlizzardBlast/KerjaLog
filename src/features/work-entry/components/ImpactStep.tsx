@@ -9,7 +9,7 @@ import { LogHeader } from '@/features/work-entry/components/LogHeader';
 import type {
   LogStepFrameProps,
   Translate,
-} from '@/features/work-entry/components/LogStepFrame';
+} from '@/features/work-entry/components/logStepTypes';
 import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 import { ThreadNode } from '@/features/work-entry/components/ThreadNode';
