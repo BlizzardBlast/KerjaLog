@@ -16,6 +16,10 @@ jest.mock('@/data/migrations/migrateDatabase', () => ({
   migrateDatabase: jest.fn(),
 }));
 
+jest.mock('@/platform/runtime/encryptedStorageRuntime', () => ({
+  assertEncryptedStorageRuntimeSupported: jest.fn(),
+}));
+
 jest.mock('@/platform/secure-storage/databaseKey', () => ({
   generateDatabaseKey: jest.fn(),
   getStoredDatabaseKey: jest.fn(),
