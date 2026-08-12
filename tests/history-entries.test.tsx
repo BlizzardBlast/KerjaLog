@@ -169,7 +169,9 @@ describe('History entries controller', () => {
       result.current.setEntryType('problem_solved');
     });
 
-    await waitFor(() => expect(repository.findHistory).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(repository.findHistory).toHaveBeenCalledTimes(2),
+    );
 
     await act(async () => {
       second.resolve(page([secondEntry]));
