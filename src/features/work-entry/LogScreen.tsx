@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,13 +9,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
-import type { WorkEntry } from '@/domain/entry/model';
 import { CaptureTypeStep } from '@/features/work-entry/components/CaptureTypeStep';
 import { EventStep } from '@/features/work-entry/components/EventStep';
 import { EvidenceStep } from '@/features/work-entry/components/EvidenceStep';
 import { ImpactStep } from '@/features/work-entry/components/ImpactStep';
 import { OutcomeStep } from '@/features/work-entry/components/OutcomeStep';
 import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
+import { useLogDraftNavigationGuard } from '@/features/work-entry/useLogDraftNavigationGuard';
 import { useLogFlow } from '@/features/work-entry/useLogFlow';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -24,22 +24,31 @@ export function LogScreen() {
   const { theme } = useTheme();
   const { t } = useI18n();
   const scrollRef = useRef<ScrollView>(null);
-  const impactCopy = useMemo(() => createImpactBuilderCopy(t), [t]);
-  const handleExit = useCallback(() => router.replace('/home'), [router]);
-  const handleSaved = useCallback(
-    (entry: WorkEntry) => {
-      router.replace({ pathname: '/entry/[id]', params: { id: entry.id } });
-    },
-    [router],
-  );
-  const handleStepChanged = useCallback(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, []);
+  const allowNextRemovalRef = useRef(false);
+  const impactCopy = createImpactBuilderCopy(t);
   const flow = useLogFlow({
     impactCopy,
-    onExit: handleExit,
-    onSaved: handleSaved,
-    onStepChanged: handleStepChanged,
+    onExit: () => router.replace('/home'),
+    onSaved: (entry) => {
+      allowNextRemovalRef.current = true;
+      router.replace({ pathname: '/entry/[id]', params: { id: entry.id } });
+    },
+    onStepChanged: () => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    },
+  });
+
+  useLogDraftNavigationGuard({
+    hasUnsavedDraft: flow.hasUnsavedDraft,
+    currentStep: flow.currentStep,
+    onInternalBack: flow.goBack,
+    allowNextRemovalRef,
+    copy: {
+      title: t('log.discard.title'),
+      description: t('log.discard.description'),
+      keepEditing: t('log.discard.keepEditing'),
+      discard: t('log.discard.confirm'),
+    },
   });
 
   const frame = {
