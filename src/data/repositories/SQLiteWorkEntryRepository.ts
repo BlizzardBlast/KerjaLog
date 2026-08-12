@@ -347,7 +347,10 @@ function validateHistoryQuery(query: WorkEntryHistoryQuery): void {
     throw new Error('History entry type filter is invalid.');
   }
 
-  if (typeof hasEvidence !== 'boolean' || typeof reviewReadyOnly !== 'boolean') {
+  if (
+    typeof hasEvidence !== 'boolean' ||
+    typeof reviewReadyOnly !== 'boolean'
+  ) {
     throw new Error('History boolean filters are invalid.');
   }
 }
