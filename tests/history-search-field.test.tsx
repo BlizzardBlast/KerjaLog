@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
+import { themes } from '@/design-system/tokens/theme';
 import { HistorySearchField } from '@/features/history/components/HistorySearchField';
 
 const mockSymbolView = jest.fn((_props: unknown) => null);
@@ -19,7 +20,7 @@ describe('HistorySearchField', () => {
     jest.clearAllMocks();
   });
 
-  test('uses search semantics and cross-platform symbol names', async () => {
+  test('uses search semantics, accessible control borders, and cross-platform symbols', async () => {
     const onChangeText = jest.fn();
 
     await render(
@@ -28,9 +29,16 @@ describe('HistorySearchField', () => {
       </ThemeProvider>,
     );
 
-    expect(
-      screen.getByRole('search', { name: 'history.search.label' }),
-    ).toBeTruthy();
+    const input = screen.getByRole('search', { name: 'history.search.label' });
+    expect(input).toHaveStyle({ borderColor: themes.light.colors.controlBorder });
+
+    await fireEvent(input, 'focus');
+    expect(input).toHaveStyle({
+      borderColor: themes.light.colors.controlBorderFocused,
+    });
+
+    await fireEvent(input, 'blur');
+    expect(input).toHaveStyle({ borderColor: themes.light.colors.controlBorder });
 
     const symbolNames = mockSymbolView.mock.calls.map(([props]) => {
       const { name } = props as { name?: unknown };
