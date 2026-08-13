@@ -1,6 +1,5 @@
-import { useForm, useSelector } from '@tanstack/react-form';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -14,43 +13,20 @@ import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
-import {
-  buildRefinementImpactStatement,
-  hasIncompleteEvidence,
-} from '@/domain/entry/impact';
 import type { WorkEntryDetail } from '@/domain/entry/model';
-import type {
-  EntrySkillSource,
-  SkillId,
-  WorkEntrySkill,
-} from '@/domain/skill/model';
 import { skillDefinitionById } from '@/domain/skill/catalog';
-import { suggestSkillIds } from '@/domain/skill/suggestions';
 import { EventStep } from '@/features/work-entry/components/EventStep';
 import { EvidenceStep } from '@/features/work-entry/components/EvidenceStep';
 import { ImpactStep } from '@/features/work-entry/components/ImpactStep';
 import { OutcomeStep } from '@/features/work-entry/components/OutcomeStep';
-import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
 import { EntryTypeStep } from '@/features/work-entry/refinement/components/EntryTypeStep';
 import { SkillStep } from '@/features/work-entry/refinement/components/SkillStep';
-import { mapEntryToRefinementValues } from '@/features/work-entry/refinement/refinementMapper';
-import { entryRefinementSchema } from '@/features/work-entry/refinement/refinementSchema';
-import { updateWorkEntry } from '@/features/work-entry/refinement/updateWorkEntry';
+import { useEntryRefinement } from '@/features/work-entry/refinement/useEntryRefinement';
 import { useLogDraftNavigationGuard } from '@/features/work-entry/useLogDraftNavigationGuard';
 import { useWorkEntry } from '@/features/work-entry/useWorkEntry';
 import { useI18n } from '@/i18n/I18nProvider';
 
 const SAFE_AREA_EDGES = ['top', 'bottom', 'left', 'right'] as const;
-const REFINEMENT_STEPS = [
-  'type',
-  'event',
-  'outcome',
-  'evidence',
-  'skills',
-  'impact',
-] as const;
-
-type RefinementStep = (typeof REFINEMENT_STEPS)[number];
 
 type EditEntryScreenProps = {
   id: string;
@@ -149,147 +125,32 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
   const { t } = useI18n();
   const scrollRef = useRef<ScrollView>(null);
   const allowNextRemovalRef = useRef(false);
-  const impactEditedRef = useRef(false);
-  const [step, setStep] = useState<RefinementStep>(() =>
-    getInitialRefinementStep(entry),
-  );
-  const [noteError, setNoteError] = useState(false);
-  const [evidenceError, setEvidenceError] = useState(false);
-  const [saveError, setSaveError] = useState(false);
-  const impactCopy = createImpactBuilderCopy(t);
 
-  const form = useForm({
-    defaultValues: mapEntryToRefinementValues(entry),
-    validators: {
-      onSubmit: entryRefinementSchema,
+  const refinement = useEntryRefinement({
+    entry,
+    t,
+    onStepChanged: () => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
     },
-    onSubmit: async ({ value }) => {
-      setSaveError(false);
-
-      try {
-        const updatedEntry = await updateWorkEntry(entry, value);
-        allowNextRemovalRef.current = true;
-        router.replace({
-          pathname: '/entry/[id]',
-          params: { id: updatedEntry.id },
-        });
-      } catch {
-        allowNextRemovalRef.current = false;
-        setSaveError(true);
-      }
+    onSaved: (updatedEntry) => {
+      allowNextRemovalRef.current = true;
+      router.replace({
+        pathname: '/entry/[id]',
+        params: { id: updatedEntry.id },
+      });
     },
   });
 
-  const entryType = useSelector(form.store, (state) => state.values.type);
-  const rawNote = useSelector(form.store, (state) => state.values.rawNote);
-  const outcomeType = useSelector(
-    form.store,
-    (state) => state.values.outcomeType,
-  );
-  const evidenceTypes = useSelector(
-    form.store,
-    (state) => state.values.evidenceTypes,
-  );
-  const evidenceDetail = useSelector(
-    form.store,
-    (state) => state.values.evidenceDetail,
-  );
-  const impactStatement = useSelector(
-    form.store,
-    (state) => state.values.impactStatement,
-  );
-  const selectedSkills = useSelector(
-    form.store,
-    (state) => state.values.skills,
-  );
-  const isDirty = useSelector(form.store, (state) => state.isDirty);
-  const isSubmitting = useSelector(form.store, (state) => state.isSubmitting);
-
-  const stepIndex = REFINEMENT_STEPS.indexOf(step);
-  const currentStep = stepIndex + 1;
-  const suggestedSkillIds = suggestSkillIds({ entryType, outcomeType });
-  const skillsSummary =
-    selectedSkills.length > 0
-      ? selectedSkills
-          .map((skill) => t(skillDefinitionById[skill.id].nameKey))
-          .join(' · ')
-      : t('entry.refine.skills.none');
-
-  const setCurrentStep = (nextStep: RefinementStep) => {
-    setStep(nextStep);
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  };
-
-  const goBack = () => {
-    if (stepIndex > 0) {
-      setCurrentStep(REFINEMENT_STEPS[stepIndex - 1]);
-      return;
+  const handleBack = () => {
+    if (!refinement.goBack()) {
+      router.back();
     }
-
-    router.back();
-  };
-
-  const invalidateGeneratedImpact = () => {
-    if (!impactEditedRef.current) {
-      form.setFieldValue('impactStatement', '');
-    }
-  };
-
-  const continueFromEvent = () => {
-    if (!rawNote.trim()) {
-      setNoteError(true);
-      return;
-    }
-
-    setNoteError(false);
-    setCurrentStep('outcome');
-  };
-
-  const continueFromEvidence = () => {
-    const incomplete = hasIncompleteEvidence(evidenceTypes, evidenceDetail);
-    setEvidenceError(incomplete);
-
-    if (!incomplete) {
-      setCurrentStep('skills');
-    }
-  };
-
-  const continueToImpact = () => {
-    if (!outcomeType) {
-      setCurrentStep('outcome');
-      return;
-    }
-
-    if (!impactStatement.trim() && !impactEditedRef.current) {
-      form.setFieldValue(
-        'impactStatement',
-        buildRefinementImpactStatement(
-          {
-            rawNote,
-            outcomeType,
-            evidenceDetail: evidenceDetail.trim() || undefined,
-          },
-          impactCopy,
-        ),
-      );
-    }
-
-    setCurrentStep('impact');
-  };
-
-  const toggleSkill = (skillId: SkillId, source: EntrySkillSource) => {
-    const existing = selectedSkills.find((skill) => skill.id === skillId);
-    const nextSkills: WorkEntrySkill[] = existing
-      ? selectedSkills.filter((skill) => skill.id !== skillId)
-      : [...selectedSkills, { id: skillId, source }];
-
-    form.setFieldValue('skills', nextSkills);
   };
 
   useLogDraftNavigationGuard({
-    hasUnsavedDraft: isDirty,
-    currentStep,
-    onInternalBack: goBack,
+    hasUnsavedDraft: refinement.isDirty,
+    currentStep: refinement.currentStep,
+    onInternalBack: handleBack,
     onDiscard: async () => true,
     allowNextRemovalRef,
     copy: {
@@ -302,10 +163,16 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
 
   const frame = {
     backLabel: t('entry.refine.back'),
-    currentStep,
-    totalSteps: REFINEMENT_STEPS.length,
-    onBack: goBack,
+    currentStep: refinement.currentStep,
+    totalSteps: refinement.totalSteps,
+    onBack: handleBack,
   };
+  const skillsSummary =
+    refinement.selectedSkills.length > 0
+      ? refinement.selectedSkills
+          .map((skill) => t(skillDefinitionById[skill.id].nameKey))
+          .join(' · ')
+      : t('entry.refine.skills.none');
 
   return (
     <SafeAreaView
@@ -322,109 +189,76 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {step === 'type' ? (
+          {refinement.step === 'type' ? (
             <EntryTypeStep
               {...frame}
-              entryType={entryType}
-              onContinue={() => setCurrentStep('event')}
-              onSelect={(nextType) => {
-                form.setFieldValue('type', nextType);
-                invalidateGeneratedImpact();
-              }}
+              entryType={refinement.entryType}
+              onContinue={() => refinement.setCurrentStep('event')}
+              onSelect={refinement.selectEntryType}
               t={t}
             />
           ) : null}
-          {step === 'event' ? (
+          {refinement.step === 'event' ? (
             <EventStep
               {...frame}
-              noteError={noteError}
-              onContinue={continueFromEvent}
-              onRawNoteChange={(value) => {
-                form.setFieldValue('rawNote', value);
-                setNoteError(false);
-                invalidateGeneratedImpact();
-              }}
+              noteError={refinement.noteError}
+              onContinue={refinement.continueFromEvent}
+              onRawNoteChange={refinement.updateRawNote}
               onSaveQuick={() => undefined}
-              rawNote={rawNote}
+              rawNote={refinement.rawNote}
               saveError={false}
-              saving={isSubmitting}
+              saving={refinement.isSubmitting}
               showSaveQuick={false}
               t={t}
             />
           ) : null}
-          {step === 'outcome' ? (
+          {refinement.step === 'outcome' ? (
             <OutcomeStep
               {...frame}
-              onContinue={() => setCurrentStep('evidence')}
-              onSelect={(nextOutcome) => {
-                form.setFieldValue('outcomeType', nextOutcome);
-                invalidateGeneratedImpact();
-              }}
-              outcomeType={outcomeType}
+              onContinue={() => refinement.setCurrentStep('evidence')}
+              onSelect={refinement.selectOutcome}
+              outcomeType={refinement.outcomeType}
               t={t}
             />
           ) : null}
-          {step === 'evidence' ? (
+          {refinement.step === 'evidence' ? (
             <EvidenceStep
               {...frame}
-              evidenceDetail={evidenceDetail}
-              evidenceError={evidenceError}
-              evidenceTypes={evidenceTypes}
-              onContinue={continueFromEvidence}
-              onDetailChange={(value) => {
-                form.setFieldValue('evidenceDetail', value);
-                setEvidenceError(false);
-                invalidateGeneratedImpact();
-              }}
-              onSkip={() => {
-                form.setFieldValue('evidenceTypes', []);
-                form.setFieldValue('evidenceDetail', '');
-                setEvidenceError(false);
-                invalidateGeneratedImpact();
-                setCurrentStep('skills');
-              }}
-              onToggleType={(type) => {
-                const nextEvidenceTypes = evidenceTypes.includes(type)
-                  ? evidenceTypes.filter((value) => value !== type)
-                  : [...evidenceTypes, type];
-                form.setFieldValue('evidenceTypes', nextEvidenceTypes);
-                setEvidenceError(false);
-                invalidateGeneratedImpact();
-              }}
+              evidenceDetail={refinement.evidenceDetail}
+              evidenceError={refinement.evidenceError}
+              evidenceTypes={refinement.evidenceTypes}
+              onContinue={refinement.continueFromEvidence}
+              onDetailChange={refinement.updateEvidenceDetail}
+              onSkip={refinement.skipEvidence}
+              onToggleType={refinement.toggleEvidenceType}
               t={t}
             />
           ) : null}
-          {step === 'skills' ? (
+          {refinement.step === 'skills' ? (
             <SkillStep
               {...frame}
-              onContinue={continueToImpact}
-              onSkip={() => {
-                form.setFieldValue('skills', []);
-                continueToImpact();
-              }}
-              onToggle={toggleSkill}
-              selectedSkills={selectedSkills}
-              suggestedSkillIds={suggestedSkillIds}
+              onContinue={refinement.continueToImpact}
+              onSkip={refinement.skipSkills}
+              onToggle={refinement.toggleSkill}
+              selectedSkills={refinement.selectedSkills}
+              suggestedSkillIds={refinement.suggestedSkillIds}
               t={t}
             />
           ) : null}
-          {step === 'impact' && outcomeType ? (
+          {refinement.step === 'impact' && refinement.outcomeType ? (
             <ImpactStep
               {...frame}
-              evidenceDetail={evidenceDetail}
-              impactStatement={impactStatement}
-              onImpactStatementChange={(value) => {
-                impactEditedRef.current = true;
-                form.setFieldValue('impactStatement', value);
-              }}
+              evidenceDetail={refinement.evidenceDetail}
+              impactStatement={refinement.impactStatement}
+              onImpactStatementChange={refinement.updateImpactStatement}
               onSave={() => {
-                void form.handleSubmit();
+                void refinement.submit();
               }}
-              outcomeType={outcomeType}
-              rawNote={rawNote}
-              saveError={saveError}
+              outcomeType={refinement.outcomeType}
+              rawNote={refinement.rawNote}
+              saveError={refinement.saveError}
               saveErrorMessage={t('entry.refine.saveError')}
-              saving={isSubmitting}
+              saving={refinement.isSubmitting}
               skillsSummary={skillsSummary}
               t={t}
             />
@@ -433,22 +267,6 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
-
-function getInitialRefinementStep(entry: WorkEntryDetail): RefinementStep {
-  if (!entry.outcomeType || entry.outcomeType === 'unsure') {
-    return 'outcome';
-  }
-
-  if (!entry.evidence) {
-    return 'evidence';
-  }
-
-  if (entry.skills.length === 0) {
-    return 'skills';
-  }
-
-  return 'impact';
 }
 
 const styles = StyleSheet.create({
