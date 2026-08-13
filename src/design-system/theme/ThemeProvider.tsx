@@ -13,7 +13,7 @@ import {
   type ThemeMode,
   themes,
 } from '@/design-system/tokens/theme';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
+import { ignoreError } from '@/shared/utils/function';
 
 const THEME_MODE_STORAGE_KEY = '@kerjalog/theme-mode/v1';
 
@@ -57,7 +57,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
       }
     };
 
-    hydrateThemeMode().catch(EMPTY_FUNCTION);
+    hydrateThemeMode().catch(ignoreError);
 
     return () => {
       ignore = true;
@@ -66,7 +66,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
   const setMode = (nextMode: ThemeMode) => {
     setModeState(nextMode);
-    persistThemeMode(nextMode).catch(EMPTY_FUNCTION);
+    persistThemeMode(nextMode).catch(ignoreError);
   };
 
   const resolvedTheme: ResolvedTheme =
