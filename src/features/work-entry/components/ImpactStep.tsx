@@ -24,6 +24,7 @@ type ImpactStepProps = LogStepFrameProps & {
   impactStatement: string;
   saving: boolean;
   saveError: boolean;
+  saveErrorMessage?: string;
   onImpactStatementChange: (value: string) => void;
   onSave: () => void;
   t: Translate;
@@ -37,6 +38,7 @@ export function ImpactStep({
   impactStatement,
   saving,
   saveError,
+  saveErrorMessage,
   onImpactStatementChange,
   onSave,
   t,
@@ -120,7 +122,9 @@ export function ImpactStep({
         {t('log.impact.confirm')}
       </Button>
       {saveError ? (
-        <InlineError>{t('log.impact.saveError')}</InlineError>
+        <InlineError>
+          {saveErrorMessage ?? t('log.impact.saveError')}
+        </InlineError>
       ) : null}
     </>
   );
