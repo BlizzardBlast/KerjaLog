@@ -33,12 +33,13 @@ export type BuildImpactStatementInput = {
 export function deriveEntryStatus(
   outcomeType: OutcomeType | null,
   evidenceDetail?: string,
+  impactStatement?: string,
 ): EntryStatus {
   if (!outcomeType || outcomeType === 'unsure') {
     return 'quick_note';
   }
 
-  if (evidenceDetail?.trim()) {
+  if (evidenceDetail?.trim() && impactStatement?.trim()) {
     return 'review_ready';
   }
 
