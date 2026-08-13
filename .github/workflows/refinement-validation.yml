@@ -32,7 +32,7 @@ jobs:
       - name: Install and regenerate lockfile
         run: pnpm install --no-frozen-lockfile
 
-      - name: Align architecture docs with TanStack Form
+      - name: Align architecture docs with refinement implementation
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -43,6 +43,18 @@ jobs:
               text = text.replace('React Hook Form', 'TanStack Form')
               text = text.replace('react-hook-form', '@tanstack/react-form')
               path.write_text(text)
+
+          path = Path('docs/PRODUCT_AND_ARCHITECTURE.md')
+          text = path.read_text()
+          text = text.replace(
+              '| Forms                | `@tanstack/react-form`                               | Efficient form/wizard state                           |',
+              '| Forms                | `@tanstack/react-form`                       | Efficient form/wizard state                           |',
+          )
+          text = text.replace(
+              'entry_id\nskill_id\nsource\nconfirmed\n```\n\n`source` can distinguish a user-selected skill from a rules-based suggestion.',
+              'entry_id\nskill_id\nsource\n```\n\n`source` distinguishes a user-selected skill from a rules-based suggestion. Only confirmed relationships are persisted; unconfirmed rule suggestions remain derived UI state.',
+          )
+          path.write_text(text)
           PY
 
       - name: Format
