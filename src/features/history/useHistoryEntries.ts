@@ -99,13 +99,17 @@ export function useHistoryEntries(
     [debouncedSearchText, filters],
   );
 
-  const loadFirstPage = useCallback(() => {
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
+  const invalidateHistoryQuery = useCallback(() => {
+    requestIdRef.current += 1;
     nextCursorRef.current = null;
     hasMoreRef.current = false;
     isLoadingMoreRef.current = false;
     loadMoreErrorRef.current = false;
+  }, []);
+
+  const loadFirstPage = useCallback(() => {
+    invalidateHistoryQuery();
+    const requestId = requestIdRef.current;
 
     setState((current) => ({
       status: 'loading',
@@ -153,7 +157,7 @@ export function useHistoryEntries(
           loadMoreError: false,
         });
       });
-  }, [query, repository]);
+  }, [invalidateHistoryQuery, query, repository]);
 
   const loadMore = useCallback(() => {
     const cursor = nextCursorRef.current;
@@ -246,12 +250,10 @@ export function useHistoryEntries(
       loadFirstPage();
 
       return () => {
-        requestIdRef.current += 1;
+        invalidateHistoryQuery();
         isSearchPendingRef.current = false;
-        isLoadingMoreRef.current = false;
-        loadMoreErrorRef.current = false;
       };
-    }, [loadFirstPage]),
+    }, [invalidateHistoryQuery, loadFirstPage]),
   );
 
   const setSearchText = useCallback(
@@ -262,36 +264,53 @@ export function useHistoryEntries(
         return;
       }
 
-      requestIdRef.current += 1;
+      invalidateHistoryQuery();
       isSearchPendingRef.current = nextSearchText !== debouncedSearchText;
-      isLoadingMoreRef.current = false;
-      loadMoreErrorRef.current = false;
       setSearchTextState(nextSearchText);
     },
-    [debouncedSearchText, searchText],
+    [debouncedSearchText, invalidateHistoryQuery, searchText],
   );
 
-  const setEntryType = useCallback((entryType: EntryType | null) => {
-    setFilters((current) => ({ ...current, entryType }));
-  }, []);
+  const setEntryType = useCallback(
+    (entryType: EntryType | null) => {
+      if (entryType === filters.entryType) {
+        return;
+      }
+
+      invalidateHistoryQuery();
+      setFilters((current) => ({ ...current, entryType }));
+    },
+    [filters.entryType, invalidateHistoryQuery],
+  );
 
   const toggleEvidence = useCallback(() => {
+    invalidateHistoryQuery();
     setFilters((current) => ({
       ...current,
       hasEvidence: !current.hasEvidence,
     }));
-  }, []);
+  }, [invalidateHistoryQuery]);
 
   const toggleReviewReady = useCallback(() => {
+    invalidateHistoryQuery();
     setFilters((current) => ({
       ...current,
       reviewReadyOnly: !current.reviewReadyOnly,
     }));
-  }, []);
+  }, [invalidateHistoryQuery]);
 
   const clearFilters = useCallback(() => {
+    if (
+      filters.entryType === null &&
+      !filters.hasEvidence &&
+      !filters.reviewReadyOnly
+    ) {
+      return;
+    }
+
+    invalidateHistoryQuery();
     setFilters(EMPTY_WORK_ENTRY_HISTORY_FILTERS);
-  }, []);
+  }, [filters, invalidateHistoryQuery]);
 
   return {
     searchText,
