@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useForm, useSelector } from '@tanstack/react-form';
+import { useMemo, useRef, useState } from 'react';
 import {
   EMPTY_WORK_ENTRY_DRAFT,
   hasWorkEntryDraftContent,
@@ -33,7 +34,6 @@ type UseLogFlowOptions = {
   initialDraft?: WorkEntryDraft | null;
   onExit: () => void;
   onSaved: CompleteSavedEntry;
-  onStepChanged?: () => void;
   prepareForCommit?: PrepareForCommit;
   onCommitFailed?: () => void;
   saveEntry?: SaveEntry;
@@ -44,29 +44,12 @@ export function useLogFlow({
   initialDraft = null,
   onExit,
   onSaved,
-  onStepChanged,
   prepareForCommit,
   onCommitFailed,
   saveEntry = (draft) => saveWorkEntry(draft),
 }: UseLogFlowOptions) {
   const startingDraft = initialDraft ?? EMPTY_WORK_ENTRY_DRAFT;
   const [step, setStep] = useState<LogStep>(startingDraft.step);
-  const [intent, setIntent] = useState<LogEventIntent | null>(
-    startingDraft.intent,
-  );
-  const [rawNote, setRawNote] = useState(startingDraft.rawNote);
-  const [outcomeType, setOutcomeType] = useState<OutcomeType | null>(
-    startingDraft.outcomeType,
-  );
-  const [evidenceTypes, setEvidenceTypes] = useState<EvidenceType[]>(
-    startingDraft.evidenceTypes,
-  );
-  const [evidenceDetail, setEvidenceDetail] = useState(
-    startingDraft.evidenceDetail,
-  );
-  const [impactStatement, setImpactStatement] = useState(
-    startingDraft.impactStatement,
-  );
   const [noteError, setNoteError] = useState(false);
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -76,21 +59,56 @@ export function useLogFlow({
   const saveInProgressRef = useRef(false);
   const committedEntryRef = useRef<WorkEntry | null>(null);
 
+  const form = useForm({
+    defaultValues: {
+      intent: startingDraft.intent,
+      rawNote: startingDraft.rawNote,
+      outcomeType: startingDraft.outcomeType,
+      evidenceTypes: startingDraft.evidenceTypes,
+      evidenceDetail: startingDraft.evidenceDetail,
+      impactStatement: startingDraft.impactStatement,
+      impactStatementSource: startingDraft.impactStatementSource,
+    },
+  });
+
+  const intent = useSelector(form.store, (state) => state.values.intent);
+  const rawNote = useSelector(form.store, (state) => state.values.rawNote);
+  const outcomeType = useSelector(form.store, (state) => state.values.outcomeType);
+  const evidenceTypes = useSelector(form.store, (state) => state.values.evidenceTypes);
+  const evidenceDetail = useSelector(form.store, (state) => state.values.evidenceDetail);
+  const impactStatement = useSelector(form.store, (state) => state.values.impactStatement);
+  const impactStatementSource = useSelector(
+    form.store,
+    (state) => state.values.impactStatementSource,
+  );
+
   const currentStep = LOG_STEPS.indexOf(step) + 1;
-  const draft: WorkEntryDraft = {
-    step,
-    intent,
-    rawNote,
-    outcomeType,
-    evidenceTypes,
-    evidenceDetail,
-    impactStatement,
-  };
+  const draft = useMemo<WorkEntryDraft>(
+    () => ({
+      step,
+      intent,
+      rawNote,
+      outcomeType,
+      evidenceTypes,
+      evidenceDetail,
+      impactStatement,
+      impactStatementSource,
+    }),
+    [
+      evidenceDetail,
+      evidenceTypes,
+      impactStatement,
+      impactStatementSource,
+      intent,
+      outcomeType,
+      rawNote,
+      step,
+    ],
+  );
   const hasUnsavedDraft = !hasCommittedEntry && hasWorkEntryDraftContent(draft);
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);
-    onStepChanged?.();
   }
 
   function goBack() {
@@ -99,28 +117,31 @@ export function useLogFlow({
       onExit();
       return;
     }
-
     moveToStep(LOG_STEPS[currentIndex - 1]);
   }
 
+  function invalidateGeneratedImpact() {
+    if (impactStatementSource === 'generated') {
+      form.setFieldValue('impactStatement', '');
+      form.setFieldValue('impactStatementSource', null);
+    }
+  }
+
   function selectIntent(nextIntent: LogEventIntent) {
-    setIntent(nextIntent);
+    form.setFieldValue('intent', nextIntent);
     setSaveError(false);
+    invalidateGeneratedImpact();
   }
 
   function continueFromType() {
-    if (intent) {
-      moveToStep('event');
-    }
+    if (intent) moveToStep('event');
   }
 
   function updateRawNote(value: string) {
-    setRawNote(value);
+    form.setFieldValue('rawNote', value);
     setSaveError(false);
-
-    if (value.trim()) {
-      setNoteError(false);
-    }
+    if (value.trim()) setNoteError(false);
+    invalidateGeneratedImpact();
   }
 
   function continueFromEvent() {
@@ -128,83 +149,82 @@ export function useLogFlow({
       setNoteError(true);
       return;
     }
-
     setNoteError(false);
     moveToStep('outcome');
   }
 
   function selectOutcome(nextOutcomeType: OutcomeType) {
-    setOutcomeType(nextOutcomeType);
+    form.setFieldValue('outcomeType', nextOutcomeType);
     setSaveError(false);
+    invalidateGeneratedImpact();
   }
 
   function continueFromOutcome() {
-    if (outcomeType) {
-      moveToStep('evidence');
-    }
+    if (outcomeType) moveToStep('evidence');
   }
 
   function toggleEvidenceType(type: EvidenceType) {
-    setEvidenceTypes((current) =>
-      current.includes(type)
-        ? current.filter((candidate) => candidate !== type)
-        : [...current, type],
+    form.setFieldValue(
+      'evidenceTypes',
+      evidenceTypes.includes(type)
+        ? evidenceTypes.filter((candidate) => candidate !== type)
+        : [...evidenceTypes, type],
     );
     setEvidenceError(false);
     setSaveError(false);
+    invalidateGeneratedImpact();
   }
 
   function updateEvidenceDetail(value: string) {
-    setEvidenceDetail(value);
+    form.setFieldValue('evidenceDetail', value);
     setSaveError(false);
-
-    if (!hasIncompleteEvidence(evidenceTypes, value)) {
-      setEvidenceError(false);
-    }
+    if (!hasIncompleteEvidence(evidenceTypes, value)) setEvidenceError(false);
+    invalidateGeneratedImpact();
   }
 
   function continueToImpact(skipEvidence = false) {
-    if (!intent || !outcomeType) {
-      return;
-    }
+    if (!intent || !outcomeType) return;
 
     const nextEvidenceTypes = skipEvidence ? [] : evidenceTypes;
     const nextEvidenceDetail = skipEvidence ? '' : evidenceDetail;
-
     if (hasIncompleteEvidence(nextEvidenceTypes, nextEvidenceDetail)) {
       setEvidenceError(true);
       return;
     }
 
     if (skipEvidence) {
-      setEvidenceTypes([]);
-      setEvidenceDetail('');
+      form.setFieldValue('evidenceTypes', []);
+      form.setFieldValue('evidenceDetail', '');
     }
 
     setEvidenceError(false);
     setSaveError(false);
-    setImpactStatement(
-      buildImpactStatement(
-        {
-          intent,
-          rawNote,
-          outcomeType,
-          evidenceDetail: nextEvidenceDetail,
-        },
-        impactCopy,
-      ),
-    );
+    if (impactStatementSource !== 'user') {
+      form.setFieldValue(
+        'impactStatement',
+        buildImpactStatement(
+          {
+            intent,
+            rawNote,
+            outcomeType,
+            evidenceDetail: nextEvidenceDetail,
+          },
+          impactCopy,
+        ),
+      );
+      form.setFieldValue('impactStatementSource', 'generated');
+    }
     moveToStep('impact');
   }
 
   function updateImpactStatement(value: string) {
-    setImpactStatement(value);
+    form.setFieldValue('impactStatement', value);
+    form.setFieldValue('impactStatementSource', value.trim() ? 'user' : null);
     setSaveError(false);
   }
 
   async function completeCommittedEntry(entry: WorkEntry): Promise<void> {
     setCompletionError(false);
-
     try {
       await onSaved(entry);
     } catch {
@@ -213,9 +233,7 @@ export function useLogFlow({
   }
 
   async function save(quickNote: boolean) {
-    if (saveInProgressRef.current) {
-      return;
-    }
+    if (saveInProgressRef.current) return;
 
     const alreadyCommitted = committedEntryRef.current;
     if (alreadyCommitted) {
@@ -227,10 +245,7 @@ export function useLogFlow({
       setNoteError(true);
       return;
     }
-
-    if (!quickNote && !outcomeType) {
-      return;
-    }
+    if (!quickNote && !outcomeType) return;
 
     saveInProgressRef.current = true;
     setSaving(true);
@@ -239,8 +254,6 @@ export function useLogFlow({
 
     let entry: WorkEntry;
     try {
-      // Freeze and flush the latest encrypted draft before committing. The
-      // repository then consumes that draft atomically with the new entry.
       await prepareForCommit?.(draft);
       entry = await saveEntry({
         intent,
@@ -249,6 +262,7 @@ export function useLogFlow({
         evidenceTypes: quickNote ? [] : evidenceTypes,
         evidenceDetail: quickNote ? '' : evidenceDetail,
         impactStatement: quickNote ? null : impactStatement,
+        impactStatementSource: quickNote ? null : impactStatementSource,
       });
     } catch {
       onCommitFailed?.();
