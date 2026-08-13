@@ -192,7 +192,7 @@ function HistoryEmptyContent({
         },
       ]}
     >
-      <Text variant="heading">
+      <Text variant="subheading">
         {t(hasActiveQuery ? 'history.noMatches.title' : 'history.empty.title')}
       </Text>
       <Text color="textMuted">

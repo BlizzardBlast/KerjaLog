@@ -72,6 +72,7 @@ export type TypographyVariant =
   | 'display'
   | 'title'
   | 'heading'
+  | 'subheading'
   | 'body'
   | 'bodyStrong'
   | 'label'
@@ -96,6 +97,12 @@ export const typography = {
     fontSize: 20,
     lineHeight: 26,
     letterSpacing: -0.2,
+  },
+  subheading: {
+    fontFamily: fontFamilies.semiBold,
+    fontSize: 18,
+    lineHeight: 24,
+    letterSpacing: -0.1,
   },
   body: {
     fontFamily: fontFamilies.medium,
