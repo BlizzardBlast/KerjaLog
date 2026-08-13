@@ -32,7 +32,7 @@ export function OutcomeStep({
         title={t('log.outcome.title')}
         description={t('log.outcome.description')}
       />
-      <View style={logStepStyles.choiceList}>
+      <View accessibilityRole="radiogroup" style={logStepStyles.choiceList}>
         {outcomeOptions.map((option) => (
           <LogChoiceCard
             key={option.value}

@@ -41,7 +41,7 @@ export function EntryTypeStep({
         title={t('entry.refine.type.title')}
         description={t('entry.refine.type.description')}
       />
-      <View style={logStepStyles.choiceList}>
+      <View accessibilityRole="radiogroup" style={logStepStyles.choiceList}>
         {ENTRY_TYPES.map((type) => (
           <LogChoiceCard
             key={type}
