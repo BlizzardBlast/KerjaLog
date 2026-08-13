@@ -1,3 +1,5 @@
+import type { WorkEntrySkill } from '@/domain/skill/model';
+
 export const ENTRY_TYPES = [
   'contribution',
   'problem_solved',
@@ -63,4 +65,15 @@ export type WorkEntry = {
   updatedAt: string;
 };
 
+export type WorkEntryDetail = WorkEntry & {
+  skills: WorkEntrySkill[];
+};
+
 export type CreateWorkEntry = Omit<WorkEntry, 'id' | 'createdAt' | 'updatedAt'>;
+
+export type UpdateWorkEntry = Omit<
+  WorkEntry,
+  'id' | 'createdAt' | 'updatedAt'
+> & {
+  skills: WorkEntrySkill[];
+};
