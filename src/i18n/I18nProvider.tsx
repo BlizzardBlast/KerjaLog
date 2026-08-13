@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 import { type TranslationKey, translations } from '@/i18n/catalog';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
+import { ignoreError } from '@/shared/utils/function';
 
 const LANGUAGE_STORAGE_KEY = '@kerjalog/language/v1';
 
@@ -73,7 +73,7 @@ export function I18nProvider({ children }: PropsWithChildren) {
       }
     };
 
-    hydrateLanguage().catch(EMPTY_FUNCTION);
+    hydrateLanguage().catch(ignoreError);
 
     return () => {
       ignore = true;
@@ -82,7 +82,7 @@ export function I18nProvider({ children }: PropsWithChildren) {
 
   const setLanguage = (nextLanguage: Language) => {
     setLanguageState(nextLanguage);
-    persistLanguage(nextLanguage).catch(EMPTY_FUNCTION);
+    persistLanguage(nextLanguage).catch(ignoreError);
   };
 
   const t = (key: TranslationKey, params?: TranslationParams) =>
