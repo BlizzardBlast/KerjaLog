@@ -5,6 +5,12 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import {
+  radii,
+  spacing,
+  themes,
+  typography,
+} from '@/design-system/tokens/theme';
 import { ignoreError } from '@/shared/utils/function';
 
 type RootErrorScreenProps = {
@@ -43,26 +49,11 @@ function getFallbackCopy(): RootErrorCopy {
 
 export function RootErrorScreen({ onRetry }: RootErrorScreenProps) {
   const colorScheme = useColorScheme();
-  const dark = colorScheme === 'dark';
+  const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'].colors;
   const copy = getFallbackCopy();
-  const colors = dark
-    ? {
-        background: '#211C25',
-        text: '#F8F3FB',
-        textMuted: '#BCB2C1',
-        button: '#A78BFA',
-        buttonText: '#151218',
-      }
-    : {
-        background: '#FFFDFC',
-        text: '#211B2A',
-        textMuted: '#6F6675',
-        button: '#7138F2',
-        buttonText: '#FFFFFF',
-      };
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+    <View style={[styles.screen, { backgroundColor: colors.surface }]}>
       <View accessibilityRole="alert" style={styles.copy}>
         <Text style={[styles.title, { color: colors.text }]}>{copy.title}</Text>
         <Text style={[styles.description, { color: colors.textMuted }]}>
@@ -76,11 +67,11 @@ export function RootErrorScreen({ onRetry }: RootErrorScreenProps) {
         }}
         style={({ pressed }) => [
           styles.button,
-          { backgroundColor: colors.button },
+          { backgroundColor: colors.primary },
           pressed && styles.pressed,
         ]}
       >
-        <Text style={[styles.buttonText, { color: colors.buttonText }]}>
+        <Text style={[styles.buttonText, { color: colors.onPrimary }]}>
           {copy.retry}
         </Text>
       </Pressable>
@@ -92,38 +83,38 @@ const styles = StyleSheet.create({
   screen: {
     alignItems: 'center',
     flex: 1,
-    gap: 24,
+    gap: spacing[6],
     justifyContent: 'center',
-    padding: 24,
+    padding: spacing[6],
   },
   copy: {
-    gap: 12,
+    gap: spacing[3],
     maxWidth: 480,
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.title.fontSize,
     fontWeight: '700',
-    lineHeight: 32,
+    lineHeight: typography.title.lineHeight,
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
     textAlign: 'center',
   },
   button: {
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: radii.md,
     justifyContent: 'center',
-    minHeight: 48,
+    minHeight: spacing[12],
     minWidth: 120,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[3],
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: typography.bodyStrong.fontSize,
     fontWeight: '600',
-    lineHeight: 22,
+    lineHeight: typography.bodyStrong.lineHeight,
   },
   pressed: {
     opacity: 0.8,
