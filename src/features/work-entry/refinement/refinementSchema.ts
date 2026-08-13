@@ -2,15 +2,13 @@ import { z } from 'zod';
 import {
   ENTRY_TYPES,
   EVIDENCE_TYPES,
+  IMPACT_STATEMENT_SOURCES,
   OUTCOME_TYPES,
 } from '@/domain/entry/model';
 import { ENTRY_SKILL_SOURCES, SKILL_IDS } from '@/domain/skill/model';
 
 const nonBlankString = (maxLength: number) =>
-  z
-    .string()
-    .max(maxLength)
-    .refine((value) => value.trim().length > 0, 'Required');
+  z.string().max(maxLength).refine((value) => value.trim().length > 0, 'Required');
 
 export const entryRefinementSchema = z
   .object({
@@ -20,6 +18,7 @@ export const entryRefinementSchema = z
     evidenceTypes: z.array(z.enum(EVIDENCE_TYPES)),
     evidenceDetail: z.string().max(1000),
     impactStatement: z.string().max(2500),
+    impactStatementSource: z.enum(IMPACT_STATEMENT_SOURCES).nullable(),
     skills: z.array(
       z.object({
         id: z.enum(SKILL_IDS),
@@ -36,6 +35,17 @@ export const entryRefinementSchema = z
         code: 'custom',
         message: 'Evidence requires both a type and a supporting detail.',
         path: ['evidenceDetail'],
+      });
+    }
+
+    const hasImpactStatement = value.impactStatement.trim().length > 0;
+    const hasImpactSource = value.impactStatementSource !== null;
+
+    if (hasImpactStatement !== hasImpactSource) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Impact statement provenance is inconsistent.',
+        path: ['impactStatement'],
       });
     }
   });
