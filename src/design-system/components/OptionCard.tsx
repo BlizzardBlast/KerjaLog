@@ -55,7 +55,7 @@ export function OptionCard({
     borderColor: interpolateColor(
       selectionProgress.value,
       [0, 1],
-      [theme.colors.border, theme.colors.primary],
+      [theme.colors.controlBorder, theme.colors.controlBorderFocused],
     ),
   }));
 

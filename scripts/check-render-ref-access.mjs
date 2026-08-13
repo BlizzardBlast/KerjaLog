@@ -8,7 +8,7 @@ const violations = sourceFiles.flatMap(checkFile);
 
 if (violations.length > 0) {
   console.error(
-    'Render-phase ref writes are not allowed. Move mutable ref writes to effects or event handlers:',
+    'Render-phase ref access is not allowed. Move ref reads and writes to effects, event handlers, or other non-render code:',
   );
 
   for (const violation of violations) {
@@ -87,14 +87,17 @@ function collectRenderBodyViolations(body, sourceFile, violations) {
       return;
     }
 
-    if (isRefAssignment(node)) {
+    if (isCurrentProperty(node)) {
       const { line, character } = sourceFile.getLineAndCharacterOfPosition(
         node.getStart(sourceFile),
       );
       const relativePath = sourceFile.fileName
         .slice(sourceRoot.length + 1)
         .replaceAll('\\', '/');
-      violations.push(`${relativePath}:${line + 1}:${character + 1}`);
+      const accessKind = getRefAccessKind(node);
+      violations.push(
+        `${relativePath}:${line + 1}:${character + 1} (${accessKind})`,
+      );
     }
 
     ts.forEachChild(node, visit);
@@ -112,21 +115,29 @@ function isNestedFunction(node) {
   );
 }
 
-function isRefAssignment(node) {
+function getRefAccessKind(node) {
+  const parent = node.parent;
+
   if (
-    ts.isBinaryExpression(node) &&
-    isAssignmentOperator(node.operatorToken.kind) &&
-    isCurrentProperty(node.left)
+    parent &&
+    ts.isBinaryExpression(parent) &&
+    parent.left === node &&
+    isAssignmentOperator(parent.operatorToken.kind)
   ) {
-    return true;
+    return 'write';
   }
 
-  return (
-    (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
-    (node.operator === ts.SyntaxKind.PlusPlusToken ||
-      node.operator === ts.SyntaxKind.MinusMinusToken) &&
-    isCurrentProperty(node.operand)
-  );
+  if (
+    parent &&
+    (ts.isPrefixUnaryExpression(parent) || ts.isPostfixUnaryExpression(parent)) &&
+    parent.operand === node &&
+    (parent.operator === ts.SyntaxKind.PlusPlusToken ||
+      parent.operator === ts.SyntaxKind.MinusMinusToken)
+  ) {
+    return 'write';
+  }
+
+  return 'read';
 }
 
 function isAssignmentOperator(kind) {
