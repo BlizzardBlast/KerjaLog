@@ -19,10 +19,10 @@ describe('HistorySearchField', () => {
     jest.clearAllMocks();
   });
 
-  test('uses search semantics and cross-platform symbol names', () => {
+  test('uses search semantics and cross-platform symbol names', async () => {
     const onChangeText = jest.fn();
 
-    render(
+    await render(
       <ThemeProvider>
         <HistorySearchField value="finance" onChangeText={onChangeText} />
       </ThemeProvider>,
@@ -48,7 +48,7 @@ describe('HistorySearchField', () => {
       web: 'cancel',
     });
 
-    fireEvent.press(
+    await fireEvent.press(
       screen.getByRole('button', { name: 'history.search.clear' }),
     );
     expect(onChangeText).toHaveBeenCalledWith('');

@@ -90,7 +90,7 @@ describe('HistoryScreen', () => {
     jest.clearAllMocks();
   });
 
-  test('routes the pagination error footer through the explicit retry action', () => {
+  test('routes the pagination error footer through the explicit retry action', async () => {
     const retryLoadMore = jest.fn();
     mockUseHistoryEntries.mockReturnValue(
       createController({
@@ -105,24 +105,24 @@ describe('HistoryScreen', () => {
       }),
     );
 
-    render(
+    await render(
       <ThemeProvider>
         <HistoryScreen />
       </ThemeProvider>,
     );
 
     expect(screen.getByText('history.loadMoreError')).toBeTruthy();
-    fireEvent.press(
+    await fireEvent.press(
       screen.getByRole('button', { name: 'history.loadMoreRetry' }),
     );
 
     expect(retryLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  test('exposes History headings with header semantics', () => {
+  test('exposes History headings with header semantics', async () => {
     mockUseHistoryEntries.mockReturnValue(createController());
 
-    render(
+    await render(
       <ThemeProvider>
         <HistoryScreen />
       </ThemeProvider>,
@@ -132,7 +132,7 @@ describe('HistoryScreen', () => {
     expect(screen.getAllByRole('header')).toHaveLength(2);
   });
 
-  test('shows an accessible progress state instead of stale no-match content while search is pending', () => {
+  test('shows an accessible progress state instead of stale no-match content while search is pending', async () => {
     mockUseHistoryEntries.mockReturnValue(
       createController({
         searchText: 'finance',
@@ -147,7 +147,7 @@ describe('HistoryScreen', () => {
       }),
     );
 
-    render(
+    await render(
       <ThemeProvider>
         <HistoryScreen />
       </ThemeProvider>,

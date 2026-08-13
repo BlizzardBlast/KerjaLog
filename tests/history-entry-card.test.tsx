@@ -42,8 +42,8 @@ describe('HistoryEntryCard', () => {
     jest.clearAllMocks();
   });
 
-  test('renders persisted evidence and exposes the detail-navigation hint', () => {
-    render(
+  test('renders persisted evidence and exposes the detail-navigation hint', async () => {
+    await render(
       <ThemeProvider>
         <HistoryEntryCard entry={createEntry()} onPress={jest.fn()} />
       </ThemeProvider>,
@@ -61,10 +61,10 @@ describe('HistoryEntryCard', () => {
     );
   });
 
-  test('marks challenge entries as private with a cross-platform lock symbol and remains actionable', () => {
+  test('marks challenge entries as private with a cross-platform lock symbol and remains actionable', async () => {
     const onPress = jest.fn();
 
-    render(
+    await render(
       <ThemeProvider>
         <HistoryEntryCard
           entry={createEntry({
@@ -91,7 +91,7 @@ describe('HistoryEntryCard', () => {
       }),
     ).toBe(true);
 
-    fireEvent.press(screen.getByRole('button'));
+    await fireEvent.press(screen.getByRole('button'));
 
     expect(onPress).toHaveBeenCalledTimes(1);
   });
