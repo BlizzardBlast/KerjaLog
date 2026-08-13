@@ -30,6 +30,12 @@ export type BuildImpactStatementInput = {
   evidenceDetail?: string;
 };
 
+export type BuildRefinementImpactStatementInput = {
+  rawNote: string;
+  outcomeType: OutcomeType;
+  evidenceDetail?: string;
+};
+
 export function deriveEntryStatus(
   outcomeType: OutcomeType | null,
   evidenceDetail?: string,
@@ -71,18 +77,18 @@ export function buildImpactStatement(
   const note = ensureSentence(input.rawNote);
   const parts = [`${copy.intentLead[input.intent]}: ${note}`];
 
-  if (input.outcomeType !== 'unsure') {
-    parts.push(
-      `${copy.outcomePrefix}: ${ensureSentence(
-        copy.outcomeLabel[input.outcomeType],
-      )}`,
-    );
-  }
+  appendOutcomeAndEvidence(parts, input, copy);
 
-  const evidence = input.evidenceDetail?.trim();
-  if (evidence) {
-    parts.push(`${copy.evidencePrefix}: ${ensureSentence(evidence)}`);
-  }
+  return parts.join(' ');
+}
+
+export function buildRefinementImpactStatement(
+  input: BuildRefinementImpactStatementInput,
+  copy: Omit<ImpactBuilderCopy, 'intentLead'>,
+): string {
+  const parts = [ensureSentence(input.rawNote)];
+
+  appendOutcomeAndEvidence(parts, input, copy);
 
   return parts.join(' ');
 }
@@ -102,6 +108,25 @@ export function hasIncompleteEvidence(
   const hasDetail = evidenceDetail.trim().length > 0;
 
   return hasTypes !== hasDetail;
+}
+
+function appendOutcomeAndEvidence(
+  parts: string[],
+  input: BuildRefinementImpactStatementInput,
+  copy: Omit<ImpactBuilderCopy, 'intentLead'>,
+): void {
+  if (input.outcomeType !== 'unsure') {
+    parts.push(
+      `${copy.outcomePrefix}: ${ensureSentence(
+        copy.outcomeLabel[input.outcomeType],
+      )}`,
+    );
+  }
+
+  const evidence = input.evidenceDetail?.trim();
+  if (evidence) {
+    parts.push(`${copy.evidencePrefix}: ${ensureSentence(evidence)}`);
+  }
 }
 
 function normalizeWhitespace(value: string): string {
