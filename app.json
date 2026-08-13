@@ -10,7 +10,10 @@
     "platforms": ["android", "ios"],
     "ios": {
       "icon": "./assets/kerjalog.icon",
-      "bundleIdentifier": "com.blizzardblast.kerjalog"
+      "bundleIdentifier": "com.blizzardblast.kerjalog",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
