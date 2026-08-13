@@ -81,7 +81,7 @@ describe('History entries controller', () => {
 
   test('loads History through the narrow read capability', async () => {
     const repository = createRepository();
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -100,7 +100,7 @@ describe('History entries controller', () => {
 
   test('combines practical filters without copying entries into global state', async () => {
     const repository = createRepository();
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -126,7 +126,7 @@ describe('History entries controller', () => {
 
   test('debounces search and exposes pending query state', async () => {
     const repository = createRepository();
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
     jest.useFakeTimers();
@@ -159,7 +159,7 @@ describe('History entries controller', () => {
   test('does not paginate the previous query while a search is pending', async () => {
     const repository = createRepository();
     repository.findHistory.mockResolvedValueOnce(page([entry], cursor));
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
     jest.useFakeTimers();
@@ -204,7 +204,7 @@ describe('History entries controller', () => {
         .mockReturnValueOnce(first.promise)
         .mockReturnValueOnce(second.promise),
     };
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await act(async () => {
       result.current.setEntryType('problem_solved');
@@ -233,7 +233,7 @@ describe('History entries controller', () => {
     repository.findHistory
       .mockResolvedValueOnce(page([entry], cursor))
       .mockResolvedValueOnce(page([secondEntry]));
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -258,7 +258,7 @@ describe('History entries controller', () => {
       .mockResolvedValueOnce(page([entry], cursor))
       .mockRejectedValueOnce(new Error('next page unavailable'))
       .mockResolvedValueOnce(page([secondEntry]));
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -292,7 +292,7 @@ describe('History entries controller', () => {
     repository.findHistory
       .mockRejectedValueOnce(new Error('database unavailable'))
       .mockResolvedValueOnce(page([entry]));
-    const { result } = renderHook(() => useHistoryEntries(repository));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('error'));
     expect(result.current.state.entries).toEqual([]);
