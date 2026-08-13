@@ -8,6 +8,7 @@ const originalEntry: WorkEntryDetail = {
   title: 'Checked the report',
   rawNote: 'Checked the report.',
   impactStatement: null,
+  impactStatementSource: null,
   occurredAt: '2026-08-10T08:00:00.000Z',
   outcomeType: null,
   status: 'quick_note',
@@ -44,6 +45,7 @@ describe('updateWorkEntry', () => {
         evidenceTypes: ['number', 'number', 'result'],
         evidenceDetail: '  7 duplicate rows removed.  ',
         impactStatement: '  Corrected the mismatch before submission.  ',
+        impactStatementSource: 'user',
         skills: [
           { id: 'problem_solving', source: 'rules' },
           { id: 'problem_solving', source: 'rules' },
@@ -65,6 +67,7 @@ describe('updateWorkEntry', () => {
           detail: '7 duplicate rows removed.',
         },
         impactStatement: 'Corrected the mismatch before submission.',
+        impactStatementSource: 'user',
         skills: [
           { id: 'problem_solving', source: 'rules' },
           { id: 'attention_to_detail', source: 'user' },
@@ -85,6 +88,7 @@ describe('updateWorkEntry', () => {
         evidenceTypes: ['deadline'],
         evidenceDetail: 'Submitted Friday',
         impactStatement: '',
+        impactStatementSource: null,
         skills: [],
       },
       repository,
@@ -92,7 +96,10 @@ describe('updateWorkEntry', () => {
 
     expect(repository.update).toHaveBeenCalledWith(
       'entry-1',
-      expect.objectContaining({ status: 'developed' }),
+      expect.objectContaining({
+        status: 'developed',
+        impactStatementSource: null,
+      }),
     );
   });
 
@@ -113,6 +120,7 @@ describe('updateWorkEntry', () => {
         evidenceTypes: [],
         evidenceDetail: '',
         impactStatement: 'Clarified the handoff process.',
+        impactStatementSource: 'user',
         skills: [{ id: 'communication', source: 'user' }],
       },
       repository,
@@ -120,7 +128,10 @@ describe('updateWorkEntry', () => {
 
     expect(repository.update).toHaveBeenCalledWith(
       'entry-1',
-      expect.objectContaining({ excludedFromExports: true }),
+      expect.objectContaining({
+        excludedFromExports: true,
+        impactStatementSource: 'user',
+      }),
     );
   });
 });
