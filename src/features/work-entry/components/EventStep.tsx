@@ -13,14 +13,17 @@ import type {
 import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 
+type QuickSaveAction = {
+  onPress: () => void;
+  hasError: boolean;
+};
+
 type EventStepProps = LogStepFrameProps & {
   rawNote: string;
   noteError: boolean;
-  saving: boolean;
-  saveError: boolean;
-  showSaveQuick?: boolean;
+  busy: boolean;
+  quickSave?: QuickSaveAction;
   onRawNoteChange: (value: string) => void;
-  onSaveQuick: () => void;
   onContinue: () => void;
   t: Translate;
 };
@@ -28,11 +31,9 @@ type EventStepProps = LogStepFrameProps & {
 export function EventStep({
   rawNote,
   noteError,
-  saving,
-  saveError,
-  showSaveQuick = true,
+  busy,
+  quickSave,
   onRawNoteChange,
-  onSaveQuick,
   onContinue,
   t,
   ...frame
@@ -72,19 +73,19 @@ export function EventStep({
         title={t('log.event.privacyTitle')}
         description={t('log.event.privacyDescription')}
       />
-      {showSaveQuick ? (
+      {quickSave ? (
         <View style={logStepStyles.buttonRow}>
           <Button
             disabled={!rawNote.trim()}
-            loading={saving}
-            onPress={onSaveQuick}
+            loading={busy}
+            onPress={quickSave.onPress}
             style={logStepStyles.flexButton}
             variant="secondary"
           >
             {t('log.event.saveQuick')}
           </Button>
           <Button
-            disabled={!rawNote.trim() || saving}
+            disabled={!rawNote.trim() || busy}
             onPress={onContinue}
             style={logStepStyles.flexButton}
           >
@@ -93,7 +94,7 @@ export function EventStep({
         </View>
       ) : (
         <Button
-          disabled={!rawNote.trim() || saving}
+          disabled={!rawNote.trim() || busy}
           fullWidth
           onPress={onContinue}
           size="lg"
@@ -101,7 +102,7 @@ export function EventStep({
           {t('log.event.continue')}
         </Button>
       )}
-      {saveError ? (
+      {quickSave?.hasError ? (
         <InlineError>{t('log.impact.saveError')}</InlineError>
       ) : null}
     </>
