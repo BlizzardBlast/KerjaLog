@@ -72,6 +72,7 @@ describe('useLogFlow', () => {
       evidenceTypes: ['number'],
       evidenceDetail: '7 duplicate records fixed.',
       impactStatement: '',
+      impactStatementSource: null,
     };
     const { result } = await renderHook(() =>
       useLogFlow({
@@ -168,11 +169,43 @@ describe('useLogFlow', () => {
       evidenceTypes: [],
       evidenceDetail: '',
       impactStatement: null,
+      impactStatementSource: null,
     });
     expect(onSaved).toHaveBeenCalledWith(savedEntry);
     expect(result.current.saveError).toBe(false);
     expect(result.current.completionError).toBe(false);
     expect(result.current.saving).toBe(false);
+  });
+
+  test('preserves user-authored impact wording when supporting facts change', async () => {
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved: jest.fn(),
+        saveEntry: jest.fn(),
+      }),
+    );
+
+    await act(async () => {
+      result.current.selectIntent('completed');
+      result.current.updateRawNote('Prepared the weekly report');
+      result.current.continueFromType();
+      result.current.continueFromEvent();
+      result.current.selectOutcome('deadline_met');
+      result.current.continueFromOutcome();
+      result.current.skipEvidence();
+      result.current.updateImpactStatement('My carefully edited impact wording.');
+      result.current.goBack();
+      result.current.goBack();
+      result.current.selectOutcome('work_clearer');
+      result.current.continueFromOutcome();
+      result.current.skipEvidence();
+    });
+
+    expect(result.current.impactStatement).toBe(
+      'My carefully edited impact wording.',
+    );
   });
 
   test('does not recreate an entry when post-commit completion fails', async () => {
