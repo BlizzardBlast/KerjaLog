@@ -1,7 +1,6 @@
 import {
   ENTRY_SKILL_SOURCES,
   SKILL_IDS,
-  type EntrySkillSource,
   type SkillId,
   type WorkEntrySkill,
 } from '@/domain/skill/model';
@@ -11,7 +10,9 @@ export type WorkEntrySkillRow = {
   source: string;
 };
 
-export function mapWorkEntrySkillRows(rows: WorkEntrySkillRow[]): WorkEntrySkill[] {
+export function mapWorkEntrySkillRows(
+  rows: WorkEntrySkillRow[],
+): WorkEntrySkill[] {
   const skills = new Map<SkillId, WorkEntrySkill>();
 
   for (const row of rows) {
@@ -43,5 +44,3 @@ function expectOneOf<const Values extends readonly string[]>(
 
   return value as Values[number];
 }
-
-export type { EntrySkillSource };
