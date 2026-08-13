@@ -152,7 +152,9 @@ describe('History entries controller', () => {
       limit: 50,
     });
     expect(
-      repository.findHistory.mock.calls.some(([query]) => query.cursor !== null),
+      repository.findHistory.mock.calls.some(
+        ([query]) => query.cursor !== null,
+      ),
     ).toBe(false);
   });
 
