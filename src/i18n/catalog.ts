@@ -8,6 +8,7 @@ import { homeEn, homeId } from '@/i18n/homeTranslations';
 import { logDraftEn, logDraftId } from '@/i18n/logDraftTranslations';
 import { logEn, logId } from '@/i18n/logTranslations';
 import { reminderEn, reminderId } from '@/i18n/reminderTranslations';
+import { skillEn, skillId } from '@/i18n/skillTranslations';
 import { en as baseEn, id as baseId } from '@/i18n/translations';
 
 export const en = {
@@ -19,6 +20,7 @@ export const en = {
   ...logEn,
   ...logDraftEn,
   ...reminderEn,
+  ...skillEn,
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -32,6 +34,7 @@ export const id: Record<TranslationKey, string> = {
   ...logId,
   ...logDraftId,
   ...reminderId,
+  ...skillId,
 };
 
 export const translations = { en, id } as const;
