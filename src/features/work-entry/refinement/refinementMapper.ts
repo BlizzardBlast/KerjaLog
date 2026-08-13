@@ -11,6 +11,7 @@ export function mapEntryToRefinementValues(
     evidenceTypes: entry.evidence?.types ?? [],
     evidenceDetail: entry.evidence?.detail ?? '',
     impactStatement: entry.impactStatement ?? '',
+    impactStatementSource: entry.impactStatementSource,
     skills: entry.skills,
   };
 }
