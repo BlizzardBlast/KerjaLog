@@ -20,6 +20,7 @@ type ImpactStepProps = LogStepFrameProps & {
   rawNote: string;
   outcomeType: OutcomeType;
   evidenceDetail: string;
+  skillsSummary?: string;
   impactStatement: string;
   saving: boolean;
   saveError: boolean;
@@ -32,6 +33,7 @@ export function ImpactStep({
   rawNote,
   outcomeType,
   evidenceDetail,
+  skillsSummary,
   impactStatement,
   saving,
   saveError,
@@ -68,6 +70,12 @@ export function ImpactStep({
           label={t('log.impact.whatSupports')}
           value={evidenceDetail.trim() || t('log.impact.noEvidence')}
         />
+        {skillsSummary ? (
+          <ThreadNode
+            label={t('entry.saved.whatDemonstrates')}
+            value={skillsSummary}
+          />
+        ) : null}
       </View>
       <View
         style={[
