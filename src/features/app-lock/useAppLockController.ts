@@ -14,6 +14,28 @@ import {
   getDeviceAuthenticationAvailability,
 } from '@/platform/authentication/deviceAuthentication';
 import { setAppLockScreenPrivacyEnabled } from '@/platform/privacy/screenPrivacy';
+import { EMPTY_FUNCTION } from '@/shared/utils/function';
+
+function mapAuthenticationError(error: string | undefined): AppLockError {
+  if (
+    error === 'user_cancel' ||
+    error === 'app_cancel' ||
+    error === 'system_cancel' ||
+    error === 'user_fallback'
+  ) {
+    return 'cancelled';
+  }
+
+  if (
+    error === 'not_available' ||
+    error === 'not_enrolled' ||
+    error === 'passcode_not_set'
+  ) {
+    return 'unavailable';
+  }
+
+  return 'authentication-failed';
+}
 
 export function useAppLockController(): AppLockContextValue {
   const { t } = useI18n();
@@ -52,7 +74,7 @@ export function useAppLockController(): AppLockContextValue {
         // The preference is privacy-sensitive: if it cannot be read, require
         // device authentication and best-effort native screen protection rather
         // than assuming App Lock was disabled.
-        await setAppLockScreenPrivacyEnabled(true).catch(() => undefined);
+        await setAppLockScreenPrivacyEnabled(true).catch(EMPTY_FUNCTION);
 
         if (!ignore) {
           setEnabledState(true);
@@ -66,7 +88,7 @@ export function useAppLockController(): AppLockContextValue {
       }
     };
 
-    hydrate().catch(() => undefined);
+    hydrate().catch(EMPTY_FUNCTION);
 
     return () => {
       ignore = true;
@@ -227,25 +249,4 @@ export function useAppLockController(): AppLockContextValue {
     unlock,
     clearError,
   };
-}
-
-function mapAuthenticationError(error: string | undefined): AppLockError {
-  if (
-    error === 'user_cancel' ||
-    error === 'app_cancel' ||
-    error === 'system_cancel' ||
-    error === 'user_fallback'
-  ) {
-    return 'cancelled';
-  }
-
-  if (
-    error === 'not_available' ||
-    error === 'not_enrolled' ||
-    error === 'passcode_not_set'
-  ) {
-    return 'unavailable';
-  }
-
-  return 'authentication-failed';
 }
