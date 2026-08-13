@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
+import ts from 'typescript';
 
 const migrationSource = readFileSync(
   new URL('../src/data/migrations/001-initial.ts', import.meta.url),
@@ -18,18 +19,11 @@ assert.ok(schemaMatch, 'Could not locate INITIAL_SCHEMA_SQL.');
 const schemaSql = schemaMatch[1];
 const db = new DatabaseSync(':memory:');
 
-const catalogSkillSignatures = [
-  ...skillCatalogSource.matchAll(
-    /\{\s*id:\s*'([^']+)',\s*nameKey:\s*'([^']+)',\s*category:\s*'([^']+)'\s*\}/gu,
-  ),
-]
-  .map((match) => `${match[1]}|${match[2]}|${match[3]}`)
-  .sort();
-
+const catalogSkillSignatures = readSkillCatalogSignatures(skillCatalogSource);
 assert.equal(
   catalogSkillSignatures.length,
   10,
-  'Could not parse the complete built-in skill catalog.',
+  'Runtime skill catalog must contain the ten broad v1 skills.',
 );
 
 try {
@@ -37,9 +31,14 @@ try {
   db.exec(schemaSql);
 
   const databaseSkillSignatures = db
-    .prepare('SELECT id, name_key, category FROM skills ORDER BY id ASC')
+    .prepare(
+      'SELECT id, slug, name_key, category FROM skills ORDER BY id ASC',
+    )
     .all()
-    .map((skill) => `${skill.id}|${skill.name_key}|${skill.category}`)
+    .map(
+      (skill) =>
+        `${skill.id}|${skill.slug}|${skill.name_key}|${skill.category}`,
+    )
     .sort();
 
   assert.deepEqual(
@@ -186,4 +185,79 @@ try {
   );
 } finally {
   db.close();
+}
+
+function readSkillCatalogSignatures(source) {
+  const sourceFile = ts.createSourceFile(
+    'catalog.ts',
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+
+  const declaration = sourceFile.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => [...statement.declarationList.declarations])
+    .find(
+      (candidate) =>
+        ts.isIdentifier(candidate.name) && candidate.name.text === 'SKILL_CATALOG',
+    );
+
+  assert.ok(declaration?.initializer, 'Could not locate SKILL_CATALOG.');
+  const initializer = unwrapExpression(declaration.initializer);
+  assert.ok(
+    ts.isArrayLiteralExpression(initializer),
+    'SKILL_CATALOG must remain an array literal so schema drift is verifiable.',
+  );
+
+  return initializer.elements
+    .map((element) => {
+      const entry = unwrapExpression(element);
+      assert.ok(
+        ts.isObjectLiteralExpression(entry),
+        'Each SKILL_CATALOG entry must remain an object literal.',
+      );
+
+      const id = readStringProperty(entry, 'id');
+      const nameKey = readStringProperty(entry, 'nameKey');
+      const category = readStringProperty(entry, 'category');
+      return `${id}|${id}|${nameKey}|${category}`;
+    })
+    .sort();
+}
+
+function unwrapExpression(expression) {
+  let current = expression;
+
+  while (
+    ts.isAsExpression(current) ||
+    ts.isSatisfiesExpression(current) ||
+    ts.isParenthesizedExpression(current)
+  ) {
+    current = current.expression;
+  }
+
+  return current;
+}
+
+function readStringProperty(objectLiteral, propertyName) {
+  const property = objectLiteral.properties.find(
+    (candidate) =>
+      ts.isPropertyAssignment(candidate) &&
+      ((ts.isIdentifier(candidate.name) && candidate.name.text === propertyName) ||
+        (ts.isStringLiteral(candidate.name) &&
+          candidate.name.text === propertyName)),
+  );
+
+  assert.ok(
+    property && ts.isPropertyAssignment(property),
+    `Skill catalog entry is missing ${propertyName}.`,
+  );
+  const value = unwrapExpression(property.initializer);
+  assert.ok(
+    ts.isStringLiteralLike(value),
+    `Skill catalog ${propertyName} must be a string literal.`,
+  );
+  return value.text;
 }
