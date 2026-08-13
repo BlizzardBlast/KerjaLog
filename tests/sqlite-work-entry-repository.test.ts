@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/data/database';
 import { SQLiteWorkEntryRepository } from '@/data/repositories/SQLiteWorkEntryRepository';
-import type { CreateWorkEntry } from '@/domain/entry/model';
+import type { CreateWorkEntry, UpdateWorkEntry } from '@/domain/entry/model';
 
 jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(),
@@ -30,8 +30,11 @@ const baseRow = {
   evidence_text_value: 'Completed before Friday close',
 };
 
-function useRows(rows: unknown[]) {
-  const getAllAsync = jest.fn().mockResolvedValue(rows);
+function useRows(rows: unknown[], skillRows?: unknown[]) {
+  const getAllAsync = jest.fn().mockResolvedValueOnce(rows);
+  if (skillRows) {
+    getAllAsync.mockResolvedValueOnce(skillRows);
+  }
 
   getDatabaseMock.mockResolvedValue({
     getAllAsync,
@@ -50,8 +53,16 @@ function useCount(count: number) {
   return getFirstAsync;
 }
 
-function useTransaction() {
+function useTransaction(options?: {
+  entryRows?: unknown[];
+  skillRows?: unknown[];
+}) {
+  const getAllAsync = jest
+    .fn()
+    .mockResolvedValueOnce(options?.entryRows ?? [])
+    .mockResolvedValueOnce(options?.skillRows ?? []);
   const db = {
+    getAllAsync,
     runAsync: jest.fn().mockResolvedValue({
       changes: 1,
       lastInsertRowId: 0,
@@ -67,6 +78,7 @@ function useTransaction() {
 
   return {
     db,
+    getAllAsync,
     withTransactionAsync: db.withTransactionAsync,
   };
 }
@@ -76,21 +88,33 @@ describe('SQLiteWorkEntryRepository', () => {
     jest.clearAllMocks();
   });
 
-  test('findById binds the id and reconstructs joined evidence', async () => {
-    const getAllAsync = useRows([
-      baseRow,
-      {
-        ...baseRow,
-        evidence_type: 'result',
-      },
-    ]);
+  test('findById binds the id and reconstructs joined evidence and skills', async () => {
+    const getAllAsync = useRows(
+      [
+        baseRow,
+        {
+          ...baseRow,
+          evidence_type: 'result',
+        },
+      ],
+      [
+        { skill_id: 'problem_solving', source: 'rules' },
+        { skill_id: 'attention_to_detail', source: 'user' },
+      ],
+    );
     const repository = new SQLiteWorkEntryRepository();
     const id = "entry-with-'quotes'-and-spaces";
 
     const entry = await repository.findById(id);
 
-    expect(getAllAsync).toHaveBeenCalledWith(
+    expect(getAllAsync).toHaveBeenNthCalledWith(
+      1,
       expect.stringContaining('WHERE work_entries.id = $id'),
+      { $id: id },
+    );
+    expect(getAllAsync).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('FROM entry_skills'),
       { $id: id },
     );
     expect(entry).toEqual({
@@ -106,17 +130,22 @@ describe('SQLiteWorkEntryRepository', () => {
         types: ['deadline', 'result'],
         detail: 'Completed before Friday close',
       },
+      skills: [
+        { id: 'problem_solving', source: 'rules' },
+        { id: 'attention_to_detail', source: 'user' },
+      ],
       excludedFromExports: false,
       createdAt: '2026-08-10T08:01:00.000Z',
       updatedAt: '2026-08-10T08:01:00.000Z',
     });
   });
 
-  test('findById returns null when the entry is missing', async () => {
-    useRows([]);
+  test('findById returns null without querying skills when the entry is missing', async () => {
+    const getAllAsync = useRows([]);
     const repository = new SQLiteWorkEntryRepository();
 
     await expect(repository.findById('missing')).resolves.toBeNull();
+    expect(getAllAsync).toHaveBeenCalledTimes(1);
   });
 
   test('findRecent binds the limit after limiting work entries before the join', async () => {
@@ -255,6 +284,86 @@ describe('SQLiteWorkEntryRepository', () => {
     });
     expect(entry.createdAt).toEqual(expect.any(String));
     expect(entry.updatedAt).toBe(entry.createdAt);
+  });
+
+  test('update replaces mutable entry data, evidence, and skills in one transaction', async () => {
+    const { db, withTransactionAsync } = useTransaction({
+      entryRows: [
+        {
+          ...baseRow,
+          type: 'problem_solved',
+          title: 'Resolved reconciliation mismatch',
+          raw_note: 'Resolved reconciliation mismatch.',
+          impact_statement: 'Corrected the mismatch before submission.',
+          outcome_type: 'error_fixed_or_prevented',
+          evidence_type: 'number',
+          evidence_text_value: '7 duplicate rows removed',
+        },
+      ],
+      skillRows: [{ skill_id: 'problem_solving', source: 'rules' }],
+    });
+    randomUUIDMock.mockReturnValueOnce('updated-evidence');
+    const repository = new SQLiteWorkEntryRepository();
+    const input: UpdateWorkEntry = {
+      type: 'problem_solved',
+      title: 'Resolved reconciliation mismatch',
+      rawNote: 'Resolved reconciliation mismatch.',
+      impactStatement: 'Corrected the mismatch before submission.',
+      occurredAt: '2026-08-10T08:00:00.000Z',
+      outcomeType: 'error_fixed_or_prevented',
+      status: 'review_ready',
+      evidence: {
+        types: ['number'],
+        detail: '7 duplicate rows removed',
+      },
+      skills: [{ id: 'problem_solving', source: 'rules' }],
+      excludedFromExports: false,
+    };
+
+    const updated = await repository.update('entry-1', input);
+
+    expect(withTransactionAsync).toHaveBeenCalledTimes(1);
+    expect(db.runAsync).toHaveBeenCalledTimes(5);
+    expect(db.runAsync).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('UPDATE work_entries'),
+      expect.objectContaining({
+        $id: 'entry-1',
+        $rawNote: input.rawNote,
+        $status: 'review_ready',
+      }),
+    );
+    expect(db.runAsync).toHaveBeenNthCalledWith(
+      2,
+      'DELETE FROM evidence WHERE entry_id = $id',
+      { $id: 'entry-1' },
+    );
+    expect(db.runAsync).toHaveBeenNthCalledWith(
+      3,
+      expect.stringContaining('INSERT INTO evidence'),
+      expect.objectContaining({
+        $id: 'updated-evidence',
+        $entryId: 'entry-1',
+        $type: 'number',
+      }),
+    );
+    expect(db.runAsync).toHaveBeenNthCalledWith(
+      4,
+      'DELETE FROM entry_skills WHERE entry_id = $id',
+      { $id: 'entry-1' },
+    );
+    expect(db.runAsync).toHaveBeenNthCalledWith(
+      5,
+      expect.stringContaining('INSERT INTO entry_skills'),
+      {
+        $entryId: 'entry-1',
+        $skillId: 'problem_solving',
+        $source: 'rules',
+      },
+    );
+    expect(updated.skills).toEqual([
+      { id: 'problem_solving', source: 'rules' },
+    ]);
   });
 
   test('rejects invalid persisted domain values', async () => {
