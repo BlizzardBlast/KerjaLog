@@ -15,18 +15,12 @@ import type { Translate } from '@/features/work-entry/components/logStepTypes';
 import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
 import { mapEntryToRefinementValues } from '@/features/work-entry/refinement/refinementMapper';
 import { entryRefinementSchema } from '@/features/work-entry/refinement/refinementSchema';
+import {
+  getInitialRefinementStep,
+  REFINEMENT_STEPS,
+  type RefinementStep,
+} from '@/features/work-entry/refinement/refinementSteps';
 import { updateWorkEntry } from '@/features/work-entry/refinement/updateWorkEntry';
-
-export const REFINEMENT_STEPS = [
-  'type',
-  'event',
-  'outcome',
-  'evidence',
-  'skills',
-  'impact',
-] as const;
-
-export type RefinementStep = (typeof REFINEMENT_STEPS)[number];
 
 type UseEntryRefinementOptions = {
   entry: WorkEntryDetail;
@@ -257,20 +251,4 @@ export function useEntryRefinement({
     updateImpactStatement,
     submit: () => form.handleSubmit(),
   };
-}
-
-function getInitialRefinementStep(entry: WorkEntryDetail): RefinementStep {
-  if (!entry.outcomeType || entry.outcomeType === 'unsure') {
-    return 'outcome';
-  }
-
-  if (!entry.evidence) {
-    return 'evidence';
-  }
-
-  if (entry.skills.length === 0) {
-    return 'skills';
-  }
-
-  return 'impact';
 }
