@@ -16,6 +16,14 @@ export const INITIAL_SCHEMA_SQL = `
     impact_statement TEXT CHECK(
       impact_statement IS NULL OR length(trim(impact_statement)) > 0
     ),
+    impact_statement_source TEXT CHECK(
+      impact_statement_source IS NULL OR impact_statement_source IN ('generated', 'user')
+    ),
+    CHECK (
+      (impact_statement IS NULL AND impact_statement_source IS NULL)
+      OR
+      (impact_statement IS NOT NULL AND impact_statement_source IS NOT NULL)
+    ),
     occurred_at TEXT NOT NULL CHECK(length(trim(occurred_at)) > 0),
     outcome_type TEXT CHECK(
       outcome_type IS NULL OR outcome_type IN (
@@ -131,6 +139,9 @@ export const INITIAL_SCHEMA_SQL = `
     evidence_types TEXT NOT NULL DEFAULT '[]',
     evidence_detail TEXT NOT NULL DEFAULT '',
     impact_statement TEXT NOT NULL DEFAULT '',
+    impact_statement_source TEXT CHECK(
+      impact_statement_source IS NULL OR impact_statement_source IN ('generated', 'user')
+    ),
     updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
   );
 
