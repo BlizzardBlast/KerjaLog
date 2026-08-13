@@ -42,6 +42,12 @@ const androidManifest = fs.readFileSync(
   path.resolve('android/app/src/main/AndroidManifest.xml'),
   'utf8',
 );
+const localAuthenticationManifest = fs.readFileSync(
+  path.resolve(
+    'node_modules/expo-local-authentication/android/src/main/AndroidManifest.xml',
+  ),
+  'utf8',
+);
 
 assertIncludes(
   appDelegate,
@@ -67,17 +73,17 @@ assertIncludes(
 assertIncludes(
   androidManifest,
   'android.permission.SCHEDULE_EXACT_ALARM',
-  'Android manifest',
+  'Android app manifest',
 );
 assertIncludes(
-  androidManifest,
+  localAuthenticationManifest,
   'android.permission.USE_BIOMETRIC',
-  'Android manifest',
+  'Expo LocalAuthentication manifest',
 );
 assertIncludes(
-  androidManifest,
+  localAuthenticationManifest,
   'android.permission.USE_FINGERPRINT',
-  'Android manifest',
+  'Expo LocalAuthentication manifest',
 );
 
 console.log('Generated native configuration verified.');

@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/expo",
   "expo": {
     "name": "KerjaLog",
     "slug": "kerjalog",
