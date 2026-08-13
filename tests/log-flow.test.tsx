@@ -195,7 +195,9 @@ describe('useLogFlow', () => {
       result.current.selectOutcome('deadline_met');
       result.current.continueFromOutcome();
       result.current.skipEvidence();
-      result.current.updateImpactStatement('My carefully edited impact wording.');
+      result.current.updateImpactStatement(
+        'My carefully edited impact wording.',
+      );
       result.current.goBack();
       result.current.goBack();
       result.current.selectOutcome('work_clearer');

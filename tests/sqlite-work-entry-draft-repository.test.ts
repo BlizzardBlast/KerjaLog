@@ -39,7 +39,9 @@ describe('SQLiteWorkEntryDraftRepository', () => {
       impact_statement_source: null,
     });
     getDatabaseMock.mockResolvedValue(db);
-    await expect(new SQLiteWorkEntryDraftRepository().loadActive()).resolves.toEqual(draft);
+    await expect(
+      new SQLiteWorkEntryDraftRepository().loadActive(),
+    ).resolves.toEqual(draft);
   });
 
   test('rejects duplicate persisted evidence types', async () => {
@@ -54,9 +56,9 @@ describe('SQLiteWorkEntryDraftRepository', () => {
       impact_statement_source: null,
     });
     getDatabaseMock.mockResolvedValue(db);
-    await expect(new SQLiteWorkEntryDraftRepository().loadActive()).rejects.toThrow(
-      'Stored work entry draft evidence contains duplicates.',
-    );
+    await expect(
+      new SQLiteWorkEntryDraftRepository().loadActive(),
+    ).rejects.toThrow('Stored work entry draft evidence contains duplicates.');
   });
 
   test('upserts impact provenance with the active draft', async () => {
