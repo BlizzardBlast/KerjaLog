@@ -18,6 +18,7 @@ type EventStepProps = LogStepFrameProps & {
   noteError: boolean;
   saving: boolean;
   saveError: boolean;
+  showSaveQuick?: boolean;
   onRawNoteChange: (value: string) => void;
   onSaveQuick: () => void;
   onContinue: () => void;
@@ -29,6 +30,7 @@ export function EventStep({
   noteError,
   saving,
   saveError,
+  showSaveQuick = true,
   onRawNoteChange,
   onSaveQuick,
   onContinue,
@@ -70,24 +72,35 @@ export function EventStep({
         title={t('log.event.privacyTitle')}
         description={t('log.event.privacyDescription')}
       />
-      <View style={logStepStyles.buttonRow}>
-        <Button
-          disabled={!rawNote.trim()}
-          loading={saving}
-          onPress={onSaveQuick}
-          style={logStepStyles.flexButton}
-          variant="secondary"
-        >
-          {t('log.event.saveQuick')}
-        </Button>
+      {showSaveQuick ? (
+        <View style={logStepStyles.buttonRow}>
+          <Button
+            disabled={!rawNote.trim()}
+            loading={saving}
+            onPress={onSaveQuick}
+            style={logStepStyles.flexButton}
+            variant="secondary"
+          >
+            {t('log.event.saveQuick')}
+          </Button>
+          <Button
+            disabled={!rawNote.trim() || saving}
+            onPress={onContinue}
+            style={logStepStyles.flexButton}
+          >
+            {t('log.event.continue')}
+          </Button>
+        </View>
+      ) : (
         <Button
           disabled={!rawNote.trim() || saving}
+          fullWidth
           onPress={onContinue}
-          style={logStepStyles.flexButton}
+          size="lg"
         >
           {t('log.event.continue')}
         </Button>
-      </View>
+      )}
       {saveError ? (
         <InlineError>{t('log.impact.saveError')}</InlineError>
       ) : null}
