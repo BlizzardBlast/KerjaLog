@@ -30,7 +30,9 @@ describe('HistorySearchField', () => {
     );
 
     const input = screen.getByRole('search', { name: 'history.search.label' });
-    expect(input).toHaveStyle({ borderColor: themes.light.colors.controlBorder });
+    expect(input).toHaveStyle({
+      borderColor: themes.light.colors.controlBorder,
+    });
 
     await fireEvent(input, 'focus');
     expect(input).toHaveStyle({
@@ -38,7 +40,9 @@ describe('HistorySearchField', () => {
     });
 
     await fireEvent(input, 'blur');
-    expect(input).toHaveStyle({ borderColor: themes.light.colors.controlBorder });
+    expect(input).toHaveStyle({
+      borderColor: themes.light.colors.controlBorder,
+    });
 
     const symbolNames = mockSymbolView.mock.calls.map(([props]) => {
       const { name } = props as { name?: unknown };
