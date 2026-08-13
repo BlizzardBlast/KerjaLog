@@ -14,7 +14,7 @@ import {
   getDeviceAuthenticationAvailability,
 } from '@/platform/authentication/deviceAuthentication';
 import { setAppLockScreenPrivacyEnabled } from '@/platform/privacy/screenPrivacy';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
+import { ignoreError } from '@/shared/utils/function';
 
 function mapAuthenticationError(error: string | undefined): AppLockError {
   if (
@@ -74,7 +74,7 @@ export function useAppLockController(): AppLockContextValue {
         // The preference is privacy-sensitive: if it cannot be read, require
         // device authentication and best-effort native screen protection rather
         // than assuming App Lock was disabled.
-        await setAppLockScreenPrivacyEnabled(true).catch(EMPTY_FUNCTION);
+        await setAppLockScreenPrivacyEnabled(true).catch(ignoreError);
 
         if (!ignore) {
           setEnabledState(true);
@@ -88,7 +88,7 @@ export function useAppLockController(): AppLockContextValue {
       }
     };
 
-    hydrate().catch(EMPTY_FUNCTION);
+    hydrate().catch(ignoreError);
 
     return () => {
       ignore = true;
