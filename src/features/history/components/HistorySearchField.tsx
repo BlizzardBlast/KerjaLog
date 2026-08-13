@@ -1,10 +1,26 @@
 import { SymbolView } from 'expo-symbols';
+import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { HISTORY_SEARCH_MAX_LENGTH } from '@/domain/entry/history';
 import { useI18n } from '@/i18n/I18nProvider';
+
+type SymbolName = ComponentProps<typeof SymbolView>['name'];
+
+const SEARCH_SYMBOL = {
+  ios: 'magnifyingglass',
+  android: 'search',
+  web: 'search',
+} satisfies SymbolName;
+
+const CLEAR_SYMBOL = {
+  ios: 'xmark.circle.fill',
+  android: 'cancel',
+  web: 'cancel',
+} satisfies SymbolName;
 
 type HistorySearchFieldProps = {
   value: string;
@@ -22,15 +38,16 @@ export function HistorySearchField({
     <View style={styles.container}>
       <Text variant="label">{t('history.search.label')}</Text>
       <View style={styles.fieldContainer}>
-        <View pointerEvents="none" style={styles.searchIcon}>
+        <DecorativeView pointerEvents="none" style={styles.searchIcon}>
           <SymbolView
-            name="magnifyingglass"
+            name={SEARCH_SYMBOL}
             size={20}
             tintColor={theme.colors.textMuted}
           />
-        </View>
+        </DecorativeView>
         <TextInput
           accessibilityLabel={t('history.search.label')}
+          accessibilityRole="search"
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={HISTORY_SEARCH_MAX_LENGTH}
@@ -60,11 +77,13 @@ export function HistorySearchField({
               pressed && styles.pressed,
             ]}
           >
-            <SymbolView
-              name="xmark.circle.fill"
-              size={20}
-              tintColor={theme.colors.textMuted}
-            />
+            <DecorativeView>
+              <SymbolView
+                name={CLEAR_SYMBOL}
+                size={20}
+                tintColor={theme.colors.textMuted}
+              />
+            </DecorativeView>
           </Pressable>
         ) : null}
       </View>

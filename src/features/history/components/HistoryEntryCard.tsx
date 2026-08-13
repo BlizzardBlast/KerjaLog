@@ -1,5 +1,7 @@
 import { SymbolView } from 'expo-symbols';
+import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing, type ThemeColors } from '@/design-system/tokens/theme';
@@ -10,6 +12,14 @@ import {
 } from '@/features/history/historyCopy';
 import { formatHistoryEntryDate } from '@/features/history/historyGrouping';
 import { useI18n } from '@/i18n/I18nProvider';
+
+type SymbolName = ComponentProps<typeof SymbolView>['name'];
+
+const PRIVATE_SYMBOL = {
+  ios: 'lock.fill',
+  android: 'lock',
+  web: 'lock',
+} satisfies SymbolName;
 
 type HistoryEntryCardProps = {
   entry: WorkEntry;
@@ -82,13 +92,19 @@ function StatusChip({ isPrivate, label, status }: StatusChipProps) {
       ]}
     >
       {isPrivate ? (
-        <SymbolView
-          name="lock.fill"
-          size={13}
-          tintColor={theme.colors[palette.foreground]}
-        />
+        <DecorativeView>
+          <SymbolView
+            name={PRIVATE_SYMBOL}
+            size={13}
+            tintColor={theme.colors[palette.foreground]}
+          />
+        </DecorativeView>
       ) : null}
-      <Text variant="caption" color={palette.foreground} numberOfLines={1}>
+      <Text
+        variant="caption"
+        color={palette.foreground}
+        style={styles.statusLabel}
+      >
         {label}
       </Text>
     </View>
@@ -131,10 +147,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: radii.full,
     flexDirection: 'row',
+    flexShrink: 1,
     gap: spacing[1],
+    maxWidth: '48%',
     minHeight: 28,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
+  },
+  statusLabel: {
+    flexShrink: 1,
+    textAlign: 'center',
   },
   pressed: {
     opacity: 0.82,

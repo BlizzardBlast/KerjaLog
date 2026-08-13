@@ -1,11 +1,8 @@
 import { getDatabase } from '@/data/database';
-import {
-  buildFtsSearchQuery,
-  SQLiteWorkEntryRepository,
-} from '@/data/repositories/SQLiteWorkEntryRepository';
+import { buildFtsSearchQuery } from '@/data/queries/workEntryHistoryQuery';
+import { SQLiteWorkEntryRepository } from '@/data/repositories/SQLiteWorkEntryRepository';
 import {
   HISTORY_SEARCH_MAX_LENGTH,
-  HISTORY_SEARCH_MAX_TERMS,
   type WorkEntryHistoryQuery,
 } from '@/domain/entry/history';
 
@@ -84,13 +81,13 @@ describe('History work entry repository', () => {
     expect(buildFtsSearchQuery('---')).toBeNull();
 
     const manyTerms = Array.from(
-      { length: HISTORY_SEARCH_MAX_TERMS + 4 },
+      { length: 20 },
       (_, index) => `term${index}`,
     ).join(' ');
     const boundedQuery = buildFtsSearchQuery(manyTerms);
 
-    expect(boundedQuery?.split(' AND ')).toHaveLength(HISTORY_SEARCH_MAX_TERMS);
-    expect(boundedQuery).not.toContain(`term${HISTORY_SEARCH_MAX_TERMS}`);
+    expect(boundedQuery?.split(' AND ')).toHaveLength(16);
+    expect(boundedQuery).not.toContain('term16');
   });
 
   test('queries a bounded first page in stable newest-first order', async () => {

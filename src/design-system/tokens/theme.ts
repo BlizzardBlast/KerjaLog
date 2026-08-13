@@ -29,6 +29,7 @@ export type ThemeColors = {
 export type AppTheme = {
   colors: ThemeColors;
   spacing: typeof spacing;
+  layout: typeof layout;
   radii: typeof radii;
   typography: typeof typography;
 };
@@ -44,6 +45,10 @@ export const spacing = {
   8: 32,
   10: 40,
   12: 48,
+} as const;
+
+export const layout = {
+  screenHorizontalPadding: spacing[6],
 } as const;
 
 export const radii = {
@@ -169,12 +174,14 @@ export const themes: Record<ResolvedTheme, AppTheme> = {
   light: {
     colors: lightColors,
     spacing,
+    layout,
     radii,
     typography,
   },
   dark: {
     colors: darkColors,
     spacing,
+    layout,
     radii,
     typography,
   },

@@ -81,7 +81,7 @@ describe('History entries controller', () => {
 
   test('loads History through the narrow read capability', async () => {
     const repository = createRepository();
-    const { result } = await renderHook(() => useHistoryEntries(repository));
+    const { result } = renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -100,7 +100,7 @@ describe('History entries controller', () => {
 
   test('combines practical filters without copying entries into global state', async () => {
     const repository = createRepository();
-    const { result } = await renderHook(() => useHistoryEntries(repository));
+    const { result } = renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -126,7 +126,7 @@ describe('History entries controller', () => {
 
   test('debounces search and exposes pending query state', async () => {
     const repository = createRepository();
-    const { result } = await renderHook(() => useHistoryEntries(repository));
+    const { result } = renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
     jest.useFakeTimers();
@@ -156,6 +156,43 @@ describe('History entries controller', () => {
     await waitFor(() => expect(result.current.isSearchPending).toBe(false));
   });
 
+  test('does not paginate the previous query while a search is pending', async () => {
+    const repository = createRepository();
+    repository.findHistory.mockResolvedValueOnce(page([entry], cursor));
+    const { result } = renderHook(() => useHistoryEntries(repository));
+
+    await waitFor(() => expect(result.current.state.status).toBe('loaded'));
+    jest.useFakeTimers();
+
+    await act(async () => {
+      result.current.setSearchText('finance');
+    });
+
+    expect(result.current.isSearchPending).toBe(true);
+
+    await act(async () => {
+      result.current.loadMore();
+    });
+    expect(repository.findHistory).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      jest.advanceTimersByTime(250);
+    });
+    jest.useRealTimers();
+
+    await waitFor(() => expect(repository.findHistory).toHaveBeenCalledTimes(2));
+    expect(repository.findHistory).toHaveBeenLastCalledWith({
+      searchText: 'finance',
+      filters: {
+        entryType: null,
+        hasEvidence: false,
+        reviewReadyOnly: false,
+      },
+      cursor: null,
+      limit: 50,
+    });
+  });
+
   test('ignores an older request that resolves after a newer query', async () => {
     const first = deferred<WorkEntryHistoryPage>();
     const second = deferred<WorkEntryHistoryPage>();
@@ -165,7 +202,7 @@ describe('History entries controller', () => {
         .mockReturnValueOnce(first.promise)
         .mockReturnValueOnce(second.promise),
     };
-    const { result } = await renderHook(() => useHistoryEntries(repository));
+    const { result } = renderHook(() => useHistoryEntries(repository));
 
     await act(async () => {
       result.current.setEntryType('problem_solved');
@@ -194,7 +231,7 @@ describe('History entries controller', () => {
     repository.findHistory
       .mockResolvedValueOnce(page([entry], cursor))
       .mockResolvedValueOnce(page([secondEntry]));
-    const { result } = await renderHook(() => useHistoryEntries(repository));
+    const { result } = renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -219,7 +256,7 @@ describe('History entries controller', () => {
       .mockResolvedValueOnce(page([entry], cursor))
       .mockRejectedValueOnce(new Error('next page unavailable'))
       .mockResolvedValueOnce(page([secondEntry]));
-    const { result } = await renderHook(() => useHistoryEntries(repository));
+    const { result } = renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -253,7 +290,7 @@ describe('History entries controller', () => {
     repository.findHistory
       .mockRejectedValueOnce(new Error('database unavailable'))
       .mockResolvedValueOnce(page([entry]));
-    const { result } = await renderHook(() => useHistoryEntries(repository));
+    const { result } = renderHook(() => useHistoryEntries(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('error'));
     expect(result.current.state.entries).toEqual([]);

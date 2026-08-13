@@ -4,6 +4,7 @@ import { Manrope_700Bold } from '@expo-google-fonts/manrope/700Bold';
 import { Manrope_800ExtraBold } from '@expo-google-fonts/manrope/800ExtraBold';
 import { useFonts } from '@expo-google-fonts/manrope/useFonts';
 import * as SplashScreen from 'expo-splash-screen';
+import { StrictMode } from 'react';
 import {
   initialWindowMetrics,
   SafeAreaProvider,
@@ -32,16 +33,18 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <ThemeProvider>
-        <I18nProvider>
-          <OnboardingProvider>
-            <AppLockProvider>
-              <RootNavigator />
-            </AppLockProvider>
-          </OnboardingProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <StrictMode>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <ThemeProvider>
+          <I18nProvider>
+            <OnboardingProvider>
+              <AppLockProvider>
+                <RootNavigator />
+              </AppLockProvider>
+            </OnboardingProvider>
+          </I18nProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </StrictMode>
   );
 }

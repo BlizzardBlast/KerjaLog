@@ -72,9 +72,13 @@ export function useHistoryEntries(
   const hasMoreRef = useRef(false);
   const isLoadingMoreRef = useRef(false);
   const loadMoreErrorRef = useRef(false);
+  const isSearchPendingRef = useRef(false);
+  const isSearchPending = searchText !== debouncedSearchText;
 
   useEffect(() => {
-    if (searchText === debouncedSearchText) {
+    isSearchPendingRef.current = isSearchPending;
+
+    if (!isSearchPending) {
       return;
     }
 
@@ -85,7 +89,7 @@ export function useHistoryEntries(
     return () => {
       clearTimeout(timeout);
     };
-  }, [debouncedSearchText, searchText]);
+  }, [isSearchPending, searchText]);
 
   const query = useMemo<Omit<WorkEntryHistoryQuery, 'cursor' | 'limit'>>(
     () => ({
@@ -155,6 +159,7 @@ export function useHistoryEntries(
     const cursor = nextCursorRef.current;
 
     if (
+      isSearchPendingRef.current ||
       cursor === null ||
       !hasMoreRef.current ||
       isLoadingMoreRef.current ||
@@ -224,7 +229,11 @@ export function useHistoryEntries(
   }, [query, repository]);
 
   const retryLoadMore = useCallback(() => {
-    if (!loadMoreErrorRef.current || isLoadingMoreRef.current) {
+    if (
+      isSearchPendingRef.current ||
+      !loadMoreErrorRef.current ||
+      isLoadingMoreRef.current
+    ) {
       return;
     }
 
@@ -238,6 +247,7 @@ export function useHistoryEntries(
 
       return () => {
         requestIdRef.current += 1;
+        isSearchPendingRef.current = false;
         isLoadingMoreRef.current = false;
         loadMoreErrorRef.current = false;
       };
@@ -245,8 +255,18 @@ export function useHistoryEntries(
   );
 
   const setSearchText = useCallback((value: string) => {
-    setSearchTextState(value.slice(0, HISTORY_SEARCH_MAX_LENGTH));
-  }, []);
+    const nextSearchText = value.slice(0, HISTORY_SEARCH_MAX_LENGTH);
+
+    if (nextSearchText === searchText) {
+      return;
+    }
+
+    requestIdRef.current += 1;
+    isSearchPendingRef.current = nextSearchText !== debouncedSearchText;
+    isLoadingMoreRef.current = false;
+    loadMoreErrorRef.current = false;
+    setSearchTextState(nextSearchText);
+  }, [debouncedSearchText, searchText]);
 
   const setEntryType = useCallback((entryType: EntryType | null) => {
     setFilters((current) => ({ ...current, entryType }));
@@ -272,7 +292,7 @@ export function useHistoryEntries(
 
   return {
     searchText,
-    isSearchPending: searchText !== debouncedSearchText,
+    isSearchPending,
     setSearchText,
     filters,
     setEntryType,

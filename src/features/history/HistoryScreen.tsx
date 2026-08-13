@@ -1,19 +1,14 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  SectionList,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { ActivityIndicator, SectionList, StyleSheet, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { radii, spacing } from '@/design-system/tokens/theme';
+import { layout, radii, spacing } from '@/design-system/tokens/theme';
 import { hasWorkEntryHistoryFilters } from '@/domain/entry/history';
 import type { WorkEntry } from '@/domain/entry/model';
 import { HistoryEntryCard } from '@/features/history/components/HistoryEntryCard';
@@ -28,8 +23,6 @@ import {
   useHistoryEntries,
 } from '@/features/history/useHistoryEntries';
 import { useI18n } from '@/i18n/I18nProvider';
-
-const SCREEN_HORIZONTAL_PADDING = spacing[6];
 
 export function HistoryScreen() {
   const router = useRouter();
@@ -65,8 +58,14 @@ export function HistoryScreen() {
         contentContainerStyle={[
           styles.content,
           {
-            paddingLeft: Math.max(insets.left, SCREEN_HORIZONTAL_PADDING),
-            paddingRight: Math.max(insets.right, SCREEN_HORIZONTAL_PADDING),
+            paddingLeft: Math.max(
+              insets.left,
+              layout.screenHorizontalPadding,
+            ),
+            paddingRight: Math.max(
+              insets.right,
+              layout.screenHorizontalPadding,
+            ),
           },
         ]}
         ListHeaderComponent={
@@ -75,7 +74,9 @@ export function HistoryScreen() {
               <Text variant="overline" color="primary">
                 {t('history.eyebrow')}
               </Text>
-              <Text variant="title">{t('history.title')}</Text>
+              <Text accessibilityRole="header" variant="title">
+                {t('history.title')}
+              </Text>
               <Text color="textMuted">{t('history.description')}</Text>
             </View>
             <HistorySearchField
@@ -121,7 +122,9 @@ export function HistoryScreen() {
 function HistoryMonthHeader({ section }: { section: HistorySection }) {
   return (
     <View style={styles.monthHeader}>
-      <Text variant="heading">{section.title}</Text>
+      <Text accessibilityRole="header" variant="heading">
+        {section.title}
+      </Text>
     </View>
   );
 }
@@ -153,6 +156,8 @@ function HistoryEmptyContent({
         accessibilityLabel={t(
           isSearchPending ? 'history.updating' : 'history.loading',
         )}
+        accessibilityRole="progressbar"
+        accessibilityState={{ busy: true }}
         style={styles.stateContainer}
       >
         <ActivityIndicator color={theme.colors.primary} />
@@ -173,19 +178,9 @@ function HistoryEmptyContent({
       >
         <Text variant="heading">{t('history.error.title')}</Text>
         <Text color="textMuted">{t('history.error.description')}</Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onRetry}
-          style={({ pressed }) => [
-            styles.retryButton,
-            { backgroundColor: theme.colors.primary },
-            pressed && styles.pressed,
-          ]}
-        >
-          <Text variant="label" color="onPrimary">
-            {t('history.error.retry')}
-          </Text>
-        </Pressable>
+        <Button size="sm" onPress={onRetry} style={styles.retryButton}>
+          {t('history.error.retry')}
+        </Button>
       </View>
     );
   }
@@ -232,7 +227,10 @@ function HistoryListFooter({
   ) {
     return (
       <ActivityIndicator
+        accessible
         accessibilityLabel={t('history.updating')}
+        accessibilityRole="progressbar"
+        accessibilityState={{ busy: true }}
         color={theme.colors.primary}
         style={styles.footerLoader}
       />
@@ -242,7 +240,10 @@ function HistoryListFooter({
   if (state.status === 'loaded' && state.isLoadingMore) {
     return (
       <ActivityIndicator
+        accessible
         accessibilityLabel={t('history.loadingMore')}
+        accessibilityRole="progressbar"
+        accessibilityState={{ busy: true }}
         color={theme.colors.primary}
         style={styles.footerLoader}
       />
@@ -255,20 +256,14 @@ function HistoryListFooter({
         <Text variant="caption" color="textMuted">
           {t('history.loadMoreError')}
         </Text>
-        <Pressable
-          accessibilityRole="button"
+        <Button
+          size="sm"
+          variant="secondary"
           onPress={onRetry}
-          style={({ pressed }) => [
-            styles.loadMoreRetryButton,
-            {
-              backgroundColor: theme.colors.surfaceSubtle,
-              borderColor: theme.colors.border,
-            },
-            pressed && styles.pressed,
-          ]}
+          style={styles.loadMoreRetryButton}
         >
-          <Text variant="label">{t('history.loadMoreRetry')}</Text>
-        </Pressable>
+          {t('history.loadMoreRetry')}
+        </Button>
       </View>
     );
   }
@@ -310,13 +305,8 @@ const styles = StyleSheet.create({
     padding: spacing[5],
   },
   retryButton: {
-    alignItems: 'center',
     alignSelf: 'flex-start',
-    borderRadius: radii.md,
-    justifyContent: 'center',
     marginTop: spacing[2],
-    minHeight: 48,
-    paddingHorizontal: spacing[4],
   },
   footerLoader: {
     marginTop: spacing[4],
@@ -327,14 +317,6 @@ const styles = StyleSheet.create({
     marginTop: spacing[4],
   },
   loadMoreRetryButton: {
-    alignItems: 'center',
-    borderRadius: radii.md,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: 44,
-    paddingHorizontal: spacing[4],
-  },
-  pressed: {
-    opacity: 0.78,
+    alignSelf: 'center',
   },
 });

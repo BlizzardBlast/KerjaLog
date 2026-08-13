@@ -1,9 +1,7 @@
 import type { EntryType, WorkEntry } from '@/domain/entry/model';
 
 export const HISTORY_PAGE_SIZE = 50;
-export const HISTORY_PAGE_MAX_SIZE = 100;
 export const HISTORY_SEARCH_MAX_LENGTH = 256;
-export const HISTORY_SEARCH_MAX_TERMS = 16;
 
 export type WorkEntryHistoryFilters = {
   entryType: EntryType | null;

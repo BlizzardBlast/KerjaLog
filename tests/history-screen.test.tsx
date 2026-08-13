@@ -3,6 +3,7 @@ import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { EMPTY_WORK_ENTRY_HISTORY_FILTERS } from '@/domain/entry/history';
 import type { WorkEntry } from '@/domain/entry/model';
 import { HistoryScreen } from '@/features/history/HistoryScreen';
+import type { HistoryEntriesController } from '@/features/history/useHistoryEntries';
 
 const mockUseHistoryEntries = jest.fn();
 const mockPush = jest.fn();
@@ -59,8 +60,8 @@ const entry: WorkEntry = {
 };
 
 function createController(
-  overrides: Record<string, unknown> = {},
-): Record<string, unknown> {
+  overrides: Partial<HistoryEntriesController> = {},
+): HistoryEntriesController {
   return {
     searchText: '',
     isSearchPending: false,
@@ -89,7 +90,7 @@ describe('HistoryScreen', () => {
     jest.clearAllMocks();
   });
 
-  test('routes the pagination error footer through the explicit retry action', async () => {
+  test('routes the pagination error footer through the explicit retry action', () => {
     const retryLoadMore = jest.fn();
     mockUseHistoryEntries.mockReturnValue(
       createController({
@@ -104,21 +105,36 @@ describe('HistoryScreen', () => {
       }),
     );
 
-    await render(
+    render(
       <ThemeProvider>
         <HistoryScreen />
       </ThemeProvider>,
     );
 
     expect(screen.getByText('history.loadMoreError')).toBeTruthy();
-    await fireEvent.press(
+    fireEvent.press(
       screen.getByRole('button', { name: 'history.loadMoreRetry' }),
     );
 
     expect(retryLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  test('shows updating state instead of a stale no-match result while search is pending', async () => {
+  test('exposes History headings with header semantics', () => {
+    mockUseHistoryEntries.mockReturnValue(createController());
+
+    render(
+      <ThemeProvider>
+        <HistoryScreen />
+      </ThemeProvider>,
+    );
+
+    expect(
+      screen.getByRole('header', { name: 'history.title' }),
+    ).toBeTruthy();
+    expect(screen.getAllByRole('header')).toHaveLength(2);
+  });
+
+  test('shows an accessible progress state instead of stale no-match content while search is pending', () => {
     mockUseHistoryEntries.mockReturnValue(
       createController({
         searchText: 'finance',
@@ -133,13 +149,15 @@ describe('HistoryScreen', () => {
       }),
     );
 
-    await render(
+    render(
       <ThemeProvider>
         <HistoryScreen />
       </ThemeProvider>,
     );
 
-    expect(screen.getByLabelText('history.updating')).toBeTruthy();
+    expect(
+      screen.getByRole('progressbar', { name: 'history.updating' }),
+    ).toBeTruthy();
     expect(screen.queryByText('history.noMatches.title')).toBeNull();
   });
 });

@@ -3,8 +3,10 @@ import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import type { WorkEntry } from '@/domain/entry/model';
 import { HistoryEntryCard } from '@/features/history/components/HistoryEntryCard';
 
+const mockSymbolView = jest.fn((_props: unknown) => null);
+
 jest.mock('expo-symbols', () => ({
-  SymbolView: () => null,
+  SymbolView: (props: unknown) => mockSymbolView(props),
 }));
 
 jest.mock('@/i18n/I18nProvider', () => ({
@@ -36,8 +38,12 @@ function createEntry(overrides: Partial<WorkEntry> = {}): WorkEntry {
 }
 
 describe('HistoryEntryCard', () => {
-  test('renders persisted evidence and exposes the detail-navigation hint', async () => {
-    await render(
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('renders persisted evidence and exposes the detail-navigation hint', () => {
+    render(
       <ThemeProvider>
         <HistoryEntryCard entry={createEntry()} onPress={jest.fn()} />
       </ThemeProvider>,
@@ -55,10 +61,10 @@ describe('HistoryEntryCard', () => {
     );
   });
 
-  test('marks challenge entries as private and remains actionable', async () => {
+  test('marks challenge entries as private with a cross-platform lock symbol and remains actionable', () => {
     const onPress = jest.fn();
 
-    await render(
+    render(
       <ThemeProvider>
         <HistoryEntryCard
           entry={createEntry({
@@ -71,9 +77,21 @@ describe('HistoryEntryCard', () => {
       </ThemeProvider>,
     );
 
-    expect(screen.getByText('history.status.private')).toBeTruthy();
+    const privateLabel = screen.getByText('history.status.private');
+    expect(privateLabel).toBeTruthy();
+    expect(privateLabel.props.numberOfLines).toBeUndefined();
+    expect(
+      mockSymbolView.mock.calls.some(([props]) => {
+        const { name } = props as { name?: unknown };
 
-    await fireEvent.press(screen.getByRole('button'));
+        return (
+          JSON.stringify(name) ===
+          JSON.stringify({ ios: 'lock.fill', android: 'lock', web: 'lock' })
+        );
+      }),
+    ).toBe(true);
+
+    fireEvent.press(screen.getByRole('button'));
 
     expect(onPress).toHaveBeenCalledTimes(1);
   });

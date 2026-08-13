@@ -14,7 +14,7 @@ import {
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { spacing } from '@/design-system/tokens/theme';
+import { layout, spacing } from '@/design-system/tokens/theme';
 import { OnboardingHeader } from '@/features/onboarding/components/OnboardingHeader';
 import {
   OnboardingStepTransition,
@@ -23,8 +23,6 @@ import {
 import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
-
-const SCREEN_HORIZONTAL_PADDING = 22;
 
 export function OnboardingScreen() {
   const router = useRouter();
@@ -67,8 +65,8 @@ export function OnboardingScreen() {
   const CurrentStep = stepConfig.Component;
   const canContinue = stepConfig.canContinue(state);
   const horizontalPadding = {
-    paddingLeft: Math.max(insets.left, SCREEN_HORIZONTAL_PADDING),
-    paddingRight: Math.max(insets.right, SCREEN_HORIZONTAL_PADDING),
+    paddingLeft: Math.max(insets.left, layout.screenHorizontalPadding),
+    paddingRight: Math.max(insets.right, layout.screenHorizontalPadding),
   };
 
   const resetScrollAfterStepChange = () => {
