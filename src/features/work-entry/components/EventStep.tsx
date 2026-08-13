@@ -1,6 +1,7 @@
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
+import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { InlineError } from '@/features/work-entry/components/InlineError';
@@ -45,24 +46,14 @@ export function EventStep({
       />
       <View style={logStepStyles.field}>
         <Text variant="label">{t('log.event.label')}</Text>
-        <TextInput
+        <TextField
           accessibilityLabel={t('log.event.label')}
+          hasError={noteError}
           maxLength={2000}
           multiline
           onChangeText={onRawNoteChange}
           placeholder={t('log.event.placeholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          style={[
-            styles.textarea,
-            theme.typography.body,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: noteError
-                ? theme.colors.danger
-                : theme.colors.border,
-              color: theme.colors.text,
-            },
-          ]}
+          style={styles.textarea}
           textAlignVertical="top"
           value={rawNote}
         />
