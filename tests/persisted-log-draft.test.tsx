@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react-native';
-import { AppState } from 'react-native';
+import { AppState, type AppStateStatus } from 'react-native';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { WorkEntryDraftWriter } from '@/domain/entry/repository';
 import { usePersistedLogDraft } from '@/features/work-entry/usePersistedLogDraft';
@@ -49,7 +49,7 @@ describe('usePersistedLogDraft', () => {
 
   test('persists the latest committed draft when the app leaves the foreground', async () => {
     const repository = createRepository();
-    let appStateListener: ((state: string) => void) | undefined;
+    let appStateListener: ((state: AppStateStatus) => void) | undefined;
     const remove = jest.fn();
     jest
       .spyOn(AppState, 'addEventListener')
@@ -125,7 +125,7 @@ describe('usePersistedLogDraft', () => {
 
   test('does not persist from AppState after persistence is disabled', async () => {
     const repository = createRepository();
-    let appStateListener: ((state: string) => void) | undefined;
+    let appStateListener: ((state: AppStateStatus) => void) | undefined;
     jest
       .spyOn(AppState, 'addEventListener')
       .mockImplementation((_type, listener) => {
