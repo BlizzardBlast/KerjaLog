@@ -25,7 +25,9 @@ export function TextField({
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleFocus = (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+  const handleFocus = (
+    event: NativeSyntheticEvent<TextInputFocusEventData>,
+  ) => {
     setIsFocused(true);
     onFocus?.(event);
   };
