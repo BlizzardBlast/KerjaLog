@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import {
-  TextInput,
-  type TextInputProps,
-  type TextInputFocusEventData,
-  type NativeSyntheticEvent,
-} from 'react-native';
+import { TextInput, type TextInputProps } from 'react-native';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 
 type TextFieldProps = TextInputProps & {
   hasError?: boolean;
   textVariant?: 'body' | 'bodyStrong';
 };
+
+type TextInputFocusHandler = NonNullable<TextInputProps['onFocus']>;
+type TextInputBlurHandler = NonNullable<TextInputProps['onBlur']>;
 
 export function TextField({
   hasError = false,
@@ -25,14 +23,12 @@ export function TextField({
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleFocus = (
-    event: NativeSyntheticEvent<TextInputFocusEventData>,
-  ) => {
+  const handleFocus: TextInputFocusHandler = (event) => {
     setIsFocused(true);
     onFocus?.(event);
   };
 
-  const handleBlur = (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+  const handleBlur: TextInputBlurHandler = (event) => {
     setIsFocused(false);
     onBlur?.(event);
   };
