@@ -54,7 +54,7 @@ export function RootErrorScreen({ onRetry }: RootErrorScreenProps) {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.surface }]}>
-      <View accessibilityRole="alert" style={styles.copy}>
+      <View accessible accessibilityRole="alert" style={styles.copy}>
         <Text style={[styles.title, { color: colors.text }]}>{copy.title}</Text>
         <Text style={[styles.description, { color: colors.textMuted }]}>
           {copy.description}
