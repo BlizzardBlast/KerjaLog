@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
-import type { WorkEntry } from '@/domain/entry/model';
+import type { WorkEntryDetail } from '@/domain/entry/model';
 import type { WorkEntryByIdReader } from '@/domain/entry/repository';
 
 export type WorkEntryLoadState =
   | { status: 'loading' }
-  | { status: 'loaded'; entry: WorkEntry }
+  | { status: 'loaded'; entry: WorkEntryDetail }
   | { status: 'not-found' }
   | { status: 'error' };
 
