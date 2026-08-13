@@ -228,6 +228,8 @@ Outcome choices should include:
 
 For v1, the Impact Builder must be deterministic and rules/template based. It must not require a remote LLM.
 
+Persist whether a non-empty impact statement is `generated` or `user` authored. Generated statements may be invalidated and rebuilt when the recorded facts change. User-authored impact wording must never be silently overwritten by generated copy. A null impact statement must have null provenance.
+
 ### 3.5 Evidence
 
 Evidence is optional and may include:
@@ -705,6 +707,7 @@ type
 title
 raw_note
 impact_statement
+impact_statement_source
 occurred_at
 project_id
 outcome_type

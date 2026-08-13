@@ -31,7 +31,7 @@ import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 
 const ACTIVE_DRAFT_ID = 1;
 
-type ImpactSourceRow = {
+type DetailedJoinedWorkEntryRow = JoinedWorkEntryRow & {
   impact_statement_source: unknown;
 };
 
@@ -40,7 +40,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     const db = await getDatabase();
 
     return withKeyedDatabaseAccess(async () => {
-      const rows = await db.getAllAsync<JoinedWorkEntryRow>(
+      const rows = await db.getAllAsync<DetailedJoinedWorkEntryRow>(
         `
           SELECT
             work_entries.id,
@@ -48,6 +48,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             work_entries.title,
             work_entries.raw_note,
             work_entries.impact_statement,
+            work_entries.impact_statement_source,
             work_entries.occurred_at,
             work_entries.outcome_type,
             work_entries.status,
@@ -65,42 +66,30 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
         { $id: id },
       );
 
+      const firstRow = rows[0];
       const entry = mapJoinedWorkEntryRows(rows)[0];
-      if (!entry) {
+      if (!entry || !firstRow) {
         return null;
       }
 
-      const [skillRows, impactSourceRow] = await Promise.all([
-        db.getAllAsync<WorkEntrySkillRow>(
-          `
-            SELECT skill_id, source
-            FROM entry_skills
-            WHERE entry_id = $id
-            ORDER BY skill_id ASC
-          `,
-          { $id: id },
-        ),
-        db.getFirstAsync<ImpactSourceRow>(
-          `
-            SELECT impact_statement_source
-            FROM work_entries
-            WHERE id = $id
-          `,
-          { $id: id },
-        ),
-      ]);
-
-      if (!impactSourceRow) {
-        throw new Error('Stored work entry impact source is missing.');
-      }
+      const impactStatementSource = mapImpactStatementSource(
+        firstRow.impact_statement_source,
+        entry.impactStatement,
+      );
+      const skillRows = await db.getAllAsync<WorkEntrySkillRow>(
+        `
+          SELECT skill_id, source
+          FROM entry_skills
+          WHERE entry_id = $id
+          ORDER BY skill_id ASC
+        `,
+        { $id: id },
+      );
 
       return {
         ...entry,
         skills: mapWorkEntrySkillRows(skillRows),
-        impactStatementSource: mapImpactStatementSource(
-          impactSourceRow.impact_statement_source,
-          entry.impactStatement,
-        ),
+        impactStatementSource,
       };
     });
   }

@@ -4,19 +4,6 @@ import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 
-const PROGRESS_SEGMENTS = [
-  'progress-1',
-  'progress-2',
-  'progress-3',
-  'progress-4',
-  'progress-5',
-  'progress-6',
-  'progress-7',
-  'progress-8',
-  'progress-9',
-  'progress-10',
-] as const;
-
 type LogHeaderProps = {
   eyebrow: string;
   title: string;
@@ -37,7 +24,10 @@ export function LogHeader({
   totalSteps,
 }: LogHeaderProps) {
   const { theme } = useTheme();
-  const progressSegments = PROGRESS_SEGMENTS.slice(0, totalSteps);
+  const progressSegments = Array.from(
+    { length: totalSteps },
+    (_, index) => `progress-${index + 1}`,
+  );
 
   return (
     <View style={styles.container}>

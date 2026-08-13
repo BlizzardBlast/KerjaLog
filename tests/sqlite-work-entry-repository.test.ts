@@ -20,6 +20,7 @@ const baseRow = {
   title: 'Helped Finance',
   raw_note: 'Helped Finance reconcile the monthly report.',
   impact_statement: 'Helped Finance reconcile the monthly report.',
+  impact_statement_source: 'generated',
   occurred_at: '2026-08-10T08:00:00.000Z',
   outcome_type: 'person_helped',
   status: 'review_ready',
@@ -123,6 +124,7 @@ describe('SQLiteWorkEntryRepository', () => {
       title: 'Helped Finance',
       rawNote: 'Helped Finance reconcile the monthly report.',
       impactStatement: 'Helped Finance reconcile the monthly report.',
+      impactStatementSource: 'generated',
       occurredAt: '2026-08-10T08:00:00.000Z',
       outcomeType: 'person_helped',
       status: 'review_ready',
@@ -230,6 +232,7 @@ describe('SQLiteWorkEntryRepository', () => {
       title: 'Helped Finance',
       rawNote: 'Helped Finance reconcile the monthly report.',
       impactStatement: 'Helped Finance reconcile the monthly report.',
+      impactStatementSource: 'generated',
       occurredAt: '2026-08-10T08:00:00.000Z',
       outcomeType: 'person_helped',
       status: 'review_ready',
@@ -250,6 +253,7 @@ describe('SQLiteWorkEntryRepository', () => {
       expect.objectContaining({
         $id: 'entry-created',
         $rawNote: input.rawNote,
+        $impactStatementSource: 'generated',
         $excludedFromExports: 0,
       }),
     );
@@ -295,6 +299,7 @@ describe('SQLiteWorkEntryRepository', () => {
           title: 'Resolved reconciliation mismatch',
           raw_note: 'Resolved reconciliation mismatch.',
           impact_statement: 'Corrected the mismatch before submission.',
+          impact_statement_source: 'user',
           outcome_type: 'error_fixed_or_prevented',
           evidence_type: 'number',
           evidence_text_value: '7 duplicate rows removed',
@@ -309,6 +314,7 @@ describe('SQLiteWorkEntryRepository', () => {
       title: 'Resolved reconciliation mismatch',
       rawNote: 'Resolved reconciliation mismatch.',
       impactStatement: 'Corrected the mismatch before submission.',
+      impactStatementSource: 'user',
       occurredAt: '2026-08-10T08:00:00.000Z',
       outcomeType: 'error_fixed_or_prevented',
       status: 'review_ready',
@@ -330,6 +336,7 @@ describe('SQLiteWorkEntryRepository', () => {
       expect.objectContaining({
         $id: 'entry-1',
         $rawNote: input.rawNote,
+        $impactStatementSource: 'user',
         $status: 'review_ready',
       }),
     );
