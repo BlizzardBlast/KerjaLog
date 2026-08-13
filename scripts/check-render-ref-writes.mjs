@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -31,10 +31,6 @@ function collectSourceFiles(directory) {
 }
 
 function checkFile(path) {
-  if (!statSync(path).isFile()) {
-    return [];
-  }
-
   const sourceText = readFileSync(path, 'utf8');
   const sourceFile = ts.createSourceFile(
     path,
@@ -134,7 +130,10 @@ function isRefAssignment(node) {
 }
 
 function isAssignmentOperator(kind) {
-  return kind >= ts.SyntaxKind.FirstAssignment && kind <= ts.SyntaxKind.LastAssignment;
+  return (
+    kind >= ts.SyntaxKind.FirstAssignment &&
+    kind <= ts.SyntaxKind.LastAssignment
+  );
 }
 
 function isCurrentProperty(node) {
