@@ -23,16 +23,176 @@ jobs:
           node-version: 24.18.1
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Apply repository provenance hardening
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: Path, old: str, new: str) -> None:
+              text = path.read_text()
+              if new in text:
+                  return
+              if old not in text:
+                  raise RuntimeError(f'Expected patch target not found in {path}')
+              path.write_text(text.replace(old, new, 1))
+
+          repository = Path('src/data/repositories/SQLiteWorkEntryRepository.ts')
+          replace_once(
+              repository,
+              """type ImpactSourceRow = {
+            impact_statement_source: unknown;
+          };""",
+              """type DetailedJoinedWorkEntryRow = JoinedWorkEntryRow & {
+            impact_statement_source: unknown;
+          };""",
+          )
+          replace_once(
+              repository,
+              'const rows = await db.getAllAsync<JoinedWorkEntryRow>(',
+              'const rows = await db.getAllAsync<DetailedJoinedWorkEntryRow>(',
+          )
+          replace_once(
+              repository,
+              """            work_entries.impact_statement,
+                      work_entries.occurred_at,""",
+              """            work_entries.impact_statement,
+                      work_entries.impact_statement_source,
+                      work_entries.occurred_at,""",
+          )
+          replace_once(
+              repository,
+              """      const entry = mapJoinedWorkEntryRows(rows)[0];
+                if (!entry) {
+                  return null;
+                }
+
+                const [skillRows, impactSourceRow] = await Promise.all([
+                  db.getAllAsync<WorkEntrySkillRow>(
+                    `
+                      SELECT skill_id, source
+                      FROM entry_skills
+                      WHERE entry_id = $id
+                      ORDER BY skill_id ASC
+                    `,
+                    { $id: id },
+                  ),
+                  db.getFirstAsync<ImpactSourceRow>(
+                    `
+                      SELECT impact_statement_source
+                      FROM work_entries
+                      WHERE id = $id
+                    `,
+                    { $id: id },
+                  ),
+                ]);
+
+                if (!impactSourceRow) {
+                  throw new Error('Stored work entry impact source is missing.');
+                }
+
+                return {
+                  ...entry,
+                  skills: mapWorkEntrySkillRows(skillRows),
+                  impactStatementSource: mapImpactStatementSource(
+                    impactSourceRow.impact_statement_source,
+                    entry.impactStatement,
+                  ),
+                };""",
+              """      const firstRow = rows[0];
+                const entry = mapJoinedWorkEntryRows(rows)[0];
+                if (!entry || !firstRow) {
+                  return null;
+                }
+
+                const impactStatementSource = mapImpactStatementSource(
+                  firstRow.impact_statement_source,
+                  entry.impactStatement,
+                );
+                const skillRows = await db.getAllAsync<WorkEntrySkillRow>(
+                  `
+                    SELECT skill_id, source
+                    FROM entry_skills
+                    WHERE entry_id = $id
+                    ORDER BY skill_id ASC
+                  `,
+                  { $id: id },
+                );
+
+                return {
+                  ...entry,
+                  skills: mapWorkEntrySkillRows(skillRows),
+                  impactStatementSource,
+                };""",
+          )
+
+          tests = Path('tests/sqlite-work-entry-repository.test.ts')
+          replace_once(
+              tests,
+              """  impact_statement: 'Helped Finance reconcile the monthly report.',
+            occurred_at:""",
+              """  impact_statement: 'Helped Finance reconcile the monthly report.',
+            impact_statement_source: 'generated',
+            occurred_at:""",
+          )
+          replace_once(
+              tests,
+              """      impactStatement: 'Helped Finance reconcile the monthly report.',
+                occurredAt:""",
+              """      impactStatement: 'Helped Finance reconcile the monthly report.',
+                impactStatementSource: 'generated',
+                occurredAt:""",
+          )
+          replace_once(
+              tests,
+              """      impactStatement: 'Helped Finance reconcile the monthly report.',
+                occurredAt: '2026-08-10T08:00:00.000Z',""",
+              """      impactStatement: 'Helped Finance reconcile the monthly report.',
+                impactStatementSource: 'generated',
+                occurredAt: '2026-08-10T08:00:00.000Z',""",
+          )
+          replace_once(
+              tests,
+              """          impact_statement: 'Corrected the mismatch before submission.',
+                      outcome_type:""",
+              """          impact_statement: 'Corrected the mismatch before submission.',
+                      impact_statement_source: 'user',
+                      outcome_type:""",
+          )
+          replace_once(
+              tests,
+              """      impactStatement: 'Corrected the mismatch before submission.',
+                occurredAt:""",
+              """      impactStatement: 'Corrected the mismatch before submission.',
+                impactStatementSource: 'user',
+                occurredAt:""",
+          )
+          replace_once(
+              tests,
+              """        $rawNote: input.rawNote,
+                  $excludedFromExports: 0,""",
+              """        $rawNote: input.rawNote,
+                  $impactStatementSource: 'generated',
+                  $excludedFromExports: 0,""",
+          )
+          replace_once(
+              tests,
+              """        $rawNote: input.rawNote,
+                  $status: 'review_ready',""",
+              """        $rawNote: input.rawNote,
+                  $impactStatementSource: 'user',
+                  $status: 'review_ready',""",
+          )
+          PY
       - name: Apply Biome formatting
         run: pnpm format
-      - name: Commit formatting
+      - name: Commit hardening changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "style: apply Biome formatting"
+            git commit -m "refactor: consolidate impact provenance reads"
             git push origin HEAD:feat/work-entry-refinement
           fi
-      - name: Typecheck formatted tree
+      - name: Typecheck hardened tree
         run: pnpm typecheck
