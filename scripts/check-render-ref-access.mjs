@@ -129,7 +129,8 @@ function getRefAccessKind(node) {
 
   if (
     parent &&
-    (ts.isPrefixUnaryExpression(parent) || ts.isPostfixUnaryExpression(parent)) &&
+    (ts.isPrefixUnaryExpression(parent) ||
+      ts.isPostfixUnaryExpression(parent)) &&
     parent.operand === node &&
     (parent.operator === ts.SyntaxKind.PlusPlusToken ||
       parent.operator === ts.SyntaxKind.MinusMinusToken)
