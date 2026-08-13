@@ -51,12 +51,12 @@ describe('usePersistedLogDraft', () => {
     const repository = createRepository();
     let appStateListener: ((state: string) => void) | undefined;
     const remove = jest.fn();
-    jest.spyOn(AppState, 'addEventListener').mockImplementation(
-      (_type, listener) => {
+    jest
+      .spyOn(AppState, 'addEventListener')
+      .mockImplementation((_type, listener) => {
         appStateListener = listener;
         return { remove };
-      },
-    );
+      });
     const updatedDraft: WorkEntryDraft = {
       ...draft,
       rawNote: 'Prepared and submitted the weekly report.',
@@ -126,12 +126,12 @@ describe('usePersistedLogDraft', () => {
   test('does not persist from AppState after persistence is disabled', async () => {
     const repository = createRepository();
     let appStateListener: ((state: string) => void) | undefined;
-    jest.spyOn(AppState, 'addEventListener').mockImplementation(
-      (_type, listener) => {
+    jest
+      .spyOn(AppState, 'addEventListener')
+      .mockImplementation((_type, listener) => {
         appStateListener = listener;
         return { remove: jest.fn() };
-      },
-    );
+      });
     const { rerender } = await renderHook(
       ({ enabled }: { enabled: boolean }) =>
         usePersistedLogDraft({ draft, enabled, repository }),
