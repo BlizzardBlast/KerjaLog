@@ -12,6 +12,7 @@ const draft: WorkEntryDraft = {
   evidenceTypes: [],
   evidenceDetail: '',
   impactStatement: '',
+  impactStatementSource: null,
 };
 
 function createRepository(): jest.Mocked<WorkEntryDraftWriter> {
@@ -91,6 +92,7 @@ describe('usePersistedLogDraft', () => {
       evidenceTypes: [],
       evidenceDetail: '',
       impactStatement: '',
+      impactStatementSource: null,
     };
     await renderHook(() =>
       usePersistedLogDraft({ draft: emptyDraft, enabled: true, repository }),
