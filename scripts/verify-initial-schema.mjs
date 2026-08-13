@@ -18,6 +18,20 @@ try {
   db.exec('PRAGMA foreign_keys = ON;');
   db.exec(schemaSql);
 
+  const skills = db
+    .prepare('SELECT id, name_key, category FROM skills ORDER BY id ASC')
+    .all();
+  assert.equal(skills.length, 10, 'Initial schema must seed ten broad skills.');
+  assert.ok(
+    skills.some(
+      (skill) =>
+        skill.id === 'attention_to_detail' &&
+        skill.name_key === 'skill.attentionToDetail' &&
+        skill.category === 'core',
+    ),
+    'Initial schema must seed localized skill identifiers.',
+  );
+
   const insertEntry = db.prepare(`
     INSERT INTO work_entries (
       id,
@@ -47,6 +61,20 @@ try {
     0,
     '2026-08-10T08:01:00.000Z',
     '2026-08-10T08:01:00.000Z',
+  );
+
+  db.prepare(`
+    INSERT INTO entry_skills (entry_id, skill_id, source)
+    VALUES (?, ?, ?)
+  `).run('entry-1', 'attention_to_detail', 'rules');
+
+  assert.deepEqual(
+    db
+      .prepare(
+        'SELECT skill_id, source FROM entry_skills WHERE entry_id = ? ORDER BY skill_id',
+      )
+      .all('entry-1'),
+    [{ skill_id: 'attention_to_detail', source: 'rules' }],
   );
 
   const search = db.prepare(`
@@ -92,6 +120,11 @@ try {
 
   db.prepare('DELETE FROM work_entries WHERE id = ?').run('entry-1');
   assert.deepEqual(searchIds('"monthly"*'), []);
+  assert.equal(
+    db.prepare('SELECT COUNT(*) AS count FROM entry_skills').get().count,
+    0,
+    'Deleting an entry must cascade its confirmed skills.',
+  );
 
   const plan = db
     .prepare(`
