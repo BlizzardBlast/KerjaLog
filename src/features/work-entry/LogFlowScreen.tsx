@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { spacing } from '@/design-system/tokens/theme';
+import { layout, spacing } from '@/design-system/tokens/theme';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
 import { CaptureTypeStep } from '@/features/work-entry/components/CaptureTypeStep';
 import { EventStep } from '@/features/work-entry/components/EventStep';
@@ -28,6 +28,8 @@ import { useI18n } from '@/i18n/I18nProvider';
 type LogFlowScreenProps = {
   initialDraft: WorkEntryDraft | null;
 };
+
+const SAFE_AREA_EDGES = ['top', 'bottom', 'left', 'right'] as const;
 
 export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
   const router = useRouter();
@@ -118,7 +120,7 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
 
   return (
     <SafeAreaView
-      edges={['top', 'bottom']}
+      edges={SAFE_AREA_EDGES}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <KeyboardAvoidingView
@@ -205,7 +207,7 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing[5],
     paddingBottom: spacing[8],
-    paddingHorizontal: 22,
+    paddingHorizontal: layout.screenHorizontalPadding,
     paddingTop: spacing[4],
   },
 });
