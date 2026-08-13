@@ -57,7 +57,11 @@ export function EditEntryScreen({ id }: EditEntryScreenProps) {
         edges={SAFE_AREA_EDGES}
         style={[styles.centered, { backgroundColor: theme.colors.surface }]}
       >
-        <Text accessibilityRole="header" variant="title" style={styles.centeredText}>
+        <Text
+          accessibilityRole="header"
+          variant="title"
+          style={styles.centeredText}
+        >
           {t('entry.refine.notFoundTitle')}
         </Text>
         <Text variant="body" color="textMuted" style={styles.centeredText}>
@@ -76,7 +80,11 @@ export function EditEntryScreen({ id }: EditEntryScreenProps) {
         edges={SAFE_AREA_EDGES}
         style={[styles.centered, { backgroundColor: theme.colors.surface }]}
       >
-        <Text accessibilityRole="header" variant="title" style={styles.centeredText}>
+        <Text
+          accessibilityRole="header"
+          variant="title"
+          style={styles.centeredText}
+        >
           {t('entry.refine.errorTitle')}
         </Text>
         <Text

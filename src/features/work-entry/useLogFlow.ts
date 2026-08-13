@@ -73,10 +73,22 @@ export function useLogFlow({
 
   const intent = useSelector(form.store, (state) => state.values.intent);
   const rawNote = useSelector(form.store, (state) => state.values.rawNote);
-  const outcomeType = useSelector(form.store, (state) => state.values.outcomeType);
-  const evidenceTypes = useSelector(form.store, (state) => state.values.evidenceTypes);
-  const evidenceDetail = useSelector(form.store, (state) => state.values.evidenceDetail);
-  const impactStatement = useSelector(form.store, (state) => state.values.impactStatement);
+  const outcomeType = useSelector(
+    form.store,
+    (state) => state.values.outcomeType,
+  );
+  const evidenceTypes = useSelector(
+    form.store,
+    (state) => state.values.evidenceTypes,
+  );
+  const evidenceDetail = useSelector(
+    form.store,
+    (state) => state.values.evidenceDetail,
+  );
+  const impactStatement = useSelector(
+    form.store,
+    (state) => state.values.impactStatement,
+  );
   const impactStatementSource = useSelector(
     form.store,
     (state) => state.values.impactStatementSource,

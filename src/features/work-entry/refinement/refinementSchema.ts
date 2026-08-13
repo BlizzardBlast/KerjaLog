@@ -8,7 +8,10 @@ import {
 import { ENTRY_SKILL_SOURCES, SKILL_IDS } from '@/domain/skill/model';
 
 const nonBlankString = (maxLength: number) =>
-  z.string().max(maxLength).refine((value) => value.trim().length > 0, 'Required');
+  z
+    .string()
+    .max(maxLength)
+    .refine((value) => value.trim().length > 0, 'Required');
 
 export const entryRefinementSchema = z
   .object({

@@ -58,7 +58,9 @@ export async function saveWorkEntry(
       hasEvidence ? evidenceDetail : undefined,
       impactStatement ?? undefined,
     ),
-    evidence: hasEvidence ? { types: evidenceTypes, detail: evidenceDetail } : null,
+    evidence: hasEvidence
+      ? { types: evidenceTypes, detail: evidenceDetail }
+      : null,
     excludedFromExports: draft.intent === 'challenge',
   });
 }

@@ -432,7 +432,9 @@ function assertEntryWriteInput(
   >,
 ): void {
   if (!isCanonicalIsoTimestamp(input.occurredAt)) {
-    throw new Error('Work entry occurred at must be a canonical ISO timestamp.');
+    throw new Error(
+      'Work entry occurred at must be a canonical ISO timestamp.',
+    );
   }
 
   const hasStatement = input.impactStatement !== null;
