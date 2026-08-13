@@ -23,22 +23,23 @@ jobs:
           node-version: 24.18.1
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Apply repository provenance hardening
+      - name: Apply final hardening patches
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
-          def replace_once(path: Path, old: str, new: str) -> None:
-              text = path.read_text()
+          def replace_once(text: str, old: str, new: str) -> str:
               if new in text:
-                  return
+                  return text
               if old not in text:
-                  raise RuntimeError(f'Expected patch target not found in {path}')
-              path.write_text(text.replace(old, new, 1))
+                  raise RuntimeError(f'Expected patch target not found:\n{old}')
+              return text.replace(old, new, 1)
 
           repository = Path('src/data/repositories/SQLiteWorkEntryRepository.ts')
-          replace_once(
-              repository,
+          text = repository.read_text()
+          text = replace_once(
+              text,
               """type ImpactSourceRow = {
             impact_statement_source: unknown;
           };""",
@@ -46,22 +47,20 @@ jobs:
             impact_statement_source: unknown;
           };""",
           )
-          replace_once(
-              repository,
+          text = replace_once(
+              text,
               'const rows = await db.getAllAsync<JoinedWorkEntryRow>(',
               'const rows = await db.getAllAsync<DetailedJoinedWorkEntryRow>(',
           )
-          replace_once(
-              repository,
+          text = replace_once(
+              text,
               """            work_entries.impact_statement,
                       work_entries.occurred_at,""",
               """            work_entries.impact_statement,
                       work_entries.impact_statement_source,
                       work_entries.occurred_at,""",
           )
-          replace_once(
-              repository,
-              """      const entry = mapJoinedWorkEntryRows(rows)[0];
+          old_detail_block = """      const entry = mapJoinedWorkEntryRows(rows)[0];
                 if (!entry) {
                   return null;
                 }
@@ -97,8 +96,8 @@ jobs:
                     impactSourceRow.impact_statement_source,
                     entry.impactStatement,
                   ),
-                };""",
-              """      const firstRow = rows[0];
+                };"""
+          new_detail_block = """      const firstRow = rows[0];
                 const entry = mapJoinedWorkEntryRows(rows)[0];
                 if (!entry || !firstRow) {
                   return null;
@@ -122,66 +121,101 @@ jobs:
                   ...entry,
                   skills: mapWorkEntrySkillRows(skillRows),
                   impactStatementSource,
-                };""",
-          )
+                };"""
+          text = replace_once(text, old_detail_block, new_detail_block)
+          repository.write_text(text)
 
           tests = Path('tests/sqlite-work-entry-repository.test.ts')
-          replace_once(
-              tests,
+          text = tests.read_text()
+          text = replace_once(
+              text,
               """  impact_statement: 'Helped Finance reconcile the monthly report.',
             occurred_at:""",
               """  impact_statement: 'Helped Finance reconcile the monthly report.',
             impact_statement_source: 'generated',
             occurred_at:""",
           )
-          replace_once(
-              tests,
-              """      impactStatement: 'Helped Finance reconcile the monthly report.',
-                occurredAt:""",
-              """      impactStatement: 'Helped Finance reconcile the monthly report.',
+          # The same object shape occurs once in the findById expectation and once
+          # in the CreateWorkEntry fixture. Make both explicit rather than making
+          # provenance optional in the production contract.
+          source_pair_old = """      impactStatement: 'Helped Finance reconcile the monthly report.',
+                occurredAt:"""
+          source_pair_new = """      impactStatement: 'Helped Finance reconcile the monthly report.',
                 impactStatementSource: 'generated',
-                occurredAt:""",
-          )
-          replace_once(
-              tests,
-              """      impactStatement: 'Helped Finance reconcile the monthly report.',
-                occurredAt: '2026-08-10T08:00:00.000Z',""",
-              """      impactStatement: 'Helped Finance reconcile the monthly report.',
-                impactStatementSource: 'generated',
-                occurredAt: '2026-08-10T08:00:00.000Z',""",
-          )
-          replace_once(
-              tests,
+                occurredAt:"""
+          for _ in range(2):
+              if source_pair_old in text:
+                  text = text.replace(source_pair_old, source_pair_new, 1)
+          text = replace_once(
+              text,
               """          impact_statement: 'Corrected the mismatch before submission.',
                       outcome_type:""",
               """          impact_statement: 'Corrected the mismatch before submission.',
                       impact_statement_source: 'user',
                       outcome_type:""",
           )
-          replace_once(
-              tests,
+          text = replace_once(
+              text,
               """      impactStatement: 'Corrected the mismatch before submission.',
                 occurredAt:""",
               """      impactStatement: 'Corrected the mismatch before submission.',
                 impactStatementSource: 'user',
                 occurredAt:""",
           )
-          replace_once(
-              tests,
+          text = replace_once(
+              text,
               """        $rawNote: input.rawNote,
                   $excludedFromExports: 0,""",
               """        $rawNote: input.rawNote,
                   $impactStatementSource: 'generated',
                   $excludedFromExports: 0,""",
           )
-          replace_once(
-              tests,
+          text = replace_once(
+              text,
               """        $rawNote: input.rawNote,
                   $status: 'review_ready',""",
               """        $rawNote: input.rawNote,
                   $impactStatementSource: 'user',
                   $status: 'review_ready',""",
           )
+          tests.write_text(text)
+
+          header = Path('src/features/work-entry/components/LogHeader.tsx')
+          text = header.read_text()
+          text = re.sub(
+              r"const PROGRESS_SEGMENTS = \[\n(?:  'progress-\d+',\n)+\] as const;\n\n",
+              '',
+              text,
+              count=1,
+          )
+          text = replace_once(
+              text,
+              '  const progressSegments = PROGRESS_SEGMENTS.slice(0, totalSteps);',
+              """  const progressSegments = Array.from(
+                { length: totalSteps },
+                (_, index) => `progress-${index + 1}`,
+              );""",
+          )
+          header.write_text(text)
+
+          docs = Path('docs/PRODUCT_AND_ARCHITECTURE.md')
+          text = docs.read_text()
+          text = replace_once(
+              text,
+              """impact_statement
+          occurred_at""",
+              """impact_statement
+          impact_statement_source
+          occurred_at""",
+          )
+          text = replace_once(
+              text,
+              'For v1, the Impact Builder must be deterministic and rules/template based. It must not require a remote LLM.',
+              """For v1, the Impact Builder must be deterministic and rules/template based. It must not require a remote LLM.
+
+Persist whether a non-empty impact statement is `generated` or `user` authored. Generated statements may be invalidated and rebuilt when the recorded facts change. User-authored impact wording must never be silently overwritten by generated copy. A null impact statement must have null provenance.""",
+          )
+          docs.write_text(text)
           PY
       - name: Apply Biome formatting
         run: pnpm format
@@ -191,7 +225,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "refactor: consolidate impact provenance reads"
+            git commit -m "refactor: finish refinement hardening"
             git push origin HEAD:feat/work-entry-refinement
           fi
       - name: Typecheck hardened tree
