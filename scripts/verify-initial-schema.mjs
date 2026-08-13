@@ -31,9 +31,7 @@ try {
   db.exec(schemaSql);
 
   const databaseSkillSignatures = db
-    .prepare(
-      'SELECT id, slug, name_key, category FROM skills ORDER BY id ASC',
-    )
+    .prepare('SELECT id, slug, name_key, category FROM skills ORDER BY id ASC')
     .all()
     .map(
       (skill) =>
@@ -201,7 +199,8 @@ function readSkillCatalogSignatures(source) {
     .flatMap((statement) => [...statement.declarationList.declarations])
     .find(
       (candidate) =>
-        ts.isIdentifier(candidate.name) && candidate.name.text === 'SKILL_CATALOG',
+        ts.isIdentifier(candidate.name) &&
+        candidate.name.text === 'SKILL_CATALOG',
     );
 
   assert.ok(declaration?.initializer, 'Could not locate SKILL_CATALOG.');
@@ -245,7 +244,8 @@ function readStringProperty(objectLiteral, propertyName) {
   const property = objectLiteral.properties.find(
     (candidate) =>
       ts.isPropertyAssignment(candidate) &&
-      ((ts.isIdentifier(candidate.name) && candidate.name.text === propertyName) ||
+      ((ts.isIdentifier(candidate.name) &&
+        candidate.name.text === propertyName) ||
         (ts.isStringLiteral(candidate.name) &&
           candidate.name.text === propertyName)),
   );
