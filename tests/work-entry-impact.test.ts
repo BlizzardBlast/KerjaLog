@@ -1,6 +1,7 @@
 import {
   buildEntryTitle,
   buildImpactStatement,
+  buildRefinementImpactStatement,
   deriveEntryStatus,
   hasIncompleteEvidence,
   type ImpactBuilderCopy,
@@ -35,9 +36,16 @@ describe('work entry impact rules', () => {
     expect(deriveEntryStatus(null)).toBe('quick_note');
     expect(deriveEntryStatus('unsure')).toBe('quick_note');
     expect(deriveEntryStatus('deadline_met')).toBe('developed');
-    expect(deriveEntryStatus('deadline_met', 'Finished on Friday')).toBe(
-      'review_ready',
-    );
+    expect(
+      deriveEntryStatus('deadline_met', 'Finished on Friday'),
+    ).toBe('developed');
+    expect(
+      deriveEntryStatus(
+        'deadline_met',
+        'Finished on Friday',
+        'Completed the report before Friday close.',
+      ),
+    ).toBe('review_ready');
   });
 
   test('requires evidence type and detail to be supplied together', () => {
@@ -65,6 +73,21 @@ describe('work entry impact rules', () => {
     );
     expect(statement).not.toContain('revenue');
     expect(statement).not.toContain('%');
+  });
+
+  test('builds a refinement statement without inventing an event intent', () => {
+    expect(
+      buildRefinementImpactStatement(
+        {
+          rawNote: 'Checked a mismatch in the monthly report',
+          outcomeType: 'error_fixed_or_prevented',
+          evidenceDetail: '7 duplicate rows were removed',
+        },
+        copy,
+      ),
+    ).toBe(
+      'Checked a mismatch in the monthly report. Outcome: An error was fixed or prevented. Evidence: 7 duplicate rows were removed.',
+    );
   });
 
   test('does not manufacture an outcome when the user is unsure', () => {
