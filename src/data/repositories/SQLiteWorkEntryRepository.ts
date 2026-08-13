@@ -9,19 +9,28 @@ import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
 } from '@/data/repositories/workEntryRowMapper';
+import {
+  mapWorkEntrySkillRows,
+  type WorkEntrySkillRow,
+} from '@/data/repositories/workEntrySkillRowMapper';
 import type {
   WorkEntryHistoryCursor,
   WorkEntryHistoryPage,
   WorkEntryHistoryQuery,
 } from '@/domain/entry/history';
-import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
+import type {
+  CreateWorkEntry,
+  UpdateWorkEntry,
+  WorkEntry,
+  WorkEntryDetail,
+} from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 
 const ACTIVE_DRAFT_ID = 1;
 
 export class SQLiteWorkEntryRepository implements WorkEntryRepository {
-  async findById(id: string): Promise<WorkEntry | null> {
+  async findById(id: string): Promise<WorkEntryDetail | null> {
     const db = await getDatabase();
 
     return withKeyedDatabaseAccess(async () => {
@@ -52,7 +61,25 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
         },
       );
 
-      return mapJoinedWorkEntryRows(rows)[0] ?? null;
+      const entry = mapJoinedWorkEntryRows(rows)[0];
+      if (!entry) {
+        return null;
+      }
+
+      const skillRows = await db.getAllAsync<WorkEntrySkillRow>(
+        `
+          SELECT skill_id, source
+          FROM entry_skills
+          WHERE entry_id = $id
+          ORDER BY skill_id ASC
+        `,
+        { $id: id },
+      );
+
+      return {
+        ...entry,
+        skills: mapWorkEntrySkillRows(skillRows),
+      };
     });
   }
 
@@ -274,6 +301,105 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       createdAt: now,
       updatedAt: now,
     };
+  }
+
+  async update(id: string, input: UpdateWorkEntry): Promise<WorkEntryDetail> {
+    if (!isCanonicalIsoTimestamp(input.occurredAt)) {
+      throw new Error(
+        'Work entry occurred at must be a canonical ISO timestamp.',
+      );
+    }
+
+    const db = await getDatabase();
+    const now = new Date().toISOString();
+    const uniqueSkills = [...new Map(input.skills.map((skill) => [skill.id, skill])).values()];
+
+    await withKeyedTransaction(db, async (transaction) => {
+      const result = await transaction.runAsync(
+        `
+          UPDATE work_entries
+          SET
+            type = $type,
+            title = $title,
+            raw_note = $rawNote,
+            impact_statement = $impactStatement,
+            occurred_at = $occurredAt,
+            outcome_type = $outcomeType,
+            status = $status,
+            excluded_from_exports = $excludedFromExports,
+            updated_at = $updatedAt
+          WHERE id = $id
+        `,
+        {
+          $id: id,
+          $type: input.type,
+          $title: input.title,
+          $rawNote: input.rawNote,
+          $impactStatement: input.impactStatement,
+          $occurredAt: input.occurredAt,
+          $outcomeType: input.outcomeType,
+          $status: input.status,
+          $excludedFromExports: input.excludedFromExports ? 1 : 0,
+          $updatedAt: now,
+        },
+      );
+
+      if (result.changes !== 1) {
+        throw new Error('Work entry to update was not found.');
+      }
+
+      await transaction.runAsync('DELETE FROM evidence WHERE entry_id = $id', {
+        $id: id,
+      });
+
+      for (const type of input.evidence?.types ?? []) {
+        await transaction.runAsync(
+          `
+            INSERT INTO evidence (
+              id,
+              entry_id,
+              type,
+              text_value,
+              created_at
+            )
+            VALUES ($id, $entryId, $type, $textValue, $createdAt)
+          `,
+          {
+            $id: Crypto.randomUUID(),
+            $entryId: id,
+            $type: type,
+            $textValue: input.evidence?.detail ?? null,
+            $createdAt: now,
+          },
+        );
+      }
+
+      await transaction.runAsync(
+        'DELETE FROM entry_skills WHERE entry_id = $id',
+        { $id: id },
+      );
+
+      for (const skill of uniqueSkills) {
+        await transaction.runAsync(
+          `
+            INSERT INTO entry_skills (entry_id, skill_id, source)
+            VALUES ($entryId, $skillId, $source)
+          `,
+          {
+            $entryId: id,
+            $skillId: skill.id,
+            $source: skill.source,
+          },
+        );
+      }
+    });
+
+    const updatedEntry = await this.findById(id);
+    if (!updatedEntry) {
+      throw new Error('Updated work entry could not be reloaded.');
+    }
+
+    return updatedEntry;
   }
 }
 
