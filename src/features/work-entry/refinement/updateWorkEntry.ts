@@ -27,13 +27,15 @@ export async function updateWorkEntry(
   const evidenceDetail = parsed.data.evidenceDetail.trim();
   const hasEvidence = hasUsefulEvidence(evidenceTypes, evidenceDetail);
   const impactStatement = parsed.data.impactStatement.trim() || null;
-  const skills = dedupeSkills(parsed.data.skills);
 
   return repository.update(originalEntry.id, {
     type: parsed.data.type,
     title: buildEntryTitle(rawNote),
     rawNote,
     impactStatement,
+    impactStatementSource: impactStatement
+      ? parsed.data.impactStatementSource
+      : null,
     occurredAt: originalEntry.occurredAt,
     outcomeType: parsed.data.outcomeType,
     status: deriveEntryStatus(
@@ -42,12 +44,9 @@ export async function updateWorkEntry(
       impactStatement ?? undefined,
     ),
     evidence: hasEvidence
-      ? {
-          types: evidenceTypes,
-          detail: evidenceDetail,
-        }
+      ? { types: evidenceTypes, detail: evidenceDetail }
       : null,
-    skills,
+    skills: dedupeSkills(parsed.data.skills),
     excludedFromExports:
       parsed.data.type === 'challenge' || originalEntry.excludedFromExports,
   });
