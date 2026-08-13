@@ -1,6 +1,7 @@
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
+import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import type { OutcomeType } from '@/domain/entry/model';
@@ -84,21 +85,14 @@ export function ImpactStep({
       </View>
       <View style={logStepStyles.field}>
         <Text variant="label">{t('log.impact.editLabel')}</Text>
-        <TextInput
+        <TextField
           accessibilityLabel={t('log.impact.editLabel')}
           maxLength={2500}
           multiline
           onChangeText={onImpactStatementChange}
-          style={[
-            styles.impactInput,
-            theme.typography.bodyStrong,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.border,
-              color: theme.colors.text,
-            },
-          ]}
+          style={styles.impactInput}
           textAlignVertical="top"
+          textVariant="bodyStrong"
           value={impactStatement}
         />
       </View>
