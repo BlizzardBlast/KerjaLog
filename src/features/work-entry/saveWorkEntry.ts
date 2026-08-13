@@ -8,6 +8,7 @@ import {
 } from '@/domain/entry/impact';
 import type {
   EvidenceType,
+  ImpactStatementSource,
   OutcomeType,
   WorkEntry,
 } from '@/domain/entry/model';
@@ -21,6 +22,7 @@ export type SaveWorkEntryDraft = {
   evidenceTypes: EvidenceType[];
   evidenceDetail: string;
   impactStatement: string | null;
+  impactStatementSource: ImpactStatementSource | null;
 };
 
 export async function saveWorkEntry(
@@ -28,26 +30,27 @@ export async function saveWorkEntry(
   repository: WorkEntryWriter = workEntryRepository,
 ): Promise<WorkEntry> {
   const rawNote = draft.rawNote.trim();
-  if (!rawNote) {
-    throw new Error('A work entry requires a note.');
-  }
+  if (!rawNote) throw new Error('A work entry requires a note.');
 
   const evidenceTypes = [...new Set(draft.evidenceTypes)];
   const evidenceDetail = draft.evidenceDetail.trim();
-
   if (hasIncompleteEvidence(evidenceTypes, evidenceDetail)) {
     throw new Error('Evidence requires both a type and a supporting detail.');
   }
 
   const hasEvidence = hasUsefulEvidence(evidenceTypes, evidenceDetail);
   const impactStatement = draft.impactStatement?.trim() || null;
-  const now = new Date().toISOString();
+  if ((impactStatement !== null) !== (draft.impactStatementSource !== null)) {
+    throw new Error('Impact statement provenance is inconsistent.');
+  }
 
+  const now = new Date().toISOString();
   return repository.commit({
     type: entryTypeByIntent[draft.intent],
     title: buildEntryTitle(rawNote),
     rawNote,
     impactStatement,
+    impactStatementSource: draft.impactStatementSource,
     occurredAt: now,
     outcomeType: draft.outcomeType,
     status: deriveEntryStatus(
@@ -55,12 +58,7 @@ export async function saveWorkEntry(
       hasEvidence ? evidenceDetail : undefined,
       impactStatement ?? undefined,
     ),
-    evidence: hasEvidence
-      ? {
-          types: evidenceTypes,
-          detail: evidenceDetail,
-        }
-      : null,
+    evidence: hasEvidence ? { types: evidenceTypes, detail: evidenceDetail } : null,
     excludedFromExports: draft.intent === 'challenge',
   });
 }
