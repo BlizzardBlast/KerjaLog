@@ -124,6 +124,38 @@ describe('History entries controller', () => {
     );
   });
 
+  test('does not paginate with a cursor from the previous filter query', async () => {
+    const repository = createRepository();
+    repository.findHistory
+      .mockResolvedValueOnce(page([entry], cursor))
+      .mockResolvedValueOnce(page([secondEntry]));
+    const { result } = await renderHook(() => useHistoryEntries(repository));
+
+    await waitFor(() => expect(result.current.state.status).toBe('loaded'));
+
+    await act(async () => {
+      result.current.setEntryType('problem_solved');
+      result.current.loadMore();
+    });
+
+    await waitFor(() =>
+      expect(repository.findHistory).toHaveBeenCalledTimes(2),
+    );
+    expect(repository.findHistory).toHaveBeenLastCalledWith({
+      searchText: '',
+      filters: {
+        entryType: 'problem_solved',
+        hasEvidence: false,
+        reviewReadyOnly: false,
+      },
+      cursor: null,
+      limit: 50,
+    });
+    expect(
+      repository.findHistory.mock.calls.some(([query]) => query.cursor !== null),
+    ).toBe(false);
+  });
+
   test('debounces search and exposes pending query state', async () => {
     const repository = createRepository();
     const { result } = await renderHook(() => useHistoryEntries(repository));
