@@ -124,7 +124,7 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.screen}
       >
         <ScrollView
@@ -148,13 +148,15 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
           {flow.step === 'event' ? (
             <EventStep
               {...frame}
+              busy={flow.saving}
               noteError={flow.noteError}
               onContinue={flow.continueFromEvent}
               onRawNoteChange={flow.updateRawNote}
-              onSaveQuick={flow.saveQuick}
+              quickSave={{
+                onPress: flow.saveQuick,
+                hasError: flow.saveError,
+              }}
               rawNote={flow.rawNote}
-              saveError={flow.saveError}
-              saving={flow.saving}
               t={t}
             />
           ) : null}
