@@ -29,8 +29,6 @@ export const entryRefinementEn = {
   'entry.refine.skills.description':
     'KerjaLog can suggest broad skills from the facts you recorded. Confirm only what feels accurate.',
   'entry.refine.skills.suggested': 'Suggested from this entry',
-  'entry.refine.skills.all': 'All skills',
-  'entry.refine.skills.skip': 'Skip skills',
   'entry.refine.skills.continue': 'Review my impact',
   'entry.refine.skills.none': 'No skills confirmed yet',
   'entry.refine.saveError':
@@ -38,16 +36,6 @@ export const entryRefinementEn = {
   'entry.saved.develop': 'Develop this entry',
   'entry.saved.edit': 'Edit entry',
   'entry.saved.whatDemonstrates': 'What this demonstrates',
-  'skill.communication': 'Communication',
-  'skill.collaboration': 'Collaboration',
-  'skill.problemSolving': 'Problem-solving',
-  'skill.execution': 'Execution',
-  'skill.attentionToDetail': 'Attention to detail',
-  'skill.customerOrientation': 'Customer orientation',
-  'skill.ownership': 'Ownership',
-  'skill.adaptability': 'Adaptability',
-  'skill.leadership': 'Leadership',
-  'skill.roleExpertise': 'Technical or role-specific expertise',
 } as const;
 
 export type EntryRefinementTranslationKey = keyof typeof entryRefinementEn;
@@ -85,8 +73,6 @@ export const entryRefinementId: Record<EntryRefinementTranslationKey, string> =
     'entry.refine.skills.description':
       'KerjaLog dapat menyarankan keterampilan umum dari fakta yang Anda catat. Konfirmasi hanya yang menurut Anda akurat.',
     'entry.refine.skills.suggested': 'Disarankan dari catatan ini',
-    'entry.refine.skills.all': 'Semua keterampilan',
-    'entry.refine.skills.skip': 'Lewati keterampilan',
     'entry.refine.skills.continue': 'Tinjau dampak saya',
     'entry.refine.skills.none': 'Belum ada keterampilan yang dikonfirmasi',
     'entry.refine.saveError':
@@ -94,14 +80,4 @@ export const entryRefinementId: Record<EntryRefinementTranslationKey, string> =
     'entry.saved.develop': 'Kembangkan catatan ini',
     'entry.saved.edit': 'Edit catatan',
     'entry.saved.whatDemonstrates': 'Yang ditunjukkan pekerjaan ini',
-    'skill.communication': 'Komunikasi',
-    'skill.collaboration': 'Kolaborasi',
-    'skill.problemSolving': 'Pemecahan masalah',
-    'skill.execution': 'Eksekusi',
-    'skill.attentionToDetail': 'Ketelitian',
-    'skill.customerOrientation': 'Orientasi pelanggan',
-    'skill.ownership': 'Tanggung jawab',
-    'skill.adaptability': 'Adaptabilitas',
-    'skill.leadership': 'Kepemimpinan',
-    'skill.roleExpertise': 'Keahlian teknis atau spesifik peran',
   };
