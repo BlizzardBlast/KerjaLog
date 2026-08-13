@@ -74,7 +74,7 @@ Keep v1 boring where boring is good:
 ```text
 SQLite = persisted product data
 Zustand = ephemeral UI/workflow state
-React Hook Form = active form state
+TanStack Form = active form state
 Network = optional, never required for core entry capture/read
 ```
 

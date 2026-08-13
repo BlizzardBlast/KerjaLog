@@ -63,9 +63,7 @@ export function SkillStep({
                 suggested ? t('entry.refine.skills.suggested') : undefined
               }
               selected={selectedIds.has(skill.id)}
-              onPress={() =>
-                onToggle(skill.id, suggested ? 'rules' : 'user')
-              }
+              onPress={() => onToggle(skill.id, suggested ? 'rules' : 'user')}
               mode="multiple"
             />
           );

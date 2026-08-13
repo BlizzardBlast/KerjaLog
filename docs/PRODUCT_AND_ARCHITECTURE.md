@@ -497,7 +497,7 @@ Expo SDK 57 maps to React Native 0.86 and targets Android SDK 36, which is appro
 | Database encryption  | SQLCipher through `expo-sqlite` config          | Career data may be sensitive                          |
 | Secret storage       | `expo-secure-store`                             | Store the database encryption key and small secrets   |
 | App lock             | `expo-local-authentication`                     | Optional biometric/device authentication              |
-| Forms                | `react-hook-form`                               | Efficient form/wizard state                           |
+| Forms                | `@tanstack/react-form`                               | Efficient form/wizard state                           |
 | Validation           | `zod`                                           | Typed boundary validation                             |
 | Ephemeral app state  | `zustand`                                       | Small UI/workflow state only                          |
 | Localization         | `expo-localization` + `i18next`/`react-i18next` | Indonesian + English without scattered strings        |
@@ -562,7 +562,7 @@ No required server in the core path.
 ```text
 SQLite = persisted product data
 Zustand = ephemeral UI/workflow state
-React Hook Form = active form state
+TanStack Form = active form state
 ```
 
 Do not mirror all entries/projects/evidence from SQLite into a global store.
@@ -1137,7 +1137,7 @@ Only after core retention is proven should the product evaluate:
 | Sync                        | None                                                     |
 | AI                          | Deterministic local rules only                           |
 | Global state                | Zustand for ephemeral state only                         |
-| Forms                       | React Hook Form + Zod                                    |
+| Forms                       | TanStack Form + Zod                                    |
 | Search                      | SQLite FTS5                                              |
 | Reminders                   | Local notifications                                      |
 | Export                      | Local text/Markdown/PDF/share/JSON                       |

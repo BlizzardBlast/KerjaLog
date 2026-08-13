@@ -203,10 +203,7 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
     (state) => state.values.skills,
   );
   const isDirty = useSelector(form.store, (state) => state.isDirty);
-  const isSubmitting = useSelector(
-    form.store,
-    (state) => state.isSubmitting,
-  );
+  const isSubmitting = useSelector(form.store, (state) => state.isSubmitting);
 
   const stepIndex = REFINEMENT_STEPS.indexOf(step);
   const currentStep = stepIndex + 1;

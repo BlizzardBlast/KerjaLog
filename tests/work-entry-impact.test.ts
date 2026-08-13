@@ -36,9 +36,9 @@ describe('work entry impact rules', () => {
     expect(deriveEntryStatus(null)).toBe('quick_note');
     expect(deriveEntryStatus('unsure')).toBe('quick_note');
     expect(deriveEntryStatus('deadline_met')).toBe('developed');
-    expect(
-      deriveEntryStatus('deadline_met', 'Finished on Friday'),
-    ).toBe('developed');
+    expect(deriveEntryStatus('deadline_met', 'Finished on Friday')).toBe(
+      'developed',
+    );
     expect(
       deriveEntryStatus(
         'deadline_met',

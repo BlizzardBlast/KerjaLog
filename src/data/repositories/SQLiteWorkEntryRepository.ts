@@ -312,7 +312,9 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 
     const db = await getDatabase();
     const now = new Date().toISOString();
-    const uniqueSkills = [...new Map(input.skills.map((skill) => [skill.id, skill])).values()];
+    const uniqueSkills = [
+      ...new Map(input.skills.map((skill) => [skill.id, skill])).values(),
+    ];
 
     await withKeyedTransaction(db, async (transaction) => {
       const result = await transaction.runAsync(

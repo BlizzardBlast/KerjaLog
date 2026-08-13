@@ -52,54 +52,55 @@ export const entryRefinementEn = {
 
 export type EntryRefinementTranslationKey = keyof typeof entryRefinementEn;
 
-export const entryRefinementId: Record<EntryRefinementTranslationKey, string> = {
-  'entry.refine.loading': 'Memuat catatan ini…',
-  'entry.refine.notFoundTitle': 'Catatan tidak ditemukan',
-  'entry.refine.notFoundDescription':
-    'Catatan kerja ini sudah tidak tersedia di perangkat ini.',
-  'entry.refine.errorTitle': 'Catatan tidak dapat dibuka',
-  'entry.refine.errorDescription':
-    'KerjaLog tidak dapat membaca catatan ini dari penyimpanan terenkripsi. Silakan coba lagi.',
-  'entry.refine.retry': 'Coba lagi',
-  'entry.refine.back': 'Kembali',
-  'entry.refine.discardTitle': 'Buang perubahan ini?',
-  'entry.refine.discardDescription':
-    'Catatan yang sudah tersimpan tidak akan berubah jika Anda keluar tanpa menyimpan.',
-  'entry.refine.keepEditing': 'Lanjut mengedit',
-  'entry.refine.discard': 'Buang perubahan',
-  'entry.refine.type.eyebrow': 'Jenis catatan',
-  'entry.refine.type.title': 'Pekerjaan seperti apa ini?',
-  'entry.refine.type.description':
-    'Pilih kategori yang paling sesuai. Ini hanya mengatur bukti Anda, bukan menilai pekerjaan.',
-  'entry.refine.type.contribution': 'Kontribusi',
-  'entry.refine.type.problemSolved': 'Masalah terselesaikan',
-  'entry.refine.type.feedback': 'Feedback',
-  'entry.refine.type.learning': 'Pembelajaran',
-  'entry.refine.type.ownership': 'Ownership',
-  'entry.refine.type.challenge': 'Tantangan',
-  'entry.refine.type.continue': 'Tinjau yang terjadi',
-  'entry.refine.skills.eyebrow': 'Bukti karier',
-  'entry.refine.skills.title': 'Apa yang ditunjukkan oleh pekerjaan ini?',
-  'entry.refine.skills.description':
-    'KerjaLog dapat menyarankan keterampilan umum dari fakta yang Anda catat. Konfirmasi hanya yang menurut Anda akurat.',
-  'entry.refine.skills.suggested': 'Disarankan dari catatan ini',
-  'entry.refine.skills.all': 'Semua keterampilan',
-  'entry.refine.skills.skip': 'Lewati keterampilan',
-  'entry.refine.skills.continue': 'Tinjau dampak saya',
-  'entry.refine.skills.none': 'Belum ada keterampilan yang dikonfirmasi',
-  'entry.refine.saveError':
-    'KerjaLog tidak dapat memperbarui catatan ini. Versi tersimpan Anda tidak berubah. Silakan coba lagi.',
-  'entry.saved.develop': 'Kembangkan catatan ini',
-  'entry.saved.edit': 'Edit catatan',
-  'entry.saved.whatDemonstrates': 'Yang ditunjukkan pekerjaan ini',
-  'skill.communication': 'Komunikasi',
-  'skill.collaboration': 'Kolaborasi',
-  'skill.problemSolving': 'Pemecahan masalah',
-  'skill.execution': 'Eksekusi',
-  'skill.attentionToDetail': 'Ketelitian',
-  'skill.customerOrientation': 'Orientasi pelanggan',
-  'skill.ownership': 'Ownership',
-  'skill.adaptability': 'Adaptabilitas',
-  'skill.leadership': 'Kepemimpinan',
-  'skill.roleExpertise': 'Keahlian teknis atau spesifik peran',
-};
+export const entryRefinementId: Record<EntryRefinementTranslationKey, string> =
+  {
+    'entry.refine.loading': 'Memuat catatan ini…',
+    'entry.refine.notFoundTitle': 'Catatan tidak ditemukan',
+    'entry.refine.notFoundDescription':
+      'Catatan kerja ini sudah tidak tersedia di perangkat ini.',
+    'entry.refine.errorTitle': 'Catatan tidak dapat dibuka',
+    'entry.refine.errorDescription':
+      'KerjaLog tidak dapat membaca catatan ini dari penyimpanan terenkripsi. Silakan coba lagi.',
+    'entry.refine.retry': 'Coba lagi',
+    'entry.refine.back': 'Kembali',
+    'entry.refine.discardTitle': 'Buang perubahan ini?',
+    'entry.refine.discardDescription':
+      'Catatan yang sudah tersimpan tidak akan berubah jika Anda keluar tanpa menyimpan.',
+    'entry.refine.keepEditing': 'Lanjut mengedit',
+    'entry.refine.discard': 'Buang perubahan',
+    'entry.refine.type.eyebrow': 'Jenis catatan',
+    'entry.refine.type.title': 'Pekerjaan seperti apa ini?',
+    'entry.refine.type.description':
+      'Pilih kategori yang paling sesuai. Ini hanya mengatur bukti Anda, bukan menilai pekerjaan.',
+    'entry.refine.type.contribution': 'Kontribusi',
+    'entry.refine.type.problemSolved': 'Masalah terselesaikan',
+    'entry.refine.type.feedback': 'Feedback',
+    'entry.refine.type.learning': 'Pembelajaran',
+    'entry.refine.type.ownership': 'Ownership',
+    'entry.refine.type.challenge': 'Tantangan',
+    'entry.refine.type.continue': 'Tinjau yang terjadi',
+    'entry.refine.skills.eyebrow': 'Bukti karier',
+    'entry.refine.skills.title': 'Apa yang ditunjukkan oleh pekerjaan ini?',
+    'entry.refine.skills.description':
+      'KerjaLog dapat menyarankan keterampilan umum dari fakta yang Anda catat. Konfirmasi hanya yang menurut Anda akurat.',
+    'entry.refine.skills.suggested': 'Disarankan dari catatan ini',
+    'entry.refine.skills.all': 'Semua keterampilan',
+    'entry.refine.skills.skip': 'Lewati keterampilan',
+    'entry.refine.skills.continue': 'Tinjau dampak saya',
+    'entry.refine.skills.none': 'Belum ada keterampilan yang dikonfirmasi',
+    'entry.refine.saveError':
+      'KerjaLog tidak dapat memperbarui catatan ini. Versi tersimpan Anda tidak berubah. Silakan coba lagi.',
+    'entry.saved.develop': 'Kembangkan catatan ini',
+    'entry.saved.edit': 'Edit catatan',
+    'entry.saved.whatDemonstrates': 'Yang ditunjukkan pekerjaan ini',
+    'skill.communication': 'Komunikasi',
+    'skill.collaboration': 'Kolaborasi',
+    'skill.problemSolving': 'Pemecahan masalah',
+    'skill.execution': 'Eksekusi',
+    'skill.attentionToDetail': 'Ketelitian',
+    'skill.customerOrientation': 'Orientasi pelanggan',
+    'skill.ownership': 'Ownership',
+    'skill.adaptability': 'Adaptabilitas',
+    'skill.leadership': 'Kepemimpinan',
+    'skill.roleExpertise': 'Keahlian teknis atau spesifik peran',
+  };

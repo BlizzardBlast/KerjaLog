@@ -4,10 +4,7 @@ import {
   EVIDENCE_TYPES,
   OUTCOME_TYPES,
 } from '@/domain/entry/model';
-import {
-  ENTRY_SKILL_SOURCES,
-  SKILL_IDS,
-} from '@/domain/skill/model';
+import { ENTRY_SKILL_SOURCES, SKILL_IDS } from '@/domain/skill/model';
 
 const nonBlankString = (maxLength: number) =>
   z
