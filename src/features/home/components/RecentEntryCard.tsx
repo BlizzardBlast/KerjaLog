@@ -15,7 +15,6 @@ export function RecentEntryCard({ entry, onPress }: RecentEntryCardProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={entry.title}
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
