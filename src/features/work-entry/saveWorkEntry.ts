@@ -40,18 +40,20 @@ export async function saveWorkEntry(
   }
 
   const hasEvidence = hasUsefulEvidence(evidenceTypes, evidenceDetail);
+  const impactStatement = draft.impactStatement?.trim() || null;
   const now = new Date().toISOString();
 
   return repository.commit({
     type: entryTypeByIntent[draft.intent],
     title: buildEntryTitle(rawNote),
     rawNote,
-    impactStatement: draft.impactStatement?.trim() || null,
+    impactStatement,
     occurredAt: now,
     outcomeType: draft.outcomeType,
     status: deriveEntryStatus(
       draft.outcomeType,
       hasEvidence ? evidenceDetail : undefined,
+      impactStatement ?? undefined,
     ),
     evidence: hasEvidence
       ? {
