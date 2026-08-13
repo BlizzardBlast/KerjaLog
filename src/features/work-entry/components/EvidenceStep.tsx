@@ -20,7 +20,7 @@ type EvidenceStepProps = LogStepFrameProps & {
   evidenceError: boolean;
   onToggleType: (type: EvidenceType) => void;
   onDetailChange: (value: string) => void;
-  onSkip: () => void;
+  onSkip?: () => void;
   onContinue: () => void;
   t: Translate;
 };
@@ -72,18 +72,24 @@ export function EvidenceStep({
           <InlineError>{t('log.evidence.detailHelp')}</InlineError>
         ) : null}
       </View>
-      <View style={logStepStyles.buttonRow}>
-        <Button
-          onPress={onSkip}
-          style={logStepStyles.flexButton}
-          variant="secondary"
-        >
-          {t('log.evidence.skip')}
-        </Button>
-        <Button onPress={onContinue} style={logStepStyles.flexButton}>
+      {onSkip ? (
+        <View style={logStepStyles.buttonRow}>
+          <Button
+            onPress={onSkip}
+            style={logStepStyles.flexButton}
+            variant="secondary"
+          >
+            {t('log.evidence.skip')}
+          </Button>
+          <Button onPress={onContinue} style={logStepStyles.flexButton}>
+            {t('log.evidence.continue')}
+          </Button>
+        </View>
+      ) : (
+        <Button fullWidth onPress={onContinue} size="lg">
           {t('log.evidence.continue')}
         </Button>
-      </View>
+      )}
     </>
   );
 }
