@@ -10,9 +10,11 @@ export const logStepStyles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing[2],
   },
   flexButton: {
-    flex: 1,
+    flexBasis: 156,
+    flexGrow: 1,
   },
 });
