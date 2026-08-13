@@ -497,7 +497,7 @@ Expo SDK 57 maps to React Native 0.86 and targets Android SDK 36, which is appro
 | Database encryption  | SQLCipher through `expo-sqlite` config          | Career data may be sensitive                          |
 | Secret storage       | `expo-secure-store`                             | Store the database encryption key and small secrets   |
 | App lock             | `expo-local-authentication`                     | Optional biometric/device authentication              |
-| Forms                | `@tanstack/react-form`                               | Efficient form/wizard state                           |
+| Forms                | `@tanstack/react-form`                       | Efficient form/wizard state                           |
 | Validation           | `zod`                                           | Typed boundary validation                             |
 | Ephemeral app state  | `zustand`                                       | Small UI/workflow state only                          |
 | Localization         | `expo-localization` + `i18next`/`react-i18next` | Indonesian + English without scattered strings        |
@@ -744,10 +744,9 @@ Use localization keys for built-in skill names instead of storing one language a
 entry_id
 skill_id
 source
-confirmed
 ```
 
-`source` can distinguish a user-selected skill from a rules-based suggestion.
+`source` distinguishes a user-selected skill from a rules-based suggestion. Only confirmed relationships are persisted; unconfirmed rule suggestions remain derived UI state.
 
 ### `review_drafts`
 
