@@ -5,7 +5,7 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { spacing } from '@/design-system/tokens/theme';
+import { layout, spacing } from '@/design-system/tokens/theme';
 import { AppLockSettingCard } from '@/features/app-lock/AppLockSettingCard';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
 import { HomeWorkDataError } from '@/features/home/components/HomeWorkDataError';
@@ -19,8 +19,6 @@ import { ThisWeekCard } from '@/features/home/components/ThisWeekCard';
 import { useHomeWorkEntries } from '@/features/home/useHomeWorkEntries';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { InexactReminderNotice } from '@/features/reminder/InexactReminderNotice';
-
-const SCREEN_HORIZONTAL_PADDING = 22;
 
 export function HomeScreen() {
   const router = useRouter();
@@ -42,8 +40,11 @@ export function HomeScreen() {
         contentContainerStyle={[
           styles.content,
           {
-            paddingLeft: Math.max(insets.left, SCREEN_HORIZONTAL_PADDING),
-            paddingRight: Math.max(insets.right, SCREEN_HORIZONTAL_PADDING),
+            paddingLeft: Math.max(insets.left, layout.screenHorizontalPadding),
+            paddingRight: Math.max(
+              insets.right,
+              layout.screenHorizontalPadding,
+            ),
           },
         ]}
         showsVerticalScrollIndicator={false}

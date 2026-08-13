@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from 'react';
 import { AppState } from 'react-native';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import {
@@ -27,12 +33,7 @@ export function usePersistedLogDraft({
   repository = workEntryDraftRepository,
 }: UsePersistedLogDraftOptions): boolean {
   const [hasPersistenceError, setHasPersistenceError] = useState(false);
-  const latestDraftRef = useRef(draft);
-  const enabledRef = useRef(enabled);
   const mountedRef = useRef(false);
-
-  latestDraftRef.current = draft;
-  enabledRef.current = enabled;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -44,7 +45,7 @@ export function usePersistedLogDraft({
 
   const persistDraft = useCallback(
     async (draftToPersist: WorkEntryDraft) => {
-      if (!enabledRef.current || suspendedRef?.current) {
+      if (suspendedRef?.current) {
         return;
       }
 
@@ -79,19 +80,23 @@ export function usePersistedLogDraft({
     return () => clearTimeout(timeout);
   }, [draft, enabled, persistDraft, suspendedRef]);
 
+  const persistLatestDraft = useEffectEvent(() => {
+    if (!enabled || suspendedRef?.current) {
+      return;
+    }
+
+    void persistDraft(draft);
+  });
+
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
-      if (
-        nextState !== 'active' &&
-        enabledRef.current &&
-        !suspendedRef?.current
-      ) {
-        void persistDraft(latestDraftRef.current);
+      if (nextState !== 'active') {
+        persistLatestDraft();
       }
     });
 
     return () => subscription.remove();
-  }, [persistDraft, suspendedRef]);
+  }, []);
 
   return hasPersistenceError;
 }

@@ -1,4 +1,8 @@
 import type { WorkEntryDraft } from '@/domain/entry/draft';
+import type {
+  WorkEntryHistoryPage,
+  WorkEntryHistoryQuery,
+} from '@/domain/entry/history';
 import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
 
 export interface WorkEntryByIdReader {
@@ -8,6 +12,10 @@ export interface WorkEntryByIdReader {
 export interface RecentWorkEntryReader {
   findRecent(limit: number): Promise<WorkEntry[]>;
   countSince(occurredAtInclusive: string): Promise<number>;
+}
+
+export interface WorkEntryHistoryReader {
+  findHistory(query: WorkEntryHistoryQuery): Promise<WorkEntryHistoryPage>;
 }
 
 export interface WorkEntryReader
@@ -22,7 +30,10 @@ export interface WorkEntryWriter {
   commit(input: CreateWorkEntry): Promise<WorkEntry>;
 }
 
-export interface WorkEntryRepository extends WorkEntryReader, WorkEntryWriter {}
+export interface WorkEntryRepository
+  extends WorkEntryReader,
+    WorkEntryHistoryReader,
+    WorkEntryWriter {}
 
 export interface WorkEntryDraftReader {
   loadActive(): Promise<WorkEntryDraft | null>;

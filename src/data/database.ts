@@ -6,6 +6,7 @@ import {
   getStoredDatabaseKey,
   storeDatabaseKey,
 } from '@/platform/secure-storage/databaseKey';
+import { ignoreError } from '@/shared/utils/function';
 
 // This filename intentionally differs from the earlier development database.
 // Before SQLCipher was enabled, a plaintext kerjalog.db could have been created
@@ -84,10 +85,10 @@ async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
 
     return db;
   } catch (error) {
-    await db.closeAsync().catch(() => undefined);
+    await db.closeAsync().catch(ignoreError);
 
     if (deleteDatabaseIfKeyPersistenceFails) {
-      await SQLite.deleteDatabaseAsync(DATABASE_NAME).catch(() => undefined);
+      await SQLite.deleteDatabaseAsync(DATABASE_NAME).catch(ignoreError);
     }
 
     throw error;

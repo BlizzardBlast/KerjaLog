@@ -1,1 +1,1 @@
-export const EMPTY_FUNCTION = () => {};
+export const ignoreError = () => {};

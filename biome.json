@@ -6,6 +6,11 @@
       "src/**/*.tsx",
       "tests/**/*.ts",
       "tests/**/*.tsx",
+      "tests/**/*.js",
+      "scripts/**/*.js",
+      "scripts/**/*.mjs",
+      "plugins/**/*.js",
+      "jest-setup.js",
       "*.json",
       ".github/**/*.yml",
       ".github/**/*.yaml"

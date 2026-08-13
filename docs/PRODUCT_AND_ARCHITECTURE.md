@@ -2,7 +2,7 @@
 
 > Status: product and architecture direction for v1
 >
-> Last reviewed: 2026-08-10
+> Last reviewed: 2026-08-13
 
 KerjaLog is a private, local-first career achievement tracker for office workers. It helps people capture everyday work while it is still fresh, understand the impact of that work, preserve evidence, and turn that evidence into useful material for performance reviews, one-on-ones, resumes, and interviews.
 
@@ -514,15 +514,17 @@ Expo SDK 57 maps to React Native 0.86 and targets Android SDK 36, which is appro
 
 Use one primary formatting/linting toolchain rather than overlapping tools.
 
-A good project direction is:
+The project quality gates are:
 
 ```text
 Biome
 + TypeScript compiler (`tsc --noEmit`)
++ React Compiler healthcheck
++ render-ref purity guard (`pnpm run react:refs:check`)
 + Expo Doctor
 ```
 
-If an Expo/React-Native-specific lint rule later requires ESLint, introduce it intentionally instead of carrying ESLint + Prettier + Biome simultaneously.
+Keep Biome as the primary JavaScript/TypeScript linter and formatter. Add narrow supplemental checks for framework-specific invariants when they provide clear value; do not introduce overlapping formatter/lint stacks by default.
 
 ---
 
@@ -624,6 +626,12 @@ src/
 │       ├── growth.tsx
 │       └── review.tsx
 │
+├── navigation/
+│   ├── AppTabs.tsx
+│   ├── AppTabButton.tsx
+│   ├── RootNavigator.tsx
+│   └── tabs.ts
+│
 ├── features/
 │   ├── onboarding/
 │   ├── work-entry/
@@ -669,6 +677,8 @@ src/
 ```
 
 Route files should stay thin: compose a screen, read route params, and delegate feature behavior.
+
+Keep reusable app-shell navigation composition in `src/navigation`; it may depend on Expo Router but should not absorb feature or business logic.
 
 ---
 
@@ -983,13 +993,18 @@ Use Maestro for cross-platform E2E unless a concrete limitation is found.
 Suggested pull-request checks:
 
 ```text
-Biome check
+Biome lint + format check
 TypeScript: tsc --noEmit
+React Compiler healthcheck
+Render-ref purity guard
+SQLite schema verification
 Unit/component tests
 Expo Doctor
+Native configuration / Android compile when native behavior changes
+Android + iOS export
 ```
 
-Native builds are more expensive and should not be required for every tiny documentation-only change.
+Native builds are more expensive and do not need to run for every tiny documentation-only change if CI is later split by change scope. Changes affecting native configuration, SQLCipher, permissions, or platform modules should continue to exercise a native build path before merge.
 
 Suggested release path:
 

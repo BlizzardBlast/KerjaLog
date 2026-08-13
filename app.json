@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "KerjaLog",
-    "slug": "KerjaLog",
+    "slug": "kerjalog",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,10 @@
     "platforms": ["android", "ios"],
     "ios": {
       "icon": "./assets/kerjalog.icon",
-      "bundleIdentifier": "com.blizzardblast.kerjalog"
+      "bundleIdentifier": "com.blizzardblast.kerjalog",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -65,6 +68,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e4445149-40fd-4c1c-911a-97fb1c41d43d"
+      }
+    },
+    "owner": "blizzardblasts-team"
   }
 }

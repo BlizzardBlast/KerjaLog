@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { layout, spacing } from '@/design-system/tokens/theme';
 
 export function PlaceholderTabScreen({
   eyebrow,
@@ -16,7 +17,7 @@ export function PlaceholderTabScreen({
 
   return (
     <SafeAreaView
-      edges={['top']}
+      edges={['top', 'left', 'right']}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <View style={styles.content}>
@@ -37,8 +38,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: 10,
-    paddingHorizontal: 22,
-    paddingTop: 22,
+    gap: spacing[3],
+    paddingHorizontal: layout.screenHorizontalPadding,
+    paddingTop: spacing[6],
   },
 });

@@ -36,6 +36,7 @@ The repository currently uses:
 - React 19.2.3
 - TypeScript 6 with strict mode
 - Expo Router
+- Expo development builds / dev client
 - React Native Reanimated
 - pnpm
 
@@ -43,26 +44,28 @@ The architecture document lists the additional v1 dependencies that should be in
 
 ## Development
 
+KerjaLog uses an Expo development build rather than Expo Go because the app relies on native capabilities such as SQLCipher, biometrics, notifications, screen privacy, and a local Expo module.
+
 Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-Start Expo:
-
-```bash
-pnpm start
-```
-
-Run a supported platform:
+Create or rebuild the local development client when native dependencies or app configuration change:
 
 ```bash
 pnpm android
 pnpm ios
 ```
 
-For realistic native development, create and use an Expo development build early. SQLCipher and full biometric behavior should not be designed around Expo Go.
+For normal JavaScript/TypeScript iteration after the development client is installed, start Metro in dev-client mode:
+
+```bash
+pnpm start
+```
+
+You normally do not need to rebuild the native client for JavaScript/TypeScript-only changes. Rebuild it after changing native dependencies, Expo config plugins, `app.json`, or native module code.
 
 ## Engineering rule
 

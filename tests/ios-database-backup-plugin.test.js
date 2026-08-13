@@ -30,7 +30,9 @@ describe('withIosDatabaseBackupExclusion', () => {
     expect(result).toContain('excludeKerjaLogDatabaseFromBackup()');
     expect(result).toContain('"SQLite"');
     expect(result).toContain('resourceValues.isExcludedFromBackup = true');
-    expect(result).toContain('try sqliteDirectory.setResourceValues(resourceValues)');
+    expect(result).toContain(
+      'try sqliteDirectory.setResourceValues(resourceValues)',
+    );
     expect(result).toContain('NSLog(');
     expect(result).not.toContain('preconditionFailure(');
   });

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { spacing } from '@/design-system/tokens/theme';
+import { layout, spacing } from '@/design-system/tokens/theme';
 import type { EntryStatus } from '@/domain/entry/model';
 import { EntrySection } from '@/features/work-entry/components/EntrySection';
 import { StatusChip } from '@/features/work-entry/components/StatusChip';
@@ -16,6 +16,8 @@ import { useI18n } from '@/i18n/I18nProvider';
 type SavedEntryScreenProps = {
   id: string;
 };
+
+const SAFE_AREA_EDGES = ['top', 'bottom', 'left', 'right'] as const;
 
 const statusLabelKeyByStatus: Record<EntryStatus, TranslationKey> = {
   quick_note: 'log.saved.quickNote',
@@ -30,14 +32,20 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
   const { state, retry } = useWorkEntry(id);
 
   if (state.status === 'loading') {
+    const loadingLabel = t('log.saved.loading');
+
     return (
       <SafeAreaView
-        edges={['top', 'bottom']}
+        accessible
+        accessibilityLabel={loadingLabel}
+        accessibilityRole="progressbar"
+        accessibilityState={{ busy: true }}
+        edges={SAFE_AREA_EDGES}
         style={[styles.centered, { backgroundColor: theme.colors.surface }]}
       >
         <ActivityIndicator color={theme.colors.primary} size="small" />
         <Text variant="body" color="textMuted">
-          {t('log.saved.loading')}
+          {loadingLabel}
         </Text>
       </SafeAreaView>
     );
@@ -46,7 +54,7 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
   if (state.status === 'not-found') {
     return (
       <SafeAreaView
-        edges={['top', 'bottom']}
+        edges={SAFE_AREA_EDGES}
         style={[styles.centered, { backgroundColor: theme.colors.surface }]}
       >
         <Text variant="title" style={styles.centeredText}>
@@ -65,7 +73,7 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
   if (state.status === 'error') {
     return (
       <SafeAreaView
-        edges={['top', 'bottom']}
+        edges={SAFE_AREA_EDGES}
         style={[styles.centered, { backgroundColor: theme.colors.surface }]}
       >
         <Text variant="title" style={styles.centeredText}>
@@ -103,7 +111,7 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
 
   return (
     <SafeAreaView
-      edges={['top', 'bottom']}
+      edges={SAFE_AREA_EDGES}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
       <ScrollView
@@ -176,7 +184,7 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing[4],
     paddingBottom: spacing[8],
-    paddingHorizontal: 22,
+    paddingHorizontal: layout.screenHorizontalPadding,
     paddingTop: spacing[5],
   },
   heading: {

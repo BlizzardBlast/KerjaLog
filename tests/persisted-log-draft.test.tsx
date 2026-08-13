@@ -1,4 +1,5 @@
 import { act, renderHook } from '@testing-library/react-native';
+import { AppState, type AppStateStatus } from 'react-native';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { WorkEntryDraftWriter } from '@/domain/entry/repository';
 import { usePersistedLogDraft } from '@/features/work-entry/usePersistedLogDraft';
@@ -26,6 +27,7 @@ describe('usePersistedLogDraft', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     jest.useRealTimers();
   });
 
@@ -43,6 +45,40 @@ describe('usePersistedLogDraft', () => {
     });
 
     expect(repository.saveActive).toHaveBeenCalledWith(draft);
+  });
+
+  test('persists the latest committed draft when the app leaves the foreground', async () => {
+    const repository = createRepository();
+    let appStateListener: ((state: AppStateStatus) => void) | undefined;
+    const remove = jest.fn();
+    jest
+      .spyOn(AppState, 'addEventListener')
+      .mockImplementation((_type, listener) => {
+        appStateListener = listener;
+        return { remove };
+      });
+    const updatedDraft: WorkEntryDraft = {
+      ...draft,
+      rawNote: 'Prepared and submitted the weekly report.',
+    };
+    const { rerender } = await renderHook(
+      ({ currentDraft }: { currentDraft: WorkEntryDraft }) =>
+        usePersistedLogDraft({
+          draft: currentDraft,
+          enabled: true,
+          repository,
+        }),
+      { initialProps: { currentDraft: draft } },
+    );
+
+    await rerender({ currentDraft: updatedDraft });
+
+    await act(async () => {
+      appStateListener?.('background');
+      await Promise.resolve();
+    });
+
+    expect(repository.saveActive).toHaveBeenCalledWith(updatedDraft);
   });
 
   test('clears a pristine draft instead of storing empty content', async () => {
@@ -80,6 +116,32 @@ describe('usePersistedLogDraft', () => {
     await rerender({ enabled: false });
     await act(async () => {
       jest.advanceTimersByTime(350);
+      await Promise.resolve();
+    });
+
+    expect(repository.saveActive).not.toHaveBeenCalled();
+    expect(repository.clearActive).not.toHaveBeenCalled();
+  });
+
+  test('does not persist from AppState after persistence is disabled', async () => {
+    const repository = createRepository();
+    let appStateListener: ((state: AppStateStatus) => void) | undefined;
+    jest
+      .spyOn(AppState, 'addEventListener')
+      .mockImplementation((_type, listener) => {
+        appStateListener = listener;
+        return { remove: jest.fn() };
+      });
+    const { rerender } = await renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        usePersistedLogDraft({ draft, enabled, repository }),
+      { initialProps: { enabled: true } },
+    );
+
+    await rerender({ enabled: false });
+
+    await act(async () => {
+      appStateListener?.('background');
       await Promise.resolve();
     });
 

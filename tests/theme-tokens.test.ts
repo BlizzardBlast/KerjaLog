@@ -1,4 +1,4 @@
-import { themes } from '@/design-system/tokens/theme';
+import { fontFamilies, themes, typography } from '@/design-system/tokens/theme';
 
 const MINIMUM_NORMAL_TEXT_CONTRAST = 4.5;
 const MINIMUM_NON_TEXT_CONTRAST = 3;
@@ -75,9 +75,46 @@ describe('theme token contrast', () => {
       themes.dark.colors.controlTrackOff,
       themes.dark.colors.surface,
     ],
+    [
+      'light control border',
+      themes.light.colors.controlBorder,
+      themes.light.colors.surface,
+    ],
+    [
+      'light focused control border',
+      themes.light.colors.controlBorderFocused,
+      themes.light.colors.surface,
+    ],
+    [
+      'dark control border',
+      themes.dark.colors.controlBorder,
+      themes.dark.colors.surface,
+    ],
+    [
+      'dark focused control border',
+      themes.dark.colors.controlBorderFocused,
+      themes.dark.colors.surface,
+    ],
   ])('%s remains distinct from its surface', (_, foreground, background) => {
     expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(
       MINIMUM_NON_TEXT_CONTRAST,
+    );
+  });
+});
+
+describe('typography hierarchy', () => {
+  test('keeps subheading between heading and body emphasis', () => {
+    expect(typography.subheading).toMatchObject({
+      fontFamily: fontFamilies.semiBold,
+      fontSize: 18,
+      lineHeight: 24,
+      letterSpacing: -0.1,
+    });
+    expect(typography.heading.fontSize).toBeGreaterThan(
+      typography.subheading.fontSize,
+    );
+    expect(typography.subheading.fontSize).toBeGreaterThan(
+      typography.body.fontSize,
     );
   });
 });

@@ -6,6 +6,7 @@ import {
   OUTCOME_TYPES,
   type WorkEntry,
 } from '@/domain/entry/model';
+import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 
 export type JoinedWorkEntryRow = {
   id: string;
@@ -181,14 +182,11 @@ function expectNonEmptyString(value: unknown, field: string): string {
 }
 
 function expectIsoTimestamp(value: unknown, field: string): string {
-  const timestamp = expectNonEmptyString(value, field);
-  const parsed = new Date(timestamp);
-
-  if (Number.isNaN(parsed.getTime()) || parsed.toISOString() !== timestamp) {
+  if (!isCanonicalIsoTimestamp(value)) {
     throw new Error(`Stored ${field} is invalid.`);
   }
 
-  return timestamp;
+  return value;
 }
 
 function expectNullableNonEmptyString(

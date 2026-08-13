@@ -42,7 +42,9 @@ function applyDatabaseBackupExclusion(contents) {
   if (!nextContents.includes('import Foundation')) {
     const importAnchor = 'internal import Expo\n';
     if (!nextContents.includes(importAnchor)) {
-      throw new Error('Unable to add Foundation import to the iOS AppDelegate.');
+      throw new Error(
+        'Unable to add Foundation import to the iOS AppDelegate.',
+      );
     }
     nextContents = nextContents.replace(
       importAnchor,
@@ -52,7 +54,9 @@ function applyDatabaseBackupExclusion(contents) {
 
   if (!nextContents.includes(CALL.trim())) {
     if (!nextContents.includes(CALL_ANCHOR)) {
-      throw new Error('Unable to locate the KerjaLog iOS AppDelegate launch anchor.');
+      throw new Error(
+        'Unable to locate the KerjaLog iOS AppDelegate launch anchor.',
+      );
     }
     nextContents = nextContents.replace(CALL_ANCHOR, `${CALL_ANCHOR}\n${CALL}`);
   }

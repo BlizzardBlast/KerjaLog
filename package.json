@@ -13,6 +13,7 @@
     "expo": "~57.0.12",
     "expo-constants": "~57.0.10",
     "expo-crypto": "~57.0.1",
+    "expo-dev-client": "~57.0.11",
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.1",
     "expo-glass-effect": "~57.0.1",
@@ -49,8 +50,7 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
+    "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "lint": "biome lint .",
@@ -58,6 +58,8 @@
     "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
     "compiler:check": "react-compiler-healthcheck",
+    "react:refs:check": "node scripts/check-render-ref-access.mjs",
+    "schema:check": "node scripts/verify-initial-schema.mjs",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -66,7 +68,7 @@
     "native:check": "expo prebuild --clean --no-install && node scripts/verify-native-config.js && cd android && ./gradlew :app:compileDebugKotlin --no-daemon",
     "export:android": "expo export --platform android --output-dir dist/android",
     "export:ios": "expo export --platform ios --output-dir dist/ios",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm run react:refs:check && pnpm run schema:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios"
   },
   "jest": {
     "preset": "jest-expo",

@@ -19,7 +19,7 @@ import {
   type WeeklyReflectionEnableResult,
   type WeeklyReflectionNotificationStatus,
 } from '@/platform/notifications/weeklyReflection';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
+import { ignoreError } from '@/shared/utils/function';
 
 export type OnboardingContextValue = {
   state: OnboardingState;
@@ -52,7 +52,7 @@ export function useOnboardingController(): OnboardingContextValue {
       setIsHydrated(true);
     };
 
-    hydrateOnboarding().catch(EMPTY_FUNCTION);
+    hydrateOnboarding().catch(ignoreError);
 
     return () => {
       ignore = true;
@@ -72,9 +72,9 @@ export function useOnboardingController(): OnboardingContextValue {
     const snapshot = state;
 
     writeQueueRef.current = writeQueueRef.current
-      .catch(EMPTY_FUNCTION)
+      .catch(ignoreError)
       .then(() => saveOnboardingState(snapshot))
-      .catch(EMPTY_FUNCTION);
+      .catch(ignoreError);
   }, [isHydrated, state]);
 
   useEffect(() => {
@@ -142,11 +142,11 @@ export function useOnboardingController(): OnboardingContextValue {
       }
     };
 
-    reconcileReminderState().catch(EMPTY_FUNCTION);
+    reconcileReminderState().catch(ignoreError);
 
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
-        reconcileReminderState().catch(EMPTY_FUNCTION);
+        reconcileReminderState().catch(ignoreError);
       }
     });
 

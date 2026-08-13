@@ -72,7 +72,7 @@ function getVariantConfigs(
     secondary: {
       containerStyle: {
         backgroundColor: theme.colors.surface,
-        borderColor: theme.colors.border,
+        borderColor: theme.colors.controlBorder,
         borderWidth: 1,
       },
       pressedStyle: { backgroundColor: theme.colors.primarySoft },

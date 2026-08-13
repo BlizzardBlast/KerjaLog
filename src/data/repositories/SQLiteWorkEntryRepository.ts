@@ -4,12 +4,19 @@ import {
   withKeyedDatabaseAccess,
   withKeyedTransaction,
 } from '@/data/keyedDatabaseAccess';
+import { buildWorkEntryHistorySqlQuery } from '@/data/queries/workEntryHistoryQuery';
 import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
 } from '@/data/repositories/workEntryRowMapper';
+import type {
+  WorkEntryHistoryCursor,
+  WorkEntryHistoryPage,
+  WorkEntryHistoryQuery,
+} from '@/domain/entry/history';
 import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
+import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 
 const ACTIVE_DRAFT_ID = 1;
 
@@ -81,7 +88,8 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             FROM work_entries
             ORDER BY
               occurred_at DESC,
-              created_at DESC
+              created_at DESC,
+              id DESC
             LIMIT $limit
           )
           SELECT
@@ -104,6 +112,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           ORDER BY
             recent_entries.occurred_at DESC,
             recent_entries.created_at DESC,
+            recent_entries.id DESC,
             evidence.created_at ASC
         `,
         {
@@ -115,8 +124,38 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     });
   }
 
+  async findHistory(
+    query: WorkEntryHistoryQuery,
+  ): Promise<WorkEntryHistoryPage> {
+    const historyQuery = buildWorkEntryHistorySqlQuery(query);
+
+    if (historyQuery.kind === 'empty') {
+      return { entries: [], nextCursor: null };
+    }
+
+    const db = await getDatabase();
+
+    return withKeyedDatabaseAccess(async () => {
+      const rows = await db.getAllAsync<JoinedWorkEntryRow>(
+        historyQuery.sql,
+        historyQuery.parameters,
+      );
+
+      const matchingEntries = mapJoinedWorkEntryRows(rows);
+      const hasMore = matchingEntries.length > query.limit;
+      const entries = matchingEntries.slice(0, query.limit);
+      const lastEntry = entries.at(-1);
+
+      return {
+        entries,
+        nextCursor:
+          hasMore && lastEntry ? createHistoryCursor(lastEntry) : null,
+      };
+    });
+  }
+
   async countSince(occurredAtInclusive: string): Promise<number> {
-    if (!isIsoTimestamp(occurredAtInclusive)) {
+    if (!isCanonicalIsoTimestamp(occurredAtInclusive)) {
       throw new Error('Work entry count boundary must be an ISO timestamp.');
     }
 
@@ -143,6 +182,12 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 
   async commit(input: CreateWorkEntry): Promise<WorkEntry> {
+    if (!isCanonicalIsoTimestamp(input.occurredAt)) {
+      throw new Error(
+        'Work entry occurred at must be a canonical ISO timestamp.',
+      );
+    }
+
     const db = await getDatabase();
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
@@ -232,8 +277,10 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 }
 
-function isIsoTimestamp(value: string): boolean {
-  const parsed = new Date(value);
-
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value;
+function createHistoryCursor(entry: WorkEntry): WorkEntryHistoryCursor {
+  return {
+    occurredAt: entry.occurredAt,
+    createdAt: entry.createdAt,
+    id: entry.id,
+  };
 }

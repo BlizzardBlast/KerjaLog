@@ -1,36 +1,204 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+export const INITIAL_SCHEMA_SQL = `
+  CREATE TABLE work_entries (
+    id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
+    type TEXT NOT NULL CHECK(type IN (
+      'contribution',
+      'problem_solved',
+      'feedback',
+      'learning',
+      'ownership',
+      'challenge'
+    )),
+    title TEXT NOT NULL CHECK(length(trim(title)) > 0),
+    raw_note TEXT NOT NULL CHECK(length(trim(raw_note)) > 0),
+    impact_statement TEXT CHECK(
+      impact_statement IS NULL OR length(trim(impact_statement)) > 0
+    ),
+    occurred_at TEXT NOT NULL CHECK(length(trim(occurred_at)) > 0),
+    outcome_type TEXT CHECK(
+      outcome_type IS NULL OR outcome_type IN (
+        'deadline_met',
+        'error_fixed_or_prevented',
+        'work_faster',
+        'work_clearer',
+        'person_helped',
+        'risk_reduced',
+        'decision_enabled',
+        'skill_gained',
+        'unsure'
+      )
+    ),
+    status TEXT NOT NULL CHECK(status IN (
+      'quick_note',
+      'developed',
+      'review_ready'
+    )),
+    excluded_from_exports INTEGER NOT NULL DEFAULT 0 CHECK(
+      excluded_from_exports IN (0, 1)
+    ),
+    created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
+    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+  );
+
+  CREATE TABLE evidence (
+    id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
+    entry_id TEXT NOT NULL CHECK(length(trim(entry_id)) > 0),
+    type TEXT NOT NULL CHECK(type IN (
+      'number',
+      'deadline',
+      'result',
+      'feedback',
+      'people_helped',
+      'reference_link',
+      'supporting_note'
+    )),
+    text_value TEXT NOT NULL CHECK(length(trim(text_value)) > 0),
+    created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
+    FOREIGN KEY (entry_id)
+      REFERENCES work_entries(id)
+      ON DELETE CASCADE,
+    UNIQUE (entry_id, type)
+  );
+
+  CREATE TABLE active_work_entry_draft (
+    id INTEGER PRIMARY KEY NOT NULL CHECK(id = 1),
+    step TEXT NOT NULL CHECK(step IN (
+      'type',
+      'event',
+      'outcome',
+      'evidence',
+      'impact'
+    )),
+    intent TEXT CHECK(
+      intent IS NULL OR intent IN (
+        'completed',
+        'solved',
+        'helped',
+        'feedback',
+        'learned',
+        'ownership',
+        'challenge'
+      )
+    ),
+    raw_note TEXT NOT NULL DEFAULT '',
+    outcome_type TEXT CHECK(
+      outcome_type IS NULL OR outcome_type IN (
+        'deadline_met',
+        'error_fixed_or_prevented',
+        'work_faster',
+        'work_clearer',
+        'person_helped',
+        'risk_reduced',
+        'decision_enabled',
+        'skill_gained',
+        'unsure'
+      )
+    ),
+    evidence_types TEXT NOT NULL DEFAULT '[]',
+    evidence_detail TEXT NOT NULL DEFAULT '',
+    impact_statement TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+  );
+
+  CREATE INDEX idx_work_entries_history_order
+    ON work_entries(occurred_at DESC, created_at DESC, id DESC);
+
+  CREATE INDEX idx_evidence_entry_id_created_at
+    ON evidence(entry_id, created_at ASC);
+
+  CREATE VIRTUAL TABLE work_entry_history_fts USING fts5(
+    entry_id UNINDEXED,
+    title,
+    raw_note,
+    impact_statement,
+    evidence_text,
+    tokenize = 'unicode61 remove_diacritics 2'
+  );
+
+  CREATE TRIGGER work_entry_history_after_insert
+  AFTER INSERT ON work_entries
+  BEGIN
+    INSERT INTO work_entry_history_fts (
+      entry_id,
+      title,
+      raw_note,
+      impact_statement,
+      evidence_text
+    )
+    VALUES (
+      NEW.id,
+      NEW.title,
+      NEW.raw_note,
+      COALESCE(NEW.impact_statement, ''),
+      ''
+    );
+  END;
+
+  CREATE TRIGGER work_entry_history_after_update
+  AFTER UPDATE OF title, raw_note, impact_statement ON work_entries
+  BEGIN
+    UPDATE work_entry_history_fts
+    SET
+      title = NEW.title,
+      raw_note = NEW.raw_note,
+      impact_statement = COALESCE(NEW.impact_statement, '')
+    WHERE entry_id = NEW.id;
+  END;
+
+  CREATE TRIGGER work_entry_history_after_delete
+  AFTER DELETE ON work_entries
+  BEGIN
+    DELETE FROM work_entry_history_fts
+    WHERE entry_id = OLD.id;
+  END;
+
+  CREATE TRIGGER work_entry_history_evidence_after_insert
+  AFTER INSERT ON evidence
+  BEGIN
+    UPDATE work_entry_history_fts
+    SET evidence_text = COALESCE((
+      SELECT group_concat(DISTINCT evidence.text_value)
+      FROM evidence
+      WHERE evidence.entry_id = NEW.entry_id
+    ), '')
+    WHERE entry_id = NEW.entry_id;
+  END;
+
+  CREATE TRIGGER work_entry_history_evidence_after_update
+  AFTER UPDATE OF entry_id, text_value ON evidence
+  BEGIN
+    UPDATE work_entry_history_fts
+    SET evidence_text = COALESCE((
+      SELECT group_concat(DISTINCT evidence.text_value)
+      FROM evidence
+      WHERE evidence.entry_id = OLD.entry_id
+    ), '')
+    WHERE entry_id = OLD.entry_id;
+
+    UPDATE work_entry_history_fts
+    SET evidence_text = COALESCE((
+      SELECT group_concat(DISTINCT evidence.text_value)
+      FROM evidence
+      WHERE evidence.entry_id = NEW.entry_id
+    ), '')
+    WHERE entry_id = NEW.entry_id;
+  END;
+
+  CREATE TRIGGER work_entry_history_evidence_after_delete
+  AFTER DELETE ON evidence
+  BEGIN
+    UPDATE work_entry_history_fts
+    SET evidence_text = COALESCE((
+      SELECT group_concat(DISTINCT evidence.text_value)
+      FROM evidence
+      WHERE evidence.entry_id = OLD.entry_id
+    ), '')
+    WHERE entry_id = OLD.entry_id;
+  END;
+`;
+
 export async function migrateToVersion1(db: SQLiteDatabase): Promise<void> {
-  await db.execAsync(`
-    CREATE TABLE work_entries (
-      id TEXT PRIMARY KEY NOT NULL,
-      type TEXT NOT NULL,
-      title TEXT NOT NULL,
-      raw_note TEXT NOT NULL,
-      impact_statement TEXT,
-      occurred_at TEXT NOT NULL,
-      outcome_type TEXT,
-      status TEXT NOT NULL,
-      excluded_from_exports INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-
-    CREATE TABLE evidence (
-      id TEXT PRIMARY KEY NOT NULL,
-      entry_id TEXT NOT NULL,
-      type TEXT NOT NULL,
-      text_value TEXT,
-      created_at TEXT NOT NULL,
-      FOREIGN KEY (entry_id)
-        REFERENCES work_entries(id)
-        ON DELETE CASCADE
-    );
-
-    CREATE INDEX idx_work_entries_occurred_at
-      ON work_entries(occurred_at DESC);
-
-    CREATE INDEX idx_evidence_entry_id
-      ON evidence(entry_id);
-  `);
+  await db.execAsync(INITIAL_SCHEMA_SQL);
 }

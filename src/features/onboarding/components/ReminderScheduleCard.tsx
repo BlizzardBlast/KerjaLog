@@ -12,7 +12,7 @@ import {
   withReminderTime,
 } from '@/features/onboarding/reminderSchedule';
 import { useI18n } from '@/i18n/I18nProvider';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
+import { ignoreError } from '@/shared/utils/function';
 
 export type ReminderScheduleCardProps = {
   schedule: WeeklyReminderSchedule;
@@ -31,7 +31,7 @@ export function ReminderScheduleCard({
   const [timePickerVisible, setTimePickerVisible] = useState(false);
 
   const commitSchedule = (nextSchedule: WeeklyReminderSchedule) => {
-    Promise.resolve(onChange(nextSchedule)).catch(EMPTY_FUNCTION);
+    Promise.resolve(onChange(nextSchedule)).catch(ignoreError);
   };
 
   return (

@@ -7,6 +7,12 @@ function assertIncludes(value, expected, label) {
   }
 }
 
+function assertMatches(value, expected, label) {
+  if (!expected.test(value)) {
+    throw new Error(`${label} is missing expected configuration.`);
+  }
+}
+
 const iosDirectory = path.resolve('ios');
 const appDelegatePath = fs
   .readdirSync(iosDirectory, { withFileTypes: true })
@@ -18,7 +24,13 @@ if (!appDelegatePath) {
   throw new Error('Generated iOS AppDelegate.swift could not be found.');
 }
 
+const infoPlistPath = path.join(path.dirname(appDelegatePath), 'Info.plist');
+if (!fs.existsSync(infoPlistPath)) {
+  throw new Error('Generated iOS Info.plist could not be found.');
+}
+
 const appDelegate = fs.readFileSync(appDelegatePath, 'utf8');
+const infoPlist = fs.readFileSync(infoPlistPath, 'utf8');
 const iosPodProperties = JSON.parse(
   fs.readFileSync(path.resolve('ios/Podfile.properties.json'), 'utf8'),
 );
@@ -30,6 +42,12 @@ const androidManifest = fs.readFileSync(
   path.resolve('android/app/src/main/AndroidManifest.xml'),
   'utf8',
 );
+const localAuthenticationManifest = fs.readFileSync(
+  path.resolve(
+    'node_modules/expo-local-authentication/android/src/main/AndroidManifest.xml',
+  ),
+  'utf8',
+);
 
 assertIncludes(
   appDelegate,
@@ -37,6 +55,11 @@ assertIncludes(
   'iOS AppDelegate',
 );
 assertIncludes(appDelegate, 'NSLog(', 'iOS AppDelegate');
+assertMatches(
+  infoPlist,
+  /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/u,
+  'iOS Info.plist',
+);
 
 if (iosPodProperties['expo.sqlite.useSQLCipher'] !== 'true') {
   throw new Error('Generated iOS SQLCipher configuration is not enabled.');
@@ -50,7 +73,17 @@ assertIncludes(
 assertIncludes(
   androidManifest,
   'android.permission.SCHEDULE_EXACT_ALARM',
-  'Android manifest',
+  'Android app manifest',
+);
+assertIncludes(
+  localAuthenticationManifest,
+  'android.permission.USE_BIOMETRIC',
+  'Expo LocalAuthentication manifest',
+);
+assertIncludes(
+  localAuthenticationManifest,
+  'android.permission.USE_FINGERPRINT',
+  'Expo LocalAuthentication manifest',
 );
 
 console.log('Generated native configuration verified.');
