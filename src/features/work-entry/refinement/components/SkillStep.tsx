@@ -20,7 +20,6 @@ type SkillStepProps = LogStepFrameProps & {
   selectedSkills: WorkEntrySkill[];
   suggestedSkillIds: SkillId[];
   onToggle: (skillId: SkillId, source: EntrySkillSource) => void;
-  onSkip: () => void;
   onContinue: () => void;
   t: Translate;
 };
@@ -29,7 +28,6 @@ export function SkillStep({
   selectedSkills,
   suggestedSkillIds,
   onToggle,
-  onSkip,
   onContinue,
   t,
   ...frame
@@ -69,18 +67,9 @@ export function SkillStep({
           );
         })}
       </View>
-      <View style={logStepStyles.buttonRow}>
-        <Button
-          onPress={onSkip}
-          style={logStepStyles.flexButton}
-          variant="secondary"
-        >
-          {t('entry.refine.skills.skip')}
-        </Button>
-        <Button onPress={onContinue} style={logStepStyles.flexButton}>
-          {t('entry.refine.skills.continue')}
-        </Button>
-      </View>
+      <Button fullWidth onPress={onContinue} size="lg">
+        {t('entry.refine.skills.continue')}
+      </Button>
     </>
   );
 }
