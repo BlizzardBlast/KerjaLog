@@ -3,10 +3,15 @@ import type {
   WorkEntryHistoryPage,
   WorkEntryHistoryQuery,
 } from '@/domain/entry/history';
-import type { CreateWorkEntry, WorkEntry } from '@/domain/entry/model';
+import type {
+  CreateWorkEntry,
+  UpdateWorkEntry,
+  WorkEntry,
+  WorkEntryDetail,
+} from '@/domain/entry/model';
 
 export interface WorkEntryByIdReader {
-  findById(id: string): Promise<WorkEntry | null>;
+  findById(id: string): Promise<WorkEntryDetail | null>;
 }
 
 export interface RecentWorkEntryReader {
@@ -30,10 +35,16 @@ export interface WorkEntryWriter {
   commit(input: CreateWorkEntry): Promise<WorkEntry>;
 }
 
+export interface WorkEntryUpdater {
+  /** Atomically replaces the mutable content, evidence, and confirmed skills. */
+  update(id: string, input: UpdateWorkEntry): Promise<WorkEntryDetail>;
+}
+
 export interface WorkEntryRepository
   extends WorkEntryReader,
     WorkEntryHistoryReader,
-    WorkEntryWriter {}
+    WorkEntryWriter,
+    WorkEntryUpdater {}
 
 export interface WorkEntryDraftReader {
   loadActive(): Promise<WorkEntryDraft | null>;
