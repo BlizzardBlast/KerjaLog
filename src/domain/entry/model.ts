@@ -45,6 +45,10 @@ export const EVIDENCE_TYPES = [
 
 export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
 
+export const IMPACT_STATEMENT_SOURCES = ['generated', 'user'] as const;
+
+export type ImpactStatementSource = (typeof IMPACT_STATEMENT_SOURCES)[number];
+
 export type WorkEntryEvidence = {
   types: EvidenceType[];
   detail: string;
@@ -67,13 +71,20 @@ export type WorkEntry = {
 
 export type WorkEntryDetail = WorkEntry & {
   skills: WorkEntrySkill[];
+  impactStatementSource: ImpactStatementSource | null;
 };
 
-export type CreateWorkEntry = Omit<WorkEntry, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateWorkEntry = Omit<
+  WorkEntry,
+  'id' | 'createdAt' | 'updatedAt'
+> & {
+  impactStatementSource: ImpactStatementSource | null;
+};
 
 export type UpdateWorkEntry = Omit<
   WorkEntry,
   'id' | 'createdAt' | 'updatedAt'
 > & {
   skills: WorkEntrySkill[];
+  impactStatementSource: ImpactStatementSource | null;
 };
