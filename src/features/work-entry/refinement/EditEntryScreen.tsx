@@ -148,7 +148,7 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
   };
 
   useLogDraftNavigationGuard({
-    hasUnsavedDraft: refinement.isDirty,
+    hasUnsavedDraft: refinement.isDirty || refinement.currentStep > 1,
     currentStep: refinement.currentStep,
     onInternalBack: handleBack,
     onDiscard: async () => true,
