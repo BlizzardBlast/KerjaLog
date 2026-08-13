@@ -7,6 +7,7 @@ const baseEntry: WorkEntryDetail = {
   title: 'Prepared the report',
   rawNote: 'Prepared the report',
   impactStatement: null,
+  impactStatementSource: null,
   occurredAt: '2026-08-10T08:00:00.000Z',
   outcomeType: null,
   status: 'quick_note',
