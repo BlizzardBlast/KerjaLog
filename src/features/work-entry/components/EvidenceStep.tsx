@@ -1,7 +1,7 @@
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
-import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { TextField } from '@/design-system/components/TextField';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import type { EvidenceType } from '@/domain/entry/model';
 import { InlineError } from '@/features/work-entry/components/InlineError';
@@ -36,8 +36,6 @@ export function EvidenceStep({
   t,
   ...frame
 }: EvidenceStepProps) {
-  const { theme } = useTheme();
-
   return (
     <>
       <LogHeader
@@ -59,24 +57,14 @@ export function EvidenceStep({
       </View>
       <View style={logStepStyles.field}>
         <Text variant="label">{t('log.evidence.detailLabel')}</Text>
-        <TextInput
+        <TextField
           accessibilityLabel={t('log.evidence.detailLabel')}
+          hasError={evidenceError}
           maxLength={1000}
           multiline
           onChangeText={onDetailChange}
           placeholder={t('log.evidence.detailPlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          style={[
-            styles.evidenceInput,
-            theme.typography.body,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: evidenceError
-                ? theme.colors.danger
-                : theme.colors.border,
-              color: theme.colors.text,
-            },
-          ]}
+          style={styles.evidenceInput}
           textAlignVertical="top"
           value={evidenceDetail}
         />
