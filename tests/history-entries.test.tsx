@@ -180,7 +180,9 @@ describe('History entries controller', () => {
     });
     jest.useRealTimers();
 
-    await waitFor(() => expect(repository.findHistory).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(repository.findHistory).toHaveBeenCalledTimes(2),
+    );
     expect(repository.findHistory).toHaveBeenLastCalledWith({
       searchText: 'finance',
       filters: {

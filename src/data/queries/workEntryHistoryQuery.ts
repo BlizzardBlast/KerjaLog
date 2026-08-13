@@ -9,10 +9,7 @@ import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 const HISTORY_PAGE_MAX_SIZE = 100;
 const HISTORY_SEARCH_MAX_TERMS = 16;
 
-type WorkEntryHistoryQueryParameters = Record<
-  string,
-  string | number | null
->;
+type WorkEntryHistoryQueryParameters = Record<string, string | number | null>;
 
 export type WorkEntryHistorySqlQuery =
   | { kind: 'empty' }

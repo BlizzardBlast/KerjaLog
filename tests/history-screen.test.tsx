@@ -128,9 +128,7 @@ describe('HistoryScreen', () => {
       </ThemeProvider>,
     );
 
-    expect(
-      screen.getByRole('header', { name: 'history.title' }),
-    ).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'history.title' })).toBeTruthy();
     expect(screen.getAllByRole('header')).toHaveLength(2);
   });
 

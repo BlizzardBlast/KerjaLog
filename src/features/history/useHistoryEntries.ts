@@ -254,19 +254,22 @@ export function useHistoryEntries(
     }, [loadFirstPage]),
   );
 
-  const setSearchText = useCallback((value: string) => {
-    const nextSearchText = value.slice(0, HISTORY_SEARCH_MAX_LENGTH);
+  const setSearchText = useCallback(
+    (value: string) => {
+      const nextSearchText = value.slice(0, HISTORY_SEARCH_MAX_LENGTH);
 
-    if (nextSearchText === searchText) {
-      return;
-    }
+      if (nextSearchText === searchText) {
+        return;
+      }
 
-    requestIdRef.current += 1;
-    isSearchPendingRef.current = nextSearchText !== debouncedSearchText;
-    isLoadingMoreRef.current = false;
-    loadMoreErrorRef.current = false;
-    setSearchTextState(nextSearchText);
-  }, [debouncedSearchText, searchText]);
+      requestIdRef.current += 1;
+      isSearchPendingRef.current = nextSearchText !== debouncedSearchText;
+      isLoadingMoreRef.current = false;
+      loadMoreErrorRef.current = false;
+      setSearchTextState(nextSearchText);
+    },
+    [debouncedSearchText, searchText],
+  );
 
   const setEntryType = useCallback((entryType: EntryType | null) => {
     setFilters((current) => ({ ...current, entryType }));

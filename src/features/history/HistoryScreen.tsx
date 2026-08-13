@@ -58,10 +58,7 @@ export function HistoryScreen() {
         contentContainerStyle={[
           styles.content,
           {
-            paddingLeft: Math.max(
-              insets.left,
-              layout.screenHorizontalPadding,
-            ),
+            paddingLeft: Math.max(insets.left, layout.screenHorizontalPadding),
             paddingRight: Math.max(
               insets.right,
               layout.screenHorizontalPadding,
