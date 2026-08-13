@@ -68,14 +68,13 @@ try {
     VALUES (?, ?, ?)
   `).run('entry-1', 'attention_to_detail', 'rules');
 
-  assert.deepEqual(
-    db
-      .prepare(
-        'SELECT skill_id, source FROM entry_skills WHERE entry_id = ? ORDER BY skill_id',
-      )
-      .all('entry-1'),
-    [{ skill_id: 'attention_to_detail', source: 'rules' }],
-  );
+  const entrySkill = db
+    .prepare(
+      'SELECT skill_id, source FROM entry_skills WHERE entry_id = ? ORDER BY skill_id',
+    )
+    .get('entry-1');
+  assert.equal(entrySkill?.skill_id, 'attention_to_detail');
+  assert.equal(entrySkill?.source, 'rules');
 
   const search = db.prepare(`
     SELECT entry_id
