@@ -18,16 +18,22 @@ import type {
   WorkEntryHistoryPage,
   WorkEntryHistoryQuery,
 } from '@/domain/entry/history';
-import type {
-  CreateWorkEntry,
-  UpdateWorkEntry,
-  WorkEntry,
-  WorkEntryDetail,
+import {
+  IMPACT_STATEMENT_SOURCES,
+  type ImpactStatementSource,
+  type CreateWorkEntry,
+  type UpdateWorkEntry,
+  type WorkEntry,
+  type WorkEntryDetail,
 } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 
 const ACTIVE_DRAFT_ID = 1;
+
+type ImpactSourceRow = {
+  impact_statement_source: unknown;
+};
 
 export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntryDetail | null> {
@@ -56,9 +62,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           WHERE work_entries.id = $id
           ORDER BY evidence.created_at ASC
         `,
-        {
-          $id: id,
-        },
+        { $id: id },
       );
 
       const entry = mapJoinedWorkEntryRows(rows)[0];
@@ -66,19 +70,37 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
         return null;
       }
 
-      const skillRows = await db.getAllAsync<WorkEntrySkillRow>(
-        `
-          SELECT skill_id, source
-          FROM entry_skills
-          WHERE entry_id = $id
-          ORDER BY skill_id ASC
-        `,
-        { $id: id },
-      );
+      const [skillRows, impactSourceRow] = await Promise.all([
+        db.getAllAsync<WorkEntrySkillRow>(
+          `
+            SELECT skill_id, source
+            FROM entry_skills
+            WHERE entry_id = $id
+            ORDER BY skill_id ASC
+          `,
+          { $id: id },
+        ),
+        db.getFirstAsync<ImpactSourceRow>(
+          `
+            SELECT impact_statement_source
+            FROM work_entries
+            WHERE id = $id
+          `,
+          { $id: id },
+        ),
+      ]);
+
+      if (!impactSourceRow) {
+        throw new Error('Stored work entry impact source is missing.');
+      }
 
       return {
         ...entry,
         skills: mapWorkEntrySkillRows(skillRows),
+        impactStatementSource: mapImpactStatementSource(
+          impactSourceRow.impact_statement_source,
+          entry.impactStatement,
+        ),
       };
     });
   }
@@ -142,9 +164,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             recent_entries.id DESC,
             evidence.created_at ASC
         `,
-        {
-          $limit: limit,
-        },
+        { $limit: limit },
       );
 
       return mapJoinedWorkEntryRows(rows);
@@ -195,9 +215,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           FROM work_entries
           WHERE occurred_at >= $occurredAtInclusive
         `,
-        {
-          $occurredAtInclusive: occurredAtInclusive,
-        },
+        { $occurredAtInclusive: occurredAtInclusive },
       );
 
       if (!row || !Number.isInteger(row.count) || row.count < 0) {
@@ -209,11 +227,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 
   async commit(input: CreateWorkEntry): Promise<WorkEntry> {
-    if (!isCanonicalIsoTimestamp(input.occurredAt)) {
-      throw new Error(
-        'Work entry occurred at must be a canonical ISO timestamp.',
-      );
-    }
+    assertEntryWriteInput(input);
 
     const db = await getDatabase();
     const id = Crypto.randomUUID();
@@ -228,6 +242,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             title,
             raw_note,
             impact_statement,
+            impact_statement_source,
             occurred_at,
             outcome_type,
             status,
@@ -241,6 +256,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             $title,
             $rawNote,
             $impactStatement,
+            $impactStatementSource,
             $occurredAt,
             $outcomeType,
             $status,
@@ -255,6 +271,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           $title: input.title,
           $rawNote: input.rawNote,
           $impactStatement: input.impactStatement,
+          $impactStatementSource: input.impactStatementSource,
           $occurredAt: input.occurredAt,
           $outcomeType: input.outcomeType,
           $status: input.status,
@@ -286,9 +303,6 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
         );
       }
 
-      // Consuming the active draft is part of the same durable commit as the
-      // new entry. A process death can therefore never leave both a committed
-      // entry and a recoverable draft that would save the same work twice.
       await transaction.runAsync(
         'DELETE FROM active_work_entry_draft WHERE id = $activeDraftId',
         { $activeDraftId: ACTIVE_DRAFT_ID },
@@ -296,19 +310,23 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     });
 
     return {
-      ...input,
       id,
+      type: input.type,
+      title: input.title,
+      rawNote: input.rawNote,
+      impactStatement: input.impactStatement,
+      occurredAt: input.occurredAt,
+      outcomeType: input.outcomeType,
+      status: input.status,
+      evidence: input.evidence,
+      excludedFromExports: input.excludedFromExports,
       createdAt: now,
       updatedAt: now,
     };
   }
 
   async update(id: string, input: UpdateWorkEntry): Promise<WorkEntryDetail> {
-    if (!isCanonicalIsoTimestamp(input.occurredAt)) {
-      throw new Error(
-        'Work entry occurred at must be a canonical ISO timestamp.',
-      );
-    }
+    assertEntryWriteInput(input);
 
     const db = await getDatabase();
     const now = new Date().toISOString();
@@ -325,6 +343,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             title = $title,
             raw_note = $rawNote,
             impact_statement = $impactStatement,
+            impact_statement_source = $impactStatementSource,
             occurred_at = $occurredAt,
             outcome_type = $outcomeType,
             status = $status,
@@ -338,6 +357,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           $title: input.title,
           $rawNote: input.rawNote,
           $impactStatement: input.impactStatement,
+          $impactStatementSource: input.impactStatementSource,
           $occurredAt: input.occurredAt,
           $outcomeType: input.outcomeType,
           $status: input.status,
@@ -403,6 +423,55 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 
     return updatedEntry;
   }
+}
+
+function assertEntryWriteInput(
+  input: Pick<
+    CreateWorkEntry,
+    'occurredAt' | 'impactStatement' | 'impactStatementSource'
+  >,
+): void {
+  if (!isCanonicalIsoTimestamp(input.occurredAt)) {
+    throw new Error('Work entry occurred at must be a canonical ISO timestamp.');
+  }
+
+  const hasStatement = input.impactStatement !== null;
+  const hasSource = input.impactStatementSource !== null;
+  if (hasStatement !== hasSource) {
+    throw new Error('Work entry impact statement provenance is inconsistent.');
+  }
+
+  if (
+    input.impactStatementSource !== null &&
+    !IMPACT_STATEMENT_SOURCES.includes(input.impactStatementSource)
+  ) {
+    throw new Error('Work entry impact statement source is invalid.');
+  }
+}
+
+function mapImpactStatementSource(
+  value: unknown,
+  impactStatement: string | null,
+): ImpactStatementSource | null {
+  if (value === null) {
+    if (impactStatement !== null) {
+      throw new Error('Stored work entry impact provenance is inconsistent.');
+    }
+    return null;
+  }
+
+  if (
+    typeof value !== 'string' ||
+    !IMPACT_STATEMENT_SOURCES.includes(value as ImpactStatementSource)
+  ) {
+    throw new Error('Stored work entry impact source is invalid.');
+  }
+
+  if (impactStatement === null) {
+    throw new Error('Stored work entry impact provenance is inconsistent.');
+  }
+
+  return value as ImpactStatementSource;
 }
 
 function createHistoryCursor(entry: WorkEntry): WorkEntryHistoryCursor {
