@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from 'react-native';
 import { ignoreError } from '@/shared/utils/function';
 
 type RootErrorScreenProps = {
