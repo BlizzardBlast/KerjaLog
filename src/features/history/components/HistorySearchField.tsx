@@ -1,8 +1,9 @@
 import { SymbolView } from 'expo-symbols';
-import { type ComponentProps, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import type { ComponentProps } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { HISTORY_SEARCH_MAX_LENGTH } from '@/domain/entry/history';
@@ -33,7 +34,6 @@ export function HistorySearchField({
 }: HistorySearchFieldProps) {
   const { theme } = useTheme();
   const { t } = useI18n();
-  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -46,30 +46,17 @@ export function HistorySearchField({
             tintColor={theme.colors.textMuted}
           />
         </DecorativeView>
-        <TextInput
+        <TextField
           accessibilityLabel={t('history.search.label')}
           accessibilityRole="search"
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={HISTORY_SEARCH_MAX_LENGTH}
-          onBlur={() => setIsFocused(false)}
           onChangeText={onChangeText}
-          onFocus={() => setIsFocused(true)}
           placeholder={t('history.search.placeholder')}
-          placeholderTextColor={theme.colors.textMuted}
           returnKeyType="search"
+          style={styles.input}
           value={value}
-          style={[
-            styles.input,
-            theme.typography.body,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: isFocused
-                ? theme.colors.controlBorderFocused
-                : theme.colors.controlBorder,
-              color: theme.colors.text,
-            },
-          ]}
         />
         {value ? (
           <Pressable
