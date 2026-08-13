@@ -1,8 +1,4 @@
-import {
-  fontFamilies,
-  themes,
-  typography,
-} from '@/design-system/tokens/theme';
+import { fontFamilies, themes, typography } from '@/design-system/tokens/theme';
 
 const MINIMUM_NORMAL_TEXT_CONTRAST = 4.5;
 const MINIMUM_NON_TEXT_CONTRAST = 3;
