@@ -44,6 +44,9 @@ jobs:
       - name: React Compiler healthcheck
         run: pnpm run compiler:check
 
+      - name: Check render ref purity
+        run: pnpm run react:refs:check
+
       - name: Verify initial SQLite schema
         run: pnpm run schema:check
 
