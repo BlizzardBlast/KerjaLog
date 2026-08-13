@@ -8,7 +8,7 @@ import { radii, spacing } from '@/design-system/tokens/theme';
 import type { NotificationReminderIssue } from '@/features/onboarding/reminderFeedback';
 import type { TranslationKey } from '@/i18n/catalog';
 import { useI18n } from '@/i18n/I18nProvider';
-import { EMPTY_FUNCTION } from '@/shared/utils/function';
+import { ignoreError } from '@/shared/utils/function';
 
 type IssueCopy = {
   titleKey: TranslationKey;
@@ -66,7 +66,7 @@ export function NotificationPermissionNotice({
       {issue === 'permission' ? (
         <Button
           onPress={() => {
-            Linking.openSettings().catch(EMPTY_FUNCTION);
+            Linking.openSettings().catch(ignoreError);
           }}
           size="sm"
           variant="secondary"
