@@ -11,6 +11,8 @@ export type ThemeColors = {
   text: string;
   textMuted: string;
   border: string;
+  controlBorder: string;
+  controlBorderFocused: string;
   primary: string;
   primaryPressed: string;
   primarySoft: string;
@@ -132,6 +134,8 @@ const lightColors: ThemeColors = {
   text: '#211B2A',
   textMuted: '#6F6675',
   border: '#DED6DF',
+  controlBorder: '#9A8E9D',
+  controlBorderFocused: '#7138F2',
   primary: '#7138F2',
   primaryPressed: '#5121A8',
   primarySoft: '#EEE7FF',
@@ -155,6 +159,8 @@ const darkColors: ThemeColors = {
   text: '#F8F3FB',
   textMuted: '#BCB2C1',
   border: '#453D49',
+  controlBorder: '#756A7D',
+  controlBorderFocused: '#A78BFA',
   primary: '#A78BFA',
   primaryPressed: '#916BF7',
   primarySoft: '#39265E',
