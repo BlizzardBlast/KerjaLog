@@ -16,6 +16,8 @@ import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 import { ThreadNode } from '@/features/work-entry/components/ThreadNode';
 import { getOutcomeLabel } from '@/features/work-entry/outcomeLabel';
 
+const IMPACT_STATEMENT_LABEL_ID = 'work-entry-impact-statement-label';
+
 type ImpactStepProps = LogStepFrameProps & {
   rawNote: string;
   outcomeType: OutcomeType;
@@ -94,9 +96,12 @@ export function ImpactStep({
         <Text variant="body">{rawNote.trim()}</Text>
       </View>
       <View style={logStepStyles.field}>
-        <Text variant="label">{t('log.impact.editLabel')}</Text>
+        <Text nativeID={IMPACT_STATEMENT_LABEL_ID} variant="label">
+          {t('log.impact.editLabel')}
+        </Text>
         <TextField
           accessibilityLabel={t('log.impact.editLabel')}
+          accessibilityLabelledBy={IMPACT_STATEMENT_LABEL_ID}
           maxLength={2500}
           multiline
           onChangeText={onImpactStatementChange}
