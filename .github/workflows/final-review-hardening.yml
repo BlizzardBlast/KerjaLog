@@ -1,0 +1,77 @@
+name: Final review hardening materializer
+
+on:
+  push:
+    branches:
+      - feat/work-entry-refinement
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: feat/work-entry-refinement
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.20.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.18.1
+          cache: pnpm
+
+      - name: Apply hardening changes
+        run: python scripts/apply-final-review-hardening.py
+
+      - name: Regenerate lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Format repository
+        run: pnpm format
+
+      - name: Ensure exact-alarm implementation is gone
+        run: |
+          if grep -R -nE 'weeklyReminderPrecision|ReminderPrecision|enabled-exact|enabled-inexact|exactAlarmAccess|InexactReminderNotice' src tests modules 2>/dev/null; then
+            echo 'Found stale exact-alarm or reminder-precision implementation.'
+            exit 1
+          fi
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: React Compiler healthcheck
+        run: pnpm run compiler:check
+
+      - name: Verify initial SQLite schema
+        run: pnpm run schema:check
+
+      - name: Test
+        run: pnpm test:ci
+
+      - name: Remove temporary materializer
+        run: rm -f scripts/apply-final-review-hardening.py .github/workflows/final-review-hardening.yml
+
+      - name: Commit hardening
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'refactor: apply final review hardening'
+          git push
