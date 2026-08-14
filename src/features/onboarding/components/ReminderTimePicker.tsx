@@ -102,7 +102,7 @@ function VisibleReminderTimePicker({
               </Text>
             </Pressable>
 
-            <Text variant="bodyStrong">
+            <Text variant="bodyStrong" style={styles.headerTitle}>
               {t('onboarding.review.reminderTimePickerTitle')}
             </Text>
 
@@ -167,12 +167,16 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   headerAction: {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 44,
     minWidth: 64,
+  },
+  headerTitle: {
+    flex: 1,
+    marginHorizontal: spacing[2],
+    textAlign: 'center',
   },
 });
