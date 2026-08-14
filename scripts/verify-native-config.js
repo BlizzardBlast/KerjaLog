@@ -55,11 +55,7 @@ assertIncludes(
   'iOS AppDelegate',
 );
 assertIncludes(appDelegate, 'NSLog(', 'iOS AppDelegate');
-assertNotIncludes(
-  infoPlist,
-  'ITSAppUsesNonExemptEncryption',
-  'iOS Info.plist',
-);
+assertNotIncludes(infoPlist, 'ITSAppUsesNonExemptEncryption', 'iOS Info.plist');
 
 if (iosPodProperties['expo.sqlite.useSQLCipher'] !== 'true') {
   throw new Error('Generated iOS SQLCipher configuration is not enabled.');
