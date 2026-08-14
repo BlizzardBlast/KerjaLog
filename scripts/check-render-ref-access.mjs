@@ -1,8 +1,12 @@
 import { readdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-const sourceRoot = fileURLToPath(new URL('../src', import.meta.url));
+const defaultSourceRoot = fileURLToPath(new URL('../src', import.meta.url));
+const sourceRoot = process.env.REF_CHECK_SOURCE_ROOT
+  ? resolve(process.env.REF_CHECK_SOURCE_ROOT)
+  : defaultSourceRoot;
 const sourceFiles = collectSourceFiles(sourceRoot);
 const violations = sourceFiles.flatMap(checkFile);
 
@@ -83,7 +87,11 @@ function isRenderFunctionName(name) {
 
 function collectRenderBodyViolations(body, sourceFile, violations) {
   const visit = (node) => {
-    if (node !== body && isNestedFunction(node)) {
+    if (
+      node !== body &&
+      isNestedFunction(node) &&
+      !isImmediatelyInvokedFunction(node)
+    ) {
       return;
     }
 
@@ -112,6 +120,23 @@ function isNestedFunction(node) {
     ts.isFunctionExpression(node) ||
     ts.isFunctionDeclaration(node) ||
     ts.isMethodDeclaration(node)
+  );
+}
+
+function isImmediatelyInvokedFunction(node) {
+  if (!ts.isArrowFunction(node) && !ts.isFunctionExpression(node)) {
+    return false;
+  }
+
+  let expression = node;
+  while (expression.parent && ts.isParenthesizedExpression(expression.parent)) {
+    expression = expression.parent;
+  }
+
+  return (
+    expression.parent !== undefined &&
+    ts.isCallExpression(expression.parent) &&
+    expression.parent.expression === expression
   );
 }
 
