@@ -65,7 +65,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci",
+    "test:ci": "jest --ci --maxWorkers=1",
     "expo:doctor": "expo-doctor",
     "native:check": "expo prebuild --clean --no-install && node scripts/verify-native-config.js && cd android && ./gradlew :app:compileDebugKotlin --no-daemon",
     "export:android": "expo export --platform android --output-dir dist/android",
