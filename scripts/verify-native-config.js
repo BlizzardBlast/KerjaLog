@@ -20,7 +20,7 @@ function assertPermissionBlocked(manifest, permission) {
     .match(/<uses-permission\b[^>]*>/gu)
     ?.find((candidate) => candidate.includes(`android:name="${permission}"`));
 
-  if (!tag || !tag.includes('tools:node="remove"')) {
+  if (!tag?.includes('tools:node="remove"')) {
     throw new Error(
       `Android app manifest must block ${permission} with tools:node="remove".`,
     );
@@ -103,11 +103,14 @@ const mergedManifestPaths = findFiles(
   'AndroidManifest.xml',
 ).filter(
   (candidate) =>
-    /merged_manifest(?:s)?/u.test(candidate) && /[/\\]debug[/\\]/u.test(candidate),
+    /merged_manifest(?:s)?/u.test(candidate) &&
+    /[/\\]debug[/\\]/u.test(candidate),
 );
 
 if (mergedManifestPaths.length === 0) {
-  throw new Error('Generated merged Android debug manifest could not be found.');
+  throw new Error(
+    'Generated merged Android debug manifest could not be found.',
+  );
 }
 
 for (const mergedManifestPath of mergedManifestPaths) {
