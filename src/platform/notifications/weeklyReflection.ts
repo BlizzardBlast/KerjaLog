@@ -179,8 +179,9 @@ export async function enableWeeklyReflectionNotification({
       weekday: schedule.weekday,
       hour: schedule.hour,
       minute: schedule.minute,
-      channelId:
-        Platform.OS === 'android' ? WEEKLY_REFLECTION_CHANNEL_ID : undefined,
+      ...(Platform.OS === 'android'
+        ? { channelId: WEEKLY_REFLECTION_CHANNEL_ID }
+        : {}),
     },
   });
 
