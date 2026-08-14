@@ -39,7 +39,7 @@ KerjaLog's weekly reflection is an ordinary local reminder and does not request 
 - [ ] Test with notification permission denied/revoked and confirm the app reports the reminder as disabled without crashing.
 - [ ] Change the reminder day/time and confirm the native scheduled request is replaced with the new schedule.
 - [ ] Remove the native scheduled request and confirm foreground reconciliation updates persisted reminder state.
-- [ ] Confirm AndroidManifest does not contain `SCHEDULE_EXACT_ALARM`; delayed delivery from OS power management is acceptable for this feature.
+- [ ] Confirm prebuild adds a `tools:node="remove"` directive for `SCHEDULE_EXACT_ALARM` and the final merged Android manifest does not request the permission; delayed delivery from OS power management is acceptable for this feature.
 
 ## Accessibility and responsive UI
 
