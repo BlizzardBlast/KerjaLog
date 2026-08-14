@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import type { SQLiteDatabase } from 'expo-sqlite';
 import { getDatabase } from '@/data/database';
 import {
   withKeyedDatabaseAccess,
@@ -35,63 +36,68 @@ type DetailedJoinedWorkEntryRow = JoinedWorkEntryRow & {
   impact_statement_source: unknown;
 };
 
+async function findWorkEntryDetail(
+  db: SQLiteDatabase,
+  id: string,
+): Promise<WorkEntryDetail | null> {
+  const rows = await db.getAllAsync<DetailedJoinedWorkEntryRow>(
+    `
+      SELECT
+        work_entries.id,
+        work_entries.type,
+        work_entries.title,
+        work_entries.raw_note,
+        work_entries.impact_statement,
+        work_entries.impact_statement_source,
+        work_entries.occurred_at,
+        work_entries.outcome_type,
+        work_entries.status,
+        work_entries.excluded_from_exports,
+        work_entries.created_at,
+        work_entries.updated_at,
+        evidence.type AS evidence_type,
+        evidence.text_value AS evidence_text_value
+      FROM work_entries
+      LEFT JOIN evidence
+        ON evidence.entry_id = work_entries.id
+      WHERE work_entries.id = $id
+      ORDER BY evidence.created_at ASC
+    `,
+    { $id: id },
+  );
+
+  const firstRow = rows[0];
+  const entry = mapJoinedWorkEntryRows(rows)[0];
+  if (!entry || !firstRow) {
+    return null;
+  }
+
+  const impactStatementSource = mapImpactStatementSource(
+    firstRow.impact_statement_source,
+    entry.impactStatement,
+  );
+  const skillRows = await db.getAllAsync<WorkEntrySkillRow>(
+    `
+      SELECT skill_id, source
+      FROM entry_skills
+      WHERE entry_id = $id
+      ORDER BY skill_id ASC
+    `,
+    { $id: id },
+  );
+
+  return {
+    ...entry,
+    skills: mapWorkEntrySkillRows(skillRows),
+    impactStatementSource,
+  };
+}
+
 export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntryDetail | null> {
     const db = await getDatabase();
 
-    return withKeyedDatabaseAccess(async () => {
-      const rows = await db.getAllAsync<DetailedJoinedWorkEntryRow>(
-        `
-          SELECT
-            work_entries.id,
-            work_entries.type,
-            work_entries.title,
-            work_entries.raw_note,
-            work_entries.impact_statement,
-            work_entries.impact_statement_source,
-            work_entries.occurred_at,
-            work_entries.outcome_type,
-            work_entries.status,
-            work_entries.excluded_from_exports,
-            work_entries.created_at,
-            work_entries.updated_at,
-            evidence.type AS evidence_type,
-            evidence.text_value AS evidence_text_value
-          FROM work_entries
-          LEFT JOIN evidence
-            ON evidence.entry_id = work_entries.id
-          WHERE work_entries.id = $id
-          ORDER BY evidence.created_at ASC
-        `,
-        { $id: id },
-      );
-
-      const firstRow = rows[0];
-      const entry = mapJoinedWorkEntryRows(rows)[0];
-      if (!entry || !firstRow) {
-        return null;
-      }
-
-      const impactStatementSource = mapImpactStatementSource(
-        firstRow.impact_statement_source,
-        entry.impactStatement,
-      );
-      const skillRows = await db.getAllAsync<WorkEntrySkillRow>(
-        `
-          SELECT skill_id, source
-          FROM entry_skills
-          WHERE entry_id = $id
-          ORDER BY skill_id ASC
-        `,
-        { $id: id },
-      );
-
-      return {
-        ...entry,
-        skills: mapWorkEntrySkillRows(skillRows),
-        impactStatementSource,
-      };
-    });
+    return withKeyedDatabaseAccess(() => findWorkEntryDetail(db, id));
   }
 
   async findRecent(limit: number): Promise<WorkEntry[]> {
@@ -323,7 +329,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       ...new Map(input.skills.map((skill) => [skill.id, skill])).values(),
     ];
 
-    await withKeyedTransaction(db, async (transaction) => {
+    return withKeyedTransaction(db, async (transaction) => {
       const result = await transaction.runAsync(
         `
           UPDATE work_entries
@@ -403,14 +409,14 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           },
         );
       }
+
+      const updatedEntry = await findWorkEntryDetail(transaction, id);
+      if (!updatedEntry) {
+        throw new Error('Updated work entry could not be reloaded.');
+      }
+
+      return updatedEntry;
     });
-
-    const updatedEntry = await this.findById(id);
-    if (!updatedEntry) {
-      throw new Error('Updated work entry could not be reloaded.');
-    }
-
-    return updatedEntry;
   }
 }
 
