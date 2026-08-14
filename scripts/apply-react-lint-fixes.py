@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
 
 write(
     'src/features/work-entry/useWorkEntry.ts',
-    '''import { useCallback, useEffect, useRef, useState } from 'react';
+    '''import { useEffect, useRef, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import type { WorkEntryDetail } from '@/domain/entry/model';
 import type { WorkEntryByIdReader } from '@/domain/entry/repository';
@@ -233,40 +233,60 @@ export function useWorkEntry(
   }));
   const requestIdRef = useRef(0);
 
-  const load = useCallback(async () => {
+  useEffect(() => {
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
 
-    try {
-      const entry = await repository.findById(id);
-
-      if (requestId === requestIdRef.current) {
-        setStored({
-          id,
-          state: entry ? { status: 'loaded', entry } : { status: 'not-found' },
-        });
-      }
-    } catch {
-      if (requestId === requestIdRef.current) {
-        setStored({ id, state: { status: 'error' } });
-      }
-    }
-  }, [id, repository]);
-
-  useEffect(() => {
-    void load();
+    repository
+      .findById(id)
+      .then((entry) => {
+        if (requestId === requestIdRef.current) {
+          setStored({
+            id,
+            state: entry
+              ? { status: 'loaded', entry }
+              : { status: 'not-found' },
+          });
+        }
+      })
+      .catch(() => {
+        if (requestId === requestIdRef.current) {
+          setStored({ id, state: { status: 'error' } });
+        }
+      });
 
     return () => {
       requestIdRef.current += 1;
     };
-  }, [load]);
+  }, [id, repository]);
+
+  const retry = () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    setStored({ id, state: LOADING_STATE });
+
+    repository
+      .findById(id)
+      .then((entry) => {
+        if (requestId === requestIdRef.current) {
+          setStored({
+            id,
+            state: entry
+              ? { status: 'loaded', entry }
+              : { status: 'not-found' },
+          });
+        }
+      })
+      .catch(() => {
+        if (requestId === requestIdRef.current) {
+          setStored({ id, state: { status: 'error' } });
+        }
+      });
+  };
 
   return {
     state: stored.id === id ? stored.state : LOADING_STATE,
-    retry: () => {
-      setStored({ id, state: LOADING_STATE });
-      void load();
-    },
+    retry,
   };
 }
 ''',
@@ -274,7 +294,7 @@ export function useWorkEntry(
 
 write(
     'src/features/work-entry/useWorkEntryDraft.ts',
-    '''import { useCallback, useEffect, useRef, useState } from 'react';
+    '''import { useEffect, useRef, useState } from 'react';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { WorkEntryDraftReader } from '@/domain/entry/repository';
@@ -297,37 +317,50 @@ export function useWorkEntryDraft(
   });
   const requestIdRef = useRef(0);
 
-  const load = useCallback(async () => {
+  useEffect(() => {
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
 
-    try {
-      const draft = await repository.loadActive();
-
-      if (requestId === requestIdRef.current) {
-        setState({ status: 'loaded', draft });
-      }
-    } catch {
-      if (requestId === requestIdRef.current) {
-        setState({ status: 'error' });
-      }
-    }
-  }, [repository]);
-
-  useEffect(() => {
-    void load();
+    repository
+      .loadActive()
+      .then((draft) => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'loaded', draft });
+        }
+      })
+      .catch(() => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'error' });
+        }
+      });
 
     return () => {
       requestIdRef.current += 1;
     };
-  }, [load]);
+  }, [repository]);
+
+  const retry = () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    setState({ status: 'loading' });
+
+    repository
+      .loadActive()
+      .then((draft) => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'loaded', draft });
+        }
+      })
+      .catch(() => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'error' });
+        }
+      });
+  };
 
   return {
     state,
-    retry: () => {
-      setState({ status: 'loading' });
-      void load();
-    },
+    retry,
   };
 }
 ''',
