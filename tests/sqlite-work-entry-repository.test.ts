@@ -282,11 +282,20 @@ describe('SQLiteWorkEntryRepository', () => {
       'DELETE FROM active_work_entry_draft WHERE id = $activeDraftId',
       { $activeDraftId: 1 },
     );
-    expect(entry).toMatchObject({
-      ...input,
+    expect(entry).toEqual({
       id: 'entry-created',
+      type: input.type,
+      title: input.title,
+      rawNote: input.rawNote,
+      impactStatement: input.impactStatement,
+      occurredAt: input.occurredAt,
+      outcomeType: input.outcomeType,
+      status: input.status,
+      evidence: input.evidence,
+      excludedFromExports: input.excludedFromExports,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
     });
-    expect(entry.createdAt).toEqual(expect.any(String));
     expect(entry.updatedAt).toBe(entry.createdAt);
   });
 
