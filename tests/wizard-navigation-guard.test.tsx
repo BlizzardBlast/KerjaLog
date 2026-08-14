@@ -44,7 +44,7 @@ describe('useWizardNavigationGuard', () => {
 
   test('intercepts native route removal for an internal step even when pristine', async () => {
     const onInternalBack = jest.fn();
-    await renderHook(() =>
+    renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: false,
         currentStep: 3,
@@ -57,7 +57,7 @@ describe('useWizardNavigationGuard', () => {
 
     expect(mockPreventRemoveEnabled).toBe(true);
 
-    await act(async () => {
+    act(() => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
@@ -66,7 +66,7 @@ describe('useWizardNavigationGuard', () => {
   });
 
   test('does not prevent removal at the first pristine step', async () => {
-    await renderHook(() =>
+    renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: false,
         currentStep: 1,
@@ -83,7 +83,7 @@ describe('useWizardNavigationGuard', () => {
   test('runs discard cleanup before dispatching a dirty first-step removal', async () => {
     const onDiscard = jest.fn().mockResolvedValue(true);
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
-    await renderHook(() =>
+    renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: true,
         currentStep: 1,
@@ -94,55 +94,57 @@ describe('useWizardNavigationGuard', () => {
     );
     await waitForGuardRegistration();
 
-    await act(async () => {
+    act(() => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
     const discardButton = alertSpy.mock.calls[0]?.[2]?.find(
       (button) => button.text === copy.discard,
     );
-    await act(async () => {
+    act(() => {
       discardButton?.onPress?.();
-      await Promise.resolve();
     });
 
-    expect(onDiscard).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(removeAction);
+    await waitFor(() => {
+      expect(onDiscard).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledWith(removeAction);
+    });
     alertSpy.mockRestore();
   });
 
   test('keeps the route when discard cleanup fails', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
-    await renderHook(() =>
+    const onDiscard = jest.fn().mockResolvedValue(false);
+    renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: true,
         currentStep: 1,
         onInternalBack: jest.fn(),
-        onDiscard: jest.fn().mockResolvedValue(false),
+        onDiscard,
         copy,
       }),
     );
     await waitForGuardRegistration();
 
-    await act(async () => {
+    act(() => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
     const discardButton = alertSpy.mock.calls[0]?.[2]?.find(
       (button) => button.text === copy.discard,
     );
-    await act(async () => {
+    act(() => {
       discardButton?.onPress?.();
-      await Promise.resolve();
     });
 
+    await waitFor(() => expect(onDiscard).toHaveBeenCalledTimes(1));
     expect(mockDispatch).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
 
   test('allows one programmatic removal without prompting', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
-    const { result } = await renderHook(() =>
+    const { result } = renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: true,
         currentStep: 5,
