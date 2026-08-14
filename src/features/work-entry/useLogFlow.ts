@@ -129,7 +129,14 @@ export function useLogFlow({
       onExit();
       return;
     }
-    moveToStep(LOG_STEPS[currentIndex - 1]);
+
+    const previousStep = LOG_STEPS[currentIndex - 1];
+    if (!previousStep) {
+      onExit();
+      return;
+    }
+
+    moveToStep(previousStep);
   }
 
   function invalidateGeneratedImpact() {
