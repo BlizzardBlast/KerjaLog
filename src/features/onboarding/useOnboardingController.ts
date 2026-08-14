@@ -174,10 +174,8 @@ export function useOnboardingController(): OnboardingContextValue {
   const goNext = () => {
     setState((current) => {
       const index = ONBOARDING_STEP_ORDER.indexOf(current.currentStep);
-      const nextStep =
-        ONBOARDING_STEP_ORDER[
-          Math.min(index + 1, ONBOARDING_STEP_ORDER.length - 1)
-        ];
+      const nextIndex = Math.min(index + 1, ONBOARDING_STEP_ORDER.length - 1);
+      const nextStep = ONBOARDING_STEP_ORDER[nextIndex] ?? current.currentStep;
 
       return {
         ...current,
@@ -189,7 +187,9 @@ export function useOnboardingController(): OnboardingContextValue {
   const goBack = () => {
     setState((current) => {
       const index = ONBOARDING_STEP_ORDER.indexOf(current.currentStep);
-      const previousStep = ONBOARDING_STEP_ORDER[Math.max(index - 1, 0)];
+      const previousIndex = Math.max(index - 1, 0);
+      const previousStep =
+        ONBOARDING_STEP_ORDER[previousIndex] ?? current.currentStep;
 
       return {
         ...current,
