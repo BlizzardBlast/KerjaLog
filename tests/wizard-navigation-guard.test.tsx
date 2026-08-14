@@ -44,7 +44,7 @@ describe('useWizardNavigationGuard', () => {
 
   test('intercepts native route removal for an internal step even when pristine', async () => {
     const onInternalBack = jest.fn();
-    renderHook(() =>
+    await renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: false,
         currentStep: 3,
@@ -66,7 +66,7 @@ describe('useWizardNavigationGuard', () => {
   });
 
   test('does not prevent removal at the first pristine step', async () => {
-    renderHook(() =>
+    await renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: false,
         currentStep: 1,
@@ -83,7 +83,7 @@ describe('useWizardNavigationGuard', () => {
   test('runs discard cleanup before dispatching a dirty first-step removal', async () => {
     const onDiscard = jest.fn().mockResolvedValue(true);
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
-    renderHook(() =>
+    await renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: true,
         currentStep: 1,
@@ -115,7 +115,7 @@ describe('useWizardNavigationGuard', () => {
   test('keeps the route when discard cleanup fails', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
     const onDiscard = jest.fn().mockResolvedValue(false);
-    renderHook(() =>
+    await renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: true,
         currentStep: 1,
@@ -144,7 +144,7 @@ describe('useWizardNavigationGuard', () => {
 
   test('allows one programmatic removal without prompting', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
-    const { result } = renderHook(() =>
+    const { result } = await renderHook(() =>
       useWizardNavigationGuard({
         hasUnsavedChanges: true,
         currentStep: 5,
