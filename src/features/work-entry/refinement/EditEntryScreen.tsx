@@ -10,6 +10,7 @@ import { skillDefinitionById } from '@/domain/skill/catalog';
 import { EventStep } from '@/features/work-entry/components/EventStep';
 import { EvidenceStep } from '@/features/work-entry/components/EvidenceStep';
 import { ImpactStep } from '@/features/work-entry/components/ImpactStep';
+import { LogSaveCompletionErrorScreen } from '@/features/work-entry/components/LogSaveCompletionErrorScreen';
 import { OutcomeStep } from '@/features/work-entry/components/OutcomeStep';
 import { WorkEntryWizardLayout } from '@/features/work-entry/components/WorkEntryWizardLayout';
 import { EntryTypeStep } from '@/features/work-entry/refinement/components/EntryTypeStep';
@@ -153,6 +154,12 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
       discard: t('entry.refine.discard'),
     },
   });
+
+  if (refinement.completionError) {
+    return (
+      <LogSaveCompletionErrorScreen onRetry={refinement.retryCompletion} />
+    );
+  }
 
   const frame = {
     backLabel: t('entry.refine.back'),
