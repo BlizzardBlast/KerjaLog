@@ -26,7 +26,9 @@ const COMPLETE_STATE: OnboardingState = {
   },
 };
 
-const LEGACY_REMINDER_METADATA_KEY = ['weekly', 'Reminder', 'Precision'].join('');
+const LEGACY_REMINDER_METADATA_KEY = ['weekly', 'Reminder', 'Precision'].join(
+  '',
+);
 const getItemMock = jest.mocked(AsyncStorage.getItem);
 const setItemMock = jest.mocked(AsyncStorage.setItem);
 const removeItemMock = jest.mocked(AsyncStorage.removeItem);
