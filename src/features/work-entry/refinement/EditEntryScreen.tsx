@@ -145,6 +145,7 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
   const allowNextRemoval = useWizardNavigationGuard({
     hasUnsavedChanges: refinement.isDirty,
     currentStep: refinement.currentStep,
+    isComplete: refinement.hasCommittedEntry,
     onInternalBack: handleBack,
     onDiscard: async () => true,
     copy: {
