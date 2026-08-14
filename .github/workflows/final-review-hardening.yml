@@ -34,6 +34,9 @@ jobs:
       - name: Apply hardening changes
         run: python scripts/apply-final-review-hardening.py
 
+      - name: Apply React lint fixes
+        run: python scripts/apply-react-lint-fixes.py
+
       - name: Regenerate lockfile
         run: pnpm install --no-frozen-lockfile
 
@@ -68,12 +71,12 @@ jobs:
         run: pnpm test:ci
 
       - name: Remove temporary materializer
-        run: rm -f scripts/apply-final-review-hardening.py .github/workflows/final-review-hardening.yml
+        run: rm -f scripts/apply-final-review-hardening.py scripts/apply-react-lint-fixes.py .github/workflows/final-review-hardening.yml
 
       - name: Commit hardening
         run: |
           git config user.name 'github-actions[bot]'
-          git config user.email '41898282+BlizzardBlast@users.noreply.github.com'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           if git diff --cached --quiet; then
             exit 0
