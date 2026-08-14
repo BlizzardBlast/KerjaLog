@@ -7,14 +7,16 @@ import { radii, spacing } from '@/design-system/tokens/theme';
 import { type Language, useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
 
-const languageOptions: ReadonlyArray<{
+type LanguageOption = {
   value: Language;
   flag: string;
   labelKey: TranslationKey;
-}> = [
+};
+
+const languageOptions = [
   { value: 'en', flag: '🇬🇧', labelKey: 'onboarding.language.english' },
   { value: 'id', flag: '🇮🇩', labelKey: 'onboarding.language.indonesian' },
-];
+] as const satisfies readonly LanguageOption[];
 
 export function LanguageSelector() {
   const { theme } = useTheme();
