@@ -268,8 +268,7 @@ export function useHistoryEntries(
       }
 
       invalidateHistoryQuery();
-      runtimeRef.current.searchPending =
-        nextSearchText !== debouncedSearchText;
+      runtimeRef.current.searchPending = nextSearchText !== debouncedSearchText;
       setSearchTextState(nextSearchText);
     },
     [debouncedSearchText, invalidateHistoryQuery, searchText],
