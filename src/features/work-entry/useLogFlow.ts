@@ -21,6 +21,7 @@ import {
   saveWorkEntry,
   type SaveWorkEntryDraft,
 } from '@/features/work-entry/saveWorkEntry';
+import { useSavedEntryCompletion } from '@/features/work-entry/useSavedEntryCompletion';
 
 export const LOG_STEPS = WORK_ENTRY_DRAFT_STEPS;
 export type LogStep = (typeof LOG_STEPS)[number];
@@ -53,11 +54,9 @@ export function useLogFlow({
   const [noteError, setNoteError] = useState(false);
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
-  const [completionError, setCompletionError] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [hasCommittedEntry, setHasCommittedEntry] = useState(false);
   const saveInProgressRef = useRef(false);
-  const committedEntryRef = useRef<WorkEntry | null>(null);
+  const savedEntryCompletion = useSavedEntryCompletion(onSaved);
 
   const form = useForm({
     defaultValues: {
@@ -117,7 +116,8 @@ export function useLogFlow({
       step,
     ],
   );
-  const hasUnsavedDraft = !hasCommittedEntry && hasWorkEntryDraftContent(draft);
+  const hasUnsavedDraft =
+    !savedEntryCompletion.hasCommittedEntry && hasWorkEntryDraftContent(draft);
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);
@@ -242,21 +242,11 @@ export function useLogFlow({
     setSaveError(false);
   }
 
-  async function completeCommittedEntry(entry: WorkEntry): Promise<void> {
-    setCompletionError(false);
-    try {
-      await onSaved(entry);
-    } catch {
-      setCompletionError(true);
-    }
-  }
-
   async function save(quickNote: boolean) {
     if (saveInProgressRef.current) return;
 
-    const alreadyCommitted = committedEntryRef.current;
-    if (alreadyCommitted) {
-      await completeCommittedEntry(alreadyCommitted);
+    if (savedEntryCompletion.hasCommitted()) {
+      await savedEntryCompletion.retryCompletion();
       return;
     }
 
@@ -269,7 +259,6 @@ export function useLogFlow({
     saveInProgressRef.current = true;
     setSaving(true);
     setSaveError(false);
-    setCompletionError(false);
 
     let entry: WorkEntry;
     try {
@@ -292,9 +281,7 @@ export function useLogFlow({
       setSaving(false);
     }
 
-    committedEntryRef.current = entry;
-    setHasCommittedEntry(true);
-    await completeCommittedEntry(entry);
+    await savedEntryCompletion.commitAndComplete(entry);
   }
 
   return {
@@ -303,7 +290,7 @@ export function useLogFlow({
     totalSteps: LOG_STEPS.length,
     draft,
     hasUnsavedDraft,
-    hasCommittedEntry,
+    hasCommittedEntry: savedEntryCompletion.hasCommittedEntry,
     intent,
     rawNote,
     outcomeType,
@@ -313,7 +300,7 @@ export function useLogFlow({
     noteError,
     evidenceError,
     saveError,
-    completionError,
+    completionError: savedEntryCompletion.completionError,
     saving,
     goBack,
     selectIntent,
@@ -329,9 +316,6 @@ export function useLogFlow({
     updateImpactStatement,
     saveQuick: () => save(true),
     saveDeveloped: () => save(false),
-    retryCompletion: () => {
-      const entry = committedEntryRef.current;
-      return entry ? completeCommittedEntry(entry) : Promise.resolve();
-    },
+    retryCompletion: savedEntryCompletion.retryCompletion,
   };
 }
