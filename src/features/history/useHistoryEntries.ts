@@ -14,6 +14,13 @@ import type { WorkEntryHistoryReader } from '@/domain/entry/repository';
 
 const SEARCH_DEBOUNCE_MS = 250;
 
+type HistoryRequestRuntime = {
+  requestId: number;
+  nextCursor: WorkEntryHistoryCursor | null;
+  pagination: 'idle' | 'loading' | 'error';
+  searchPending: boolean;
+};
+
 export type HistoryEntriesState =
   | {
       status: 'loading';
@@ -67,16 +74,16 @@ export function useHistoryEntries(
     isLoadingMore: false,
     loadMoreError: false,
   });
-  const requestIdRef = useRef(0);
-  const nextCursorRef = useRef<WorkEntryHistoryCursor | null>(null);
-  const hasMoreRef = useRef(false);
-  const isLoadingMoreRef = useRef(false);
-  const loadMoreErrorRef = useRef(false);
-  const isSearchPendingRef = useRef(false);
+  const runtimeRef = useRef<HistoryRequestRuntime>({
+    requestId: 0,
+    nextCursor: null,
+    pagination: 'idle',
+    searchPending: false,
+  });
   const isSearchPending = searchText !== debouncedSearchText;
 
   useEffect(() => {
-    isSearchPendingRef.current = isSearchPending;
+    runtimeRef.current.searchPending = isSearchPending;
 
     if (!isSearchPending) {
       return;
@@ -100,16 +107,15 @@ export function useHistoryEntries(
   );
 
   const invalidateHistoryQuery = useCallback(() => {
-    requestIdRef.current += 1;
-    nextCursorRef.current = null;
-    hasMoreRef.current = false;
-    isLoadingMoreRef.current = false;
-    loadMoreErrorRef.current = false;
+    const runtime = runtimeRef.current;
+    runtime.requestId += 1;
+    runtime.nextCursor = null;
+    runtime.pagination = 'idle';
   }, []);
 
   const loadFirstPage = useCallback(() => {
     invalidateHistoryQuery();
-    const requestId = requestIdRef.current;
+    const requestId = runtimeRef.current.requestId;
 
     setState((current) => ({
       status: 'loading',
@@ -126,12 +132,13 @@ export function useHistoryEntries(
         limit: HISTORY_PAGE_SIZE,
       })
       .then((page) => {
-        if (requestIdRef.current !== requestId) {
+        const runtime = runtimeRef.current;
+        if (runtime.requestId !== requestId) {
           return;
         }
 
-        nextCursorRef.current = page.nextCursor;
-        hasMoreRef.current = page.nextCursor !== null;
+        runtime.nextCursor = page.nextCursor;
+        runtime.pagination = 'idle';
 
         setState({
           status: 'loaded',
@@ -142,12 +149,13 @@ export function useHistoryEntries(
         });
       })
       .catch(() => {
-        if (requestIdRef.current !== requestId) {
+        const runtime = runtimeRef.current;
+        if (runtime.requestId !== requestId) {
           return;
         }
 
-        nextCursorRef.current = null;
-        hasMoreRef.current = false;
+        runtime.nextCursor = null;
+        runtime.pagination = 'idle';
 
         setState({
           status: 'error',
@@ -160,20 +168,19 @@ export function useHistoryEntries(
   }, [invalidateHistoryQuery, query, repository]);
 
   const loadMore = useCallback(() => {
-    const cursor = nextCursorRef.current;
+    const runtime = runtimeRef.current;
+    const cursor = runtime.nextCursor;
 
     if (
-      isSearchPendingRef.current ||
+      runtime.searchPending ||
       cursor === null ||
-      !hasMoreRef.current ||
-      isLoadingMoreRef.current ||
-      loadMoreErrorRef.current
+      runtime.pagination !== 'idle'
     ) {
       return;
     }
 
-    const requestId = requestIdRef.current;
-    isLoadingMoreRef.current = true;
+    const requestId = runtime.requestId;
+    runtime.pagination = 'loading';
 
     setState((current) =>
       current.status === 'loaded'
@@ -188,14 +195,13 @@ export function useHistoryEntries(
         limit: HISTORY_PAGE_SIZE,
       })
       .then((page) => {
-        if (requestIdRef.current !== requestId) {
+        const currentRuntime = runtimeRef.current;
+        if (currentRuntime.requestId !== requestId) {
           return;
         }
 
-        nextCursorRef.current = page.nextCursor;
-        hasMoreRef.current = page.nextCursor !== null;
-        isLoadingMoreRef.current = false;
-        loadMoreErrorRef.current = false;
+        currentRuntime.nextCursor = page.nextCursor;
+        currentRuntime.pagination = 'idle';
 
         setState((current) => {
           if (current.status !== 'loaded') {
@@ -217,12 +223,12 @@ export function useHistoryEntries(
         });
       })
       .catch(() => {
-        if (requestIdRef.current !== requestId) {
+        const currentRuntime = runtimeRef.current;
+        if (currentRuntime.requestId !== requestId) {
           return;
         }
 
-        isLoadingMoreRef.current = false;
-        loadMoreErrorRef.current = true;
+        currentRuntime.pagination = 'error';
 
         setState((current) =>
           current.status === 'loaded'
@@ -233,15 +239,12 @@ export function useHistoryEntries(
   }, [query, repository]);
 
   const retryLoadMore = useCallback(() => {
-    if (
-      isSearchPendingRef.current ||
-      !loadMoreErrorRef.current ||
-      isLoadingMoreRef.current
-    ) {
+    const runtime = runtimeRef.current;
+    if (runtime.searchPending || runtime.pagination !== 'error') {
       return;
     }
 
-    loadMoreErrorRef.current = false;
+    runtime.pagination = 'idle';
     loadMore();
   }, [loadMore]);
 
@@ -251,7 +254,7 @@ export function useHistoryEntries(
 
       return () => {
         invalidateHistoryQuery();
-        isSearchPendingRef.current = false;
+        runtimeRef.current.searchPending = false;
       };
     }, [invalidateHistoryQuery, loadFirstPage]),
   );
@@ -265,7 +268,8 @@ export function useHistoryEntries(
       }
 
       invalidateHistoryQuery();
-      isSearchPendingRef.current = nextSearchText !== debouncedSearchText;
+      runtimeRef.current.searchPending =
+        nextSearchText !== debouncedSearchText;
       setSearchTextState(nextSearchText);
     },
     [debouncedSearchText, invalidateHistoryQuery, searchText],
