@@ -166,6 +166,10 @@ function EntryRefinementEditor({ entry }: { entry: WorkEntryDetail }) {
     backLabel: t('entry.refine.back'),
     currentStep: refinement.currentStep,
     totalSteps: refinement.totalSteps,
+    progressLabel: t('log.step', {
+      current: refinement.currentStep,
+      total: refinement.totalSteps,
+    }),
     onBack: handleBack,
   };
   const skillsSummary =

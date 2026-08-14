@@ -50,20 +50,13 @@ export function useWeeklyReminderController(
     });
 
   const applyEnableResult = (result: WeeklyReflectionEnableResult) => {
-    if (result === 'enabled-exact' || result === 'enabled-inexact') {
-      update({
-        weeklyReminderEnabled: true,
-        weeklyReminderPrecision:
-          result === 'enabled-exact' ? 'exact' : 'inexact',
-      });
+    if (result === 'enabled') {
+      update({ weeklyReminderEnabled: true });
       dispatchFeedback({ type: 'success' });
       return;
     }
 
-    update({
-      weeklyReminderEnabled: false,
-      weeklyReminderPrecision: null,
-    });
+    update({ weeklyReminderEnabled: false });
     dispatchFeedback({
       type: 'failure',
       issue: reminderIssueByResult[result],
@@ -76,10 +69,7 @@ export function useWeeklyReminderController(
     try {
       if (!enabled) {
         await disableWeeklyReflectionNotification();
-        update({
-          weeklyReminderEnabled: false,
-          weeklyReminderPrecision: null,
-        });
+        update({ weeklyReminderEnabled: false });
         dispatchFeedback({ type: 'success' });
         return;
       }
@@ -87,10 +77,7 @@ export function useWeeklyReminderController(
       const result = await enableForSchedule(state.weeklyReminderSchedule);
       applyEnableResult(result);
     } catch {
-      update({
-        weeklyReminderEnabled: false,
-        weeklyReminderPrecision: null,
-      });
+      update({ weeklyReminderEnabled: false });
       dispatchFeedback({ type: 'failure', issue: 'setup' });
     }
   };
@@ -108,10 +95,7 @@ export function useWeeklyReminderController(
       const result = await enableForSchedule(schedule);
       applyEnableResult(result);
     } catch {
-      update({
-        weeklyReminderEnabled: false,
-        weeklyReminderPrecision: null,
-      });
+      update({ weeklyReminderEnabled: false });
       dispatchFeedback({ type: 'failure', issue: 'setup' });
     }
   };

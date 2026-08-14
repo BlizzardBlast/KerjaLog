@@ -1,4 +1,4 @@
-import type { TextStyle } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type ResolvedTheme = Exclude<ThemeMode, 'system'>;
@@ -61,11 +61,15 @@ export const radii = {
   full: 999,
 } as const;
 
+function selectFontFamily(android: string, ios: string): string {
+  return Platform.OS === 'ios' ? ios : android;
+}
+
 export const fontFamilies = {
-  medium: 'Manrope_500Medium',
-  semiBold: 'Manrope_600SemiBold',
-  bold: 'Manrope_700Bold',
-  extraBold: 'Manrope_800ExtraBold',
+  medium: selectFontFamily('Manrope_500Medium', 'Manrope-Medium'),
+  semiBold: selectFontFamily('Manrope_600SemiBold', 'Manrope-SemiBold'),
+  bold: selectFontFamily('Manrope_700Bold', 'Manrope-Bold'),
+  extraBold: selectFontFamily('Manrope_800ExtraBold', 'Manrope-ExtraBold'),
 } as const;
 
 export type TypographyVariant =

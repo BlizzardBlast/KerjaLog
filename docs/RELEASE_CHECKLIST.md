@@ -7,7 +7,7 @@ Use this checklist before distributing a build outside local development. Produc
 - [ ] `pnpm check` passes on the release commit.
 - [ ] The initial SQLite schema verifier passes.
 - [ ] React Compiler healthcheck passes without opt-outs added for application code.
-- [ ] Render-phase ref purity checks and their fixtures pass.
+- [ ] Official React Hooks/compiler-aware ESLint rules pass with zero warnings.
 - [ ] Android native configuration/Kotlin compilation passes.
 - [ ] Android and iOS bundle exports pass.
 
@@ -28,14 +28,15 @@ KerjaLog uses SQLCipher and platform cryptography. Before every TestFlight/App S
 - [ ] Confirm that `expo.ios.config.usesNonExemptEncryption` in `app.json` matches that determination.
 - [ ] Do not change the declaration solely to silence App Store Connect prompts; retain the supporting compliance determination with release records.
 
-## Android notifications and exact alarms
+## Android notifications
 
-KerjaLog's weekly reflection reminder supports exact and inexact delivery.
+KerjaLog's weekly reflection is an ordinary local reminder and does not request exact-alarm special access.
 
-- [ ] Test on a device where exact-alarm access is granted.
-- [ ] Test on a device where exact-alarm access is denied/revoked.
-- [ ] Confirm the reminder still schedules through the supported inexact fallback and the UI reports approximate delivery rather than failing the feature.
-- [ ] Re-check Play policy requirements before release if the exact-alarm permission or reminder behavior changes.
+- [ ] Test with notification permission granted and confirm the weekly request is scheduled.
+- [ ] Test with notification permission denied/revoked and confirm the app reports the reminder as disabled without crashing.
+- [ ] Change the reminder day/time and confirm the native scheduled request is replaced with the new schedule.
+- [ ] Remove the native scheduled request and confirm foreground reconciliation updates persisted reminder state.
+- [ ] Confirm AndroidManifest does not contain `SCHEDULE_EXACT_ALARM`; delayed delivery from OS power management is acceptable for this feature.
 
 ## Accessibility and responsive UI
 

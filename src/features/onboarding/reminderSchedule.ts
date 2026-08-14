@@ -18,10 +18,24 @@ export const reminderWeekdayTranslationKeys: Record<
   7: 'weekday.saturday',
 };
 
+const REMINDER_PICKER_ANCHOR = { year: 2000, month: 0, day: 1 } as const;
+
 export function createReminderTimeDate(
   schedule: WeeklyReminderSchedule,
-  baseDate = new Date(),
+  baseDate?: Date,
 ): Date {
+  if (!baseDate) {
+    return new Date(
+      REMINDER_PICKER_ANCHOR.year,
+      REMINDER_PICKER_ANCHOR.month,
+      REMINDER_PICKER_ANCHOR.day,
+      schedule.hour,
+      schedule.minute,
+      0,
+      0,
+    );
+  }
+
   const date = new Date(baseDate);
   date.setHours(schedule.hour, schedule.minute, 0, 0);
   return date;

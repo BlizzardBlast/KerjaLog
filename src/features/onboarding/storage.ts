@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isReminderPrecision } from '@/domain/reminder/model';
 import {
   CAREER_LEVELS,
   DEFAULT_ONBOARDING_STATE,
@@ -77,11 +76,6 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
     )
       ? value.weeklyReminderSchedule
       : DEFAULT_WEEKLY_REMINDER_SCHEDULE,
-    weeklyReminderPrecision:
-      weeklyReminderEnabled &&
-      isReminderPrecision(value.weeklyReminderPrecision)
-        ? value.weeklyReminderPrecision
-        : null,
   };
 
   return {

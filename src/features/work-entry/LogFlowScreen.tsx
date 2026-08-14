@@ -90,6 +90,10 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
     backLabel: t('log.back'),
     currentStep: flow.currentStep,
     totalSteps: flow.totalSteps,
+    progressLabel: t('log.step', {
+      current: flow.currentStep,
+      total: flow.totalSteps,
+    }),
     onBack: flow.goBack,
   };
 

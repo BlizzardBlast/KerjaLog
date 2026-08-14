@@ -12,6 +12,7 @@ type LogHeaderProps = {
   onBack: () => void;
   currentStep: number;
   totalSteps: number;
+  progressLabel: string;
 };
 
 export function LogHeader({
@@ -22,6 +23,7 @@ export function LogHeader({
   onBack,
   currentStep,
   totalSteps,
+  progressLabel,
 }: LogHeaderProps) {
   const { theme } = useTheme();
   const progressSegments = Array.from(
@@ -32,8 +34,14 @@ export function LogHeader({
   return (
     <View style={styles.container}>
       <View
+        accessibilityLabel={progressLabel}
         accessibilityRole="progressbar"
-        accessibilityValue={{ min: 1, max: totalSteps, now: currentStep }}
+        accessibilityValue={{
+          min: 1,
+          max: totalSteps,
+          now: currentStep,
+          text: progressLabel,
+        }}
         style={styles.progress}
       >
         {progressSegments.map((segment, index) => (

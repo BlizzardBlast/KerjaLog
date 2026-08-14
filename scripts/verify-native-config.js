@@ -13,6 +13,12 @@ function assertMatches(value, expected, label) {
   }
 }
 
+function assertNotIncludes(value, unexpected, label) {
+  if (value.includes(unexpected)) {
+    throw new Error(`${label} includes forbidden configuration: ${unexpected}`);
+  }
+}
+
 const iosDirectory = path.resolve('ios');
 const appDelegatePath = fs
   .readdirSync(iosDirectory, { withFileTypes: true })
@@ -70,7 +76,7 @@ assertIncludes(
   'expo.sqlite.useSQLCipher=true',
   'Android Gradle properties',
 );
-assertIncludes(
+assertNotIncludes(
   androidManifest,
   'android.permission.SCHEDULE_EXACT_ALARM',
   'Android app manifest',

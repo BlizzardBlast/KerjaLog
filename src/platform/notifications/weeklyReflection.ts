@@ -1,9 +1,7 @@
 import { isRunningInExpoGo } from 'expo';
 import type { NotificationPermissionsStatus } from 'expo-notifications';
 import { Platform } from 'react-native';
-import type { ReminderPrecision } from '@/domain/reminder/model';
 import type { WeeklyReminderSchedule } from '@/features/onboarding/model';
-import { getWeeklyReminderPrecision } from '@/platform/notifications/exactAlarmAccess';
 
 const WEEKLY_REFLECTION_CHANNEL_ID = 'weekly-reflection';
 const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
@@ -11,14 +9,12 @@ const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
 type NotificationsModule = typeof import('expo-notifications');
 
 export type WeeklyReflectionEnableResult =
-  | 'enabled-exact'
-  | 'enabled-inexact'
+  | 'enabled'
   | 'permission-denied'
   | 'unsupported-runtime';
 
 export type WeeklyReflectionNotificationStatus =
-  | 'enabled-exact'
-  | 'enabled-inexact'
+  | 'enabled'
   | 'disabled'
   | 'unsupported-runtime';
 
@@ -53,12 +49,6 @@ function isNotificationPermissionGranted(
     permissions.granted ||
     permissions.ios?.status === notifications.IosAuthorizationStatus.PROVISIONAL
   );
-}
-
-function enabledResultForPrecision(
-  precision: ReminderPrecision,
-): Extract<WeeklyReflectionEnableResult, `enabled-${string}`> {
-  return precision === 'exact' ? 'enabled-exact' : 'enabled-inexact';
 }
 
 async function ensureAndroidNotificationChannel(
@@ -138,11 +128,7 @@ export async function getWeeklyReflectionNotificationStatus(): Promise<WeeklyRef
     (request) => request.identifier === WEEKLY_REFLECTION_NOTIFICATION_ID,
   );
 
-  if (!isScheduled) {
-    return 'disabled';
-  }
-
-  return enabledResultForPrecision(getWeeklyReminderPrecision());
+  return isScheduled ? 'enabled' : 'disabled';
 }
 
 export async function enableWeeklyReflectionNotification({
@@ -185,11 +171,7 @@ export async function enableWeeklyReflectionNotification({
     },
   });
 
-  // Expo SDK 57's Android scheduler checks canScheduleExactAlarms() and falls
-  // back to setAndAllowWhileIdle() when exact access is unavailable. There is
-  // no separate inexact-alarm permission to request; report the mode so the UI
-  // can tell the user when delivery is approximate instead of exact.
-  return enabledResultForPrecision(getWeeklyReminderPrecision());
+  return 'enabled';
 }
 
 export async function disableWeeklyReflectionNotification(): Promise<void> {

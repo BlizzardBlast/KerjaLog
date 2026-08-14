@@ -9,5 +9,6 @@ export type LogStepFrameProps = {
   backLabel: string;
   currentStep: number;
   totalSteps: number;
+  progressLabel: string;
   onBack: () => void;
 };

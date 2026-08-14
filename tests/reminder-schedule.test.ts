@@ -10,6 +10,18 @@ const schedule = {
 };
 
 describe('reminder schedule helpers', () => {
+  test('uses a deterministic anchor when a picker date is created during render', () => {
+    const date = createReminderTimeDate(schedule);
+
+    expect(date.getFullYear()).toBe(2000);
+    expect(date.getMonth()).toBe(0);
+    expect(date.getDate()).toBe(1);
+    expect(date.getHours()).toBe(16);
+    expect(date.getMinutes()).toBe(30);
+    expect(date.getSeconds()).toBe(0);
+    expect(date.getMilliseconds()).toBe(0);
+  });
+
   test('creates picker dates in local wall-clock time', () => {
     const baseDate = new Date(2026, 7, 9, 8, 5, 44, 900);
     const date = createReminderTimeDate(schedule, baseDate);

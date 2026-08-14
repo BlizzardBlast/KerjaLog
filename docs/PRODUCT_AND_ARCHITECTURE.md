@@ -263,7 +263,7 @@ Use local scheduled notifications. Do not require a notification backend.
 
 The reminder is opt-in. The user chooses the weekday and local wall-clock time before enabling it. Friday at 16:30 is only the initial suggestion, not fixed product behavior. Persist the schedule as local weekday/hour/minute fields rather than a UTC timestamp or serialized calendar date.
 
-On Android 12+, precise user-selected reminder times may use the `SCHEDULE_EXACT_ALARM` special app access. Treat that access as an optional precision upgrade rather than a prerequisite for reminders: Expo SDK 57 falls back to an inexact `setAndAllowWhileIdle` alarm when exact access is unavailable. Keep the reminder enabled in that case, clearly tell the user that delivery is approximate, and offer **Alarms & reminders** settings only if they want exact timing. Persist the last observed reminder precision and reconcile it when the app starts or returns to the foreground so permission grants/revocations re-arm the native reminder in the correct mode. If notification permission or the native scheduled request itself is removed, reconcile the persisted ON/OFF state. Do not turn the reminder off merely because the current runtime cannot inspect native reminder state.
+Weekly reminders use ordinary local scheduled notifications. KerjaLog does not request Android exact-alarm special access because minute-level precision is not product-critical for a gentle reflection reminder. OS power management may delay delivery. If notification permission or the native scheduled request disappears, reconcile the persisted enabled state when the app starts or returns to the foreground. A runtime that cannot inspect native reminder state must not force the persisted reminder off.
 
 Do not use visible streaks or guilt-based messaging for missed weeks.
 
@@ -501,7 +501,7 @@ Expo SDK 57 maps to React Native 0.86 and targets Android SDK 36, which is appro
 | App lock             | `expo-local-authentication`                     | Optional biometric/device authentication              |
 | Forms                | `@tanstack/react-form`                       | Efficient form/wizard state                           |
 | Validation           | `zod`                                           | Typed boundary validation                             |
-| Ephemeral app state  | `zustand`                                       | Small UI/workflow state only                          |
+| Ephemeral app state  | React local/context state; Zustand only if needed | Keep local state local; add a store only for genuine shared cross-feature state |
 | Localization         | `expo-localization` + `i18next`/`react-i18next` | Indonesian + English without scattered strings        |
 | Reminders            | `expo-notifications`                            | Local weekly reflection reminders                     |
 | PDF                  | `expo-print`                                    | Local HTML-to-PDF generation                          |
@@ -522,7 +522,7 @@ The project quality gates are:
 Biome
 + TypeScript compiler (`tsc --noEmit`)
 + React Compiler healthcheck
-+ render-ref purity guard (`pnpm run react:refs:check`)
++ official React Hooks/compiler-aware ESLint rules
 + Expo Doctor
 ```
 
@@ -563,8 +563,9 @@ No required server in the core path.
 
 ```text
 SQLite = persisted product data
-Zustand = ephemeral UI/workflow state
+React local/context state = component-local and app-shell UI state
 TanStack Form = active form state
+Zustand = shared cross-feature ephemeral state only if it genuinely emerges
 ```
 
 Do not mirror all entries/projects/evidence from SQLite into a global store.
@@ -1138,7 +1139,7 @@ Only after core retention is proven should the product evaluate:
 | Backend                     | None required                                            |
 | Sync                        | None                                                     |
 | AI                          | Deterministic local rules only                           |
-| Global state                | Zustand for ephemeral state only                         |
+| Global state                | None by default; Zustand only for genuine shared ephemeral state |
 | Forms                       | TanStack Form + Zod                                    |
 | Search                      | SQLite FTS5                                              |
 | Reminders                   | Local notifications                                      |
