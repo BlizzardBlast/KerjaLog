@@ -80,6 +80,22 @@ describe('useWizardNavigationGuard', () => {
     expect(mockPreventRemoveEnabled).toBe(false);
   });
 
+  test('does not trap navigation after the workflow has committed', async () => {
+    await renderHook(() =>
+      useWizardNavigationGuard({
+        hasUnsavedChanges: true,
+        currentStep: 5,
+        isComplete: true,
+        onInternalBack: jest.fn(),
+        onDiscard: jest.fn().mockResolvedValue(true),
+        copy,
+      }),
+    );
+    await waitForGuardRegistration();
+
+    expect(mockPreventRemoveEnabled).toBe(false);
+  });
+
   test('runs discard cleanup before dispatching a dirty first-step removal', async () => {
     const onDiscard = jest.fn().mockResolvedValue(true);
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
