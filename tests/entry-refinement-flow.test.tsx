@@ -26,7 +26,7 @@ const baseEntry: WorkEntryDetail = {
   updatedAt: '2026-08-10T08:01:00.000Z',
 };
 
-describe('useEntryRefinement impact ownership', () => {
+describe('useEntryRefinement', () => {
   test('never overwrites user-authored impact wording when recorded facts change', async () => {
     const entry: WorkEntryDetail = {
       ...baseEntry,
@@ -73,5 +73,42 @@ describe('useEntryRefinement impact ownership', () => {
     expect(result.current.impactStatement).toContain(
       'Evidence: Submitted two days earlier.',
     );
+  });
+
+  test('retries post-commit completion without updating the entry twice', async () => {
+    const updatedEntry: WorkEntryDetail = {
+      ...baseEntry,
+      updatedAt: '2026-08-14T00:00:00.000Z',
+    };
+    const updateEntry = jest.fn().mockResolvedValue(updatedEntry);
+    const onSaved = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('navigation unavailable'))
+      .mockResolvedValueOnce(undefined);
+    const { result } = await renderHook(() =>
+      useEntryRefinement({
+        entry: baseEntry,
+        t,
+        onSaved,
+        updateEntry,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(updateEntry).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(result.current.saveError).toBe(false);
+    expect(result.current.completionError).toBe(true);
+
+    await act(async () => {
+      await result.current.retryCompletion();
+    });
+
+    expect(updateEntry).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledTimes(2);
+    expect(result.current.completionError).toBe(false);
   });
 });
