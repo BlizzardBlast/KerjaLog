@@ -40,6 +40,9 @@ jobs:
       - name: Apply typecheck fixes
         run: python scripts/apply-typecheck-fixes.py
 
+      - name: Restore workflow files for ordinary code push
+        run: python scripts/prepare-materializer-push.py
+
       - name: Regenerate lockfile
         run: pnpm install --no-frozen-lockfile
 
@@ -73,8 +76,8 @@ jobs:
       - name: Test
         run: pnpm test:ci
 
-      - name: Remove temporary materializer
-        run: rm -f scripts/apply-final-review-hardening.py scripts/apply-react-lint-fixes.py scripts/apply-typecheck-fixes.py .github/workflows/final-review-hardening.yml
+      - name: Remove temporary materializer scripts
+        run: rm -f scripts/apply-final-review-hardening.py scripts/apply-react-lint-fixes.py scripts/apply-typecheck-fixes.py scripts/prepare-materializer-push.py
 
       - name: Commit hardening
         run: |
