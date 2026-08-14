@@ -22,11 +22,14 @@ Use this checklist before distributing a build outside local development. Produc
 
 ## Apple encryption export compliance
 
-KerjaLog uses SQLCipher and platform cryptography. Before every TestFlight/App Store submission:
+KerjaLog embeds SQLCipher, so `expo.ios.config.usesNonExemptEncryption` is intentionally **unset** until the shipped cryptography and distribution countries have been classified through App Store Connect. Do not encode an exemption before that determination.
 
-- [ ] Complete or re-check the current App Store Connect encryption/export-compliance questionnaire for the shipped cryptography.
-- [ ] Confirm that `expo.ios.config.usesNonExemptEncryption` in `app.json` matches that determination.
-- [ ] Do not change the declaration solely to silence App Store Connect prompts; retain the supporting compliance determination with release records.
+Before every TestFlight/App Store submission:
+
+- [ ] Complete or re-check the current App Store Connect encryption/export-compliance questionnaire for the exact shipped build and intended countries.
+- [ ] Record whether Apple determines that export-compliance documentation is required. If required, upload/obtain the applicable declaration or compliance code before submission.
+- [ ] Only after that determination, set `expo.ios.config.usesNonExemptEncryption` (and an export compliance code if Apple provides one) to match the approved classification, or intentionally leave the key unset so App Store Connect continues to ask the questionnaire.
+- [ ] Retain the supporting compliance determination with release records; never set the flag merely to suppress App Store Connect prompts.
 
 ## Android notifications
 
