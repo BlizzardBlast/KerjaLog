@@ -1,4 +1,4 @@
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
@@ -59,53 +59,58 @@ export function ReminderDayPicker({
             />
           </View>
 
-          <Text variant="heading">
-            {t('onboarding.review.reminderDayPickerTitle')}
-          </Text>
+          <ScrollView
+            contentContainerStyle={styles.sheetContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text variant="heading">
+              {t('onboarding.review.reminderDayPickerTitle')}
+            </Text>
 
-          <View style={styles.options} accessibilityRole="radiogroup">
-            {REMINDER_WEEKDAYS.map((weekday) => {
-              const selected = weekday === value;
+            <View style={styles.options} accessibilityRole="radiogroup">
+              {REMINDER_WEEKDAYS.map((weekday) => {
+                const selected = weekday === value;
 
-              return (
-                <Pressable
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: selected }}
-                  key={weekday}
-                  onPress={() => {
-                    onChange(weekday);
-                    onClose();
-                  }}
-                  style={({ pressed }) => [
-                    styles.option,
-                    {
-                      backgroundColor: selected
-                        ? theme.colors.primarySoft
-                        : theme.colors.surface,
-                      borderColor: selected
-                        ? theme.colors.primary
-                        : theme.colors.border,
-                    },
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text
-                    variant="bodyStrong"
-                    color={selected ? 'primary' : 'text'}
+                return (
+                  <Pressable
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: selected }}
+                    key={weekday}
+                    onPress={() => {
+                      onChange(weekday);
+                      onClose();
+                    }}
+                    style={({ pressed }) => [
+                      styles.option,
+                      {
+                        backgroundColor: selected
+                          ? theme.colors.primarySoft
+                          : theme.colors.surface,
+                        borderColor: selected
+                          ? theme.colors.primary
+                          : theme.colors.border,
+                      },
+                      pressed && styles.pressed,
+                    ]}
                   >
-                    {t(reminderWeekdayTranslationKeys[weekday])}
-                  </Text>
-                  {selected ? (
-                    <DecorativeView>
-                      <Text variant="bodyStrong" color="primary">
-                        ✓
-                      </Text>
-                    </DecorativeView>
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </View>
+                    <Text
+                      variant="bodyStrong"
+                      color={selected ? 'primary' : 'text'}
+                    >
+                      {t(reminderWeekdayTranslationKeys[weekday])}
+                    </Text>
+                    {selected ? (
+                      <DecorativeView>
+                        <Text variant="bodyStrong" color="primary">
+                          ✓
+                        </Text>
+                      </DecorativeView>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -129,9 +134,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radii.xl,
     borderTopRightRadius: radii.xl,
     borderWidth: 1,
-    gap: spacing[4],
+    gap: spacing[3],
+    maxHeight: '88%',
     paddingHorizontal: spacing[5],
     paddingTop: spacing[3],
+  },
+  sheetContent: {
+    gap: spacing[4],
+    paddingBottom: spacing[1],
   },
   grabberWrap: {
     alignItems: 'center',
