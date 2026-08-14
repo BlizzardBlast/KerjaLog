@@ -7,12 +7,6 @@ function assertIncludes(value, expected, label) {
   }
 }
 
-function assertMatches(value, expected, label) {
-  if (!expected.test(value)) {
-    throw new Error(`${label} is missing expected configuration.`);
-  }
-}
-
 function assertNotIncludes(value, unexpected, label) {
   if (value.includes(unexpected)) {
     throw new Error(`${label} includes forbidden configuration: ${unexpected}`);
@@ -61,9 +55,9 @@ assertIncludes(
   'iOS AppDelegate',
 );
 assertIncludes(appDelegate, 'NSLog(', 'iOS AppDelegate');
-assertMatches(
+assertNotIncludes(
   infoPlist,
-  /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/u,
+  'ITSAppUsesNonExemptEncryption',
   'iOS Info.plist',
 );
 
