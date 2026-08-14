@@ -136,7 +136,12 @@ export function useEntryRefinement({
       return false;
     }
 
-    setCurrentStep(REFINEMENT_STEPS[stepIndex - 1]);
+    const previousStep = REFINEMENT_STEPS[stepIndex - 1];
+    if (!previousStep) {
+      return false;
+    }
+
+    setCurrentStep(previousStep);
     return true;
   };
 
@@ -215,13 +220,16 @@ export function useEntryRefinement({
     }
 
     if (!impactStatement.trim()) {
+      const trimmedEvidenceDetail = evidenceDetail.trim();
       form.setFieldValue(
         'impactStatement',
         buildRefinementImpactStatement(
           {
             rawNote,
             outcomeType,
-            evidenceDetail: evidenceDetail.trim() || undefined,
+            ...(trimmedEvidenceDetail
+              ? { evidenceDetail: trimmedEvidenceDetail }
+              : {}),
           },
           impactCopy,
         ),
