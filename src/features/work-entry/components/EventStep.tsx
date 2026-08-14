@@ -13,6 +13,8 @@ import type {
 import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 
+const EVENT_NOTE_LABEL_ID = 'work-entry-event-note-label';
+
 type QuickSaveAction = {
   onPress: () => void;
   hasError: boolean;
@@ -48,9 +50,12 @@ export function EventStep({
         title={t('log.event.title')}
       />
       <View style={logStepStyles.field}>
-        <Text variant="label">{t('log.event.label')}</Text>
+        <Text nativeID={EVENT_NOTE_LABEL_ID} variant="label">
+          {t('log.event.label')}
+        </Text>
         <TextField
           accessibilityLabel={t('log.event.label')}
+          accessibilityLabelledBy={EVENT_NOTE_LABEL_ID}
           hasError={noteError}
           maxLength={2000}
           multiline
