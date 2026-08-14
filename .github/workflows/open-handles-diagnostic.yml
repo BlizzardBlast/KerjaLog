@@ -21,5 +21,7 @@ jobs:
           node-version: 24.18.1
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Detect Jest open handles
-        run: pnpm exec jest --ci --runInBand --detectOpenHandles
+      - name: Run with one Jest worker
+        run: pnpm exec jest --ci --maxWorkers=1
+      - name: Run with two Jest workers
+        run: pnpm exec jest --ci --maxWorkers=2
