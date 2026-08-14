@@ -20,6 +20,7 @@ export function AppTabs() {
         sceneStyle: { backgroundColor: theme.colors.surface },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarAllowFontScaling: true,
         tabBarHideOnKeyboard: true,
         tabBarLabelPosition: 'below-icon',
         tabBarItemStyle: styles.tabItem,
@@ -29,7 +30,7 @@ export function AppTabs() {
           {
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.border,
-            height: 64 + bottomPadding,
+            minHeight: 64 + bottomPadding,
             paddingBottom: bottomPadding,
           },
         ],
