@@ -14,6 +14,8 @@ import type {
 import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { evidenceOptions } from '@/features/work-entry/options';
 
+const EVIDENCE_DETAIL_LABEL_ID = 'work-entry-evidence-detail-label';
+
 type EvidenceStepProps = LogStepFrameProps & {
   evidenceTypes: EvidenceType[];
   evidenceDetail: string;
@@ -56,9 +58,12 @@ export function EvidenceStep({
         ))}
       </View>
       <View style={logStepStyles.field}>
-        <Text variant="label">{t('log.evidence.detailLabel')}</Text>
+        <Text nativeID={EVIDENCE_DETAIL_LABEL_ID} variant="label">
+          {t('log.evidence.detailLabel')}
+        </Text>
         <TextField
           accessibilityLabel={t('log.evidence.detailLabel')}
+          accessibilityLabelledBy={EVIDENCE_DETAIL_LABEL_ID}
           hasError={evidenceError}
           maxLength={1000}
           multiline
