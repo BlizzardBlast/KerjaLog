@@ -51,6 +51,7 @@ export function useEntryRefinement({
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [completionError, setCompletionError] = useState(false);
+  const [hasCommittedEntry, setHasCommittedEntry] = useState(false);
   const impactCopy = createImpactBuilderCopy(t);
 
   const completeCommittedEntry = async (updatedEntry: WorkEntryDetail) => {
@@ -85,6 +86,7 @@ export function useEntryRefinement({
       }
 
       committedEntryRef.current = updatedEntry;
+      setHasCommittedEntry(true);
       await completeCommittedEntry(updatedEntry);
     },
   });
@@ -250,6 +252,7 @@ export function useEntryRefinement({
     suggestedSkillIds,
     isDirty,
     isSubmitting,
+    hasCommittedEntry,
     noteError,
     evidenceError,
     saveError,
