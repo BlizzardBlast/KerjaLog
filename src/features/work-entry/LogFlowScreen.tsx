@@ -57,6 +57,7 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
   const allowNextRemoval = useWizardNavigationGuard({
     hasUnsavedChanges: flow.hasUnsavedDraft,
     currentStep: flow.currentStep,
+    isComplete: flow.hasCommittedEntry,
     onInternalBack: flow.goBack,
     onDiscard: async () => {
       draftPersistenceSuspendedRef.current = true;
