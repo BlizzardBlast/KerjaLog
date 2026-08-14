@@ -37,6 +37,9 @@ jobs:
       - name: Apply React lint fixes
         run: python scripts/apply-react-lint-fixes.py
 
+      - name: Apply typecheck fixes
+        run: python scripts/apply-typecheck-fixes.py
+
       - name: Regenerate lockfile
         run: pnpm install --no-frozen-lockfile
 
@@ -71,7 +74,7 @@ jobs:
         run: pnpm test:ci
 
       - name: Remove temporary materializer
-        run: rm -f scripts/apply-final-review-hardening.py scripts/apply-react-lint-fixes.py .github/workflows/final-review-hardening.yml
+        run: rm -f scripts/apply-final-review-hardening.py scripts/apply-react-lint-fixes.py scripts/apply-typecheck-fixes.py .github/workflows/final-review-hardening.yml
 
       - name: Commit hardening
         run: |
