@@ -1,5 +1,5 @@
 import { useForm, useSelector } from '@tanstack/react-form';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   buildRefinementImpactStatement,
   hasIncompleteEvidence,
@@ -14,7 +14,10 @@ import { suggestSkillIds } from '@/domain/skill/suggestions';
 import type { Translate } from '@/features/work-entry/components/logStepTypes';
 import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
 import { mapEntryToRefinementValues } from '@/features/work-entry/refinement/refinementMapper';
-import { entryRefinementSchema } from '@/features/work-entry/refinement/refinementSchema';
+import {
+  entryRefinementSchema,
+  type EntryRefinementValues,
+} from '@/features/work-entry/refinement/refinementSchema';
 import {
   getInitialRefinementStep,
   REFINEMENT_STEPS,
@@ -22,35 +25,67 @@ import {
 } from '@/features/work-entry/refinement/refinementSteps';
 import { updateWorkEntry } from '@/features/work-entry/refinement/updateWorkEntry';
 
+type UpdateEntry = (
+  entry: WorkEntryDetail,
+  values: EntryRefinementValues,
+) => Promise<WorkEntryDetail>;
+
 type UseEntryRefinementOptions = {
   entry: WorkEntryDetail;
   t: Translate;
-  onSaved: (entry: WorkEntryDetail) => void;
+  onSaved: (entry: WorkEntryDetail) => void | Promise<void>;
+  updateEntry?: UpdateEntry;
 };
 
 export function useEntryRefinement({
   entry,
   t,
   onSaved,
+  updateEntry = updateWorkEntry,
 }: UseEntryRefinementOptions) {
+  const committedEntryRef = useRef<WorkEntryDetail | null>(null);
   const [step, setStep] = useState<RefinementStep>(() =>
     getInitialRefinementStep(entry),
   );
   const [noteError, setNoteError] = useState(false);
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const [completionError, setCompletionError] = useState(false);
   const impactCopy = createImpactBuilderCopy(t);
+
+  const completeCommittedEntry = async (updatedEntry: WorkEntryDetail) => {
+    setCompletionError(false);
+
+    try {
+      await onSaved(updatedEntry);
+    } catch {
+      setCompletionError(true);
+    }
+  };
+
   const form = useForm({
     defaultValues: mapEntryToRefinementValues(entry),
     validators: { onSubmit: entryRefinementSchema },
     onSubmit: async ({ value }) => {
-      setSaveError(false);
+      const alreadyCommitted = committedEntryRef.current;
+      if (alreadyCommitted) {
+        await completeCommittedEntry(alreadyCommitted);
+        return;
+      }
 
+      setSaveError(false);
+      setCompletionError(false);
+
+      let updatedEntry: WorkEntryDetail;
       try {
-        onSaved(await updateWorkEntry(entry, value));
+        updatedEntry = await updateEntry(entry, value);
       } catch {
         setSaveError(true);
+        return;
       }
+
+      committedEntryRef.current = updatedEntry;
+      await completeCommittedEntry(updatedEntry);
     },
   });
 
@@ -218,6 +253,7 @@ export function useEntryRefinement({
     noteError,
     evidenceError,
     saveError,
+    completionError,
     goBack,
     setCurrentStep,
     selectEntryType,
@@ -231,5 +267,11 @@ export function useEntryRefinement({
     continueToImpact,
     updateImpactStatement,
     submit: () => form.handleSubmit(),
+    retryCompletion: () => {
+      const updatedEntry = committedEntryRef.current;
+      return updatedEntry
+        ? completeCommittedEntry(updatedEntry)
+        : Promise.resolve();
+    },
   };
 }
