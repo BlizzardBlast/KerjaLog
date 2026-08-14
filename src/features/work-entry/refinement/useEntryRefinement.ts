@@ -1,5 +1,5 @@
 import { useForm, useSelector } from '@tanstack/react-form';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   buildRefinementImpactStatement,
   hasIncompleteEvidence,
@@ -24,6 +24,7 @@ import {
   type RefinementStep,
 } from '@/features/work-entry/refinement/refinementSteps';
 import { updateWorkEntry } from '@/features/work-entry/refinement/updateWorkEntry';
+import { useSavedEntryCompletion } from '@/features/work-entry/useSavedEntryCompletion';
 
 type UpdateEntry = (
   entry: WorkEntryDetail,
@@ -43,39 +44,25 @@ export function useEntryRefinement({
   onSaved,
   updateEntry = updateWorkEntry,
 }: UseEntryRefinementOptions) {
-  const committedEntryRef = useRef<WorkEntryDetail | null>(null);
   const [step, setStep] = useState<RefinementStep>(() =>
     getInitialRefinementStep(entry),
   );
   const [noteError, setNoteError] = useState(false);
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
-  const [completionError, setCompletionError] = useState(false);
-  const [hasCommittedEntry, setHasCommittedEntry] = useState(false);
+  const savedEntryCompletion = useSavedEntryCompletion(onSaved);
   const impactCopy = createImpactBuilderCopy(t);
-
-  const completeCommittedEntry = async (updatedEntry: WorkEntryDetail) => {
-    setCompletionError(false);
-
-    try {
-      await onSaved(updatedEntry);
-    } catch {
-      setCompletionError(true);
-    }
-  };
 
   const form = useForm({
     defaultValues: mapEntryToRefinementValues(entry),
     validators: { onSubmit: entryRefinementSchema },
     onSubmit: async ({ value }) => {
-      const alreadyCommitted = committedEntryRef.current;
-      if (alreadyCommitted) {
-        await completeCommittedEntry(alreadyCommitted);
+      if (savedEntryCompletion.hasCommitted()) {
+        await savedEntryCompletion.retryCompletion();
         return;
       }
 
       setSaveError(false);
-      setCompletionError(false);
 
       let updatedEntry: WorkEntryDetail;
       try {
@@ -85,9 +72,7 @@ export function useEntryRefinement({
         return;
       }
 
-      committedEntryRef.current = updatedEntry;
-      setHasCommittedEntry(true);
-      await completeCommittedEntry(updatedEntry);
+      await savedEntryCompletion.commitAndComplete(updatedEntry);
     },
   });
 
@@ -260,11 +245,11 @@ export function useEntryRefinement({
     suggestedSkillIds,
     isDirty,
     isSubmitting,
-    hasCommittedEntry,
+    hasCommittedEntry: savedEntryCompletion.hasCommittedEntry,
     noteError,
     evidenceError,
     saveError,
-    completionError,
+    completionError: savedEntryCompletion.completionError,
     goBack,
     setCurrentStep,
     selectEntryType,
@@ -278,11 +263,6 @@ export function useEntryRefinement({
     continueToImpact,
     updateImpactStatement,
     submit: () => form.handleSubmit(),
-    retryCompletion: () => {
-      const updatedEntry = committedEntryRef.current;
-      return updatedEntry
-        ? completeCommittedEntry(updatedEntry)
-        : Promise.resolve();
-    },
+    retryCompletion: savedEntryCompletion.retryCompletion,
   };
 }
