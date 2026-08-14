@@ -7,6 +7,7 @@ import {
   isOutcomeType,
   isWorkEntryDraftStep,
   type WorkEntryDraft,
+  WORK_ENTRY_DRAFT_STEPS,
 } from '@/domain/entry/draft';
 import type { WorkEntryDraftRepository } from '@/domain/entry/repository';
 
@@ -87,24 +88,30 @@ export class SQLiteWorkEntryDraftRepository
 }
 
 function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
-  if (!isWorkEntryDraftStep(row.step))
+  if (!isWorkEntryDraftStep(row.step)) {
     throw new Error('Stored work entry draft step is invalid.');
-  if (row.intent !== null && !isLogEventIntent(row.intent))
+  }
+  if (row.intent !== null && !isLogEventIntent(row.intent)) {
     throw new Error('Stored work entry draft intent is invalid.');
-  if (typeof row.raw_note !== 'string')
+  }
+  if (typeof row.raw_note !== 'string') {
     throw new Error('Stored work entry draft note is invalid.');
-  if (row.outcome_type !== null && !isOutcomeType(row.outcome_type))
+  }
+  if (row.outcome_type !== null && !isOutcomeType(row.outcome_type)) {
     throw new Error('Stored work entry draft outcome is invalid.');
+  }
   if (
     typeof row.evidence_detail !== 'string' ||
     typeof row.impact_statement !== 'string'
-  )
+  ) {
     throw new Error('Stored work entry draft text is invalid.');
+  }
   if (
     row.impact_statement_source !== null &&
     !isImpactStatementSource(row.impact_statement_source)
-  )
+  ) {
     throw new Error('Stored work entry draft impact source is invalid.');
+  }
 
   const draft: WorkEntryDraft = {
     step: row.step,
@@ -121,29 +128,35 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
 }
 
 function parseEvidenceTypes(value: unknown): WorkEntryDraft['evidenceTypes'] {
-  if (typeof value !== 'string')
+  if (typeof value !== 'string') {
     throw new Error('Stored work entry draft evidence is invalid.');
+  }
+
   let parsed: unknown;
   try {
     parsed = JSON.parse(value);
   } catch {
     throw new Error('Stored work entry draft evidence is invalid.');
   }
-  if (!Array.isArray(parsed) || !parsed.every(isEvidenceType))
+
+  if (!Array.isArray(parsed) || !parsed.every(isEvidenceType)) {
     throw new Error('Stored work entry draft evidence is invalid.');
-  if (new Set(parsed).size !== parsed.length)
+  }
+  if (new Set(parsed).size !== parsed.length) {
     throw new Error('Stored work entry draft evidence contains duplicates.');
+  }
   return parsed;
 }
 
 function assertDraftProgression(draft: WorkEntryDraft): void {
-  const stepIndex = ['type', 'event', 'outcome', 'evidence', 'impact'].indexOf(
-    draft.step,
-  );
-  if (stepIndex >= 1 && draft.intent === null)
+  const stepIndex = WORK_ENTRY_DRAFT_STEPS.indexOf(draft.step);
+  if (stepIndex >= 1 && draft.intent === null) {
     throw new Error('Stored work entry draft is missing its event type.');
-  if (stepIndex >= 2 && draft.rawNote.trim().length === 0)
+  }
+  if (stepIndex >= 2 && draft.rawNote.trim().length === 0) {
     throw new Error('Stored work entry draft is missing its note.');
-  if (stepIndex >= 3 && draft.outcomeType === null)
+  }
+  if (stepIndex >= 3 && draft.outcomeType === null) {
     throw new Error('Stored work entry draft is missing its outcome.');
+  }
 }
