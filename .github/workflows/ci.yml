@@ -58,6 +58,8 @@ jobs:
 
       - name: Verify generated native configuration
         run: pnpm run native:check
+        env:
+          NODE_ENV: development
 
       - name: Export Android bundle
         run: pnpm run export:android
