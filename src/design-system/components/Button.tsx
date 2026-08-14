@@ -169,10 +169,12 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     flexDirection: 'row',
+    flexShrink: 1,
     gap: spacing[2],
     justifyContent: 'center',
   },
   label: {
+    flexShrink: 1,
     textAlign: 'center',
   },
   disabled: {
