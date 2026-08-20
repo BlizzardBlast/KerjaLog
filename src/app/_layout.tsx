@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native';
+import { isRunningInExpoGo } from 'expo';
 import type { ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StrictMode } from 'react';
@@ -15,36 +16,40 @@ import { configureNotificationHandling } from '@/platform/notifications/weeklyRe
 import { RootErrorScreen } from '@/shared/components/RootErrorScreen';
 import { ignoreError } from '@/shared/utils/function';
 
+const runningInExpoGo = isRunningInExpoGo();
+
 Sentry.init({
   dsn: 'https://14ee0c9c15f1270cd72c729104c5df0c@o4511942233227264.ingest.us.sentry.io/4511942238666752',
-
-  // Adds more context data to events (IP address, cookies, user, etc.)
-  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
-  sendDefaultPii: true,
-
-  // Enable Logs
+  sendDefaultPii: false,
+  tracesSampleRate: __DEV__ ? 1 : 0.2,
+  enableNativeFramesTracking: !runningInExpoGo,
   enableLogs: true,
-
-  // Configure Session Replay
-  replaysSessionSampleRate: 0.1,
+  enableAutoConsoleLogs: false,
+  replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 1,
   integrations: [
-    Sentry.mobileReplayIntegration(),
-    Sentry.feedbackIntegration(),
+    Sentry.expoRouterIntegration({
+      enableTimeToInitialDisplay: !runningInExpoGo,
+    }),
+    Sentry.mobileReplayIntegration({
+      maskAllText: true,
+      maskAllImages: true,
+      maskAllVectors: true,
+    }),
   ],
-
-  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-  // spotlight: __DEV__,
 });
 
 SplashScreen.preventAutoHideAsync().catch(ignoreError);
 configureNotificationHandling().catch(ignoreError);
 
-export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+function RootErrorBoundary({ retry }: ErrorBoundaryProps) {
   return <RootErrorScreen onRetry={retry} />;
 }
 
-export default function RootLayout() {
+export const ErrorBoundary =
+  Sentry.wrapExpoRouterErrorBoundary(RootErrorBoundary);
+
+function RootLayout() {
   return (
     <StrictMode>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
@@ -61,3 +66,5 @@ export default function RootLayout() {
     </StrictMode>
   );
 }
+
+export default Sentry.wrap(RootLayout);
