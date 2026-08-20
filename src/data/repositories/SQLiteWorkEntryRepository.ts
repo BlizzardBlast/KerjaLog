@@ -29,6 +29,11 @@ import {
 } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
+import {
+  ENTRY_SKILL_SOURCES,
+  SKILL_IDS,
+  type WorkEntrySkill,
+} from '@/domain/skill/model';
 
 const ACTIVE_DRAFT_ID = 1;
 
@@ -198,7 +203,9 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 
   async countSince(occurredAtInclusive: string): Promise<number> {
     if (!isCanonicalIsoTimestamp(occurredAtInclusive)) {
-      throw new Error('Work entry count boundary must be an ISO timestamp.');
+      throw new Error(
+        'Work entry count boundary must be an ISO timestamp.',
+      );
     }
 
     const db = await getDatabase();
@@ -227,6 +234,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
     const db = await getDatabase();
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
+    const uniqueSkills = dedupeSkills(input.skills);
 
     await withKeyedTransaction(db, async (transaction) => {
       await transaction.runAsync(
@@ -298,6 +306,8 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
         );
       }
 
+      await insertEntrySkills(transaction, id, uniqueSkills);
+
       await transaction.runAsync(
         'DELETE FROM active_work_entry_draft WHERE id = $activeDraftId',
         { $activeDraftId: ACTIVE_DRAFT_ID },
@@ -325,9 +335,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 
     const db = await getDatabase();
     const now = new Date().toISOString();
-    const uniqueSkills = [
-      ...new Map(input.skills.map((skill) => [skill.id, skill])).values(),
-    ];
+    const uniqueSkills = dedupeSkills(input.skills);
 
     return withKeyedTransaction(db, async (transaction) => {
       const result = await transaction.runAsync(
@@ -395,20 +403,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
         'DELETE FROM entry_skills WHERE entry_id = $id',
         { $id: id },
       );
-
-      for (const skill of uniqueSkills) {
-        await transaction.runAsync(
-          `
-            INSERT INTO entry_skills (entry_id, skill_id, source)
-            VALUES ($entryId, $skillId, $source)
-          `,
-          {
-            $entryId: id,
-            $skillId: skill.id,
-            $source: skill.source,
-          },
-        );
-      }
+      await insertEntrySkills(transaction, id, uniqueSkills);
 
       const updatedEntry = await findWorkEntryDetail(transaction, id);
       if (!updatedEntry) {
@@ -420,10 +415,34 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 }
 
+function dedupeSkills(skills: WorkEntrySkill[]): WorkEntrySkill[] {
+  return [...new Map(skills.map((skill) => [skill.id, skill])).values()];
+}
+
+async function insertEntrySkills(
+  db: SQLiteDatabase,
+  entryId: string,
+  skills: WorkEntrySkill[],
+): Promise<void> {
+  for (const skill of skills) {
+    await db.runAsync(
+      `
+        INSERT INTO entry_skills (entry_id, skill_id, source)
+        VALUES ($entryId, $skillId, $source)
+      `,
+      {
+        $entryId: entryId,
+        $skillId: skill.id,
+        $source: skill.source,
+      },
+    );
+  }
+}
+
 function assertEntryWriteInput(
   input: Pick<
     CreateWorkEntry,
-    'occurredAt' | 'impactStatement' | 'impactStatementSource'
+    'occurredAt' | 'impactStatement' | 'impactStatementSource' | 'skills'
   >,
 ): void {
   if (!isCanonicalIsoTimestamp(input.occurredAt)) {
@@ -443,6 +462,15 @@ function assertEntryWriteInput(
     !IMPACT_STATEMENT_SOURCES.includes(input.impactStatementSource)
   ) {
     throw new Error('Work entry impact statement source is invalid.');
+  }
+
+  for (const skill of input.skills) {
+    if (
+      !SKILL_IDS.includes(skill.id) ||
+      !ENTRY_SKILL_SOURCES.includes(skill.source)
+    ) {
+      throw new Error('Work entry skill is invalid.');
+    }
   }
 }
 
