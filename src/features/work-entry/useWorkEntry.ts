@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { workEntryRepository } from '@/data/repositories/workEntryRepository';
 import type { WorkEntryDetail } from '@/domain/entry/model';
 import type { WorkEntryByIdReader } from '@/domain/entry/repository';
@@ -31,56 +31,47 @@ export function useWorkEntry(
   }));
   const requestIdRef = useRef(0);
 
-  useEffect(() => {
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
+  const loadEntry = useCallback(
+    (showLoading: boolean) => {
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
 
-    repository
-      .findById(id)
-      .then((entry) => {
-        if (requestId === requestIdRef.current) {
-          setStored({
-            id,
-            state: entry
-              ? { status: 'loaded', entry }
-              : { status: 'not-found' },
-          });
-        }
-      })
-      .catch(() => {
-        if (requestId === requestIdRef.current) {
-          setStored({ id, state: { status: 'error' } });
-        }
-      });
+      if (showLoading) {
+        setStored({ id, state: LOADING_STATE });
+      }
+
+      repository
+        .findById(id)
+        .then((entry) => {
+          if (requestId === requestIdRef.current) {
+            setStored({
+              id,
+              state: entry
+                ? { status: 'loaded', entry }
+                : { status: 'not-found' },
+            });
+          }
+        })
+        .catch(() => {
+          if (requestId === requestIdRef.current) {
+            setStored({ id, state: { status: 'error' } });
+          }
+        });
+    },
+    [id, repository],
+  );
+
+  useEffect(() => {
+    loadEntry(false);
 
     return () => {
       requestIdRef.current += 1;
     };
-  }, [id, repository]);
+  }, [loadEntry]);
 
-  const retry = () => {
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
-    setStored({ id, state: LOADING_STATE });
-
-    repository
-      .findById(id)
-      .then((entry) => {
-        if (requestId === requestIdRef.current) {
-          setStored({
-            id,
-            state: entry
-              ? { status: 'loaded', entry }
-              : { status: 'not-found' },
-          });
-        }
-      })
-      .catch(() => {
-        if (requestId === requestIdRef.current) {
-          setStored({ id, state: { status: 'error' } });
-        }
-      });
-  };
+  const retry = useCallback(() => {
+    loadEntry(true);
+  }, [loadEntry]);
 
   return {
     state: stored.id === id ? stored.state : LOADING_STATE,
