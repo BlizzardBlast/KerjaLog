@@ -7,10 +7,12 @@ import { spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type LogSaveCompletionErrorScreenProps = {
+  loading: boolean;
   onRetry: () => void;
 };
 
 export function LogSaveCompletionErrorScreen({
+  loading,
   onRetry,
 }: LogSaveCompletionErrorScreenProps) {
   const { theme } = useTheme();
@@ -33,7 +35,7 @@ export function LogSaveCompletionErrorScreen({
       >
         {t('log.completion.description')}
       </Text>
-      <Button fullWidth onPress={onRetry}>
+      <Button fullWidth loading={loading} onPress={onRetry}>
         {t('log.completion.retry')}
       </Button>
     </SafeAreaView>
