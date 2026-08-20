@@ -30,7 +30,7 @@ export function WorkEntryWizardLayout({
 
     previousStepKeyRef.current = stepKey;
     scrollRef.current?.scrollTo({ y: 0, animated: false });
-  });
+  }, [stepKey]);
 
   return (
     <SafeAreaView
