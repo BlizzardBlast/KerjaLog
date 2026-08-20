@@ -7,12 +7,20 @@ import {
   OUTCOME_TYPES,
   type OutcomeType,
 } from '@/domain/entry/model';
+import {
+  ENTRY_SKILL_SOURCES,
+  type EntrySkillSource,
+  SKILL_IDS,
+  type SkillId,
+  type WorkEntrySkill,
+} from '@/domain/skill/model';
 
 export const WORK_ENTRY_DRAFT_STEPS = [
   'type',
   'event',
   'outcome',
   'evidence',
+  'skills',
   'impact',
 ] as const;
 
@@ -25,6 +33,7 @@ export type WorkEntryDraft = {
   outcomeType: OutcomeType | null;
   evidenceTypes: EvidenceType[];
   evidenceDetail: string;
+  skills: WorkEntrySkill[];
   impactStatement: string;
   impactStatementSource: ImpactStatementSource | null;
 };
@@ -36,6 +45,7 @@ export const EMPTY_WORK_ENTRY_DRAFT: WorkEntryDraft = {
   outcomeType: null,
   evidenceTypes: [],
   evidenceDetail: '',
+  skills: [],
   impactStatement: '',
   impactStatementSource: null,
 };
@@ -47,6 +57,7 @@ export function hasWorkEntryDraftContent(draft: WorkEntryDraft): boolean {
     draft.outcomeType !== null ||
     draft.evidenceTypes.length > 0 ||
     draft.evidenceDetail.trim().length > 0 ||
+    draft.skills.length > 0 ||
     draft.impactStatement.trim().length > 0 ||
     draft.impactStatementSource !== null
   );
@@ -77,6 +88,17 @@ export function isOutcomeType(value: unknown): value is OutcomeType {
 export function isEvidenceType(value: unknown): value is EvidenceType {
   return (
     typeof value === 'string' && EVIDENCE_TYPES.includes(value as EvidenceType)
+  );
+}
+
+export function isSkillId(value: unknown): value is SkillId {
+  return typeof value === 'string' && SKILL_IDS.includes(value as SkillId);
+}
+
+export function isEntrySkillSource(value: unknown): value is EntrySkillSource {
+  return (
+    typeof value === 'string' &&
+    ENTRY_SKILL_SOURCES.includes(value as EntrySkillSource)
   );
 }
 
