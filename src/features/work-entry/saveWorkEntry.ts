@@ -6,6 +6,7 @@ import {
   hasUsefulEvidence,
   type LogEventIntent,
 } from '@/domain/entry/impact';
+import { assertWorkEntryTextWithinLimits } from '@/domain/entry/limits';
 import type {
   EvidenceType,
   ImpactStatementSource,
@@ -31,6 +32,12 @@ export async function saveWorkEntry(
   draft: SaveWorkEntryDraft,
   repository: WorkEntryWriter = workEntryRepository,
 ): Promise<WorkEntry> {
+  assertWorkEntryTextWithinLimits({
+    rawNote: draft.rawNote,
+    evidenceDetail: draft.evidenceDetail,
+    impactStatement: draft.impactStatement,
+  });
+
   const rawNote = draft.rawNote.trim();
   if (!rawNote) throw new Error('A work entry requires a note.');
 
