@@ -1,15 +1,18 @@
 import { getDatabase } from '@/data/database';
 import { withKeyedDatabaseAccess } from '@/data/keyedDatabaseAccess';
 import {
+  isEntrySkillSource,
   isEvidenceType,
   isImpactStatementSource,
   isLogEventIntent,
   isOutcomeType,
+  isSkillId,
   isWorkEntryDraftStep,
   type WorkEntryDraft,
   WORK_ENTRY_DRAFT_STEPS,
 } from '@/domain/entry/draft';
 import type { WorkEntryDraftRepository } from '@/domain/entry/repository';
+import type { WorkEntrySkill } from '@/domain/skill/model';
 
 const ACTIVE_DRAFT_ID = 1;
 
@@ -20,6 +23,7 @@ type ActiveDraftRow = {
   outcome_type: unknown;
   evidence_types: unknown;
   evidence_detail: unknown;
+  selected_skills: unknown;
   impact_statement: unknown;
   impact_statement_source: unknown;
 };
@@ -32,7 +36,7 @@ export class SQLiteWorkEntryDraftRepository
     return withKeyedDatabaseAccess(async () => {
       const row = await db.getFirstAsync<ActiveDraftRow>(
         `SELECT step, intent, raw_note, outcome_type, evidence_types, evidence_detail,
-          impact_statement, impact_statement_source
+          selected_skills, impact_statement, impact_statement_source
          FROM active_work_entry_draft WHERE id = $id`,
         { $id: ACTIVE_DRAFT_ID },
       );
@@ -47,10 +51,10 @@ export class SQLiteWorkEntryDraftRepository
       await db.runAsync(
         `INSERT INTO active_work_entry_draft (
           id, step, intent, raw_note, outcome_type, evidence_types, evidence_detail,
-          impact_statement, impact_statement_source, updated_at
+          selected_skills, impact_statement, impact_statement_source, updated_at
         ) VALUES (
           $id, $step, $intent, $rawNote, $outcomeType, $evidenceTypes, $evidenceDetail,
-          $impactStatement, $impactStatementSource, $updatedAt
+          $selectedSkills, $impactStatement, $impactStatementSource, $updatedAt
         ) ON CONFLICT(id) DO UPDATE SET
           step = excluded.step,
           intent = excluded.intent,
@@ -58,6 +62,7 @@ export class SQLiteWorkEntryDraftRepository
           outcome_type = excluded.outcome_type,
           evidence_types = excluded.evidence_types,
           evidence_detail = excluded.evidence_detail,
+          selected_skills = excluded.selected_skills,
           impact_statement = excluded.impact_statement,
           impact_statement_source = excluded.impact_statement_source,
           updated_at = excluded.updated_at`,
@@ -69,6 +74,7 @@ export class SQLiteWorkEntryDraftRepository
           $outcomeType: draft.outcomeType,
           $evidenceTypes: JSON.stringify(draft.evidenceTypes),
           $evidenceDetail: draft.evidenceDetail,
+          $selectedSkills: JSON.stringify(draft.skills),
           $impactStatement: draft.impactStatement,
           $impactStatementSource: draft.impactStatementSource,
           $updatedAt: updatedAt,
@@ -120,6 +126,7 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
     outcomeType: row.outcome_type,
     evidenceTypes: parseEvidenceTypes(row.evidence_types),
     evidenceDetail: row.evidence_detail,
+    skills: parseSkills(row.selected_skills),
     impactStatement: row.impact_statement,
     impactStatementSource: row.impact_statement_source,
   };
@@ -145,6 +152,39 @@ function parseEvidenceTypes(value: unknown): WorkEntryDraft['evidenceTypes'] {
   if (new Set(parsed).size !== parsed.length) {
     throw new Error('Stored work entry draft evidence contains duplicates.');
   }
+  return parsed;
+}
+
+function parseSkills(value: unknown): WorkEntrySkill[] {
+  if (typeof value !== 'string') {
+    throw new Error('Stored work entry draft skills are invalid.');
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error('Stored work entry draft skills are invalid.');
+  }
+
+  if (
+    !Array.isArray(parsed) ||
+    !parsed.every(
+      (skill): skill is WorkEntrySkill =>
+        typeof skill === 'object' &&
+        skill !== null &&
+        'id' in skill &&
+        isSkillId(skill.id) &&
+        'source' in skill &&
+        isEntrySkillSource(skill.source),
+    )
+  ) {
+    throw new Error('Stored work entry draft skills are invalid.');
+  }
+  if (new Set(parsed.map((skill) => skill.id)).size !== parsed.length) {
+    throw new Error('Stored work entry draft skills contain duplicates.');
+  }
+
   return parsed;
 }
 
