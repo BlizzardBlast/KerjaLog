@@ -48,3 +48,4 @@ example
 
 # CodeGraph local index and daemon state
 .codegraph/
+.env.local
