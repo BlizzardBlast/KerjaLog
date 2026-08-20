@@ -57,9 +57,7 @@ export function SkillStep({
             <LogChoiceCard
               key={skill.id}
               title={t(skill.nameKey)}
-              description={
-                suggested ? t('entry.skills.suggested') : undefined
-              }
+              description={suggested ? t('entry.skills.suggested') : undefined}
               selected={selectedIds.has(skill.id)}
               onPress={() => onToggle(skill.id, suggested ? 'rules' : 'user')}
               mode="multiple"
