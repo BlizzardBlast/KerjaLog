@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import {
   ENTRY_TYPES,
   EVIDENCE_TYPES,
@@ -16,11 +17,11 @@ const nonBlankString = (maxLength: number) =>
 export const entryRefinementSchema = z
   .object({
     type: z.enum(ENTRY_TYPES),
-    rawNote: nonBlankString(2000),
+    rawNote: nonBlankString(WORK_ENTRY_TEXT_LIMITS.rawNote),
     outcomeType: z.enum(OUTCOME_TYPES).nullable(),
     evidenceTypes: z.array(z.enum(EVIDENCE_TYPES)),
-    evidenceDetail: z.string().max(1000),
-    impactStatement: z.string().max(2500),
+    evidenceDetail: z.string().max(WORK_ENTRY_TEXT_LIMITS.evidenceDetail),
+    impactStatement: z.string().max(WORK_ENTRY_TEXT_LIMITS.impactStatement),
     impactStatementSource: z.enum(IMPACT_STATEMENT_SOURCES).nullable(),
     skills: z.array(
       z.object({
