@@ -203,9 +203,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
 
   async countSince(occurredAtInclusive: string): Promise<number> {
     if (!isCanonicalIsoTimestamp(occurredAtInclusive)) {
-      throw new Error(
-        'Work entry count boundary must be an ISO timestamp.',
-      );
+      throw new Error('Work entry count boundary must be an ISO timestamp.');
     }
 
     const db = await getDatabase();
