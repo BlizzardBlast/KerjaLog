@@ -78,6 +78,7 @@ export type CreateWorkEntry = Omit<
   WorkEntry,
   'id' | 'createdAt' | 'updatedAt'
 > & {
+  skills: WorkEntrySkill[];
   impactStatementSource: ImpactStatementSource | null;
 };
 
