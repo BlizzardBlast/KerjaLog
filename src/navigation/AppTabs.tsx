@@ -49,7 +49,7 @@ export function AppTabs() {
                     router.push('/entry/new');
                   },
                 }
-              : undefined
+              : {}
           }
           options={{
             title: t(tab.labelKey),
