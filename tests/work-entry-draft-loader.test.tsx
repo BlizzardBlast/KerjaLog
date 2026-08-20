@@ -10,6 +10,7 @@ const draft: WorkEntryDraft = {
   outcomeType: null,
   evidenceTypes: [],
   evidenceDetail: '',
+  skills: [],
   impactStatement: '',
   impactStatementSource: null,
 };
