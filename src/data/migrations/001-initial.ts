@@ -109,6 +109,7 @@ export const INITIAL_SCHEMA_SQL = `
       'event',
       'outcome',
       'evidence',
+      'skills',
       'impact'
     )),
     intent TEXT CHECK(
@@ -138,6 +139,7 @@ export const INITIAL_SCHEMA_SQL = `
     ),
     evidence_types TEXT NOT NULL DEFAULT '[]',
     evidence_detail TEXT NOT NULL DEFAULT '',
+    selected_skills TEXT NOT NULL DEFAULT '[]',
     impact_statement TEXT NOT NULL DEFAULT '',
     impact_statement_source TEXT CHECK(
       impact_statement_source IS NULL OR impact_statement_source IN ('generated', 'user')
