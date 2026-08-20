@@ -14,7 +14,6 @@ export function useSavedEntryCompletion<Entry>(
   const completionInProgressRef = useRef(false);
   const [hasCommittedEntry, setHasCommittedEntry] = useState(false);
   const [completionError, setCompletionError] = useState(false);
-  const [isCompleting, setIsCompleting] = useState(false);
 
   const complete = async (entry: Entry): Promise<void> => {
     if (completionInProgressRef.current) {
@@ -22,7 +21,6 @@ export function useSavedEntryCompletion<Entry>(
     }
 
     completionInProgressRef.current = true;
-    setIsCompleting(true);
     setCompletionError(false);
 
     try {
@@ -31,7 +29,6 @@ export function useSavedEntryCompletion<Entry>(
       setCompletionError(true);
     } finally {
       completionInProgressRef.current = false;
-      setIsCompleting(false);
     }
   };
 
@@ -51,7 +48,6 @@ export function useSavedEntryCompletion<Entry>(
   return {
     hasCommittedEntry,
     completionError,
-    isCompleting,
     hasCommitted,
     commitAndComplete,
     retryCompletion,
