@@ -13,7 +13,7 @@ function createRepository(): jest.Mocked<WorkEntryWriter> {
 }
 
 describe('saveWorkEntry', () => {
-  test('maps a developed capture into persisted entry data', async () => {
+  test('maps a developed capture into persisted entry data with confirmed skills', async () => {
     const repository = createRepository();
     const entry = await saveWorkEntry(
       {
@@ -22,6 +22,11 @@ describe('saveWorkEntry', () => {
         outcomeType: 'person_helped',
         evidenceTypes: ['deadline'],
         evidenceDetail: 'Completed before Friday close',
+        skills: [
+          { id: 'collaboration', source: 'rules' },
+          { id: 'collaboration', source: 'rules' },
+          { id: 'communication', source: 'user' },
+        ],
         impactStatement: 'Helped Finance reconcile the monthly report.',
         impactStatementSource: 'generated',
       },
@@ -30,6 +35,14 @@ describe('saveWorkEntry', () => {
 
     expect(entry.type).toBe('contribution');
     expect(entry.status).toBe('review_ready');
+    expect(repository.commit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skills: [
+          { id: 'collaboration', source: 'rules' },
+          { id: 'communication', source: 'user' },
+        ],
+      }),
+    );
     expect(repository.commit).toHaveBeenCalledTimes(1);
   });
 
@@ -42,6 +55,7 @@ describe('saveWorkEntry', () => {
         outcomeType: null,
         evidenceTypes: [],
         evidenceDetail: '',
+        skills: [],
         impactStatement: null,
         impactStatementSource: null,
       },
@@ -61,6 +75,7 @@ describe('saveWorkEntry', () => {
           outcomeType: 'deadline_met',
           evidenceTypes: ['deadline'],
           evidenceDetail: '',
+          skills: [],
           impactStatement: 'Prepared the report on time.',
           impactStatementSource: 'generated',
         },
@@ -79,6 +94,7 @@ describe('saveWorkEntry', () => {
           outcomeType: 'deadline_met',
           evidenceTypes: [],
           evidenceDetail: '',
+          skills: [],
           impactStatement: 'Prepared the report on time.',
           impactStatementSource: null,
         },
@@ -97,6 +113,7 @@ describe('saveWorkEntry', () => {
           outcomeType: null,
           evidenceTypes: [],
           evidenceDetail: '',
+          skills: [],
           impactStatement: null,
           impactStatementSource: null,
         },
