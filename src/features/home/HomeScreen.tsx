@@ -25,7 +25,7 @@ export function HomeScreen() {
   const { state } = useOnboarding();
   const workEntries = useHomeWorkEntries();
   const insets = useSafeAreaInsets();
-  const openCapture = () => router.push('/capture');
+  const openCapture = () => router.push('/entry/new');
   const openEntry = (id: string) =>
     router.push({ pathname: '/entry/[id]', params: { id } });
 
