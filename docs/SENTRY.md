@@ -10,10 +10,14 @@ The runtime configuration is intentionally conservative because KerjaLog stores 
 - Expo Router reports templated route names without concrete route parameters;
 - Session Replay uploads only when an error occurs;
 - replay text, images, and vectors remain masked;
-- automatic console-log ingestion is disabled;
+- JavaScript console and HTTP breadcrumbs are disabled;
+- JavaScript error and transaction events remove user, request, and extra contexts before sending;
+- trace-propagation headers are disabled until a first-party backend origin is explicitly allowlisted;
 - screenshots, view hierarchy attachments, request/response bodies, and request headers are not enabled.
 
 Do not add work-entry text, evidence, feedback, user-entered values, authentication material, or database contents to Sentry messages, tags, breadcrumbs, logs, or custom contexts.
+
+`beforeSend` and `beforeSendTransaction` apply only to JavaScript events. Keep Sentry's server-side data-scrubbing rules enabled as a second layer, covering credentials, personal data, and any future network query parameters. Native crash payloads are not filtered by these JavaScript hooks.
 
 ## Source maps and debug symbols
 
@@ -32,6 +36,8 @@ The configured Sentry organization and project slugs are `blizzard-dw` and `reac
 `expoRouterIntegration` is configured in the root layout. It records navigation transactions without manual React Navigation container registration. Native frame tracking and Time to Initial Display are disabled in Expo Go because those measurements require a native build.
 
 The Metro transform is also configured to wrap Expo Router `ErrorBoundary` re-exports. KerjaLog's custom root route error boundary is wrapped explicitly so handled render errors are still reported to Sentry while keeping the existing fallback UI.
+
+KerjaLog supports iOS and Android only. Metro excludes Sentry's web Feedback and Replay code; mobile error replay remains enabled with masking.
 
 ## Sampling
 
