@@ -1,3 +1,4 @@
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import type { WorkEntryWriter } from '@/domain/entry/repository';
 import { saveWorkEntry } from '@/features/work-entry/saveWorkEntry';
 
@@ -120,5 +121,63 @@ describe('saveWorkEntry', () => {
         repository,
       ),
     ).rejects.toThrow('A work entry requires a note.');
+  });
+
+  test.each([
+    {
+      field: 'note',
+      draft: {
+        rawNote: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.rawNote + 1),
+        evidenceTypes: [] as const,
+        evidenceDetail: '',
+        impactStatement: null,
+        impactStatementSource: null,
+      },
+      message: 'Work entry note exceeds the maximum length.',
+    },
+    {
+      field: 'evidence',
+      draft: {
+        rawNote: 'Prepared the report',
+        evidenceTypes: ['number'] as const,
+        evidenceDetail: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.evidenceDetail + 1),
+        impactStatement: null,
+        impactStatementSource: null,
+      },
+      message: 'Work entry evidence exceeds the maximum length.',
+    },
+    {
+      field: 'impact',
+      draft: {
+        rawNote: 'Prepared the report',
+        evidenceTypes: [] as const,
+        evidenceDetail: '',
+        impactStatement: 'a'.repeat(
+          WORK_ENTRY_TEXT_LIMITS.impactStatement + 1,
+        ),
+        impactStatementSource: 'user' as const,
+      },
+      message: 'Work entry impact statement exceeds the maximum length.',
+    },
+  ])('rejects an oversized $field before repository commit', async ({
+    draft,
+    message,
+  }) => {
+    const repository = createRepository();
+
+    await expect(
+      saveWorkEntry(
+        {
+          intent: 'completed',
+          outcomeType: null,
+          skills: [],
+          ...draft,
+          evidenceTypes: [...draft.evidenceTypes],
+        },
+        repository,
+      ),
+    ).rejects.toThrow(message);
+
+    expect(repository.commit).not.toHaveBeenCalled();
   });
 });
