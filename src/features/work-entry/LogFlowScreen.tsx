@@ -103,7 +103,7 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
       ? flow.selectedSkills
           .map((skill) => t(skillDefinitionById[skill.id].nameKey))
           .join(' · ')
-      : t('entry.refine.skills.none');
+      : t('entry.skills.none');
 
   return (
     <WorkEntryWizardLayout stepKey={flow.step}>
