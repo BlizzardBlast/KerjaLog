@@ -13,6 +13,7 @@ import type {
   WorkEntry,
 } from '@/domain/entry/model';
 import type { WorkEntryWriter } from '@/domain/entry/repository';
+import type { WorkEntrySkill } from '@/domain/skill/model';
 import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
 
 export type SaveWorkEntryDraft = {
@@ -21,6 +22,7 @@ export type SaveWorkEntryDraft = {
   outcomeType: OutcomeType | null;
   evidenceTypes: EvidenceType[];
   evidenceDetail: string;
+  skills: WorkEntrySkill[];
   impactStatement: string | null;
   impactStatementSource: ImpactStatementSource | null;
 };
@@ -44,6 +46,9 @@ export async function saveWorkEntry(
     throw new Error('Impact statement provenance is inconsistent.');
   }
 
+  const skills = [
+    ...new Map(draft.skills.map((skill) => [skill.id, skill])).values(),
+  ];
   const now = new Date().toISOString();
   return repository.commit({
     type: entryTypeByIntent[draft.intent],
@@ -61,6 +66,7 @@ export async function saveWorkEntry(
     evidence: hasEvidence
       ? { types: evidenceTypes, detail: evidenceDetail }
       : null,
+    skills,
     excludedFromExports: draft.intent === 'challenge',
   });
 }
