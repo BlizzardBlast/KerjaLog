@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { tabs } from '@/navigation/tabs';
 
 export function AppTabs() {
+  const router = useRouter();
   const { theme } = useTheme();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
@@ -40,6 +41,16 @@ export function AppTabs() {
         <Tabs.Screen
           key={tab.name}
           name={tab.name}
+          listeners={
+            tab.capture
+              ? {
+                  tabPress: (event) => {
+                    event.preventDefault();
+                    router.push('/entry/new');
+                  },
+                }
+              : undefined
+          }
           options={{
             title: t(tab.labelKey),
             tabBarAccessibilityLabel: t(tab.labelKey),
