@@ -17,6 +17,13 @@ import type {
   OutcomeType,
   WorkEntry,
 } from '@/domain/entry/model';
+import type {
+  EntrySkillSource,
+  SkillId,
+  WorkEntrySkill,
+} from '@/domain/skill/model';
+import { suggestSkillIds } from '@/domain/skill/suggestions';
+import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
 import {
   saveWorkEntry,
   type SaveWorkEntryDraft,
@@ -65,6 +72,7 @@ export function useLogFlow({
       outcomeType: startingDraft.outcomeType,
       evidenceTypes: startingDraft.evidenceTypes,
       evidenceDetail: startingDraft.evidenceDetail,
+      skills: startingDraft.skills,
       impactStatement: startingDraft.impactStatement,
       impactStatementSource: startingDraft.impactStatementSource,
     },
@@ -84,6 +92,7 @@ export function useLogFlow({
     form.store,
     (state) => state.values.evidenceDetail,
   );
+  const selectedSkills = useSelector(form.store, (state) => state.values.skills);
   const impactStatement = useSelector(
     form.store,
     (state) => state.values.impactStatement,
@@ -94,6 +103,12 @@ export function useLogFlow({
   );
 
   const currentStep = LOG_STEPS.indexOf(step) + 1;
+  const suggestedSkillIds = intent
+    ? suggestSkillIds({
+        entryType: entryTypeByIntent[intent],
+        outcomeType,
+      })
+    : [];
   const draft = useMemo<WorkEntryDraft>(
     () => ({
       step,
@@ -102,6 +117,7 @@ export function useLogFlow({
       outcomeType,
       evidenceTypes,
       evidenceDetail,
+      skills: selectedSkills,
       impactStatement,
       impactStatementSource,
     }),
@@ -113,6 +129,7 @@ export function useLogFlow({
       intent,
       outcomeType,
       rawNote,
+      selectedSkills,
       step,
     ],
   );
@@ -201,7 +218,7 @@ export function useLogFlow({
     invalidateGeneratedImpact();
   }
 
-  function continueToImpact(skipEvidence = false) {
+  function continueFromEvidence(skipEvidence = false) {
     if (!intent || !outcomeType) return;
 
     const nextEvidenceTypes = skipEvidence ? [] : evidenceTypes;
@@ -218,6 +235,22 @@ export function useLogFlow({
 
     setEvidenceError(false);
     setSaveError(false);
+    moveToStep('skills');
+  }
+
+  function toggleSkill(skillId: SkillId, source: EntrySkillSource) {
+    const existing = selectedSkills.find((skill) => skill.id === skillId);
+    const nextSkills: WorkEntrySkill[] = existing
+      ? selectedSkills.filter((skill) => skill.id !== skillId)
+      : [...selectedSkills, { id: skillId, source }];
+
+    form.setFieldValue('skills', nextSkills);
+    setSaveError(false);
+  }
+
+  function continueToImpact() {
+    if (!intent || !outcomeType) return;
+
     if (impactStatementSource !== 'user') {
       form.setFieldValue(
         'impactStatement',
@@ -226,7 +259,7 @@ export function useLogFlow({
             intent,
             rawNote,
             outcomeType,
-            evidenceDetail: nextEvidenceDetail,
+            evidenceDetail,
           },
           impactCopy,
         ),
@@ -269,6 +302,7 @@ export function useLogFlow({
         outcomeType: quickNote ? null : outcomeType,
         evidenceTypes: quickNote ? [] : evidenceTypes,
         evidenceDetail: quickNote ? '' : evidenceDetail,
+        skills: quickNote ? [] : selectedSkills,
         impactStatement: quickNote ? null : impactStatement,
         impactStatementSource: quickNote ? null : impactStatementSource,
       });
@@ -296,6 +330,8 @@ export function useLogFlow({
     outcomeType,
     evidenceTypes,
     evidenceDetail,
+    selectedSkills,
+    suggestedSkillIds,
     impactStatement,
     noteError,
     evidenceError,
@@ -311,8 +347,10 @@ export function useLogFlow({
     continueFromOutcome,
     toggleEvidenceType,
     updateEvidenceDetail,
-    skipEvidence: () => continueToImpact(true),
-    continueFromEvidence: () => continueToImpact(false),
+    skipEvidence: () => continueFromEvidence(true),
+    continueFromEvidence: () => continueFromEvidence(false),
+    toggleSkill,
+    continueToImpact,
     updateImpactStatement,
     saveQuick: () => save(true),
     saveDeveloped: () => save(false),
