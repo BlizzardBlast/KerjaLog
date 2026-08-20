@@ -167,11 +167,23 @@ describe('useLogFlow', () => {
 
     await act(async () => {
       result.current.selectIntent('solved');
-      result.current.updateRawNote('Fixed duplicate rows before submission.');
+    });
+    await act(async () => {
       result.current.continueFromType();
+    });
+    await act(async () => {
+      result.current.updateRawNote('Fixed duplicate rows before submission.');
+    });
+    await act(async () => {
       result.current.continueFromEvent();
+    });
+    await act(async () => {
       result.current.selectOutcome('error_fixed_or_prevented');
+    });
+    await act(async () => {
       result.current.continueFromOutcome();
+    });
+    await act(async () => {
       result.current.skipEvidence();
     });
 
@@ -182,8 +194,17 @@ describe('useLogFlow', () => {
 
     await act(async () => {
       result.current.toggleSkill('problem_solving', 'rules');
+    });
+
+    expect(result.current.selectedSkills).toEqual([
+      { id: 'problem_solving', source: 'rules' },
+    ]);
+
+    await act(async () => {
       result.current.continueToImpact();
     });
+
+    expect(result.current.step).toBe('impact');
 
     await act(async () => {
       await result.current.saveDeveloped();
@@ -246,22 +267,56 @@ describe('useLogFlow', () => {
 
     await act(async () => {
       result.current.selectIntent('completed');
-      result.current.updateRawNote('Prepared the weekly report');
+    });
+    await act(async () => {
       result.current.continueFromType();
+    });
+    await act(async () => {
+      result.current.updateRawNote('Prepared the weekly report');
+    });
+    await act(async () => {
       result.current.continueFromEvent();
+    });
+    await act(async () => {
       result.current.selectOutcome('deadline_met');
+    });
+    await act(async () => {
       result.current.continueFromOutcome();
+    });
+    await act(async () => {
       result.current.skipEvidence();
+    });
+    await act(async () => {
       result.current.continueToImpact();
+    });
+    await act(async () => {
       result.current.updateImpactStatement(
         'My carefully edited impact wording.',
       );
+    });
+
+    await act(async () => {
       result.current.goBack();
+    });
+    await act(async () => {
       result.current.goBack();
+    });
+    await act(async () => {
       result.current.goBack();
+    });
+
+    expect(result.current.step).toBe('outcome');
+
+    await act(async () => {
       result.current.selectOutcome('work_clearer');
+    });
+    await act(async () => {
       result.current.continueFromOutcome();
+    });
+    await act(async () => {
       result.current.skipEvidence();
+    });
+    await act(async () => {
       result.current.continueToImpact();
     });
 
