@@ -118,7 +118,7 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
       ? entry.skills
           .map((skill) => t(skillDefinitionById[skill.id].nameKey))
           .join(' · ')
-      : t('entry.refine.skills.none');
+      : t('entry.skills.none');
 
   return (
     <SafeAreaView
