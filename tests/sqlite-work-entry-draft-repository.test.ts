@@ -7,12 +7,16 @@ jest.mock('@/data/database', () => ({ getDatabase: jest.fn() }));
 const getDatabaseMock = jest.mocked(getDatabase);
 
 const draft: WorkEntryDraft = {
-  step: 'evidence',
+  step: 'skills',
   intent: 'solved',
   rawNote: 'Fixed duplicate records before the report was submitted.',
   outcomeType: 'error_fixed_or_prevented',
   evidenceTypes: ['number', 'deadline'],
   evidenceDetail: '7 duplicate records fixed before Friday.',
+  skills: [
+    { id: 'problem_solving', source: 'rules' },
+    { id: 'attention_to_detail', source: 'user' },
+  ],
   impactStatement: '',
   impactStatementSource: null,
 };
@@ -27,14 +31,16 @@ function createDatabase(row: unknown = null) {
 describe('SQLiteWorkEntryDraftRepository', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test('loads the encrypted active draft with impact provenance', async () => {
+  test('loads the encrypted active draft with skills and impact provenance', async () => {
     const db = createDatabase({
-      step: 'evidence',
+      step: 'skills',
       intent: 'solved',
       raw_note: draft.rawNote,
       outcome_type: 'error_fixed_or_prevented',
       evidence_types: '["number","deadline"]',
       evidence_detail: draft.evidenceDetail,
+      selected_skills:
+        '[{"id":"problem_solving","source":"rules"},{"id":"attention_to_detail","source":"user"}]',
       impact_statement: '',
       impact_statement_source: null,
     });
@@ -52,6 +58,7 @@ describe('SQLiteWorkEntryDraftRepository', () => {
       outcome_type: 'error_fixed_or_prevented',
       evidence_types: '["number","number"]',
       evidence_detail: draft.evidenceDetail,
+      selected_skills: '[]',
       impact_statement: '',
       impact_statement_source: null,
     });
@@ -61,7 +68,26 @@ describe('SQLiteWorkEntryDraftRepository', () => {
     ).rejects.toThrow('Stored work entry draft evidence contains duplicates.');
   });
 
-  test('upserts impact provenance with the active draft', async () => {
+  test('rejects duplicate persisted skills', async () => {
+    const db = createDatabase({
+      step: 'skills',
+      intent: 'solved',
+      raw_note: draft.rawNote,
+      outcome_type: 'error_fixed_or_prevented',
+      evidence_types: '[]',
+      evidence_detail: '',
+      selected_skills:
+        '[{"id":"problem_solving","source":"rules"},{"id":"problem_solving","source":"user"}]',
+      impact_statement: '',
+      impact_statement_source: null,
+    });
+    getDatabaseMock.mockResolvedValue(db);
+    await expect(
+      new SQLiteWorkEntryDraftRepository().loadActive(),
+    ).rejects.toThrow('Stored work entry draft skills contain duplicates.');
+  });
+
+  test('upserts skills and impact provenance with the active draft', async () => {
     const db = createDatabase();
     getDatabaseMock.mockResolvedValue(db);
     await new SQLiteWorkEntryDraftRepository().saveActive(draft);
@@ -69,6 +95,7 @@ describe('SQLiteWorkEntryDraftRepository', () => {
       expect.stringContaining('INSERT INTO active_work_entry_draft'),
       expect.objectContaining({
         $id: 1,
+        $selectedSkills: JSON.stringify(draft.skills),
         $impactStatementSource: null,
       }),
     );
