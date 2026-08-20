@@ -1,7 +1,7 @@
 # Keep Expo native modules on the single SDK-compatible constants release even
 # when an older package manifest still points at the previous patch version.
 overrides:
-  expo-constants: 57.0.10
+  expo-constants: 57.0.12
 
 # pnpm 11 applies a one-day release-age gate by default. Keep narrow exact-version
 # exceptions for packages already required by the committed Expo SDK lockfile
