@@ -16,6 +16,7 @@ const input: CreateWorkEntry = {
   outcomeType: 'person_helped',
   status: 'review_ready',
   evidence: null,
+  skills: [],
   excludedFromExports: false,
 };
 
