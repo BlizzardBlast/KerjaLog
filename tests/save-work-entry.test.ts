@@ -152,32 +152,30 @@ describe('saveWorkEntry', () => {
         rawNote: 'Prepared the report',
         evidenceTypes: [] as const,
         evidenceDetail: '',
-        impactStatement: 'a'.repeat(
-          WORK_ENTRY_TEXT_LIMITS.impactStatement + 1,
-        ),
+        impactStatement: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.impactStatement + 1),
         impactStatementSource: 'user' as const,
       },
       message: 'Work entry impact statement exceeds the maximum length.',
     },
-  ])('rejects an oversized $field before repository commit', async ({
-    draft,
-    message,
-  }) => {
-    const repository = createRepository();
+  ])(
+    'rejects an oversized $field before repository commit',
+    async ({ draft, message }) => {
+      const repository = createRepository();
 
-    await expect(
-      saveWorkEntry(
-        {
-          intent: 'completed',
-          outcomeType: null,
-          skills: [],
-          ...draft,
-          evidenceTypes: [...draft.evidenceTypes],
-        },
-        repository,
-      ),
-    ).rejects.toThrow(message);
+      await expect(
+        saveWorkEntry(
+          {
+            intent: 'completed',
+            outcomeType: null,
+            skills: [],
+            ...draft,
+            evidenceTypes: [...draft.evidenceTypes],
+          },
+          repository,
+        ),
+      ).rejects.toThrow(message);
 
-    expect(repository.commit).not.toHaveBeenCalled();
-  });
+      expect(repository.commit).not.toHaveBeenCalled();
+    },
+  );
 });
