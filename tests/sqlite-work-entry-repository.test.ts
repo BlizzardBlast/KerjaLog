@@ -220,7 +220,7 @@ describe('SQLiteWorkEntryRepository', () => {
     expect(getDatabaseMock).not.toHaveBeenCalled();
   });
 
-  test('commit writes entry and evidence and consumes the active draft atomically', async () => {
+  test('commit writes entry, evidence, and skills and consumes the active draft atomically', async () => {
     const { db, withTransactionAsync } = useTransaction();
     randomUUIDMock
       .mockReturnValueOnce('entry-created')
@@ -240,13 +240,14 @@ describe('SQLiteWorkEntryRepository', () => {
         types: ['deadline', 'result'],
         detail: 'Completed before Friday close',
       },
+      skills: [{ id: 'collaboration', source: 'rules' }],
       excludedFromExports: false,
     };
 
     const entry = await repository.commit(input);
 
     expect(withTransactionAsync).toHaveBeenCalledTimes(1);
-    expect(db.runAsync).toHaveBeenCalledTimes(4);
+    expect(db.runAsync).toHaveBeenCalledTimes(5);
     expect(db.runAsync).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('INSERT INTO work_entries'),
@@ -279,6 +280,15 @@ describe('SQLiteWorkEntryRepository', () => {
     );
     expect(db.runAsync).toHaveBeenNthCalledWith(
       4,
+      expect.stringContaining('INSERT INTO entry_skills'),
+      {
+        $entryId: 'entry-created',
+        $skillId: 'collaboration',
+        $source: 'rules',
+      },
+    );
+    expect(db.runAsync).toHaveBeenNthCalledWith(
+      5,
       'DELETE FROM active_work_entry_draft WHERE id = $activeDraftId',
       { $activeDraftId: 1 },
     );
