@@ -3,6 +3,7 @@ import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import type { EvidenceType } from '@/domain/entry/model';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogChoiceCard } from '@/features/work-entry/components/LogChoiceCard';
@@ -65,7 +66,7 @@ export function EvidenceStep({
           accessibilityLabel={t('log.evidence.detailLabel')}
           accessibilityLabelledBy={EVIDENCE_DETAIL_LABEL_ID}
           hasError={evidenceError}
-          maxLength={1000}
+          maxLength={WORK_ENTRY_TEXT_LIMITS.evidenceDetail}
           multiline
           onChangeText={onDetailChange}
           placeholder={t('log.evidence.detailPlaceholder')}
