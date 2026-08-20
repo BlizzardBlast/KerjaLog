@@ -10,6 +10,14 @@ maestro test .maestro/log-entry.yaml
 
 The core flow covers onboarding, Log capture, native Back protection inside the wizard, save, Home refresh, and saved-entry rendering.
 
+## Automated entry refinement
+
+```bash
+maestro test .maestro/refine-entry.yaml
+```
+
+This flow saves a quick note, develops it later through outcome, evidence, confirmed skills, and Impact Builder, then verifies that the saved entry becomes review-ready with its Evidence Thread intact.
+
 ## Automated encrypted draft recovery
 
 ```bash

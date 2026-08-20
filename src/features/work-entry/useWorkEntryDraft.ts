@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { WorkEntryDraftReader } from '@/domain/entry/repository';
@@ -21,36 +21,49 @@ export function useWorkEntryDraft(
   });
   const requestIdRef = useRef(0);
 
-  const load = useCallback(async () => {
+  useEffect(() => {
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
-    setState({ status: 'loading' });
 
-    try {
-      const draft = await repository.loadActive();
-
-      if (requestId === requestIdRef.current) {
-        setState({ status: 'loaded', draft });
-      }
-    } catch {
-      if (requestId === requestIdRef.current) {
-        setState({ status: 'error' });
-      }
-    }
-  }, [repository]);
-
-  useEffect(() => {
-    void load();
+    repository
+      .loadActive()
+      .then((draft) => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'loaded', draft });
+        }
+      })
+      .catch(() => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'error' });
+        }
+      });
 
     return () => {
       requestIdRef.current += 1;
     };
-  }, [load]);
+  }, [repository]);
+
+  const retry = () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    setState({ status: 'loading' });
+
+    repository
+      .loadActive()
+      .then((draft) => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'loaded', draft });
+        }
+      })
+      .catch(() => {
+        if (requestId === requestIdRef.current) {
+          setState({ status: 'error' });
+        }
+      });
+  };
 
   return {
     state,
-    retry: () => {
-      void load();
-    },
+    retry,
   };
 }

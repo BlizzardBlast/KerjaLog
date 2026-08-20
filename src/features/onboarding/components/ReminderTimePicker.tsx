@@ -1,5 +1,5 @@
 import DateTimePicker from '@expo/ui/community/datetime-picker';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/design-system/components/Text';
@@ -16,28 +16,38 @@ export type ReminderTimePickerProps = {
   onClose: () => void;
 };
 
+type VisibleReminderTimePickerProps = Omit<ReminderTimePickerProps, 'visible'>;
+
 export function ReminderTimePicker({
   visible,
   value,
   onChange,
   onClose,
 }: ReminderTimePickerProps) {
+  if (!visible) {
+    return null;
+  }
+
+  return (
+    <VisibleReminderTimePicker
+      value={value}
+      onChange={onChange}
+      onClose={onClose}
+    />
+  );
+}
+
+function VisibleReminderTimePicker({
+  value,
+  onChange,
+  onClose,
+}: VisibleReminderTimePickerProps) {
   const insets = useSafeAreaInsets();
   const { theme, resolvedTheme } = useTheme();
   const { language, t } = useI18n();
   const [draftDate, setDraftDate] = useState(() =>
     createReminderTimeDate(value),
   );
-
-  useEffect(() => {
-    if (visible) {
-      setDraftDate(createReminderTimeDate(value));
-    }
-  }, [value, visible]);
-
-  if (!visible) {
-    return null;
-  }
 
   if (Platform.OS === 'android') {
     return (
@@ -50,18 +60,13 @@ export function ReminderTimePicker({
           onClose();
         }}
         presentation="dialog"
-        value={createReminderTimeDate(value)}
+        value={draftDate}
       />
     );
   }
 
   return (
-    <Modal
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent
-      visible={visible}
-    >
+    <Modal animationType="slide" onRequestClose={onClose} transparent visible>
       <View style={styles.modal}>
         <Pressable
           accessibilityLabel={t('common.action.cancel')}
@@ -97,7 +102,7 @@ export function ReminderTimePicker({
               </Text>
             </Pressable>
 
-            <Text variant="bodyStrong">
+            <Text variant="bodyStrong" style={styles.headerTitle}>
               {t('onboarding.review.reminderTimePickerTitle')}
             </Text>
 
@@ -162,12 +167,16 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   headerAction: {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 44,
     minWidth: 64,
+  },
+  headerTitle: {
+    flex: 1,
+    marginHorizontal: spacing[2],
+    textAlign: 'center',
   },
 });

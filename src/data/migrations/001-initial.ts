@@ -16,6 +16,9 @@ export const INITIAL_SCHEMA_SQL = `
     impact_statement TEXT CHECK(
       impact_statement IS NULL OR length(trim(impact_statement)) > 0
     ),
+    impact_statement_source TEXT CHECK(
+      impact_statement_source IS NULL OR impact_statement_source IN ('generated', 'user')
+    ),
     occurred_at TEXT NOT NULL CHECK(length(trim(occurred_at)) > 0),
     outcome_type TEXT CHECK(
       outcome_type IS NULL OR outcome_type IN (
@@ -39,7 +42,12 @@ export const INITIAL_SCHEMA_SQL = `
       excluded_from_exports IN (0, 1)
     ),
     created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
-    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0),
+    CHECK (
+      (impact_statement IS NULL AND impact_statement_source IS NULL)
+      OR
+      (impact_statement IS NOT NULL AND impact_statement_source IS NOT NULL)
+    )
   );
 
   CREATE TABLE evidence (
@@ -62,6 +70,38 @@ export const INITIAL_SCHEMA_SQL = `
     UNIQUE (entry_id, type)
   );
 
+  CREATE TABLE skills (
+    id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
+    slug TEXT NOT NULL UNIQUE CHECK(length(trim(slug)) > 0),
+    name_key TEXT NOT NULL UNIQUE CHECK(length(trim(name_key)) > 0),
+    category TEXT NOT NULL CHECK(category IN ('core', 'role_specific'))
+  );
+
+  INSERT INTO skills (id, slug, name_key, category) VALUES
+    ('communication', 'communication', 'skill.communication', 'core'),
+    ('collaboration', 'collaboration', 'skill.collaboration', 'core'),
+    ('problem_solving', 'problem_solving', 'skill.problemSolving', 'core'),
+    ('execution', 'execution', 'skill.execution', 'core'),
+    ('attention_to_detail', 'attention_to_detail', 'skill.attentionToDetail', 'core'),
+    ('customer_orientation', 'customer_orientation', 'skill.customerOrientation', 'core'),
+    ('ownership', 'ownership', 'skill.ownership', 'core'),
+    ('adaptability', 'adaptability', 'skill.adaptability', 'core'),
+    ('leadership', 'leadership', 'skill.leadership', 'core'),
+    ('role_expertise', 'role_expertise', 'skill.roleExpertise', 'role_specific');
+
+  CREATE TABLE entry_skills (
+    entry_id TEXT NOT NULL CHECK(length(trim(entry_id)) > 0),
+    skill_id TEXT NOT NULL CHECK(length(trim(skill_id)) > 0),
+    source TEXT NOT NULL CHECK(source IN ('rules', 'user')),
+    PRIMARY KEY (entry_id, skill_id),
+    FOREIGN KEY (entry_id)
+      REFERENCES work_entries(id)
+      ON DELETE CASCADE,
+    FOREIGN KEY (skill_id)
+      REFERENCES skills(id)
+      ON DELETE RESTRICT
+  );
+
   CREATE TABLE active_work_entry_draft (
     id INTEGER PRIMARY KEY NOT NULL CHECK(id = 1),
     step TEXT NOT NULL CHECK(step IN (
@@ -69,6 +109,7 @@ export const INITIAL_SCHEMA_SQL = `
       'event',
       'outcome',
       'evidence',
+      'skills',
       'impact'
     )),
     intent TEXT CHECK(
@@ -98,7 +139,11 @@ export const INITIAL_SCHEMA_SQL = `
     ),
     evidence_types TEXT NOT NULL DEFAULT '[]',
     evidence_detail TEXT NOT NULL DEFAULT '',
+    selected_skills TEXT NOT NULL DEFAULT '[]',
     impact_statement TEXT NOT NULL DEFAULT '',
+    impact_statement_source TEXT CHECK(
+      impact_statement_source IS NULL OR impact_statement_source IN ('generated', 'user')
+    ),
     updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
   );
 
@@ -107,6 +152,9 @@ export const INITIAL_SCHEMA_SQL = `
 
   CREATE INDEX idx_evidence_entry_id_created_at
     ON evidence(entry_id, created_at ASC);
+
+  CREATE INDEX idx_entry_skills_skill_id
+    ON entry_skills(skill_id, entry_id);
 
   CREATE VIRTUAL TABLE work_entry_history_fts USING fts5(
     entry_id UNINDEXED,

@@ -1,18 +1,20 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
-import type { WorkEntry } from '@/domain/entry/model';
+import type { WorkEntryDetail } from '@/domain/entry/model';
 import type { WorkEntryByIdReader } from '@/domain/entry/repository';
 import { useWorkEntry } from '@/features/work-entry/useWorkEntry';
 
-const entry: WorkEntry = {
+const entry: WorkEntryDetail = {
   id: 'entry-1',
   type: 'contribution',
   title: 'Prepared the report',
   rawNote: 'Prepared the report',
   impactStatement: null,
+  impactStatementSource: null,
   occurredAt: '2026-08-11T00:00:00.000Z',
   outcomeType: null,
   status: 'quick_note',
   evidence: null,
+  skills: [],
   excludedFromExports: false,
   createdAt: '2026-08-11T00:00:00.000Z',
   updatedAt: '2026-08-11T00:00:00.000Z',

@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isReminderPrecision } from '@/domain/reminder/model';
 import {
   CAREER_LEVELS,
   DEFAULT_ONBOARDING_STATE,
@@ -49,31 +48,34 @@ function sanitizeOnboardingState(value: unknown): OnboardingState {
     typeof value.weeklyReminderEnabled === 'boolean'
       ? value.weeklyReminderEnabled
       : DEFAULT_ONBOARDING_STATE.weeklyReminderEnabled;
+  const workArea = hasValue(WORK_AREAS, value.workArea)
+    ? value.workArea
+    : undefined;
+  const careerLevel = hasValue(CAREER_LEVELS, value.careerLevel)
+    ? value.careerLevel
+    : undefined;
+  const mainGoal = hasValue(MAIN_GOALS, value.mainGoal)
+    ? value.mainGoal
+    : undefined;
+  const reviewSchedule = hasValue(REVIEW_SCHEDULES, value.reviewSchedule)
+    ? value.reviewSchedule
+    : undefined;
   const sanitizedState: OnboardingState = {
     version: ONBOARDING_STATE_VERSION,
     currentStep: isStep(value.currentStep)
       ? value.currentStep
       : DEFAULT_ONBOARDING_STATE.currentStep,
     completed: false,
-    workArea: hasValue(WORK_AREAS, value.workArea) ? value.workArea : undefined,
-    careerLevel: hasValue(CAREER_LEVELS, value.careerLevel)
-      ? value.careerLevel
-      : undefined,
-    mainGoal: hasValue(MAIN_GOALS, value.mainGoal) ? value.mainGoal : undefined,
-    reviewSchedule: hasValue(REVIEW_SCHEDULES, value.reviewSchedule)
-      ? value.reviewSchedule
-      : undefined,
+    ...(workArea ? { workArea } : {}),
+    ...(careerLevel ? { careerLevel } : {}),
+    ...(mainGoal ? { mainGoal } : {}),
+    ...(reviewSchedule ? { reviewSchedule } : {}),
     weeklyReminderEnabled,
     weeklyReminderSchedule: isValidWeeklyReminderSchedule(
       value.weeklyReminderSchedule,
     )
       ? value.weeklyReminderSchedule
       : DEFAULT_WEEKLY_REMINDER_SCHEDULE,
-    weeklyReminderPrecision:
-      weeklyReminderEnabled &&
-      isReminderPrecision(value.weeklyReminderPrecision)
-        ? value.weeklyReminderPrecision
-        : null,
   };
 
   return {

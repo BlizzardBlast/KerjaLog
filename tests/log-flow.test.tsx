@@ -71,7 +71,9 @@ describe('useLogFlow', () => {
       outcomeType: 'error_fixed_or_prevented',
       evidenceTypes: ['number'],
       evidenceDetail: '7 duplicate records fixed.',
+      skills: [{ id: 'problem_solving', source: 'rules' }],
       impactStatement: '',
+      impactStatementSource: null,
     };
     const { result } = await renderHook(() =>
       useLogFlow({
@@ -85,6 +87,7 @@ describe('useLogFlow', () => {
 
     expect(result.current.draft).toEqual(initialDraft);
     expect(result.current.currentStep).toBe(4);
+    expect(result.current.selectedSkills).toEqual(initialDraft.skills);
     expect(result.current.hasUnsavedDraft).toBe(true);
   });
 
@@ -133,11 +136,86 @@ describe('useLogFlow', () => {
       result.current.continueFromEvidence();
     });
 
-    expect(result.current.step).toBe('impact');
+    expect(result.current.step).toBe('skills');
     expect(result.current.evidenceError).toBe(false);
+
+    await act(async () => {
+      result.current.continueToImpact();
+    });
+
+    expect(result.current.step).toBe('impact');
     expect(result.current.impactStatement).toContain(
       'Evidence: Finished before Friday close.',
     );
+  });
+
+  test('suggests and saves confirmed skills for a full entry', async () => {
+    const onSaved = jest.fn();
+    const saveEntry = jest.fn().mockResolvedValue({
+      ...savedEntry,
+      outcomeType: 'error_fixed_or_prevented',
+      status: 'developed',
+    });
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved,
+        saveEntry,
+      }),
+    );
+
+    await act(async () => {
+      result.current.selectIntent('solved');
+    });
+    await act(async () => {
+      result.current.continueFromType();
+    });
+    await act(async () => {
+      result.current.updateRawNote('Fixed duplicate rows before submission.');
+    });
+    await act(async () => {
+      result.current.continueFromEvent();
+    });
+    await act(async () => {
+      result.current.selectOutcome('error_fixed_or_prevented');
+    });
+    await act(async () => {
+      result.current.continueFromOutcome();
+    });
+    await act(async () => {
+      result.current.skipEvidence();
+    });
+
+    expect(result.current.step).toBe('skills');
+    expect(result.current.suggestedSkillIds).toEqual(
+      expect.arrayContaining(['problem_solving', 'attention_to_detail']),
+    );
+
+    await act(async () => {
+      result.current.toggleSkill('problem_solving', 'rules');
+    });
+
+    expect(result.current.selectedSkills).toEqual([
+      { id: 'problem_solving', source: 'rules' },
+    ]);
+
+    await act(async () => {
+      result.current.continueToImpact();
+    });
+
+    expect(result.current.step).toBe('impact');
+
+    await act(async () => {
+      await result.current.saveDeveloped();
+    });
+
+    expect(saveEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skills: [{ id: 'problem_solving', source: 'rules' }],
+      }),
+    );
+    expect(onSaved).toHaveBeenCalledTimes(1);
   });
 
   test('delegates quick-save persistence and reports the saved entry', async () => {
@@ -167,12 +245,84 @@ describe('useLogFlow', () => {
       outcomeType: null,
       evidenceTypes: [],
       evidenceDetail: '',
+      skills: [],
       impactStatement: null,
+      impactStatementSource: null,
     });
     expect(onSaved).toHaveBeenCalledWith(savedEntry);
     expect(result.current.saveError).toBe(false);
     expect(result.current.completionError).toBe(false);
     expect(result.current.saving).toBe(false);
+  });
+
+  test('preserves user-authored impact wording when supporting facts change', async () => {
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved: jest.fn(),
+        saveEntry: jest.fn(),
+      }),
+    );
+
+    await act(async () => {
+      result.current.selectIntent('completed');
+    });
+    await act(async () => {
+      result.current.continueFromType();
+    });
+    await act(async () => {
+      result.current.updateRawNote('Prepared the weekly report');
+    });
+    await act(async () => {
+      result.current.continueFromEvent();
+    });
+    await act(async () => {
+      result.current.selectOutcome('deadline_met');
+    });
+    await act(async () => {
+      result.current.continueFromOutcome();
+    });
+    await act(async () => {
+      result.current.skipEvidence();
+    });
+    await act(async () => {
+      result.current.continueToImpact();
+    });
+    await act(async () => {
+      result.current.updateImpactStatement(
+        'My carefully edited impact wording.',
+      );
+    });
+
+    await act(async () => {
+      result.current.goBack();
+    });
+    await act(async () => {
+      result.current.goBack();
+    });
+    await act(async () => {
+      result.current.goBack();
+    });
+
+    expect(result.current.step).toBe('outcome');
+
+    await act(async () => {
+      result.current.selectOutcome('work_clearer');
+    });
+    await act(async () => {
+      result.current.continueFromOutcome();
+    });
+    await act(async () => {
+      result.current.skipEvidence();
+    });
+    await act(async () => {
+      result.current.continueToImpact();
+    });
+
+    expect(result.current.impactStatement).toBe(
+      'My carefully edited impact wording.',
+    );
   });
 
   test('does not recreate an entry when post-commit completion fails', async () => {

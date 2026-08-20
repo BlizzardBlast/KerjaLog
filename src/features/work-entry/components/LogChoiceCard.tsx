@@ -10,8 +10,8 @@ type SymbolName = ComponentProps<typeof SymbolView>['name'];
 
 type LogChoiceCardProps = {
   title: string;
-  description?: string;
-  icon?: SymbolName;
+  description?: string | undefined;
+  icon?: SymbolName | undefined;
   selected: boolean;
   onPress: () => void;
   mode?: 'single' | 'multiple';

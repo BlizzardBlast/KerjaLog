@@ -30,7 +30,7 @@ export function HistoryEntryCard({ entry, onPress }: HistoryEntryCardProps) {
   const { theme } = useTheme();
   const { language, t } = useI18n();
   const locale = language === 'id' ? 'id-ID' : 'en-US';
-  const isPrivate = entry.type === 'challenge';
+  const isPrivate = entry.excludedFromExports;
   const statusLabel = isPrivate
     ? t('history.status.private')
     : t(getHistoryEntryStatusKey(entry.status));

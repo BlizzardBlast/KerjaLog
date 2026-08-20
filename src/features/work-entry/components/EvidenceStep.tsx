@@ -3,6 +3,7 @@ import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import type { EvidenceType } from '@/domain/entry/model';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogChoiceCard } from '@/features/work-entry/components/LogChoiceCard';
@@ -14,13 +15,15 @@ import type {
 import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { evidenceOptions } from '@/features/work-entry/options';
 
+const EVIDENCE_DETAIL_LABEL_ID = 'work-entry-evidence-detail-label';
+
 type EvidenceStepProps = LogStepFrameProps & {
   evidenceTypes: EvidenceType[];
   evidenceDetail: string;
   evidenceError: boolean;
   onToggleType: (type: EvidenceType) => void;
   onDetailChange: (value: string) => void;
-  onSkip: () => void;
+  onSkip?: () => void;
   onContinue: () => void;
   t: Translate;
 };
@@ -56,11 +59,14 @@ export function EvidenceStep({
         ))}
       </View>
       <View style={logStepStyles.field}>
-        <Text variant="label">{t('log.evidence.detailLabel')}</Text>
+        <Text nativeID={EVIDENCE_DETAIL_LABEL_ID} variant="label">
+          {t('log.evidence.detailLabel')}
+        </Text>
         <TextField
           accessibilityLabel={t('log.evidence.detailLabel')}
+          accessibilityLabelledBy={EVIDENCE_DETAIL_LABEL_ID}
           hasError={evidenceError}
-          maxLength={1000}
+          maxLength={WORK_ENTRY_TEXT_LIMITS.evidenceDetail}
           multiline
           onChangeText={onDetailChange}
           placeholder={t('log.evidence.detailPlaceholder')}
@@ -72,18 +78,24 @@ export function EvidenceStep({
           <InlineError>{t('log.evidence.detailHelp')}</InlineError>
         ) : null}
       </View>
-      <View style={logStepStyles.buttonRow}>
-        <Button
-          onPress={onSkip}
-          style={logStepStyles.flexButton}
-          variant="secondary"
-        >
-          {t('log.evidence.skip')}
-        </Button>
-        <Button onPress={onContinue} style={logStepStyles.flexButton}>
+      {onSkip ? (
+        <View style={logStepStyles.buttonRow}>
+          <Button
+            onPress={onSkip}
+            style={logStepStyles.flexButton}
+            variant="secondary"
+          >
+            {t('log.evidence.skip')}
+          </Button>
+          <Button onPress={onContinue} style={logStepStyles.flexButton}>
+            {t('log.evidence.continue')}
+          </Button>
+        </View>
+      ) : (
+        <Button fullWidth onPress={onContinue} size="lg">
           {t('log.evidence.continue')}
         </Button>
-      </View>
+      )}
     </>
   );
 }

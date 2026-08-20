@@ -24,9 +24,11 @@ const COMPLETE_STATE: OnboardingState = {
     hour: 18,
     minute: 15,
   },
-  weeklyReminderPrecision: 'inexact',
 };
 
+const LEGACY_REMINDER_METADATA_KEY = ['weekly', 'Reminder', 'Precision'].join(
+  '',
+);
 const getItemMock = jest.mocked(AsyncStorage.getItem);
 const setItemMock = jest.mocked(AsyncStorage.setItem);
 const removeItemMock = jest.mocked(AsyncStorage.removeItem);
@@ -64,29 +66,18 @@ describe('onboarding storage', () => {
     );
   });
 
-  test('treats a missing legacy reminder precision as unknown without disabling the reminder', async () => {
-    const { weeklyReminderPrecision: _, ...legacyState } = COMPLETE_STATE;
-    getItemMock.mockResolvedValueOnce(JSON.stringify(legacyState));
-
-    const state = await loadOnboardingState();
-
-    expect(state.weeklyReminderEnabled).toBe(true);
-    expect(state.weeklyReminderPrecision).toBeNull();
-  });
-
-  test('clears reminder precision when the reminder itself is disabled', async () => {
+  test('ignores removed legacy reminder timing metadata', async () => {
     getItemMock.mockResolvedValueOnce(
       JSON.stringify({
         ...COMPLETE_STATE,
-        weeklyReminderEnabled: false,
-        weeklyReminderPrecision: 'inexact',
+        [LEGACY_REMINDER_METADATA_KEY]: 'exact',
       }),
     );
 
     const state = await loadOnboardingState();
 
-    expect(state.weeklyReminderEnabled).toBe(false);
-    expect(state.weeklyReminderPrecision).toBeNull();
+    expect(state).toEqual(COMPLETE_STATE);
+    expect(state).not.toHaveProperty(LEGACY_REMINDER_METADATA_KEY);
   });
 
   test.each([

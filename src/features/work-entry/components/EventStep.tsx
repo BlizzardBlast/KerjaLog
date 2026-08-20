@@ -4,6 +4,7 @@ import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
 import type {
@@ -13,13 +14,19 @@ import type {
 import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 
+const EVENT_NOTE_LABEL_ID = 'work-entry-event-note-label';
+
+type QuickSaveAction = {
+  onPress: () => void;
+  hasError: boolean;
+};
+
 type EventStepProps = LogStepFrameProps & {
   rawNote: string;
   noteError: boolean;
-  saving: boolean;
-  saveError: boolean;
+  busy: boolean;
+  quickSave?: QuickSaveAction;
   onRawNoteChange: (value: string) => void;
-  onSaveQuick: () => void;
   onContinue: () => void;
   t: Translate;
 };
@@ -27,10 +34,9 @@ type EventStepProps = LogStepFrameProps & {
 export function EventStep({
   rawNote,
   noteError,
-  saving,
-  saveError,
+  busy,
+  quickSave,
   onRawNoteChange,
-  onSaveQuick,
   onContinue,
   t,
   ...frame
@@ -45,11 +51,14 @@ export function EventStep({
         title={t('log.event.title')}
       />
       <View style={logStepStyles.field}>
-        <Text variant="label">{t('log.event.label')}</Text>
+        <Text nativeID={EVENT_NOTE_LABEL_ID} variant="label">
+          {t('log.event.label')}
+        </Text>
         <TextField
           accessibilityLabel={t('log.event.label')}
+          accessibilityLabelledBy={EVENT_NOTE_LABEL_ID}
           hasError={noteError}
-          maxLength={2000}
+          maxLength={WORK_ENTRY_TEXT_LIMITS.rawNote}
           multiline
           onChangeText={onRawNoteChange}
           placeholder={t('log.event.placeholder')}
@@ -70,25 +79,36 @@ export function EventStep({
         title={t('log.event.privacyTitle')}
         description={t('log.event.privacyDescription')}
       />
-      <View style={logStepStyles.buttonRow}>
+      {quickSave ? (
+        <View style={logStepStyles.buttonRow}>
+          <Button
+            disabled={!rawNote.trim()}
+            loading={busy}
+            onPress={quickSave.onPress}
+            style={logStepStyles.flexButton}
+            variant="secondary"
+          >
+            {t('log.event.saveQuick')}
+          </Button>
+          <Button
+            disabled={!rawNote.trim() || busy}
+            onPress={onContinue}
+            style={logStepStyles.flexButton}
+          >
+            {t('log.event.continue')}
+          </Button>
+        </View>
+      ) : (
         <Button
-          disabled={!rawNote.trim()}
-          loading={saving}
-          onPress={onSaveQuick}
-          style={logStepStyles.flexButton}
-          variant="secondary"
-        >
-          {t('log.event.saveQuick')}
-        </Button>
-        <Button
-          disabled={!rawNote.trim() || saving}
+          disabled={!rawNote.trim() || busy}
+          fullWidth
           onPress={onContinue}
-          style={logStepStyles.flexButton}
+          size="lg"
         >
           {t('log.event.continue')}
         </Button>
-      </View>
-      {saveError ? (
+      )}
+      {quickSave?.hasError ? (
         <InlineError>{t('log.impact.saveError')}</InlineError>
       ) : null}
     </>

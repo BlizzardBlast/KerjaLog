@@ -15,18 +15,10 @@ export const en = {
   'tabs.growth': 'Growth',
   'tabs.review': 'Review',
 
-  'placeholder.capture.eyebrow': 'Quick Capture',
-  'placeholder.capture.title': 'What happened at work?',
-  'placeholder.capture.description':
-    'The seven beginner-friendly work-event choices will live here. The central navigation action is already connected to this route.',
   'placeholder.growth.eyebrow': 'Growth',
   'placeholder.growth.title': 'Your evidence map',
   'placeholder.growth.description':
     'Skill evidence counts will live here without ratings, scores, or gamification.',
-  'placeholder.history.eyebrow': 'History',
-  'placeholder.history.title': 'Your work, when you need it',
-  'placeholder.history.description':
-    'Search and filtering will be built here next. The tab is already wired into the app navigation.',
   'placeholder.review.eyebrow': 'Review',
   'placeholder.review.title': 'Build from real evidence',
   'placeholder.review.description':
@@ -207,18 +199,10 @@ export const id: Record<TranslationKey, string> = {
   'tabs.growth': 'Perkembangan',
   'tabs.review': 'Review',
 
-  'placeholder.capture.eyebrow': 'Catat Cepat',
-  'placeholder.capture.title': 'Apa yang terjadi di pekerjaan?',
-  'placeholder.capture.description':
-    'Tujuh pilihan kejadian kerja yang ramah untuk pemula akan tersedia di sini. Tombol utama di navigasi sudah terhubung ke halaman ini.',
   'placeholder.growth.eyebrow': 'Perkembangan',
   'placeholder.growth.title': 'Peta bukti perkembangan Anda',
   'placeholder.growth.description':
     'Jumlah bukti keterampilan akan tampil di sini tanpa rating, skor, atau gamifikasi.',
-  'placeholder.history.eyebrow': 'Riwayat',
-  'placeholder.history.title': 'Pekerjaan Anda, saat Anda membutuhkannya',
-  'placeholder.history.description':
-    'Pencarian dan filter akan dibuat di sini berikutnya. Tab ini sudah terhubung ke navigasi aplikasi.',
   'placeholder.review.eyebrow': 'Review',
   'placeholder.review.title': 'Susun dari bukti nyata',
   'placeholder.review.description':

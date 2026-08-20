@@ -10,10 +10,7 @@
     "platforms": ["android", "ios"],
     "ios": {
       "icon": "./assets/kerjalog.icon",
-      "bundleIdentifier": "com.blizzardblast.kerjalog",
-      "config": {
-        "usesNonExemptEncryption": false
-      }
+      "bundleIdentifier": "com.blizzardblast.kerjalog"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,15 +19,26 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"],
       "predictiveBackGestureEnabled": true,
       "allowBackup": false,
       "icon": "./assets/images/icon.png",
-      "package": "com.blizzardblast.kerjalog"
+      "package": "com.blizzardblast.kerjalog",
+      "blockedPermissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
     },
     "plugins": [
       "expo-router",
       "expo-notifications",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/manrope/500Medium/Manrope_500Medium.ttf",
+            "node_modules/@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf",
+            "node_modules/@expo-google-fonts/manrope/800ExtraBold/Manrope_800ExtraBold.ttf"
+          ]
+        }
+      ],
       [
         "expo-sqlite",
         {

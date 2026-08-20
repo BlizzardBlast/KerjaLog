@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import type { ReminderPrecision } from '@/domain/reminder/model';
 import {
   DEFAULT_ONBOARDING_STATE,
   hasRequiredOnboardingAnswers,
@@ -12,13 +11,7 @@ import {
   loadOnboardingState,
   saveOnboardingState,
 } from '@/features/onboarding/storage';
-import { useI18n } from '@/i18n/I18nProvider';
-import {
-  enableWeeklyReflectionNotification,
-  getWeeklyReflectionNotificationStatus,
-  type WeeklyReflectionEnableResult,
-  type WeeklyReflectionNotificationStatus,
-} from '@/platform/notifications/weeklyReflection';
+import { getWeeklyReflectionNotificationStatus } from '@/platform/notifications/weeklyReflection';
 import { ignoreError } from '@/shared/utils/function';
 
 export type OnboardingContextValue = {
@@ -32,7 +25,6 @@ export type OnboardingContextValue = {
 };
 
 export function useOnboardingController(): OnboardingContextValue {
-  const { t } = useI18n();
   const [state, setState] = useState<OnboardingState>(DEFAULT_ONBOARDING_STATE);
   const [isHydrated, setIsHydrated] = useState(false);
   const writeQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -95,46 +87,24 @@ export function useOnboardingController(): OnboardingContextValue {
       try {
         const status = await getWeeklyReflectionNotificationStatus();
 
-        if (ignore || status === 'unsupported-runtime') {
+        if (
+          ignore ||
+          status === 'unsupported-runtime' ||
+          status === 'enabled'
+        ) {
           return;
         }
 
-        if (status === 'disabled') {
-          setState((current) =>
-            current.weeklyReminderEnabled
-              ? {
-                  ...current,
-                  weeklyReminderEnabled: false,
-                  weeklyReminderPrecision: null,
-                }
-              : current,
-          );
-          return;
-        }
-
-        const observedPrecision = precisionFromStatus(status);
-        if (state.weeklyReminderPrecision === observedPrecision) {
-          return;
-        }
-
-        const result = await enableWeeklyReflectionNotification({
-          schedule: state.weeklyReminderSchedule,
-          copy: {
-            title: t('onboarding.review.notificationTitle'),
-            body: t('onboarding.review.notificationBody'),
-            channelName: t('onboarding.review.notificationChannelName'),
-          },
-        });
-
-        if (!ignore) {
-          setState((current) => applyReminderResult(current, result));
-        }
+        setState((current) =>
+          current.weeklyReminderEnabled
+            ? { ...current, weeklyReminderEnabled: false }
+            : current,
+        );
       } catch {
         if (!ignore) {
           setState((current) => ({
             ...current,
             weeklyReminderEnabled: false,
-            weeklyReminderPrecision: null,
           }));
         }
       } finally {
@@ -154,13 +124,7 @@ export function useOnboardingController(): OnboardingContextValue {
       ignore = true;
       subscription.remove();
     };
-  }, [
-    isHydrated,
-    state.weeklyReminderEnabled,
-    state.weeklyReminderPrecision,
-    state.weeklyReminderSchedule,
-    t,
-  ]);
+  }, [isHydrated, state.weeklyReminderEnabled]);
 
   const currentStepIndex = Math.max(
     0,
@@ -174,10 +138,8 @@ export function useOnboardingController(): OnboardingContextValue {
   const goNext = () => {
     setState((current) => {
       const index = ONBOARDING_STEP_ORDER.indexOf(current.currentStep);
-      const nextStep =
-        ONBOARDING_STEP_ORDER[
-          Math.min(index + 1, ONBOARDING_STEP_ORDER.length - 1)
-        ];
+      const nextIndex = Math.min(index + 1, ONBOARDING_STEP_ORDER.length - 1);
+      const nextStep = ONBOARDING_STEP_ORDER[nextIndex] ?? current.currentStep;
 
       return {
         ...current,
@@ -189,7 +151,9 @@ export function useOnboardingController(): OnboardingContextValue {
   const goBack = () => {
     setState((current) => {
       const index = ONBOARDING_STEP_ORDER.indexOf(current.currentStep);
-      const previousStep = ONBOARDING_STEP_ORDER[Math.max(index - 1, 0)];
+      const previousIndex = Math.max(index - 1, 0);
+      const previousStep =
+        ONBOARDING_STEP_ORDER[previousIndex] ?? current.currentStep;
 
       return {
         ...current,
@@ -224,33 +188,5 @@ export function useOnboardingController(): OnboardingContextValue {
     goNext,
     goBack,
     complete,
-  };
-}
-
-function precisionFromStatus(
-  status: Extract<
-    WeeklyReflectionNotificationStatus,
-    'enabled-exact' | 'enabled-inexact'
-  >,
-): ReminderPrecision {
-  return status === 'enabled-exact' ? 'exact' : 'inexact';
-}
-
-function applyReminderResult(
-  state: OnboardingState,
-  result: WeeklyReflectionEnableResult,
-): OnboardingState {
-  if (result === 'enabled-exact' || result === 'enabled-inexact') {
-    return {
-      ...state,
-      weeklyReminderEnabled: true,
-      weeklyReminderPrecision: result === 'enabled-exact' ? 'exact' : 'inexact',
-    };
-  }
-
-  return {
-    ...state,
-    weeklyReminderEnabled: false,
-    weeklyReminderPrecision: null,
   };
 }

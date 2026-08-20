@@ -61,15 +61,15 @@ describe('HistoryEntryCard', () => {
     );
   });
 
-  test('marks challenge entries as private with a cross-platform lock symbol and remains actionable', async () => {
+  test('marks excluded entries as private even when their current type is not challenge', async () => {
     const onPress = jest.fn();
 
     await render(
       <ThemeProvider>
         <HistoryEntryCard
           entry={createEntry({
-            type: 'challenge',
-            status: 'quick_note',
+            type: 'contribution',
+            status: 'developed',
             excludedFromExports: true,
           })}
           onPress={onPress}

@@ -10,7 +10,9 @@ const draft: WorkEntryDraft = {
   outcomeType: null,
   evidenceTypes: [],
   evidenceDetail: '',
+  skills: [],
   impactStatement: '',
+  impactStatementSource: null,
 };
 
 describe('useWorkEntryDraft', () => {
@@ -21,7 +23,6 @@ describe('useWorkEntryDraft', () => {
     const { result } = await renderHook(() => useWorkEntryDraft(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
-
     expect(result.current.state).toEqual({ status: 'loaded', draft });
   });
 

@@ -44,7 +44,7 @@ The architecture document lists the additional v1 dependencies that should be in
 
 ## Development
 
-KerjaLog uses an Expo development build rather than Expo Go because the app relies on native capabilities such as SQLCipher, biometrics, notifications, screen privacy, and a local Expo module.
+KerjaLog uses an Expo development build rather than Expo Go because the app relies on native capabilities such as SQLCipher, biometrics, notifications, and screen privacy.
 
 Install dependencies:
 
@@ -73,8 +73,9 @@ Keep v1 boring where boring is good:
 
 ```text
 SQLite = persisted product data
-Zustand = ephemeral UI/workflow state
-React Hook Form = active form state
+React local/context state = component-local and app-shell UI state
+TanStack Form = active form state
+Zustand = shared cross-feature ephemeral state only if it genuinely emerges
 Network = optional, never required for core entry capture/read
 ```
 

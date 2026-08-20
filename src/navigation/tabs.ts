@@ -1,35 +1,32 @@
-import type { Href } from 'expo-router';
 import type { SymbolView } from 'expo-symbols';
 import type { ComponentProps } from 'react';
-import type { TranslationKey } from '@/i18n/translations';
+import type { TranslationKey } from '@/i18n/catalog';
 
 type SymbolName = ComponentProps<typeof SymbolView>['name'];
 
+export type AppTabName = 'home' | 'history' | 'capture' | 'growth' | 'review';
+
 export type TabDefinition = {
-  name: string;
-  href: Href;
+  name: AppTabName;
   labelKey: TranslationKey;
   shortLabelKey?: TranslationKey;
   icon: SymbolName;
   capture?: boolean;
 };
 
-export const tabs = [
+export const tabs: readonly TabDefinition[] = [
   {
     name: 'home',
-    href: '/home',
     labelKey: 'tabs.home',
     icon: { ios: 'house.fill', android: 'home', web: 'home' },
   },
   {
     name: 'history',
-    href: '/history',
     labelKey: 'tabs.history',
     icon: { ios: 'clock.arrow.circlepath', android: 'history', web: 'history' },
   },
   {
     name: 'capture',
-    href: '/capture',
     labelKey: 'tabs.logWork',
     shortLabelKey: 'tabs.log',
     icon: { ios: 'plus', android: 'add', web: 'add' },
@@ -37,7 +34,6 @@ export const tabs = [
   },
   {
     name: 'growth',
-    href: '/growth',
     labelKey: 'tabs.growth',
     icon: {
       ios: 'chart.line.uptrend.xyaxis',
@@ -47,8 +43,7 @@ export const tabs = [
   },
   {
     name: 'review',
-    href: '/review',
     labelKey: 'tabs.review',
     icon: { ios: 'doc.text.fill', android: 'description', web: 'description' },
   },
-] satisfies ReadonlyArray<TabDefinition>;
+];

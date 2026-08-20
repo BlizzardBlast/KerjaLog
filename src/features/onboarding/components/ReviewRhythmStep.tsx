@@ -13,7 +13,6 @@ import { StepHeading } from '@/features/onboarding/components/StepHeading';
 import type { OnboardingStepProps } from '@/features/onboarding/components/types';
 import { reviewScheduleOptions } from '@/features/onboarding/options';
 import { useWeeklyReminderController } from '@/features/onboarding/useWeeklyReminderController';
-import { InexactReminderNotice } from '@/features/reminder/InexactReminderNotice';
 import { useI18n } from '@/i18n/I18nProvider';
 
 export function ReviewRhythmStep({
@@ -61,10 +60,6 @@ export function ReviewRhythmStep({
           onChange={reminder.setSchedule}
         />
 
-        {state.weeklyReminderEnabled &&
-        state.weeklyReminderPrecision === 'inexact' ? (
-          <InexactReminderNotice />
-        ) : null}
         {reminder.feedback.issue ? (
           <NotificationPermissionNotice issue={reminder.feedback.issue} />
         ) : null}

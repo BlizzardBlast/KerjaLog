@@ -10,6 +10,21 @@ import type {
   TypographyVariant,
 } from '@/design-system/tokens/theme';
 
+const dynamicTypeRampByVariant = {
+  display: 'largeTitle',
+  title: 'title1',
+  heading: 'title2',
+  subheading: 'title3',
+  body: 'body',
+  bodyStrong: 'body',
+  label: 'callout',
+  caption: 'caption1',
+  overline: 'caption2',
+} as const satisfies Record<
+  TypographyVariant,
+  NonNullable<NativeTextProps['dynamicTypeRamp']>
+>;
+
 export type TextProps = PropsWithChildren<
   Omit<NativeTextProps, 'style'> & {
     variant?: TypographyVariant;
@@ -21,6 +36,7 @@ export type TextProps = PropsWithChildren<
 export function Text({
   variant = 'body',
   color = 'text',
+  dynamicTypeRamp = dynamicTypeRampByVariant[variant],
   style,
   children,
   ...props
@@ -31,6 +47,7 @@ export function Text({
   return (
     <NativeText
       {...props}
+      dynamicTypeRamp={dynamicTypeRamp}
       style={[variantStyle, { color: theme.colors[color] }, style]}
     >
       {children}

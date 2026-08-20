@@ -11,6 +11,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 
 type SymbolName = ComponentProps<typeof SymbolView>['name'];
 
+const SEARCH_LABEL_ID = 'history-search-label';
 const SEARCH_SYMBOL = {
   ios: 'magnifyingglass',
   android: 'search',
@@ -37,7 +38,9 @@ export function HistorySearchField({
 
   return (
     <View style={styles.container}>
-      <Text variant="label">{t('history.search.label')}</Text>
+      <Text nativeID={SEARCH_LABEL_ID} variant="label">
+        {t('history.search.label')}
+      </Text>
       <View style={styles.fieldContainer}>
         <DecorativeView pointerEvents="none" style={styles.searchIcon}>
           <SymbolView
@@ -48,6 +51,7 @@ export function HistorySearchField({
         </DecorativeView>
         <TextField
           accessibilityLabel={t('history.search.label')}
+          accessibilityLabelledBy={SEARCH_LABEL_ID}
           accessibilityRole="search"
           autoCapitalize="none"
           autoCorrect={false}

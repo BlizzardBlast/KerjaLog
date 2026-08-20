@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useEffectEvent, useState } from 'react';
 import { AppState } from 'react-native';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import {
@@ -33,15 +27,6 @@ export function usePersistedLogDraft({
   repository = workEntryDraftRepository,
 }: UsePersistedLogDraftOptions): boolean {
   const [hasPersistenceError, setHasPersistenceError] = useState(false);
-  const mountedRef = useRef(false);
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
 
   const persistDraft = useCallback(
     async (draftToPersist: WorkEntryDraft) => {
@@ -56,13 +41,9 @@ export function usePersistedLogDraft({
           await repository.clearActive();
         }
 
-        if (mountedRef.current) {
-          setHasPersistenceError(false);
-        }
+        setHasPersistenceError(false);
       } catch {
-        if (mountedRef.current) {
-          setHasPersistenceError(true);
-        }
+        setHasPersistenceError(true);
       }
     },
     [repository, suspendedRef],

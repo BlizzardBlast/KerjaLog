@@ -1,40 +1,40 @@
 import { useNavigation } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
+import { useRef } from 'react';
 import { Alert } from 'react-native';
 
-type MutableFlag = {
-  current: boolean;
-};
-
-type LogDraftNavigationCopy = {
+type NavigationCopy = {
   title: string;
   description: string;
   keepEditing: string;
   discard: string;
 };
 
-type UseLogDraftNavigationGuardOptions = {
-  hasUnsavedDraft: boolean;
+type Options = {
+  hasUnsavedChanges: boolean;
   currentStep: number;
+  isComplete?: boolean;
   onInternalBack: () => void;
   onDiscard: () => Promise<boolean>;
-  allowNextRemovalRef: MutableFlag;
-  copy: LogDraftNavigationCopy;
+  copy: NavigationCopy;
 };
 
-export function useLogDraftNavigationGuard({
-  hasUnsavedDraft,
+export function useWizardNavigationGuard({
+  hasUnsavedChanges,
   currentStep,
+  isComplete = false,
   onInternalBack,
   onDiscard,
-  allowNextRemovalRef,
   copy,
-}: UseLogDraftNavigationGuardOptions): void {
+}: Options) {
   const navigation = useNavigation();
+  const allowRemovalRef = useRef(false);
+  const shouldPreventRemoval =
+    !isComplete && (hasUnsavedChanges || currentStep > 1);
 
-  usePreventRemove(hasUnsavedDraft, ({ data }) => {
-    if (allowNextRemovalRef.current) {
-      allowNextRemovalRef.current = false;
+  usePreventRemove(shouldPreventRemoval, ({ data }) => {
+    if (allowRemovalRef.current) {
+      allowRemovalRef.current = false;
       navigation.dispatch(data.action);
       return;
     }
@@ -45,10 +45,7 @@ export function useLogDraftNavigationGuard({
     }
 
     Alert.alert(copy.title, copy.description, [
-      {
-        text: copy.keepEditing,
-        style: 'cancel',
-      },
+      { text: copy.keepEditing, style: 'cancel' },
       {
         text: copy.discard,
         style: 'destructive',
@@ -62,4 +59,8 @@ export function useLogDraftNavigationGuard({
       },
     ]);
   });
+
+  return () => {
+    allowRemovalRef.current = true;
+  };
 }

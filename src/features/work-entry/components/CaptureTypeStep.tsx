@@ -32,7 +32,7 @@ export function CaptureTypeStep({
         title={t('log.capture.title')}
         description={t('log.capture.description')}
       />
-      <View style={logStepStyles.choiceList}>
+      <View accessibilityRole="radiogroup" style={logStepStyles.choiceList}>
         {logEventOptions.map((option) => (
           <LogChoiceCard
             key={option.value}

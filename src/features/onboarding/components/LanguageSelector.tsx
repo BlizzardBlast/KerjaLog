@@ -7,14 +7,16 @@ import { radii, spacing } from '@/design-system/tokens/theme';
 import { type Language, useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translations';
 
-const languageOptions: ReadonlyArray<{
+type LanguageOption = {
   value: Language;
   flag: string;
   labelKey: TranslationKey;
-}> = [
+};
+
+const languageOptions = [
   { value: 'en', flag: '🇬🇧', labelKey: 'onboarding.language.english' },
   { value: 'id', flag: '🇮🇩', labelKey: 'onboarding.language.indonesian' },
-];
+] as const satisfies readonly LanguageOption[];
 
 export function LanguageSelector() {
   const { theme } = useTheme();
@@ -119,10 +121,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     gap: spacing[1],
-    height: spacing[12],
     justifyContent: 'center',
+    minHeight: spacing[12],
     minWidth: 62,
     paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
   },
   flag: {
     lineHeight: 22,
@@ -131,11 +134,12 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     borderWidth: 1,
     boxShadow: '0 12px 28px rgba(49, 32, 57, 0.16)',
+    marginTop: spacing[2],
     minWidth: 190,
     overflow: 'hidden',
     position: 'absolute',
     right: 0,
-    top: 54,
+    top: '100%',
   },
   option: {
     alignItems: 'center',

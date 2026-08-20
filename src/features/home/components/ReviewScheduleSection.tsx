@@ -17,7 +17,7 @@ const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
 };
 
 type ReviewScheduleSectionProps = {
-  reviewSchedule?: ReviewSchedule;
+  reviewSchedule: ReviewSchedule | undefined;
 };
 
 export function ReviewScheduleSection({

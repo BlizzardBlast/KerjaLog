@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
@@ -30,7 +30,10 @@ export function AppLockScreen() {
       edges={['top', 'bottom']}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <DecorativeView
           style={[styles.icon, { backgroundColor: theme.colors.primarySoft }]}
         >
@@ -68,7 +71,7 @@ export function AppLockScreen() {
             {errorMessage}
           </Text>
         ) : null}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -79,10 +82,11 @@ const styles = StyleSheet.create({
   },
   content: {
     alignItems: 'center',
-    flex: 1,
+    flexGrow: 1,
     gap: spacing[6],
     justifyContent: 'center',
     paddingHorizontal: spacing[6],
+    paddingVertical: spacing[6],
   },
   icon: {
     alignItems: 'center',

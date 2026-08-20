@@ -1,8 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
-import { useLogDraftNavigationGuard } from '@/features/work-entry/useLogDraftNavigationGuard';
+import { useWizardNavigationGuard } from '@/features/work-entry/useWizardNavigationGuard';
 
 const mockDispatch = jest.fn();
+let mockPreventRemoveEnabled = false;
 let mockPreventRemoveHandler:
   | ((event: { data: { action: { type: string } } }) => void)
   | undefined;
@@ -13,18 +14,19 @@ jest.mock('expo-router', () => ({
 
 jest.mock('expo-router/react-navigation', () => ({
   usePreventRemove: (
-    _preventRemove: boolean,
+    preventRemove: boolean,
     handler: typeof mockPreventRemoveHandler,
   ) => {
+    mockPreventRemoveEnabled = preventRemove;
     mockPreventRemoveHandler = handler;
   },
 }));
 
 const copy = {
-  title: 'Discard this draft?',
-  description: 'The draft will be lost.',
+  title: 'Discard changes?',
+  description: 'Unsaved changes will be lost.',
   keepEditing: 'Keep editing',
-  discard: 'Discard draft',
+  discard: 'Discard changes',
 };
 
 const removeAction = { type: 'GO_BACK' };
@@ -33,27 +35,29 @@ async function waitForGuardRegistration() {
   await waitFor(() => expect(mockPreventRemoveHandler).toBeDefined());
 }
 
-describe('useLogDraftNavigationGuard', () => {
+describe('useWizardNavigationGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPreventRemoveEnabled = false;
     mockPreventRemoveHandler = undefined;
   });
 
-  test('turns native route removal into an internal wizard back step', async () => {
+  test('intercepts native route removal for an internal step even when pristine', async () => {
     const onInternalBack = jest.fn();
     await renderHook(() =>
-      useLogDraftNavigationGuard({
-        hasUnsavedDraft: true,
+      useWizardNavigationGuard({
+        hasUnsavedChanges: false,
         currentStep: 3,
         onInternalBack,
         onDiscard: jest.fn().mockResolvedValue(true),
-        allowNextRemovalRef: { current: false },
         copy,
       }),
     );
     await waitForGuardRegistration();
 
-    await act(async () => {
+    expect(mockPreventRemoveEnabled).toBe(true);
+
+    await act(() => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
@@ -61,93 +65,118 @@ describe('useLogDraftNavigationGuard', () => {
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 
-  test('clears persisted draft before allowing explicit discard', async () => {
+  test('does not prevent removal at the first pristine step', async () => {
+    await renderHook(() =>
+      useWizardNavigationGuard({
+        hasUnsavedChanges: false,
+        currentStep: 1,
+        onInternalBack: jest.fn(),
+        onDiscard: jest.fn().mockResolvedValue(true),
+        copy,
+      }),
+    );
+    await waitForGuardRegistration();
+
+    expect(mockPreventRemoveEnabled).toBe(false);
+  });
+
+  test('does not trap navigation after the workflow has committed', async () => {
+    await renderHook(() =>
+      useWizardNavigationGuard({
+        hasUnsavedChanges: true,
+        currentStep: 5,
+        isComplete: true,
+        onInternalBack: jest.fn(),
+        onDiscard: jest.fn().mockResolvedValue(true),
+        copy,
+      }),
+    );
+    await waitForGuardRegistration();
+
+    expect(mockPreventRemoveEnabled).toBe(false);
+  });
+
+  test('runs discard cleanup before dispatching a dirty first-step removal', async () => {
     const onDiscard = jest.fn().mockResolvedValue(true);
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
     await renderHook(() =>
-      useLogDraftNavigationGuard({
-        hasUnsavedDraft: true,
+      useWizardNavigationGuard({
+        hasUnsavedChanges: true,
         currentStep: 1,
         onInternalBack: jest.fn(),
         onDiscard,
-        allowNextRemovalRef: { current: false },
         copy,
       }),
     );
     await waitForGuardRegistration();
 
-    await act(async () => {
+    await act(() => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
-    const buttons = alertSpy.mock.calls[0]?.[2];
-    const discardButton = buttons?.find(
+    const discardButton = alertSpy.mock.calls[0]?.[2]?.find(
       (button) => button.text === copy.discard,
     );
-    await act(async () => {
+    await act(() => {
       discardButton?.onPress?.();
-      await Promise.resolve();
     });
 
-    expect(onDiscard).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(removeAction);
+    await waitFor(() => {
+      expect(onDiscard).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledWith(removeAction);
+    });
     alertSpy.mockRestore();
   });
 
-  test('keeps the route when encrypted draft cleanup fails', async () => {
-    const onDiscard = jest.fn().mockResolvedValue(false);
+  test('keeps the route when discard cleanup fails', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
+    const onDiscard = jest.fn().mockResolvedValue(false);
     await renderHook(() =>
-      useLogDraftNavigationGuard({
-        hasUnsavedDraft: true,
+      useWizardNavigationGuard({
+        hasUnsavedChanges: true,
         currentStep: 1,
         onInternalBack: jest.fn(),
         onDiscard,
-        allowNextRemovalRef: { current: false },
         copy,
       }),
     );
     await waitForGuardRegistration();
 
-    await act(async () => {
+    await act(() => {
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
-    const buttons = alertSpy.mock.calls[0]?.[2];
-    const discardButton = buttons?.find(
+    const discardButton = alertSpy.mock.calls[0]?.[2]?.find(
       (button) => button.text === copy.discard,
     );
-    await act(async () => {
+    await act(() => {
       discardButton?.onPress?.();
-      await Promise.resolve();
     });
 
-    expect(onDiscard).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onDiscard).toHaveBeenCalledTimes(1));
     expect(mockDispatch).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
 
-  test('allows the saved-entry replacement without a discard prompt', async () => {
-    const allowNextRemovalRef = { current: true };
+  test('allows one programmatic removal without prompting', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
-    await renderHook(() =>
-      useLogDraftNavigationGuard({
-        hasUnsavedDraft: true,
+    const { result } = await renderHook(() =>
+      useWizardNavigationGuard({
+        hasUnsavedChanges: true,
         currentStep: 5,
         onInternalBack: jest.fn(),
         onDiscard: jest.fn().mockResolvedValue(true),
-        allowNextRemovalRef,
         copy,
       }),
     );
     await waitForGuardRegistration();
 
-    await act(async () => {
+    await act(() => {
+      result.current();
       mockPreventRemoveHandler?.({ data: { action: removeAction } });
     });
 
     expect(mockDispatch).toHaveBeenCalledWith(removeAction);
-    expect(allowNextRemovalRef.current).toBe(false);
     expect(alertSpy).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });

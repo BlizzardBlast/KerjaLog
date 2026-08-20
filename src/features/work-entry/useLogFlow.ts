@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useForm, useSelector } from '@tanstack/react-form';
+import { useMemo, useRef, useState } from 'react';
 import {
   EMPTY_WORK_ENTRY_DRAFT,
   hasWorkEntryDraftContent,
@@ -16,10 +17,18 @@ import type {
   OutcomeType,
   WorkEntry,
 } from '@/domain/entry/model';
+import type {
+  EntrySkillSource,
+  SkillId,
+  WorkEntrySkill,
+} from '@/domain/skill/model';
+import { suggestSkillIds } from '@/domain/skill/suggestions';
+import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
 import {
   saveWorkEntry,
   type SaveWorkEntryDraft,
 } from '@/features/work-entry/saveWorkEntry';
+import { useSavedEntryCompletion } from '@/features/work-entry/useSavedEntryCompletion';
 
 export const LOG_STEPS = WORK_ENTRY_DRAFT_STEPS;
 export type LogStep = (typeof LOG_STEPS)[number];
@@ -33,7 +42,6 @@ type UseLogFlowOptions = {
   initialDraft?: WorkEntryDraft | null;
   onExit: () => void;
   onSaved: CompleteSavedEntry;
-  onStepChanged?: () => void;
   prepareForCommit?: PrepareForCommit;
   onCommitFailed?: () => void;
   saveEntry?: SaveEntry;
@@ -44,53 +52,95 @@ export function useLogFlow({
   initialDraft = null,
   onExit,
   onSaved,
-  onStepChanged,
   prepareForCommit,
   onCommitFailed,
   saveEntry = (draft) => saveWorkEntry(draft),
 }: UseLogFlowOptions) {
   const startingDraft = initialDraft ?? EMPTY_WORK_ENTRY_DRAFT;
   const [step, setStep] = useState<LogStep>(startingDraft.step);
-  const [intent, setIntent] = useState<LogEventIntent | null>(
-    startingDraft.intent,
-  );
-  const [rawNote, setRawNote] = useState(startingDraft.rawNote);
-  const [outcomeType, setOutcomeType] = useState<OutcomeType | null>(
-    startingDraft.outcomeType,
-  );
-  const [evidenceTypes, setEvidenceTypes] = useState<EvidenceType[]>(
-    startingDraft.evidenceTypes,
-  );
-  const [evidenceDetail, setEvidenceDetail] = useState(
-    startingDraft.evidenceDetail,
-  );
-  const [impactStatement, setImpactStatement] = useState(
-    startingDraft.impactStatement,
-  );
   const [noteError, setNoteError] = useState(false);
   const [evidenceError, setEvidenceError] = useState(false);
   const [saveError, setSaveError] = useState(false);
-  const [completionError, setCompletionError] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [hasCommittedEntry, setHasCommittedEntry] = useState(false);
   const saveInProgressRef = useRef(false);
-  const committedEntryRef = useRef<WorkEntry | null>(null);
+  const savedEntryCompletion = useSavedEntryCompletion(onSaved);
+
+  const form = useForm({
+    defaultValues: {
+      intent: startingDraft.intent,
+      rawNote: startingDraft.rawNote,
+      outcomeType: startingDraft.outcomeType,
+      evidenceTypes: startingDraft.evidenceTypes,
+      evidenceDetail: startingDraft.evidenceDetail,
+      skills: startingDraft.skills,
+      impactStatement: startingDraft.impactStatement,
+      impactStatementSource: startingDraft.impactStatementSource,
+    },
+  });
+
+  const intent = useSelector(form.store, (state) => state.values.intent);
+  const rawNote = useSelector(form.store, (state) => state.values.rawNote);
+  const outcomeType = useSelector(
+    form.store,
+    (state) => state.values.outcomeType,
+  );
+  const evidenceTypes = useSelector(
+    form.store,
+    (state) => state.values.evidenceTypes,
+  );
+  const evidenceDetail = useSelector(
+    form.store,
+    (state) => state.values.evidenceDetail,
+  );
+  const selectedSkills = useSelector(
+    form.store,
+    (state) => state.values.skills,
+  );
+  const impactStatement = useSelector(
+    form.store,
+    (state) => state.values.impactStatement,
+  );
+  const impactStatementSource = useSelector(
+    form.store,
+    (state) => state.values.impactStatementSource,
+  );
 
   const currentStep = LOG_STEPS.indexOf(step) + 1;
-  const draft: WorkEntryDraft = {
-    step,
-    intent,
-    rawNote,
-    outcomeType,
-    evidenceTypes,
-    evidenceDetail,
-    impactStatement,
-  };
-  const hasUnsavedDraft = !hasCommittedEntry && hasWorkEntryDraftContent(draft);
+  const suggestedSkillIds = intent
+    ? suggestSkillIds({
+        entryType: entryTypeByIntent[intent],
+        outcomeType,
+      })
+    : [];
+  const draft = useMemo<WorkEntryDraft>(
+    () => ({
+      step,
+      intent,
+      rawNote,
+      outcomeType,
+      evidenceTypes,
+      evidenceDetail,
+      skills: selectedSkills,
+      impactStatement,
+      impactStatementSource,
+    }),
+    [
+      evidenceDetail,
+      evidenceTypes,
+      impactStatement,
+      impactStatementSource,
+      intent,
+      outcomeType,
+      rawNote,
+      selectedSkills,
+      step,
+    ],
+  );
+  const hasUnsavedDraft =
+    !savedEntryCompletion.hasCommittedEntry && hasWorkEntryDraftContent(draft);
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);
-    onStepChanged?.();
   }
 
   function goBack() {
@@ -100,27 +150,37 @@ export function useLogFlow({
       return;
     }
 
-    moveToStep(LOG_STEPS[currentIndex - 1]);
+    const previousStep = LOG_STEPS[currentIndex - 1];
+    if (!previousStep) {
+      onExit();
+      return;
+    }
+
+    moveToStep(previousStep);
+  }
+
+  function invalidateGeneratedImpact() {
+    if (impactStatementSource === 'generated') {
+      form.setFieldValue('impactStatement', '');
+      form.setFieldValue('impactStatementSource', null);
+    }
   }
 
   function selectIntent(nextIntent: LogEventIntent) {
-    setIntent(nextIntent);
+    form.setFieldValue('intent', nextIntent);
     setSaveError(false);
+    invalidateGeneratedImpact();
   }
 
   function continueFromType() {
-    if (intent) {
-      moveToStep('event');
-    }
+    if (intent) moveToStep('event');
   }
 
   function updateRawNote(value: string) {
-    setRawNote(value);
+    form.setFieldValue('rawNote', value);
     setSaveError(false);
-
-    if (value.trim()) {
-      setNoteError(false);
-    }
+    if (value.trim()) setNoteError(false);
+    invalidateGeneratedImpact();
   }
 
   function continueFromEvent() {
@@ -128,98 +188,101 @@ export function useLogFlow({
       setNoteError(true);
       return;
     }
-
     setNoteError(false);
     moveToStep('outcome');
   }
 
   function selectOutcome(nextOutcomeType: OutcomeType) {
-    setOutcomeType(nextOutcomeType);
+    form.setFieldValue('outcomeType', nextOutcomeType);
     setSaveError(false);
+    invalidateGeneratedImpact();
   }
 
   function continueFromOutcome() {
-    if (outcomeType) {
-      moveToStep('evidence');
-    }
+    if (outcomeType) moveToStep('evidence');
   }
 
   function toggleEvidenceType(type: EvidenceType) {
-    setEvidenceTypes((current) =>
-      current.includes(type)
-        ? current.filter((candidate) => candidate !== type)
-        : [...current, type],
+    form.setFieldValue(
+      'evidenceTypes',
+      evidenceTypes.includes(type)
+        ? evidenceTypes.filter((candidate) => candidate !== type)
+        : [...evidenceTypes, type],
     );
     setEvidenceError(false);
     setSaveError(false);
+    invalidateGeneratedImpact();
   }
 
   function updateEvidenceDetail(value: string) {
-    setEvidenceDetail(value);
+    form.setFieldValue('evidenceDetail', value);
     setSaveError(false);
-
-    if (!hasIncompleteEvidence(evidenceTypes, value)) {
-      setEvidenceError(false);
-    }
+    if (!hasIncompleteEvidence(evidenceTypes, value)) setEvidenceError(false);
+    invalidateGeneratedImpact();
   }
 
-  function continueToImpact(skipEvidence = false) {
-    if (!intent || !outcomeType) {
-      return;
-    }
+  function continueFromEvidence(skipEvidence = false) {
+    if (!intent || !outcomeType) return;
 
     const nextEvidenceTypes = skipEvidence ? [] : evidenceTypes;
     const nextEvidenceDetail = skipEvidence ? '' : evidenceDetail;
-
     if (hasIncompleteEvidence(nextEvidenceTypes, nextEvidenceDetail)) {
       setEvidenceError(true);
       return;
     }
 
     if (skipEvidence) {
-      setEvidenceTypes([]);
-      setEvidenceDetail('');
+      form.setFieldValue('evidenceTypes', []);
+      form.setFieldValue('evidenceDetail', '');
     }
 
     setEvidenceError(false);
     setSaveError(false);
-    setImpactStatement(
-      buildImpactStatement(
-        {
-          intent,
-          rawNote,
-          outcomeType,
-          evidenceDetail: nextEvidenceDetail,
-        },
-        impactCopy,
-      ),
-    );
+    moveToStep('skills');
+  }
+
+  function toggleSkill(skillId: SkillId, source: EntrySkillSource) {
+    const existing = selectedSkills.find((skill) => skill.id === skillId);
+    const nextSkills: WorkEntrySkill[] = existing
+      ? selectedSkills.filter((skill) => skill.id !== skillId)
+      : [...selectedSkills, { id: skillId, source }];
+
+    form.setFieldValue('skills', nextSkills);
+    setSaveError(false);
+  }
+
+  function continueToImpact() {
+    if (!intent || !outcomeType) return;
+
+    if (impactStatementSource !== 'user') {
+      form.setFieldValue(
+        'impactStatement',
+        buildImpactStatement(
+          {
+            intent,
+            rawNote,
+            outcomeType,
+            evidenceDetail,
+          },
+          impactCopy,
+        ),
+      );
+      form.setFieldValue('impactStatementSource', 'generated');
+    }
     moveToStep('impact');
   }
 
   function updateImpactStatement(value: string) {
-    setImpactStatement(value);
+    form.setFieldValue('impactStatement', value);
+    form.setFieldValue('impactStatementSource', value.trim() ? 'user' : null);
     setSaveError(false);
   }
 
-  async function completeCommittedEntry(entry: WorkEntry): Promise<void> {
-    setCompletionError(false);
-
-    try {
-      await onSaved(entry);
-    } catch {
-      setCompletionError(true);
-    }
-  }
-
   async function save(quickNote: boolean) {
-    if (saveInProgressRef.current) {
-      return;
-    }
+    if (saveInProgressRef.current) return;
 
-    const alreadyCommitted = committedEntryRef.current;
-    if (alreadyCommitted) {
-      await completeCommittedEntry(alreadyCommitted);
+    if (savedEntryCompletion.hasCommitted()) {
+      await savedEntryCompletion.retryCompletion();
       return;
     }
 
@@ -227,20 +290,14 @@ export function useLogFlow({
       setNoteError(true);
       return;
     }
-
-    if (!quickNote && !outcomeType) {
-      return;
-    }
+    if (!quickNote && !outcomeType) return;
 
     saveInProgressRef.current = true;
     setSaving(true);
     setSaveError(false);
-    setCompletionError(false);
 
     let entry: WorkEntry;
     try {
-      // Freeze and flush the latest encrypted draft before committing. The
-      // repository then consumes that draft atomically with the new entry.
       await prepareForCommit?.(draft);
       entry = await saveEntry({
         intent,
@@ -248,7 +305,9 @@ export function useLogFlow({
         outcomeType: quickNote ? null : outcomeType,
         evidenceTypes: quickNote ? [] : evidenceTypes,
         evidenceDetail: quickNote ? '' : evidenceDetail,
+        skills: quickNote ? [] : selectedSkills,
         impactStatement: quickNote ? null : impactStatement,
+        impactStatementSource: quickNote ? null : impactStatementSource,
       });
     } catch {
       onCommitFailed?.();
@@ -259,9 +318,7 @@ export function useLogFlow({
       setSaving(false);
     }
 
-    committedEntryRef.current = entry;
-    setHasCommittedEntry(true);
-    await completeCommittedEntry(entry);
+    await savedEntryCompletion.commitAndComplete(entry);
   }
 
   return {
@@ -270,17 +327,19 @@ export function useLogFlow({
     totalSteps: LOG_STEPS.length,
     draft,
     hasUnsavedDraft,
-    hasCommittedEntry,
+    hasCommittedEntry: savedEntryCompletion.hasCommittedEntry,
     intent,
     rawNote,
     outcomeType,
     evidenceTypes,
     evidenceDetail,
+    selectedSkills,
+    suggestedSkillIds,
     impactStatement,
     noteError,
     evidenceError,
     saveError,
-    completionError,
+    completionError: savedEntryCompletion.completionError,
     saving,
     goBack,
     selectIntent,
@@ -291,14 +350,13 @@ export function useLogFlow({
     continueFromOutcome,
     toggleEvidenceType,
     updateEvidenceDetail,
-    skipEvidence: () => continueToImpact(true),
-    continueFromEvidence: () => continueToImpact(false),
+    skipEvidence: () => continueFromEvidence(true),
+    continueFromEvidence: () => continueFromEvidence(false),
+    toggleSkill,
+    continueToImpact,
     updateImpactStatement,
     saveQuick: () => save(true),
     saveDeveloped: () => save(false),
-    retryCompletion: () => {
-      const entry = committedEntryRef.current;
-      return entry ? completeCommittedEntry(entry) : Promise.resolve();
-    },
+    retryCompletion: savedEntryCompletion.retryCompletion,
   };
 }

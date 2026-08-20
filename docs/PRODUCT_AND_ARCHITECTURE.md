@@ -2,7 +2,7 @@
 
 > Status: product and architecture direction for v1
 >
-> Last reviewed: 2026-08-13
+> Last reviewed: 2026-08-20
 
 KerjaLog is a private, local-first career achievement tracker for office workers. It helps people capture everyday work while it is still fresh, understand the impact of that work, preserve evidence, and turn that evidence into useful material for performance reviews, one-on-ones, resumes, and interviews.
 
@@ -206,13 +206,16 @@ This is an entry-completeness state, not a performance score.
 
 The Impact Builder is the signature interaction.
 
-A suggested flow:
+The full capture/development flow is:
 
 1. **What happened at work?**
 2. **What changed because of this?**
 3. **Do you have evidence or a useful detail?**
-4. **Preview the impact statement.**
-5. **Confirm or edit before saving.**
+4. **What does this demonstrate?** Confirm broad skills only when they fit the recorded facts.
+5. **Preview the impact statement.**
+6. **Confirm or edit before saving.**
+
+Quick Save intentionally exits after the work note and does not require outcome, evidence, skills, or impact wording. A quick note can be developed through the remaining steps later.
 
 Outcome choices should include:
 
@@ -227,6 +230,10 @@ Outcome choices should include:
 - I am not sure yet.
 
 For v1, the Impact Builder must be deterministic and rules/template based. It must not require a remote LLM.
+
+Persist whether a non-empty impact statement is `generated` or `user` authored. Generated statements may be invalidated and rebuilt when the recorded facts change. User-authored impact wording must never be silently overwritten by generated copy. A null impact statement must have null provenance.
+
+Confirmed skills are separate career-evidence metadata. They are shown in the Evidence Thread and can support Growth/review features, but v1-generated impact prose is built from the recorded work note, outcome, and useful evidence rather than automatically inserting skill labels into the sentence.
 
 ### 3.5 Evidence
 
@@ -261,7 +268,7 @@ Use local scheduled notifications. Do not require a notification backend.
 
 The reminder is opt-in. The user chooses the weekday and local wall-clock time before enabling it. Friday at 16:30 is only the initial suggestion, not fixed product behavior. Persist the schedule as local weekday/hour/minute fields rather than a UTC timestamp or serialized calendar date.
 
-On Android 12+, precise user-selected reminder times may use the `SCHEDULE_EXACT_ALARM` special app access. Treat that access as an optional precision upgrade rather than a prerequisite for reminders: Expo SDK 57 falls back to an inexact `setAndAllowWhileIdle` alarm when exact access is unavailable. Keep the reminder enabled in that case, clearly tell the user that delivery is approximate, and offer **Alarms & reminders** settings only if they want exact timing. Persist the last observed reminder precision and reconcile it when the app starts or returns to the foreground so permission grants/revocations re-arm the native reminder in the correct mode. If notification permission or the native scheduled request itself is removed, reconcile the persisted ON/OFF state. Do not turn the reminder off merely because the current runtime cannot inspect native reminder state.
+Weekly reminders use ordinary local scheduled notifications. KerjaLog does not request Android exact-alarm special access because minute-level precision is not product-critical for a gentle reflection reminder. OS power management may delay delivery. If notification permission or the native scheduled request disappears, reconcile the persisted enabled state when the app starts or returns to the foreground. A runtime that cannot inspect native reminder state must not force the persisted reminder off.
 
 Do not use visible streaks or guilt-based messaging for missed weeks.
 
@@ -491,24 +498,24 @@ Expo SDK 57 maps to React Native 0.86 and targets Android SDK 36, which is appro
 
 ### Add for v1
 
-| Concern              | Choice                                          | Why                                                   |
-| -------------------- | ----------------------------------------------- | ----------------------------------------------------- |
-| Local database       | `expo-sqlite`                                   | Durable relational local storage                      |
-| Database encryption  | SQLCipher through `expo-sqlite` config          | Career data may be sensitive                          |
-| Secret storage       | `expo-secure-store`                             | Store the database encryption key and small secrets   |
-| App lock             | `expo-local-authentication`                     | Optional biometric/device authentication              |
-| Forms                | `react-hook-form`                               | Efficient form/wizard state                           |
-| Validation           | `zod`                                           | Typed boundary validation                             |
-| Ephemeral app state  | `zustand`                                       | Small UI/workflow state only                          |
-| Localization         | `expo-localization` + `i18next`/`react-i18next` | Indonesian + English without scattered strings        |
-| Reminders            | `expo-notifications`                            | Local weekly reflection reminders                     |
-| PDF                  | `expo-print`                                    | Local HTML-to-PDF generation                          |
-| Sharing              | `expo-sharing`                                  | Native share sheet for generated files                |
-| File handling        | Expo file-system APIs                           | Export/import files                                   |
-| Unit/component tests | Jest + React Native Testing Library             | Logic and component confidence                        |
-| E2E                  | Maestro                                         | Core Android/iOS journey validation                   |
-| Crash reporting      | Sentry, with aggressive scrubbing               | Production diagnostics without career-content leakage |
-| Builds/releases      | EAS Build / Submit / Update                     | Managed native build and release workflow             |
+| Concern              | Choice                                             | Why                                                                  |
+| -------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
+| Local database       | `expo-sqlite`                                      | Durable relational local storage                                     |
+| Database encryption  | SQLCipher through `expo-sqlite` config             | Career data may be sensitive                                         |
+| Secret storage       | `expo-secure-store`                                | Store the database encryption key and small secrets                  |
+| App lock             | `expo-local-authentication`                        | Optional biometric/device authentication                             |
+| Forms                | `@tanstack/react-form`                             | Efficient form/wizard state                                          |
+| Validation           | `zod`                                              | Typed boundary validation                                            |
+| Ephemeral app state  | React local/context state; Zustand only if needed  | Keep local state local; add a store only for genuine shared UI state |
+| Localization         | `expo-localization` + `i18next`/`react-i18next`    | Indonesian + English without scattered strings                       |
+| Reminders            | `expo-notifications`                               | Local weekly reflection reminders                                    |
+| PDF                  | `expo-print`                                       | Local HTML-to-PDF generation                                         |
+| Sharing              | `expo-sharing`                                     | Native share sheet for generated files                               |
+| File handling        | Expo file-system APIs                              | Export/import files                                                   |
+| Unit/component tests | Jest + React Native Testing Library                | Logic and component confidence                                       |
+| E2E                  | Maestro                                            | Core Android/iOS journey validation                                  |
+| Crash reporting      | Sentry, with aggressive scrubbing                  | Production diagnostics without career-content leakage                |
+| Builds/releases      | EAS Build / Submit / Update                        | Managed native build and release workflow                            |
 
 ### Linting and formatting
 
@@ -520,7 +527,7 @@ The project quality gates are:
 Biome
 + TypeScript compiler (`tsc --noEmit`)
 + React Compiler healthcheck
-+ render-ref purity guard (`pnpm run react:refs:check`)
++ official React Hooks/compiler-aware ESLint rules
 + Expo Doctor
 ```
 
@@ -561,8 +568,9 @@ No required server in the core path.
 
 ```text
 SQLite = persisted product data
-Zustand = ephemeral UI/workflow state
-React Hook Form = active form state
+React local/context state = component-local and app-shell UI state
+TanStack Form = active form state
+Zustand = shared cross-feature ephemeral state only if it genuinely emerges
 ```
 
 Do not mirror all entries/projects/evidence from SQLite into a global store.
@@ -705,6 +713,7 @@ type
 title
 raw_note
 impact_statement
+impact_statement_source
 occurred_at
 project_id
 outcome_type
@@ -744,10 +753,9 @@ Use localization keys for built-in skill names instead of storing one language a
 entry_id
 skill_id
 source
-confirmed
 ```
 
-`source` can distinguish a user-selected skill from a rules-based suggestion.
+`source` distinguishes a user-selected skill from a rules-based suggestion. Only confirmed relationships are persisted; unconfirmed rule suggestions remain derived UI state.
 
 ### `review_drafts`
 
@@ -860,14 +868,15 @@ v1:
 RulesImpactAssistant
 ```
 
-It should use:
+The deterministic wording engine should use:
 
 - entry type;
 - user-authored note;
 - selected outcome;
 - confirmed evidence;
-- confirmed skills;
 - deterministic templates/rules.
+
+Confirmed skills remain separate user-confirmed career evidence. They can be displayed in the Evidence Thread and consumed by Growth/review features, but the wording engine must not automatically insert skill labels into generated impact prose.
 
 A future version may add:
 
@@ -996,7 +1005,7 @@ Suggested pull-request checks:
 Biome lint + format check
 TypeScript: tsc --noEmit
 React Compiler healthcheck
-Render-ref purity guard
+Official React Hooks/compiler-aware ESLint rules
 SQLite schema verification
 Unit/component tests
 Expo Doctor
@@ -1136,8 +1145,8 @@ Only after core retention is proven should the product evaluate:
 | Backend                     | None required                                            |
 | Sync                        | None                                                     |
 | AI                          | Deterministic local rules only                           |
-| Global state                | Zustand for ephemeral state only                         |
-| Forms                       | React Hook Form + Zod                                    |
+| Global state                | None by default; Zustand only for genuine shared ephemeral state |
+| Forms                       | TanStack Form + Zod                                      |
 | Search                      | SQLite FTS5                                              |
 | Reminders                   | Local notifications                                      |
 | Export                      | Local text/Markdown/PDF/share/JSON                       |

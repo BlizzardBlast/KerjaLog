@@ -1,16 +1,46 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+const EXACT_ALARM_PERMISSION = 'android.permission.SCHEDULE_EXACT_ALARM';
+
 function assertIncludes(value, expected, label) {
   if (!value.includes(expected)) {
     throw new Error(`${label} is missing expected configuration: ${expected}`);
   }
 }
 
-function assertMatches(value, expected, label) {
-  if (!expected.test(value)) {
-    throw new Error(`${label} is missing expected configuration.`);
+function assertNotIncludes(value, unexpected, label) {
+  if (value.includes(unexpected)) {
+    throw new Error(`${label} includes forbidden configuration: ${unexpected}`);
   }
+}
+
+function assertPermissionBlocked(manifest, permission) {
+  const tag = manifest
+    .match(/<uses-permission\b[^>]*>/gu)
+    ?.find((candidate) => candidate.includes(`android:name="${permission}"`));
+
+  if (!tag?.includes('tools:node="remove"')) {
+    throw new Error(
+      `Android app manifest must block ${permission} with tools:node="remove".`,
+    );
+  }
+}
+
+function findFiles(directory, filename) {
+  if (!fs.existsSync(directory)) {
+    return [];
+  }
+
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const candidate = path.join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      return findFiles(candidate, filename);
+    }
+
+    return entry.name === filename ? [candidate] : [];
+  });
 }
 
 const iosDirectory = path.resolve('ios');
@@ -55,11 +85,7 @@ assertIncludes(
   'iOS AppDelegate',
 );
 assertIncludes(appDelegate, 'NSLog(', 'iOS AppDelegate');
-assertMatches(
-  infoPlist,
-  /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/u,
-  'iOS Info.plist',
-);
+assertNotIncludes(infoPlist, 'ITSAppUsesNonExemptEncryption', 'iOS Info.plist');
 
 if (iosPodProperties['expo.sqlite.useSQLCipher'] !== 'true') {
   throw new Error('Generated iOS SQLCipher configuration is not enabled.');
@@ -70,11 +96,31 @@ assertIncludes(
   'expo.sqlite.useSQLCipher=true',
   'Android Gradle properties',
 );
-assertIncludes(
-  androidManifest,
-  'android.permission.SCHEDULE_EXACT_ALARM',
-  'Android app manifest',
+assertPermissionBlocked(androidManifest, EXACT_ALARM_PERMISSION);
+
+const mergedManifestPaths = findFiles(
+  path.resolve('android/app/build/intermediates'),
+  'AndroidManifest.xml',
+).filter(
+  (candidate) =>
+    /merged_manifest(?:s)?/u.test(candidate) &&
+    /[/\\]debug[/\\]/u.test(candidate),
 );
+
+if (mergedManifestPaths.length === 0) {
+  throw new Error(
+    'Generated merged Android debug manifest could not be found.',
+  );
+}
+
+for (const mergedManifestPath of mergedManifestPaths) {
+  assertNotIncludes(
+    fs.readFileSync(mergedManifestPath, 'utf8'),
+    EXACT_ALARM_PERMISSION,
+    `Merged Android manifest ${path.relative(process.cwd(), mergedManifestPath)}`,
+  );
+}
+
 assertIncludes(
   localAuthenticationManifest,
   'android.permission.USE_BIOMETRIC',

@@ -4,6 +4,7 @@ import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import type { OutcomeType } from '@/domain/entry/model';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
@@ -16,13 +17,17 @@ import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 import { ThreadNode } from '@/features/work-entry/components/ThreadNode';
 import { getOutcomeLabel } from '@/features/work-entry/outcomeLabel';
 
+const IMPACT_STATEMENT_LABEL_ID = 'work-entry-impact-statement-label';
+
 type ImpactStepProps = LogStepFrameProps & {
   rawNote: string;
   outcomeType: OutcomeType;
   evidenceDetail: string;
+  skillsSummary?: string;
   impactStatement: string;
   saving: boolean;
   saveError: boolean;
+  saveErrorMessage?: string;
   onImpactStatementChange: (value: string) => void;
   onSave: () => void;
   t: Translate;
@@ -32,9 +37,11 @@ export function ImpactStep({
   rawNote,
   outcomeType,
   evidenceDetail,
+  skillsSummary,
   impactStatement,
   saving,
   saveError,
+  saveErrorMessage,
   onImpactStatementChange,
   onSave,
   t,
@@ -68,6 +75,12 @@ export function ImpactStep({
           label={t('log.impact.whatSupports')}
           value={evidenceDetail.trim() || t('log.impact.noEvidence')}
         />
+        {skillsSummary ? (
+          <ThreadNode
+            label={t('entry.saved.whatDemonstrates')}
+            value={skillsSummary}
+          />
+        ) : null}
       </View>
       <View
         style={[
@@ -84,10 +97,13 @@ export function ImpactStep({
         <Text variant="body">{rawNote.trim()}</Text>
       </View>
       <View style={logStepStyles.field}>
-        <Text variant="label">{t('log.impact.editLabel')}</Text>
+        <Text nativeID={IMPACT_STATEMENT_LABEL_ID} variant="label">
+          {t('log.impact.editLabel')}
+        </Text>
         <TextField
           accessibilityLabel={t('log.impact.editLabel')}
-          maxLength={2500}
+          accessibilityLabelledBy={IMPACT_STATEMENT_LABEL_ID}
+          maxLength={WORK_ENTRY_TEXT_LIMITS.impactStatement}
           multiline
           onChangeText={onImpactStatementChange}
           style={styles.impactInput}
@@ -112,7 +128,9 @@ export function ImpactStep({
         {t('log.impact.confirm')}
       </Button>
       {saveError ? (
-        <InlineError>{t('log.impact.saveError')}</InlineError>
+        <InlineError>
+          {saveErrorMessage ?? t('log.impact.saveError')}
+        </InlineError>
       ) : null}
     </>
   );
