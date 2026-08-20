@@ -73,7 +73,7 @@ export function EntryRefinementEditor({ entry }: EntryRefinementEditorProps) {
       ? refinement.selectedSkills
           .map((skill) => t(skillDefinitionById[skill.id].nameKey))
           .join(' · ')
-      : t('entry.refine.skills.none');
+      : t('entry.skills.none');
 
   return (
     <WorkEntryWizardLayout stepKey={refinement.step}>
