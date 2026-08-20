@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { Alert } from 'react-native';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
+import { skillDefinitionById } from '@/domain/skill/catalog';
 import { CaptureTypeStep } from '@/features/work-entry/components/CaptureTypeStep';
 import { EventStep } from '@/features/work-entry/components/EventStep';
 import { EvidenceStep } from '@/features/work-entry/components/EvidenceStep';
@@ -12,6 +13,7 @@ import { LogSaveCompletionErrorScreen } from '@/features/work-entry/components/L
 import { OutcomeStep } from '@/features/work-entry/components/OutcomeStep';
 import { WorkEntryWizardLayout } from '@/features/work-entry/components/WorkEntryWizardLayout';
 import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
+import { SkillStep } from '@/features/work-entry/refinement/components/SkillStep';
 import { useLogFlow } from '@/features/work-entry/useLogFlow';
 import { usePersistedLogDraft } from '@/features/work-entry/usePersistedLogDraft';
 import { useWizardNavigationGuard } from '@/features/work-entry/useWizardNavigationGuard';
@@ -96,6 +98,12 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
     }),
     onBack: flow.goBack,
   };
+  const skillsSummary =
+    flow.selectedSkills.length > 0
+      ? flow.selectedSkills
+          .map((skill) => t(skillDefinitionById[skill.id].nameKey))
+          .join(' · ')
+      : t('entry.refine.skills.none');
 
   return (
     <WorkEntryWizardLayout stepKey={flow.step}>
@@ -145,6 +153,16 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
           t={t}
         />
       ) : null}
+      {flow.step === 'skills' ? (
+        <SkillStep
+          {...frame}
+          onContinue={flow.continueToImpact}
+          onToggle={flow.toggleSkill}
+          selectedSkills={flow.selectedSkills}
+          suggestedSkillIds={flow.suggestedSkillIds}
+          t={t}
+        />
+      ) : null}
       {flow.step === 'impact' && flow.outcomeType ? (
         <ImpactStep
           {...frame}
@@ -156,6 +174,7 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
           rawNote={flow.rawNote}
           saveError={flow.saveError}
           saving={flow.saving}
+          skillsSummary={skillsSummary}
           t={t}
         />
       ) : null}
