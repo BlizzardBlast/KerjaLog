@@ -4,6 +4,7 @@ import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
 import type {
@@ -57,7 +58,7 @@ export function EventStep({
           accessibilityLabel={t('log.event.label')}
           accessibilityLabelledBy={EVENT_NOTE_LABEL_ID}
           hasError={noteError}
-          maxLength={2000}
+          maxLength={WORK_ENTRY_TEXT_LIMITS.rawNote}
           multiline
           onChangeText={onRawNoteChange}
           placeholder={t('log.event.placeholder')}
