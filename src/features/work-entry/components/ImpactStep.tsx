@@ -4,6 +4,7 @@ import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import type { OutcomeType } from '@/domain/entry/model';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
@@ -102,7 +103,7 @@ export function ImpactStep({
         <TextField
           accessibilityLabel={t('log.impact.editLabel')}
           accessibilityLabelledBy={IMPACT_STATEMENT_LABEL_ID}
-          maxLength={2500}
+          maxLength={WORK_ENTRY_TEXT_LIMITS.impactStatement}
           multiline
           onChangeText={onImpactStatementChange}
           style={styles.impactInput}
