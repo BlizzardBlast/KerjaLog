@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
@@ -7,16 +8,24 @@ import { spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type LogSaveCompletionErrorScreenProps = {
-  loading: boolean;
-  onRetry: () => void;
+  onRetry: () => Promise<void> | void;
 };
 
 export function LogSaveCompletionErrorScreen({
-  loading,
   onRetry,
 }: LogSaveCompletionErrorScreenProps) {
   const { theme } = useTheme();
   const { t } = useI18n();
+  const [retrying, setRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    try {
+      await onRetry();
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   return (
     <SafeAreaView
@@ -35,7 +44,7 @@ export function LogSaveCompletionErrorScreen({
       >
         {t('log.completion.description')}
       </Text>
-      <Button fullWidth loading={loading} onPress={onRetry}>
+      <Button fullWidth loading={retrying} onPress={handleRetry}>
         {t('log.completion.retry')}
       </Button>
     </SafeAreaView>
