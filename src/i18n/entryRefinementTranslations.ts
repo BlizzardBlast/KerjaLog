@@ -24,13 +24,6 @@ export const entryRefinementEn = {
   'entry.refine.type.ownership': 'I took responsibility',
   'entry.refine.type.challenge': 'Something became difficult',
   'entry.refine.type.continue': 'Review what happened',
-  'entry.refine.skills.eyebrow': 'Career evidence',
-  'entry.refine.skills.title': 'What does this demonstrate?',
-  'entry.refine.skills.description':
-    'KerjaLog can suggest broad skills from the facts you recorded. Confirm only what feels accurate.',
-  'entry.refine.skills.suggested': 'Suggested from this entry',
-  'entry.refine.skills.continue': 'Review my impact',
-  'entry.refine.skills.none': 'No skills confirmed yet',
   'entry.refine.saveError':
     'KerjaLog could not update this entry. Your saved version is unchanged. Please try again.',
   'entry.saved.develop': 'Develop this entry',
@@ -68,13 +61,6 @@ export const entryRefinementId: Record<EntryRefinementTranslationKey, string> =
     'entry.refine.type.ownership': 'Saya mengambil tanggung jawab',
     'entry.refine.type.challenge': 'Sesuatu menjadi sulit',
     'entry.refine.type.continue': 'Tinjau yang terjadi',
-    'entry.refine.skills.eyebrow': 'Bukti karier',
-    'entry.refine.skills.title': 'Apa yang ditunjukkan oleh pekerjaan ini?',
-    'entry.refine.skills.description':
-      'KerjaLog dapat menyarankan keterampilan umum dari fakta yang Anda catat. Konfirmasi hanya yang menurut Anda akurat.',
-    'entry.refine.skills.suggested': 'Disarankan dari catatan ini',
-    'entry.refine.skills.continue': 'Tinjau dampak saya',
-    'entry.refine.skills.none': 'Belum ada keterampilan yang dikonfirmasi',
     'entry.refine.saveError':
       'KerjaLog tidak dapat memperbarui catatan ini. Versi tersimpan Anda tidak berubah. Silakan coba lagi.',
     'entry.saved.develop': 'Kembangkan catatan ini',
