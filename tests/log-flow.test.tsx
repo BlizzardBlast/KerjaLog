@@ -71,6 +71,7 @@ describe('useLogFlow', () => {
       outcomeType: 'error_fixed_or_prevented',
       evidenceTypes: ['number'],
       evidenceDetail: '7 duplicate records fixed.',
+      skills: [{ id: 'problem_solving', source: 'rules' }],
       impactStatement: '',
       impactStatementSource: null,
     };
@@ -86,6 +87,7 @@ describe('useLogFlow', () => {
 
     expect(result.current.draft).toEqual(initialDraft);
     expect(result.current.currentStep).toBe(4);
+    expect(result.current.selectedSkills).toEqual(initialDraft.skills);
     expect(result.current.hasUnsavedDraft).toBe(true);
   });
 
@@ -134,11 +136,65 @@ describe('useLogFlow', () => {
       result.current.continueFromEvidence();
     });
 
-    expect(result.current.step).toBe('impact');
+    expect(result.current.step).toBe('skills');
     expect(result.current.evidenceError).toBe(false);
+
+    await act(async () => {
+      result.current.continueToImpact();
+    });
+
+    expect(result.current.step).toBe('impact');
     expect(result.current.impactStatement).toContain(
       'Evidence: Finished before Friday close.',
     );
+  });
+
+  test('suggests and saves confirmed skills for a full entry', async () => {
+    const onSaved = jest.fn();
+    const saveEntry = jest.fn().mockResolvedValue({
+      ...savedEntry,
+      outcomeType: 'error_fixed_or_prevented',
+      status: 'developed',
+    });
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved,
+        saveEntry,
+      }),
+    );
+
+    await act(async () => {
+      result.current.selectIntent('solved');
+      result.current.updateRawNote('Fixed duplicate rows before submission.');
+      result.current.continueFromType();
+      result.current.continueFromEvent();
+      result.current.selectOutcome('error_fixed_or_prevented');
+      result.current.continueFromOutcome();
+      result.current.skipEvidence();
+    });
+
+    expect(result.current.step).toBe('skills');
+    expect(result.current.suggestedSkillIds).toEqual(
+      expect.arrayContaining(['problem_solving', 'attention_to_detail']),
+    );
+
+    await act(async () => {
+      result.current.toggleSkill('problem_solving', 'rules');
+      result.current.continueToImpact();
+    });
+
+    await act(async () => {
+      await result.current.saveDeveloped();
+    });
+
+    expect(saveEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skills: [{ id: 'problem_solving', source: 'rules' }],
+      }),
+    );
+    expect(onSaved).toHaveBeenCalledTimes(1);
   });
 
   test('delegates quick-save persistence and reports the saved entry', async () => {
@@ -168,6 +224,7 @@ describe('useLogFlow', () => {
       outcomeType: null,
       evidenceTypes: [],
       evidenceDetail: '',
+      skills: [],
       impactStatement: null,
       impactStatementSource: null,
     });
@@ -195,14 +252,17 @@ describe('useLogFlow', () => {
       result.current.selectOutcome('deadline_met');
       result.current.continueFromOutcome();
       result.current.skipEvidence();
+      result.current.continueToImpact();
       result.current.updateImpactStatement(
         'My carefully edited impact wording.',
       );
       result.current.goBack();
       result.current.goBack();
+      result.current.goBack();
       result.current.selectOutcome('work_clearer');
       result.current.continueFromOutcome();
       result.current.skipEvidence();
+      result.current.continueToImpact();
     });
 
     expect(result.current.impactStatement).toBe(
