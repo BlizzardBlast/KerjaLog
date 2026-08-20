@@ -45,9 +45,9 @@ export function SkillStep({
     <>
       <LogHeader
         {...frame}
-        eyebrow={t('entry.refine.skills.eyebrow')}
-        title={t('entry.refine.skills.title')}
-        description={t('entry.refine.skills.description')}
+        eyebrow={t('entry.skills.eyebrow')}
+        title={t('entry.skills.title')}
+        description={t('entry.skills.description')}
       />
       <View style={logStepStyles.choiceList}>
         {orderedSkills.map((skill) => {
@@ -58,7 +58,7 @@ export function SkillStep({
               key={skill.id}
               title={t(skill.nameKey)}
               description={
-                suggested ? t('entry.refine.skills.suggested') : undefined
+                suggested ? t('entry.skills.suggested') : undefined
               }
               selected={selectedIds.has(skill.id)}
               onPress={() => onToggle(skill.id, suggested ? 'rules' : 'user')}
@@ -68,7 +68,7 @@ export function SkillStep({
         })}
       </View>
       <Button fullWidth onPress={onContinue} size="lg">
-        {t('entry.refine.skills.continue')}
+        {t('entry.skills.continue')}
       </Button>
     </>
   );
