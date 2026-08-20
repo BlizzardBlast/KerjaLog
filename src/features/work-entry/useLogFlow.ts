@@ -92,7 +92,10 @@ export function useLogFlow({
     form.store,
     (state) => state.values.evidenceDetail,
   );
-  const selectedSkills = useSelector(form.store, (state) => state.values.skills);
+  const selectedSkills = useSelector(
+    form.store,
+    (state) => state.values.skills,
+  );
   const impactStatement = useSelector(
     form.store,
     (state) => state.values.impactStatement,
