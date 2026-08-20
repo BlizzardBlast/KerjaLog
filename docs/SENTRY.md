@@ -10,12 +10,14 @@ The runtime configuration is intentionally conservative because KerjaLog stores 
 - Expo Router reports templated route names without concrete route parameters;
 - Session Replay uploads only when an error occurs;
 - replay text, images, and vectors remain masked;
-- JavaScript console and HTTP breadcrumbs are disabled;
-- JavaScript error and transaction events remove user, request, and extra contexts before sending;
+- JavaScript console and XHR breadcrumbs are retained for debugging; sensitive keys and matching message values are filtered, and URL query strings/fragments are removed;
+- JavaScript error and transaction events retain safe contexts, opaque user IDs, request methods, and request paths; headers, cookies, bodies, query strings, and sensitive fields are removed;
 - trace-propagation headers are disabled until a first-party backend origin is explicitly allowlisted;
 - screenshots, view hierarchy attachments, request/response bodies, and request headers are not enabled.
 
-Do not add work-entry text, evidence, feedback, user-entered values, authentication material, or database contents to Sentry messages, tags, breadcrumbs, logs, or custom contexts.
+Do not add work-entry text, evidence, feedback, user-entered values, authentication material, or database contents to Sentry messages, tags, breadcrumbs, logs, or custom contexts. If identifying a signed-in user, use only an opaque, non-reversible ID; never send names, emails, usernames, or IP addresses.
+
+KerjaLog currently uses React Native's standard XHR-backed `fetch`, so only XHR breadcrumbs are enabled to prevent duplicate network trails. If the app adopts `expo/fetch`, revisit this setting and enable `fetch` as well.
 
 `beforeSend` and `beforeSendTransaction` apply only to JavaScript events. Keep Sentry's server-side data-scrubbing rules enabled as a second layer, covering credentials, personal data, and any future network query parameters. Native crash payloads are not filtered by these JavaScript hooks.
 

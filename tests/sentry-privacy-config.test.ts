@@ -33,55 +33,116 @@ describe('Sentry privacy configuration', () => {
     isRunningInExpoGoMock.mockReturnValue(false);
   });
 
-  test('removes sensitive data from JavaScript error events', () => {
+  test('retains safe error context and redacts sensitive values', () => {
     // Given
     initializeSentry();
     const options = getSentryOptions();
     const errorEvent = {
-      extra: { rawNote: 'private note' },
-      request: { url: 'https://example.test/?token=private' },
+      contexts: { feature: { screen: 'history' } },
+      extra: {
+        operation: 'save-work-entry',
+        rawNote: 'private note',
+        retry: { password: 'private-password', status: 'retrying' },
+      },
+      request: {
+        cookies: { session: 'private-cookie' },
+        data: { note: 'private note' },
+        headers: { Authorization: 'Bearer private-token' },
+        method: 'POST',
+        query_string: 'token=private-token',
+        url: 'https://example.test/v1/worklogs?token=private-token',
+      },
       type: undefined,
-      user: { email: 'private@example.test' },
+      user: {
+        email: 'private@example.test',
+        id: 'opaque-user-id',
+        role: 'member',
+        username: 'private-username',
+      },
     };
 
     // When
     const sentEvent = options.beforeSend?.(errorEvent, {});
 
     // Then
-    expect(sentEvent).toEqual({ type: undefined });
-    expect(errorEvent).toEqual({
-      extra: { rawNote: 'private note' },
-      request: { url: 'https://example.test/?token=private' },
+    expect(sentEvent).toEqual({
+      contexts: { feature: { screen: 'history' } },
+      extra: {
+        operation: 'save-work-entry',
+        rawNote: '[Filtered]',
+        retry: { password: '[Filtered]', status: 'retrying' },
+      },
+      request: {
+        method: 'POST',
+        url: 'https://example.test/v1/worklogs',
+      },
       type: undefined,
-      user: { email: 'private@example.test' },
+      user: { id: 'opaque-user-id', role: 'member' },
+    });
+    expect(errorEvent).toEqual({
+      contexts: { feature: { screen: 'history' } },
+      extra: {
+        operation: 'save-work-entry',
+        rawNote: 'private note',
+        retry: { password: 'private-password', status: 'retrying' },
+      },
+      request: {
+        cookies: { session: 'private-cookie' },
+        data: { note: 'private note' },
+        headers: { Authorization: 'Bearer private-token' },
+        method: 'POST',
+        query_string: 'token=private-token',
+        url: 'https://example.test/v1/worklogs?token=private-token',
+      },
+      type: undefined,
+      user: {
+        email: 'private@example.test',
+        id: 'opaque-user-id',
+        role: 'member',
+        username: 'private-username',
+      },
     });
   });
 
-  test('removes sensitive data from JavaScript transaction events', () => {
+  test('retains safe transaction context and redacts sensitive values', () => {
     // Given
     initializeSentry();
     const options = getSentryOptions();
     const transactionEvent = {
-      extra: { evidence: 'private evidence' },
-      request: { url: 'https://example.test/?token=private' },
+      extra: { evidence: 'private evidence', operation: 'load-history' },
+      request: {
+        method: 'GET',
+        url: 'https://example.test/v1/worklogs?token=private-token',
+      },
       type: 'transaction' as const,
-      user: { id: 'private-user-id' },
+      user: { id: 'opaque-user-id', ip_address: '192.0.2.1' },
     };
 
     // When
     const sentEvent = options.beforeSendTransaction?.(transactionEvent, {});
 
     // Then
-    expect(sentEvent).toEqual({ type: 'transaction' });
-    expect(transactionEvent).toEqual({
-      extra: { evidence: 'private evidence' },
-      request: { url: 'https://example.test/?token=private' },
+    expect(sentEvent).toEqual({
+      extra: { evidence: '[Filtered]', operation: 'load-history' },
+      request: {
+        method: 'GET',
+        url: 'https://example.test/v1/worklogs',
+      },
       type: 'transaction',
-      user: { id: 'private-user-id' },
+      user: { id: 'opaque-user-id' },
+    });
+    expect(transactionEvent).toEqual({
+      extra: { evidence: 'private evidence', operation: 'load-history' },
+      request: {
+        method: 'GET',
+        url: 'https://example.test/v1/worklogs?token=private-token',
+      },
+      type: 'transaction',
+      user: { id: 'opaque-user-id', ip_address: '192.0.2.1' },
     });
   });
 
-  test('drops console and HTTP breadcrumbs', () => {
+  test('retains rich breadcrumbs after scrubbing sensitive values', () => {
     // Given
     initializeSentry();
     const options = getSentryOptions();
@@ -89,15 +150,39 @@ describe('Sentry privacy configuration', () => {
     // When
     const consoleBreadcrumb = options.beforeBreadcrumb?.({
       category: 'console',
+      data: {
+        arguments: [{ email: 'private@example.test', status: 'sync-started' }],
+      },
+      message: 'sync started for email=private@example.test',
     });
-    const requestBreadcrumb = options.beforeBreadcrumb?.({ category: 'xhr' });
+    const requestBreadcrumb = options.beforeBreadcrumb?.({
+      category: 'xhr',
+      data: {
+        authorization: 'Bearer private-token',
+        method: 'POST',
+        url: 'https://api.example.test/v1/worklogs?token=private-token',
+      },
+    });
     const touchBreadcrumb = options.beforeBreadcrumb?.({
       category: 'ui.click',
     });
 
     // Then
-    expect(consoleBreadcrumb).toBeNull();
-    expect(requestBreadcrumb).toBeNull();
+    expect(consoleBreadcrumb).toEqual({
+      category: 'console',
+      data: {
+        arguments: [{ email: '[Filtered]', status: 'sync-started' }],
+      },
+      message: 'sync started for email=[Filtered]',
+    });
+    expect(requestBreadcrumb).toEqual({
+      category: 'xhr',
+      data: {
+        authorization: '[Filtered]',
+        method: 'POST',
+        url: 'https://api.example.test/v1/worklogs',
+      },
+    });
     expect(touchBreadcrumb).toEqual({ category: 'ui.click' });
   });
 
@@ -114,9 +199,9 @@ describe('Sentry privacy configuration', () => {
     expect(options.tracePropagationTargets).toEqual([]);
     expect(breadcrumbsIntegration).toEqual([
       {
-        console: false,
+        console: true,
         fetch: false,
-        xhr: false,
+        xhr: true,
       },
     ]);
   });
