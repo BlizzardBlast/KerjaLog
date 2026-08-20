@@ -11,6 +11,7 @@ const draft: WorkEntryDraft = {
   outcomeType: null,
   evidenceTypes: [],
   evidenceDetail: '',
+  skills: [],
   impactStatement: '',
   impactStatementSource: null,
 };
@@ -91,6 +92,7 @@ describe('usePersistedLogDraft', () => {
       outcomeType: null,
       evidenceTypes: [],
       evidenceDetail: '',
+      skills: [],
       impactStatement: '',
       impactStatementSource: null,
     };
