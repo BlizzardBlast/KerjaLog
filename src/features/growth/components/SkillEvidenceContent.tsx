@@ -145,9 +145,7 @@ export function SkillEvidenceContent({
         ]}
       >
         <Text variant="bodyStrong">{t('growth.detail.coverageTitle')}</Text>
-        <Text color="textMuted">
-          {t('growth.detail.coverageDescription')}
-        </Text>
+        <Text color="textMuted">{t('growth.detail.coverageDescription')}</Text>
       </View>
     </View>
   );
