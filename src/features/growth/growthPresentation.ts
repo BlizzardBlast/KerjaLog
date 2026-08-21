@@ -1,9 +1,8 @@
-import type { SymbolView } from 'expo-symbols';
-import type { ComponentProps } from 'react';
+import type { AppIconName } from '@/design-system/icons/AppIcon';
 import type { SkillId } from '@/domain/skill/model';
 import type { TranslationKey } from '@/i18n/catalog';
 
-export type GrowthSkillIcon = ComponentProps<typeof SymbolView>['name'];
+export type GrowthSkillIcon = AppIconName;
 
 const SKILL_DESCRIPTION_KEYS: Record<SkillId, TranslationKey> = {
   communication: 'growth.skill.communication.description',
@@ -19,36 +18,19 @@ const SKILL_DESCRIPTION_KEYS: Record<SkillId, TranslationKey> = {
 };
 
 const SKILL_ICONS: Record<SkillId, GrowthSkillIcon> = {
-  communication: { ios: 'message.fill', android: 'chat', web: 'chat' },
-  collaboration: { ios: 'person.2.fill', android: 'group', web: 'group' },
-  problem_solving: {
-    ios: 'lightbulb.fill',
-    android: 'lightbulb',
-    web: 'lightbulb',
-  },
-  execution: {
-    ios: 'checkmark.circle.fill',
-    android: 'check_circle',
-    web: 'check_circle',
-  },
+  communication: { ios: 'message.fill', android: 'chat' },
+  collaboration: { ios: 'person.2.fill', android: 'group' },
+  problem_solving: { ios: 'lightbulb.fill', android: 'lightbulb' },
+  execution: { ios: 'checkmark.circle.fill', android: 'check_circle' },
   attention_to_detail: {
     ios: 'checkmark.seal.fill',
     android: 'fact_check',
-    web: 'fact_check',
   },
-  customer_orientation: {
-    ios: 'heart.fill',
-    android: 'favorite',
-    web: 'favorite',
-  },
-  ownership: { ios: 'flag.fill', android: 'flag', web: 'flag' },
-  adaptability: {
-    ios: 'arrow.triangle.2.circlepath',
-    android: 'sync',
-    web: 'sync',
-  },
-  leadership: { ios: 'person.3.fill', android: 'groups', web: 'groups' },
-  role_expertise: { ios: 'hammer.fill', android: 'build', web: 'build' },
+  customer_orientation: { ios: 'heart.fill', android: 'favorite' },
+  ownership: { ios: 'flag.fill', android: 'flag' },
+  adaptability: { ios: 'arrow.triangle.2.circlepath', android: 'sync' },
+  leadership: { ios: 'person.3.fill', android: 'groups' },
+  role_expertise: { ios: 'hammer.fill', android: 'build' },
 };
 
 const evidenceDateFormatters = new Map<string, Intl.DateTimeFormat>();
