@@ -9,12 +9,23 @@ const SENSITIVE_BREADCRUMB_TEXT_PATTERNS = [
   /((?:account[-_]?number|address|api[-_]?key|authorization|birth(?:date)?|card[-_]?number|cif|content|cookie|cvv|description|email|evidence|feedback|ip[-_]?address|name|note|otp|passcode|password|phone|pin|raw[-_]?note|secret|session[-_]?id|text|token|user[-_]?id|username|work[-_]?entry)\s*(?:=|:)\s*)(?:Bearer\s+)?[^,\s;]+/gi,
   /((?:"|')?(?:account[-_]?number|address|api[-_]?key|authorization|birth(?:date)?|card[-_]?number|cif|content|cookie|cvv|description|email|evidence|feedback|ip[-_]?address|name|note|otp|passcode|password|phone|pin|raw[-_]?note|secret|session[-_]?id|text|token|user[-_]?id|username|work[-_]?entry)(?:"|')?\s*:\s*["'])[^"']*/gi,
 ] as const;
+const SENSITIVE_EXCEPTION_TEXT_PATTERNS = [
+  /(\bwork[-_ ]?entry(?:\s+id)?\s+)[a-z0-9][a-z0-9_-]{7,}\b/gi,
+] as const;
 
 function redactText(value: string): string {
   return SENSITIVE_BREADCRUMB_TEXT_PATTERNS.reduce(
     (redactedValue, pattern) =>
       redactedValue.replace(pattern, `$1${FILTERED_VALUE}`),
     value,
+  );
+}
+
+function redactExceptionText(value: string): string {
+  return SENSITIVE_EXCEPTION_TEXT_PATTERNS.reduce(
+    (redactedValue, pattern) =>
+      redactedValue.replace(pattern, `$1${FILTERED_VALUE}`),
+    redactText(value),
   );
 }
 
@@ -101,6 +112,22 @@ function redactEventUser(user: NonNullable<Sentry.Event['user']>) {
   };
 }
 
+function redactEventException(
+  exception: NonNullable<Sentry.Event['exception']>,
+) {
+  if (!exception.values) {
+    return exception;
+  }
+
+  return {
+    ...exception,
+    values: exception.values.map(({ value, ...exceptionValue }) => ({
+      ...exceptionValue,
+      ...(value ? { value: redactExceptionText(value) } : {}),
+    })),
+  };
+}
+
 function redactEventMetadata(
   extra: Sentry.Event['extra'],
   request: Sentry.Event['request'],
@@ -147,10 +174,11 @@ export function initializeSentry(): void {
     beforeBreadcrumb(breadcrumb) {
       return redactBreadcrumb(breadcrumb);
     },
-    beforeSend({ extra, request, user, ...event }) {
+    beforeSend({ exception, extra, request, user, ...event }) {
       return {
         ...event,
         ...redactEventMetadata(extra, request, user),
+        ...(exception ? { exception: redactEventException(exception) } : {}),
       };
     },
     beforeSendTransaction({ extra, request, user, ...event }) {

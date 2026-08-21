@@ -29,6 +29,11 @@ import {
   type SaveWorkEntryDraft,
 } from '@/features/work-entry/saveWorkEntry';
 import { useSavedEntryCompletion } from '@/features/work-entry/useSavedEntryCompletion';
+import {
+  captureWorkflowFailure,
+  recordWorkflowStart,
+  type WorkflowTelemetry,
+} from '@/platform/observability/workflowTelemetry';
 
 export const LOG_STEPS = WORK_ENTRY_DRAFT_STEPS;
 export type LogStep = (typeof LOG_STEPS)[number];
@@ -297,7 +302,15 @@ export function useLogFlow({
     setSaveError(false);
 
     let entry: WorkEntry;
+    const workflow = {
+      feature: 'work-entry' as const,
+      mode: quickNote ? 'quick' : 'developed',
+      operation: 'save' as const,
+      screen: 'log' as const,
+      step,
+    } satisfies WorkflowTelemetry;
     try {
+      recordWorkflowStart(workflow);
       await prepareForCommit?.(draft);
       entry = await saveEntry({
         intent,
@@ -309,7 +322,8 @@ export function useLogFlow({
         impactStatement: quickNote ? null : impactStatement,
         impactStatementSource: quickNote ? null : impactStatementSource,
       });
-    } catch {
+    } catch (error) {
+      captureWorkflowFailure(error, workflow);
       onCommitFailed?.();
       setSaveError(true);
       return;

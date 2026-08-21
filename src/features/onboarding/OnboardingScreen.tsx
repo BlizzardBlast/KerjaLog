@@ -24,6 +24,10 @@ import {
 import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
+import {
+  captureWorkflowFailure,
+  recordWorkflowStart,
+} from '@/platform/observability/workflowTelemetry';
 
 function ProfiledOnboardingScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());
@@ -94,9 +98,21 @@ function ProfiledOnboardingScreen() {
     setIsFinishing(true);
 
     try {
+      recordWorkflowStart({
+        feature: 'onboarding',
+        operation: 'complete',
+        screen: 'onboarding',
+        step: state.currentStep,
+      });
       await complete();
       router.replace('/home');
-    } catch {
+    } catch (error) {
+      captureWorkflowFailure(error, {
+        feature: 'onboarding',
+        operation: 'complete',
+        screen: 'onboarding',
+        step: state.currentStep,
+      });
       const message = t('onboarding.review.saveError');
       setHasFinishError(true);
       AccessibilityInfo.announceForAccessibility(message);

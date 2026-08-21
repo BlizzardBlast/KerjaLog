@@ -3,6 +3,13 @@ import { AppState, type AppStateStatus } from 'react-native';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { WorkEntryDraftWriter } from '@/domain/entry/repository';
 import { usePersistedLogDraft } from '@/features/work-entry/usePersistedLogDraft';
+import { captureWorkflowFailure } from '@/platform/observability/workflowTelemetry';
+
+jest.mock('@/platform/observability/workflowTelemetry', () => ({
+  captureWorkflowFailure: jest.fn(),
+}));
+
+const captureWorkflowFailureMock = jest.mocked(captureWorkflowFailure);
 
 const draft: WorkEntryDraft = {
   step: 'event',
@@ -26,6 +33,7 @@ function createRepository(): jest.Mocked<WorkEntryDraftWriter> {
 describe('usePersistedLogDraft', () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -175,17 +183,27 @@ describe('usePersistedLogDraft', () => {
   });
 
   test('surfaces encrypted draft persistence failures', async () => {
+    // Given
     const repository = createRepository();
-    repository.saveActive.mockRejectedValueOnce(new Error('disk unavailable'));
+    const error = new Error('disk unavailable');
+    repository.saveActive.mockRejectedValueOnce(error);
     const { result } = await renderHook(() =>
       usePersistedLogDraft({ draft, enabled: true, repository }),
     );
 
+    // When
     await act(async () => {
       jest.advanceTimersByTime(350);
       await Promise.resolve();
     });
 
+    // Then
     expect(result.current).toBe(true);
+    expect(captureWorkflowFailureMock).toHaveBeenCalledWith(error, {
+      feature: 'work-entry',
+      operation: 'persist-draft',
+      screen: 'log',
+      step: 'event',
+    });
   });
 });

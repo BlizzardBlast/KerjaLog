@@ -6,6 +6,7 @@ import {
   type WorkEntryDraft,
 } from '@/domain/entry/draft';
 import type { WorkEntryDraftWriter } from '@/domain/entry/repository';
+import { captureWorkflowFailure } from '@/platform/observability/workflowTelemetry';
 
 const DRAFT_SAVE_DEBOUNCE_MS = 350;
 
@@ -42,7 +43,13 @@ export function usePersistedLogDraft({
         }
 
         setHasPersistenceError(false);
-      } catch {
+      } catch (error) {
+        captureWorkflowFailure(error, {
+          feature: 'work-entry',
+          operation: 'persist-draft',
+          screen: 'log',
+          step: draftToPersist.step,
+        });
         setHasPersistenceError(true);
       }
     },

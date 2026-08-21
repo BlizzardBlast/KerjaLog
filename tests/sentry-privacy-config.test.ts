@@ -118,6 +118,42 @@ describe('Sentry privacy configuration', () => {
     });
   });
 
+  test('redacts work-entry identifiers from JavaScript exception values', () => {
+    // Given
+    initializeSentry();
+    const options = getSentryOptions();
+    const errorEvent = {
+      exception: {
+        values: [
+          {
+            type: 'Error',
+            value: 'Stored evidence for work entry entry-12345 is incomplete.',
+          },
+        ],
+      },
+      type: undefined,
+    };
+
+    // When
+    const sentEvent = options.beforeSend?.(errorEvent, {});
+
+    // Then
+    expect(sentEvent).toEqual({
+      exception: {
+        values: [
+          {
+            type: 'Error',
+            value: 'Stored evidence for work entry [Filtered] is incomplete.',
+          },
+        ],
+      },
+      type: undefined,
+    });
+    expect(errorEvent.exception.values[0]?.value).toBe(
+      'Stored evidence for work entry entry-12345 is incomplete.',
+    );
+  });
+
   test('retains safe transaction context and redacts sensitive values', () => {
     // Given
     initializeSentry();

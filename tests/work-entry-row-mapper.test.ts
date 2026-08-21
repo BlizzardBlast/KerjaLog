@@ -43,7 +43,7 @@ describe('mapJoinedWorkEntryRows', () => {
           evidence_text_value: null,
         },
       ]),
-    ).toThrow('Stored evidence for work entry entry-1 is incomplete.');
+    ).toThrow('Stored evidence is incomplete.');
   });
 
   test('rejects blank persisted evidence detail', () => {

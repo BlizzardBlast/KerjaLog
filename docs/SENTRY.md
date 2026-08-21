@@ -12,6 +12,9 @@ The runtime configuration is intentionally conservative because KerjaLog stores 
 - replay text, images, and vectors remain masked;
 - JavaScript console and XHR breadcrumbs are retained for debugging; sensitive keys and matching message values are filtered, and URL query strings/fragments are removed;
 - JavaScript error and transaction events retain safe contexts, opaque user IDs, request methods, and request paths; headers, cookies, bodies, query strings, and sensitive fields are removed;
+- unexpected onboarding and work-entry persistence failures include only fixed-value `feature`, `operation`, and `failure.kind` tags plus a `workflow` context (`screen`, `step`, `mode`, and failure state); expected form validation is not reported;
+- workflow breadcrumbs record only fixed state transitions; no work-entry text, IDs, or user values are included;
+- JavaScript exception values scrub work-entry identifiers, and persistence errors use stable messages so a private local ID cannot fragment issue grouping;
 - deep-link breadcrumbs retain the route needed for debugging, while `sendDefaultPii: false` removes query strings and ID-like path segments;
 - trace-propagation headers are disabled until a first-party backend origin is explicitly allowlisted;
 - screenshots, view hierarchy attachments, request/response bodies, and request headers are not enabled.

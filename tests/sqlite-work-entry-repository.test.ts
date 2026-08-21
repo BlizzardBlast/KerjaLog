@@ -418,7 +418,7 @@ describe('SQLiteWorkEntryRepository', () => {
     const repository = new SQLiteWorkEntryRepository();
 
     await expect(repository.findById('entry-1')).rejects.toThrow(
-      'Stored evidence for work entry entry-1 is inconsistent.',
+      'Stored evidence is inconsistent.',
     );
   });
 });

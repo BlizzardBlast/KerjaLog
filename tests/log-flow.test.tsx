@@ -3,6 +3,18 @@ import type { WorkEntryDraft } from '@/domain/entry/draft';
 import type { ImpactBuilderCopy } from '@/domain/entry/impact';
 import type { WorkEntry } from '@/domain/entry/model';
 import { useLogFlow } from '@/features/work-entry/useLogFlow';
+import {
+  captureWorkflowFailure,
+  recordWorkflowStart,
+} from '@/platform/observability/workflowTelemetry';
+
+jest.mock('@/platform/observability/workflowTelemetry', () => ({
+  captureWorkflowFailure: jest.fn(),
+  recordWorkflowStart: jest.fn(),
+}));
+
+const captureWorkflowFailureMock = jest.mocked(captureWorkflowFailure);
+const recordWorkflowStartMock = jest.mocked(recordWorkflowStart);
 
 const impactCopy: ImpactBuilderCopy = {
   intentLead: {
@@ -44,6 +56,10 @@ const savedEntry: WorkEntry = {
 };
 
 describe('useLogFlow', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('reports an unsaved draft as soon as the user starts the flow', async () => {
     const { result } = await renderHook(() =>
       useLogFlow({
@@ -253,6 +269,47 @@ describe('useLogFlow', () => {
     expect(result.current.saveError).toBe(false);
     expect(result.current.completionError).toBe(false);
     expect(result.current.saving).toBe(false);
+  });
+
+  test('reports failed quick-save persistence without entry data', async () => {
+    // Given
+    const error = new Error('database unavailable');
+    const saveEntry = jest.fn().mockRejectedValue(error);
+    const { result } = await renderHook(() =>
+      useLogFlow({
+        impactCopy,
+        onExit: jest.fn(),
+        onSaved: jest.fn(),
+        saveEntry,
+      }),
+    );
+
+    await act(async () => {
+      result.current.selectIntent('completed');
+      result.current.updateRawNote('Prepared the weekly report');
+    });
+
+    // When
+    await act(async () => {
+      await result.current.saveQuick();
+    });
+
+    // Then
+    expect(recordWorkflowStartMock).toHaveBeenCalledWith({
+      feature: 'work-entry',
+      mode: 'quick',
+      operation: 'save',
+      screen: 'log',
+      step: 'type',
+    });
+    expect(captureWorkflowFailureMock).toHaveBeenCalledWith(error, {
+      feature: 'work-entry',
+      mode: 'quick',
+      operation: 'save',
+      screen: 'log',
+      step: 'type',
+    });
+    expect(result.current.saveError).toBe(true);
   });
 
   test('preserves user-authored impact wording when supporting facts change', async () => {
