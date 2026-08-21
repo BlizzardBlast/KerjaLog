@@ -80,16 +80,9 @@ describe('HistoryEntryCard', () => {
     const privateLabel = screen.getByText('history.status.private');
     expect(privateLabel).toBeTruthy();
     expect(privateLabel.props.numberOfLines).toBeUndefined();
-    expect(
-      mockSymbolView.mock.calls.some(([props]) => {
-        const { name } = props as { name?: unknown };
-
-        return (
-          JSON.stringify(name) ===
-          JSON.stringify({ ios: 'lock.fill', android: 'lock', web: 'lock' })
-        );
-      }),
-    ).toBe(true);
+    expect(mockSymbolView).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'lock.fill', size: 13 }),
+    );
 
     await fireEvent.press(screen.getByRole('button'));
 
