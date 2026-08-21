@@ -50,6 +50,7 @@ export function LanguageSelector() {
         <LanguageSelectorTrigger
           option={selectedOption}
           accessibilityLabel={t('common.language.change')}
+          accessibilityValue={t(selectedOption.labelKey)}
           expanded={anchor !== null}
           onPress={toggle}
         />
