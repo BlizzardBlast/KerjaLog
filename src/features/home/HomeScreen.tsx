@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import {
@@ -19,8 +20,8 @@ import { ThisWeekCard } from '@/features/home/components/ThisWeekCard';
 import { useHomeWorkEntries } from '@/features/home/useHomeWorkEntries';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 
-export function HomeScreen() {
-  const router = useRouter();
+function ProfiledHomeScreen() {
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { state } = useOnboarding();
   const workEntries = useHomeWorkEntries();
@@ -84,6 +85,10 @@ export function HomeScreen() {
     </SafeAreaView>
   );
 }
+
+const HomeScreen = Sentry.withProfiler(ProfiledHomeScreen);
+
+export { HomeScreen };
 
 const styles = StyleSheet.create({
   screen: {

@@ -119,7 +119,11 @@
         {
           "url": "https://sentry.io/",
           "project": "react-native",
-          "organization": "blizzard-dw"
+          "organization": "blizzard-dw",
+          "experimental_android": {
+            "enableAndroidGradlePlugin": true,
+            "includeSourceContext": true
+          }
         }
       ]
     ],

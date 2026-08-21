@@ -46,4 +46,6 @@ function RootLayout() {
   );
 }
 
-export default Sentry.wrap(RootLayout);
+const ProfiledRootLayout = Sentry.withProfiler(RootLayout);
+
+export default Sentry.wrap(ProfiledRootLayout);

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import type { WorkEntryDetail } from '@/domain/entry/model';
 import { skillDefinitionById } from '@/domain/skill/catalog';
@@ -18,7 +19,7 @@ type EntryRefinementEditorProps = {
 };
 
 export function EntryRefinementEditor({ entry }: EntryRefinementEditorProps) {
-  const router = useRouter();
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { t } = useI18n();
   const refinement = useEntryRefinement({
     entry,

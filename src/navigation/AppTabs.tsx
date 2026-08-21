@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { Tabs, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
@@ -8,7 +9,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { tabs } from '@/navigation/tabs';
 
 export function AppTabs() {
-  const router = useRouter();
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();

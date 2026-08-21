@@ -4,6 +4,7 @@ import { initializeSentry } from '@/platform/observability/sentry';
 
 jest.mock('@sentry/react-native', () => ({
   breadcrumbsIntegration: jest.fn((options) => ({ options })),
+  deeplinkIntegration: jest.fn((options) => ({ options })),
   expoRouterIntegration: jest.fn((options) => ({ options })),
   init: jest.fn(),
   mobileReplayIntegration: jest.fn((options) => ({ options })),
@@ -15,7 +16,9 @@ jest.mock('expo', () => ({
 
 const initMock = jest.mocked(Sentry.init);
 const breadcrumbsIntegrationMock = jest.mocked(Sentry.breadcrumbsIntegration);
+const deeplinkIntegrationMock = jest.mocked(Sentry.deeplinkIntegration);
 const isRunningInExpoGoMock = jest.mocked(isRunningInExpoGo);
+const initialDevMode = __DEV__;
 
 function getSentryOptions() {
   const [options] = initMock.mock.calls.at(-1) ?? [];
@@ -30,7 +33,18 @@ function getSentryOptions() {
 describe('Sentry privacy configuration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(globalThis, '__DEV__', {
+      configurable: true,
+      value: initialDevMode,
+    });
     isRunningInExpoGoMock.mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    Object.defineProperty(globalThis, '__DEV__', {
+      configurable: true,
+      value: initialDevMode,
+    });
   });
 
   test('retains safe error context and redacts sensitive values', () => {
@@ -216,8 +230,39 @@ describe('Sentry privacy configuration', () => {
 
     // Then
     expect(options.enableNativeFramesTracking).toBe(false);
+    expect(options.profilesSampleRate).toBeUndefined();
     expect(Sentry.expoRouterIntegration).toHaveBeenCalledWith({
       enableTimeToInitialDisplay: false,
     });
+  });
+
+  test('enables native profiling, deep-link tracing, and interaction tracing', () => {
+    // Given
+    initializeSentry();
+    const options = getSentryOptions();
+
+    // Then
+    expect(options.profilesSampleRate).toBe(1);
+    expect(options.enableUserInteractionTracing).toBe(true);
+    expect(options._experiments).toEqual({
+      enableStandaloneAppStartTracing: true,
+    });
+    expect(deeplinkIntegrationMock).toHaveBeenCalledWith();
+  });
+
+  test('samples native production profiles relative to sampled traces', () => {
+    // Given
+    Object.defineProperty(globalThis, '__DEV__', {
+      configurable: true,
+      value: false,
+    });
+
+    // When
+    initializeSentry();
+    const options = getSentryOptions();
+
+    // Then
+    expect(options.tracesSampleRate).toBe(0.2);
+    expect(options.profilesSampleRate).toBe(0.1);
   });
 });

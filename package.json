@@ -76,7 +76,9 @@
     "native:check": "expo prebuild --clean --no-install && cd android && ./gradlew :app:compileDebugKotlin --no-daemon && cd .. && node scripts/verify-native-config.js",
     "export:android": "expo export --platform android --output-dir dist/android",
     "export:ios": "expo export --platform ios --output-dir dist/ios",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm run schema:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm run schema:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios",
+    "eas-build-on-error": "sentry-eas-build-on-error",
+    "eas-build-on-success": "node scripts/upload-sentry-size-analysis.cjs && sentry-eas-build-on-success"
   },
   "jest": {
     "preset": "jest-expo",

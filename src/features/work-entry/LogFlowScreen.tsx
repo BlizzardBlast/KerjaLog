@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { useRef } from 'react';
 import { Alert } from 'react-native';
@@ -24,7 +25,7 @@ type LogFlowScreenProps = {
 };
 
 export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
-  const router = useRouter();
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { t } = useI18n();
   const draftPersistenceSuspendedRef = useRef(false);
   const impactCopy = createImpactBuilderCopy(t);

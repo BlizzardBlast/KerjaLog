@@ -135,12 +135,15 @@ export function initializeSentry(): void {
     dsn: 'https://14ee0c9c15f1270cd72c729104c5df0c@o4511942233227264.ingest.us.sentry.io/4511942238666752',
     sendDefaultPii: false,
     tracesSampleRate: __DEV__ ? 1 : 0.2,
+    ...(runningInExpoGo ? {} : { profilesSampleRate: __DEV__ ? 1 : 0.1 }),
     tracePropagationTargets: [],
     enableNativeFramesTracking: !runningInExpoGo,
     enableLogs: true,
     enableAutoConsoleLogs: false,
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 1,
+    replaysSessionQuality: 'low',
+    enableUserInteractionTracing: true,
     beforeBreadcrumb(breadcrumb) {
       return redactBreadcrumb(breadcrumb);
     },
@@ -162,6 +165,7 @@ export function initializeSentry(): void {
         fetch: false,
         xhr: true,
       }),
+      Sentry.deeplinkIntegration(),
       Sentry.expoRouterIntegration({
         enableTimeToInitialDisplay: !runningInExpoGo,
       }),
@@ -171,5 +175,8 @@ export function initializeSentry(): void {
         maskAllVectors: true,
       }),
     ],
+    _experiments: {
+      enableStandaloneAppStartTracing: true,
+    },
   });
 }

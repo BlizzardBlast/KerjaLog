@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -24,8 +25,8 @@ import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 
-export function OnboardingScreen() {
-  const router = useRouter();
+function ProfiledOnboardingScreen() {
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
@@ -166,6 +167,10 @@ export function OnboardingScreen() {
     </SafeAreaView>
   );
 }
+
+const OnboardingScreen = Sentry.withProfiler(ProfiledOnboardingScreen);
+
+export { OnboardingScreen };
 
 const styles = StyleSheet.create({
   screen: {
