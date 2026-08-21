@@ -13,6 +13,10 @@ export const SKILL_IDS = [
 
 export type SkillId = (typeof SKILL_IDS)[number];
 
+export function isSkillId(value: unknown): value is SkillId {
+  return typeof value === 'string' && SKILL_IDS.some((id) => id === value);
+}
+
 export const ENTRY_SKILL_SOURCES = ['rules', 'user'] as const;
 
 export type EntrySkillSource = (typeof ENTRY_SKILL_SOURCES)[number];
