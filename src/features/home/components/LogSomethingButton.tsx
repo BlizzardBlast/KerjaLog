@@ -1,5 +1,5 @@
-import { SymbolView } from 'expo-symbols';
 import { Button } from '@/design-system/components/Button';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -15,10 +15,10 @@ export function LogSomethingButton({ onPress }: LogSomethingButtonProps) {
     <Button
       fullWidth
       leadingIcon={
-        <SymbolView
-          name={{ ios: 'plus', android: 'add', web: 'add' }}
+        <AppIcon
+          name={{ ios: 'plus', android: 'add' }}
           size={20}
-          tintColor={theme.colors.onPrimary}
+          color={theme.colors.onPrimary}
         />
       }
       onPress={onPress}
