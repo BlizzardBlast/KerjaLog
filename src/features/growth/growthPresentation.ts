@@ -59,10 +59,10 @@ export function getGrowthSkillIcon(skillId: SkillId): GrowthSkillIcon {
   return SKILL_ICONS[skillId];
 }
 
-export function formatEvidenceDate(timestamp: string, locale: string): string {
+export function createEvidenceDateFormatter(locale: string): Intl.DateTimeFormat {
   return new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(new Date(timestamp));
+  });
 }
