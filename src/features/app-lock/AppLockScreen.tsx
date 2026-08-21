@@ -1,9 +1,9 @@
-import { SymbolView } from 'expo-symbols';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useAppLock } from '@/features/app-lock/AppLockProvider';
@@ -37,10 +37,10 @@ export function AppLockScreen() {
         <DecorativeView
           style={[styles.icon, { backgroundColor: theme.colors.primarySoft }]}
         >
-          <SymbolView
-            name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }}
+          <AppIcon
+            name={{ ios: 'lock.fill', android: 'lock' }}
             size={32}
-            tintColor={theme.colors.primary}
+            color={theme.colors.primary}
           />
         </DecorativeView>
 
