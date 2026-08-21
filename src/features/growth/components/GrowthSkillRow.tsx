@@ -1,5 +1,6 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
@@ -36,8 +37,7 @@ export function GrowthSkillRow({
         pressed && !disabled && { backgroundColor: theme.colors.primarySoft },
       ]}
     >
-      <View
-        accessible={false}
+      <DecorativeView
         style={[
           styles.icon,
           {
@@ -52,7 +52,7 @@ export function GrowthSkillRow({
           size={20}
           tintColor={disabled ? theme.colors.textMuted : theme.colors.primary}
         />
-      </View>
+      </DecorativeView>
       <View style={styles.copy}>
         <Text variant="bodyStrong">{name}</Text>
         <Text variant="caption" color="textMuted">
