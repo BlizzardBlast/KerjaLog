@@ -112,7 +112,12 @@ export function GrowthEvidenceMapContent({
           ) : null}
         </View>
         <Text variant="heading">
-          {t('growth.summary.skillAreas', { count: skillAreaCount })}
+          {t(
+            skillAreaCount === 1
+              ? 'growth.summary.skillAreaOne'
+              : 'growth.summary.skillAreaMany',
+            { count: skillAreaCount },
+          )}
         </Text>
         <Text color="textMuted">{t('growth.summary.hint')}</Text>
       </View>
