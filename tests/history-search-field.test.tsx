@@ -20,7 +20,7 @@ describe('HistorySearchField', () => {
     jest.clearAllMocks();
   });
 
-  test('uses search semantics, accessible control borders, and cross-platform symbols', async () => {
+  test('uses search semantics, accessible control borders, and app icons', async () => {
     const onChangeText = jest.fn();
 
     await render(
@@ -49,16 +49,8 @@ describe('HistorySearchField', () => {
       return name;
     });
 
-    expect(symbolNames).toContainEqual({
-      ios: 'magnifyingglass',
-      android: 'search',
-      web: 'search',
-    });
-    expect(symbolNames).toContainEqual({
-      ios: 'xmark.circle.fill',
-      android: 'cancel',
-      web: 'cancel',
-    });
+    expect(symbolNames).toContain('magnifyingglass');
+    expect(symbolNames).toContain('xmark.circle.fill');
 
     await fireEvent.press(
       screen.getByRole('button', { name: 'history.search.clear' }),
