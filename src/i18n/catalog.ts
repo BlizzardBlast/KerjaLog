@@ -8,10 +8,7 @@ import { historyEn, historyId } from '@/i18n/historyTranslations';
 import { homeEn, homeId } from '@/i18n/homeTranslations';
 import { logDraftEn, logDraftId } from '@/i18n/logDraftTranslations';
 import { logEn, logId } from '@/i18n/logTranslations';
-import {
-  preferenceEn,
-  preferenceId,
-} from '@/i18n/preferenceTranslations';
+import { preferenceEn, preferenceId } from '@/i18n/preferenceTranslations';
 import { reminderEn, reminderId } from '@/i18n/reminderTranslations';
 import { skillEn, skillId } from '@/i18n/skillTranslations';
 import { en as baseEn, id as baseId } from '@/i18n/translations';
