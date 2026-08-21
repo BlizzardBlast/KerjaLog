@@ -23,7 +23,6 @@ const evidenceMap: GrowthEvidenceMap = {
     {
       skillId: 'attention_to_detail',
       entryCount: 2,
-      latestOccurredAt: '2026-08-20T08:00:00.000Z',
     },
   ],
 };
