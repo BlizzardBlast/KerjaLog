@@ -25,8 +25,8 @@ jest.mock('@/design-system/components/ThemeToggleButton', () => {
 });
 
 describe('HomeHeader', () => {
-  test('keeps language and theme preferences available after onboarding', () => {
-    render(
+  test('keeps language and theme preferences available after onboarding', async () => {
+    await render(
       <ThemeProvider>
         <HomeHeader />
       </ThemeProvider>,
