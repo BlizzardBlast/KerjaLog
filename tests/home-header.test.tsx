@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
+import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
 
 jest.mock('@/i18n/I18nProvider', () => ({
@@ -25,7 +26,11 @@ jest.mock('@/design-system/components/ThemeToggleButton', () => {
 
 describe('HomeHeader', () => {
   test('keeps language and theme preferences available after onboarding', () => {
-    render(<HomeHeader />);
+    render(
+      <ThemeProvider>
+        <HomeHeader />
+      </ThemeProvider>,
+    );
 
     expect(screen.getByText('home.eyebrow')).toBeTruthy();
     expect(screen.getByRole('header', { name: 'home.title' })).toBeTruthy();
