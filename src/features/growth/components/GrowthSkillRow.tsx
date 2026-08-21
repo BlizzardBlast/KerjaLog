@@ -1,7 +1,7 @@
-import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import type { GrowthSkillIcon } from '@/features/growth/growthPresentation';
@@ -47,10 +47,10 @@ export function GrowthSkillRow({
           },
         ]}
       >
-        <SymbolView
+        <AppIcon
           name={icon}
           size={20}
-          tintColor={disabled ? theme.colors.textMuted : theme.colors.primary}
+          color={disabled ? theme.colors.textMuted : theme.colors.primary}
         />
       </DecorativeView>
       <View style={styles.copy}>
