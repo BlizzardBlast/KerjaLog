@@ -1,6 +1,12 @@
 import regular from 'expo-symbols/androidWeights/regular';
 import { type AndroidSymbol, type SFSymbol, SymbolView } from 'expo-symbols';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import {
+  type ColorValue,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 export type AppIconName = {
   ios: SFSymbol;
@@ -11,7 +17,7 @@ export type AppIconName = {
 export type AppIconProps = {
   name: AppIconName;
   size?: number;
-  color: string;
+  color: ColorValue;
 };
 
 /**
