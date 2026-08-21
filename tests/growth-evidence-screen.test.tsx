@@ -4,6 +4,10 @@ import type { GrowthEvidenceMap } from '@/domain/growth/model';
 import { GrowthEvidenceMapContent } from '@/features/growth/components/GrowthEvidenceMapContent';
 import { SkillEvidenceContent } from '@/features/growth/components/SkillEvidenceContent';
 
+jest.mock('expo-symbols', () => ({
+  SymbolView: () => null,
+}));
+
 jest.mock('@/i18n/I18nProvider', () => ({
   useI18n: () => ({
     language: 'en',
@@ -56,8 +60,8 @@ describe('Growth evidence presentation', () => {
     expect(leadership.props.accessibilityState).toEqual({ disabled: true });
     expect(screen.getByText('growth.guidance.title')).toBeTruthy();
 
-    await fireEvent.press(attention);
-    await fireEvent.press(leadership);
+    fireEvent.press(attention);
+    fireEvent.press(leadership);
 
     expect(openSkill).toHaveBeenCalledTimes(1);
     expect(openSkill).toHaveBeenCalledWith('attention_to_detail');
@@ -79,7 +83,7 @@ describe('Growth evidence presentation', () => {
     ).toBeTruthy();
   });
 
-  test('opens the saved entry behind a skill evidence thread item', async () => {
+  test('opens the saved entry behind a virtualized skill evidence item', async () => {
     const openEntry = jest.fn();
 
     await render(
@@ -107,7 +111,7 @@ describe('Growth evidence presentation', () => {
     );
 
     expect(screen.getByText('growth.detail.coverageTitle')).toBeTruthy();
-    await fireEvent.press(
+    fireEvent.press(
       screen.getByRole('button', {
         name: /Resolved reconciliation discrepancies/,
       }),
