@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
 
 jest.mock('@/i18n/I18nProvider', () => ({
@@ -8,13 +7,21 @@ jest.mock('@/i18n/I18nProvider', () => ({
   }),
 }));
 
-jest.mock('@/i18n/components/LanguageSelector', () => ({
-  LanguageSelector: () => <Text>language-selector</Text>,
-}));
+jest.mock('@/i18n/components/LanguageSelector', () => {
+  const { Text } = require('react-native');
 
-jest.mock('@/design-system/components/ThemeToggleButton', () => ({
-  ThemeToggleButton: () => <Text>theme-toggle</Text>,
-}));
+  return {
+    LanguageSelector: () => <Text>language-selector</Text>,
+  };
+});
+
+jest.mock('@/design-system/components/ThemeToggleButton', () => {
+  const { Text } = require('react-native');
+
+  return {
+    ThemeToggleButton: () => <Text>theme-toggle</Text>,
+  };
+});
 
 describe('HomeHeader', () => {
   test('keeps language and theme preferences available after onboarding', () => {
