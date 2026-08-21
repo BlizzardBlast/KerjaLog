@@ -24,9 +24,7 @@ export function SkillEvidenceThreadItem({
   return (
     <View style={styles.row}>
       <View accessible={false} style={styles.railColumn}>
-        <View
-          style={[styles.dot, { backgroundColor: theme.colors.primary }]}
-        />
+        <View style={[styles.dot, { backgroundColor: theme.colors.primary }]} />
         {!isLast ? (
           <View
             style={[styles.rail, { backgroundColor: theme.colors.border }]}
