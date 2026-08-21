@@ -18,12 +18,10 @@ const evidenceMap: GrowthEvidenceMap = {
     {
       skillId: 'attention_to_detail',
       entryCount: 2,
-      latestOccurredAt: '2026-08-20T08:00:00.000Z',
     },
     {
       skillId: 'leadership',
       entryCount: 0,
-      latestOccurredAt: null,
     },
   ],
 };
@@ -32,7 +30,7 @@ describe('Growth evidence presentation', () => {
   test('keeps supporting skills actionable and zero-evidence skills non-judgmental', async () => {
     const openSkill = jest.fn();
 
-    await render(
+    render(
       <ThemeProvider>
         <GrowthEvidenceMapContent
           state={{
@@ -58,15 +56,15 @@ describe('Growth evidence presentation', () => {
     expect(leadership.props.accessibilityState).toEqual({ disabled: true });
     expect(screen.getByText('growth.guidance.title')).toBeTruthy();
 
-    await fireEvent.press(attention);
-    await fireEvent.press(leadership);
+    fireEvent.press(attention);
+    fireEvent.press(leadership);
 
     expect(openSkill).toHaveBeenCalledTimes(1);
     expect(openSkill).toHaveBeenCalledWith('attention_to_detail');
   });
 
-  test('exposes an accessible loading state', async () => {
-    await render(
+  test('exposes an accessible loading state', () => {
+    render(
       <ThemeProvider>
         <GrowthEvidenceMapContent
           state={{ status: 'loading' }}
@@ -81,10 +79,10 @@ describe('Growth evidence presentation', () => {
     ).toBeTruthy();
   });
 
-  test('opens the saved entry behind a skill evidence thread item', async () => {
+  test('opens the saved entry behind a skill evidence thread item', () => {
     const openEntry = jest.fn();
 
-    await render(
+    render(
       <ThemeProvider>
         <SkillEvidenceContent
           locale="en-US"
@@ -108,7 +106,7 @@ describe('Growth evidence presentation', () => {
     );
 
     expect(screen.getByText('growth.detail.coverageTitle')).toBeTruthy();
-    await fireEvent.press(
+    fireEvent.press(
       screen.getByRole('button', {
         name: /Resolved reconciliation discrepancies/,
       }),
