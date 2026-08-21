@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/react-native';
 import { Tabs, useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -67,14 +67,14 @@ export function AppTabs() {
                     },
                   ]}
                 >
-                  <SymbolView
+                  <AppIcon
                     name={tab.icon}
                     size={26}
-                    tintColor={theme.colors.onPrimary}
+                    color={theme.colors.onPrimary}
                   />
                 </View>
               ) : (
-                <SymbolView name={tab.icon} size={22} tintColor={color} />
+                <AppIcon name={tab.icon} size={22} color={color} />
               ),
           }}
         />
