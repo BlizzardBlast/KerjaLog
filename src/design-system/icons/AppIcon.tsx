@@ -12,6 +12,7 @@ import {
 export type AppIconName = {
   ios: SFSymbol;
   android: AndroidSymbol;
+  web?: AndroidSymbol;
 };
 
 export type AppIconProps = {
@@ -56,7 +57,11 @@ export function AppIcon({ name, size = 24, color }: AppIconProps) {
         </Text>
       ) : (
         <SymbolView
-          name={{ ios: name.ios, android: name.android, web: name.android }}
+          name={{
+            ios: name.ios,
+            android: name.android,
+            web: name.web ?? name.android,
+          }}
           size={size}
           tintColor={color}
         />
