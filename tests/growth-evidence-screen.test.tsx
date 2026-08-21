@@ -30,7 +30,7 @@ describe('Growth evidence presentation', () => {
   test('keeps supporting skills actionable and zero-evidence skills non-judgmental', async () => {
     const openSkill = jest.fn();
 
-    render(
+    await render(
       <ThemeProvider>
         <GrowthEvidenceMapContent
           state={{
@@ -56,15 +56,15 @@ describe('Growth evidence presentation', () => {
     expect(leadership.props.accessibilityState).toEqual({ disabled: true });
     expect(screen.getByText('growth.guidance.title')).toBeTruthy();
 
-    fireEvent.press(attention);
-    fireEvent.press(leadership);
+    await fireEvent.press(attention);
+    await fireEvent.press(leadership);
 
     expect(openSkill).toHaveBeenCalledTimes(1);
     expect(openSkill).toHaveBeenCalledWith('attention_to_detail');
   });
 
-  test('exposes an accessible loading state', () => {
-    render(
+  test('exposes an accessible loading state', async () => {
+    await render(
       <ThemeProvider>
         <GrowthEvidenceMapContent
           state={{ status: 'loading' }}
@@ -79,10 +79,10 @@ describe('Growth evidence presentation', () => {
     ).toBeTruthy();
   });
 
-  test('opens the saved entry behind a skill evidence thread item', () => {
+  test('opens the saved entry behind a skill evidence thread item', async () => {
     const openEntry = jest.fn();
 
-    render(
+    await render(
       <ThemeProvider>
         <SkillEvidenceContent
           locale="en-US"
@@ -107,7 +107,7 @@ describe('Growth evidence presentation', () => {
     );
 
     expect(screen.getByText('growth.detail.coverageTitle')).toBeTruthy();
-    fireEvent.press(
+    await fireEvent.press(
       screen.getByRole('button', {
         name: /Resolved reconciliation discrepancies/,
       }),
