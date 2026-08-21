@@ -1,5 +1,4 @@
-import type { TranslationKey } from '@/i18n/catalog';
-import type { Language } from '@/i18n/I18nProvider';
+import type { Language, TranslationKey } from '@/i18n/catalog';
 
 export type LanguageOption = {
   value: Language;
