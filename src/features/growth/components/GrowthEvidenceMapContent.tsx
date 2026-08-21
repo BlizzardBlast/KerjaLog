@@ -96,9 +96,12 @@ export function GrowthEvidenceMapContent({
       >
         <View style={styles.summaryTopRow}>
           <Text variant="overline" color="primary">
-            {t('growth.summary.entries', {
-              count: state.evidenceMap.totalEntries,
-            })}
+            {t(
+              state.evidenceMap.totalEntries === 1
+                ? 'growth.summary.entryOne'
+                : 'growth.summary.entryMany',
+              { count: state.evidenceMap.totalEntries },
+            )}
           </Text>
           {state.isRefreshing ? (
             <ActivityIndicator
