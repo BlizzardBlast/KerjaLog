@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import type { ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StrictMode } from 'react';
@@ -11,17 +12,23 @@ import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { configureNotificationHandling } from '@/platform/notifications/weeklyReflection';
+import { initializeSentry } from '@/platform/observability/sentry';
 import { RootErrorScreen } from '@/shared/components/RootErrorScreen';
 import { ignoreError } from '@/shared/utils/function';
+
+initializeSentry();
 
 SplashScreen.preventAutoHideAsync().catch(ignoreError);
 configureNotificationHandling().catch(ignoreError);
 
-export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+function RootErrorBoundary({ retry }: ErrorBoundaryProps) {
   return <RootErrorScreen onRetry={retry} />;
 }
 
-export default function RootLayout() {
+export const ErrorBoundary =
+  Sentry.wrapExpoRouterErrorBoundary(RootErrorBoundary);
+
+function RootLayout() {
   return (
     <StrictMode>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
@@ -38,3 +45,7 @@ export default function RootLayout() {
     </StrictMode>
   );
 }
+
+const ProfiledRootLayout = Sentry.withProfiler(RootLayout);
+
+export default Sentry.wrap(ProfiledRootLayout);

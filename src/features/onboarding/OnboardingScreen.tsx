@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -23,9 +24,13 @@ import {
 import { ONBOARDING_STEP_CONFIG } from '@/features/onboarding/stepConfig';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
+import {
+  captureWorkflowFailure,
+  recordWorkflowStart,
+} from '@/platform/observability/workflowTelemetry';
 
-export function OnboardingScreen() {
-  const router = useRouter();
+function ProfiledOnboardingScreen() {
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
@@ -93,9 +98,21 @@ export function OnboardingScreen() {
     setIsFinishing(true);
 
     try {
+      recordWorkflowStart({
+        feature: 'onboarding',
+        operation: 'complete',
+        screen: 'onboarding',
+        step: state.currentStep,
+      });
       await complete();
       router.replace('/home');
-    } catch {
+    } catch (error) {
+      captureWorkflowFailure(error, {
+        feature: 'onboarding',
+        operation: 'complete',
+        screen: 'onboarding',
+        step: state.currentStep,
+      });
       const message = t('onboarding.review.saveError');
       setHasFinishError(true);
       AccessibilityInfo.announceForAccessibility(message);
@@ -166,6 +183,10 @@ export function OnboardingScreen() {
     </SafeAreaView>
   );
 }
+
+const OnboardingScreen = Sentry.withProfiler(ProfiledOnboardingScreen);
+
+export { OnboardingScreen };
 
 const styles = StyleSheet.create({
   screen: {

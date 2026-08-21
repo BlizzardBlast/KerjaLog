@@ -78,7 +78,7 @@ export function mapJoinedWorkEntryRows(
       'evidence text value',
     );
 
-    validateEvidenceRow(id, evidenceType, evidenceTextValue);
+    validateEvidenceRow(evidenceType, evidenceTextValue);
 
     let accumulated = entries.get(id);
 
@@ -117,9 +117,7 @@ export function mapJoinedWorkEntryRows(
         accumulated.evidenceDetail !== null &&
         accumulated.evidenceDetail !== evidenceTextValue
       ) {
-        throw new Error(
-          `Stored evidence for work entry ${id} is inconsistent.`,
-        );
+        throw new Error('Stored evidence is inconsistent.');
       }
 
       accumulated.evidenceDetail = evidenceTextValue;
@@ -136,18 +134,14 @@ function toWorkEntry({
 }: AccumulatedWorkEntry): WorkEntry {
   if (evidenceTypes.length === 0) {
     if (evidenceDetail !== null) {
-      throw new Error(
-        `Stored evidence for work entry ${entry.id} is inconsistent.`,
-      );
+      throw new Error('Stored evidence is inconsistent.');
     }
 
     return entry;
   }
 
   if (evidenceDetail === null) {
-    throw new Error(
-      `Stored evidence for work entry ${entry.id} is incomplete.`,
-    );
+    throw new Error('Stored evidence is incomplete.');
   }
 
   return {
@@ -159,13 +153,9 @@ function toWorkEntry({
   };
 }
 
-function validateEvidenceRow(
-  entryId: string,
-  type: EvidenceType | null,
-  detail: string | null,
-) {
+function validateEvidenceRow(type: EvidenceType | null, detail: string | null) {
   if ((type === null) !== (detail === null)) {
-    throw new Error(`Stored evidence for work entry ${entryId} is incomplete.`);
+    throw new Error('Stored evidence is incomplete.');
   }
 }
 

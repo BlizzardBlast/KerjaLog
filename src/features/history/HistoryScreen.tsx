@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, View } from 'react-native';
@@ -24,8 +25,8 @@ import {
 } from '@/features/history/useHistoryEntries';
 import { useI18n } from '@/i18n/I18nProvider';
 
-export function HistoryScreen() {
-  const router = useRouter();
+function ProfiledHistoryScreen() {
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { language, t } = useI18n();
   const insets = useSafeAreaInsets();
@@ -115,6 +116,10 @@ export function HistoryScreen() {
     </SafeAreaView>
   );
 }
+
+const HistoryScreen = Sentry.withProfiler(ProfiledHistoryScreen);
+
+export { HistoryScreen };
 
 function HistoryMonthHeader({ section }: { section: HistorySection }) {
   return (

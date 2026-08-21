@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,8 +16,8 @@ type EditEntryScreenProps = {
   id: string;
 };
 
-export function EditEntryScreen({ id }: EditEntryScreenProps) {
-  const router = useRouter();
+function ProfiledEditEntryScreen({ id }: EditEntryScreenProps) {
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
   const { state, retry } = useWorkEntry(id);
@@ -109,6 +110,10 @@ export function EditEntryScreen({ id }: EditEntryScreenProps) {
     />
   );
 }
+
+const EditEntryScreen = Sentry.withProfiler(ProfiledEditEntryScreen);
+
+export { EditEntryScreen };
 
 const styles = StyleSheet.create({
   centered: {

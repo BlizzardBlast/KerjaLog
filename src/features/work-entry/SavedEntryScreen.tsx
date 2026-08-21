@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,8 +24,8 @@ const statusLabelKeyByStatus: Record<EntryStatus, TranslationKey> = {
   review_ready: 'log.saved.reviewReady',
 };
 
-export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
-  const router = useRouter();
+function ProfiledSavedEntryScreen({ id }: SavedEntryScreenProps) {
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
   const { state, retry } = useWorkEntry(id);
@@ -212,6 +213,10 @@ export function SavedEntryScreen({ id }: SavedEntryScreenProps) {
     </SafeAreaView>
   );
 }
+
+const SavedEntryScreen = Sentry.withProfiler(ProfiledSavedEntryScreen);
+
+export { SavedEntryScreen };
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },

@@ -6,20 +6,28 @@
   "engines": {
     "node": ">=24 <25"
   },
+  "expo": {
+    "install": {
+      "exclude": [
+        "@sentry/react-native"
+      ]
+    }
+  },
   "dependencies": {
     "@expo-google-fonts/manrope": "0.4.2",
-    "@expo/ui": "~57.0.11",
+    "@expo/ui": "~57.0.12",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@sentry/react-native": "^8.23.0",
     "@tanstack/react-form": "1.33.3",
-    "expo": "~57.0.14",
+    "expo": "~57.0.15",
     "expo-constants": "57.0.12",
     "expo-crypto": "~57.0.1",
-    "expo-dev-client": "~57.0.13",
+    "expo-dev-client": "~57.0.14",
     "expo-font": "~57.0.1",
-    "expo-linking": "~57.0.6",
+    "expo-linking": "~57.0.7",
     "expo-local-authentication": "~57.0.2",
-    "expo-notifications": "~57.0.12",
-    "expo-router": "~57.0.14",
+    "expo-notifications": "~57.0.13",
+    "expo-router": "~57.0.15",
     "expo-screen-capture": "~57.0.2",
     "expo-secure-store": "~57.0.1",
     "expo-splash-screen": "~57.0.7",
@@ -68,7 +76,9 @@
     "native:check": "expo prebuild --clean --no-install && cd android && ./gradlew :app:compileDebugKotlin --no-daemon && cd .. && node scripts/verify-native-config.js",
     "export:android": "expo export --platform android --output-dir dist/android",
     "export:ios": "expo export --platform ios --output-dir dist/ios",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm run schema:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm run compiler:check && pnpm run schema:check && pnpm test:ci && pnpm run expo:doctor && pnpm run native:check && pnpm run export:android && pnpm run export:ios",
+    "eas-build-on-error": "sentry-eas-build-on-error",
+    "eas-build-on-success": "node scripts/upload-sentry-size-analysis.cjs && sentry-eas-build-on-success"
   },
   "jest": {
     "preset": "jest-expo",

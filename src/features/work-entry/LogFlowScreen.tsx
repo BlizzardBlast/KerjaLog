@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { useRef } from 'react';
 import { Alert } from 'react-native';
@@ -18,13 +19,17 @@ import { useLogFlow } from '@/features/work-entry/useLogFlow';
 import { usePersistedLogDraft } from '@/features/work-entry/usePersistedLogDraft';
 import { useWizardNavigationGuard } from '@/features/work-entry/useWizardNavigationGuard';
 import { useI18n } from '@/i18n/I18nProvider';
+import {
+  captureWorkflowFailure,
+  recordWorkflowStart,
+} from '@/platform/observability/workflowTelemetry';
 
 type LogFlowScreenProps = {
   initialDraft: WorkEntryDraft | null;
 };
 
 export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
-  const router = useRouter();
+  const router = Sentry.wrapExpoRouter(useRouter());
   const { t } = useI18n();
   const draftPersistenceSuspendedRef = useRef(false);
   const impactCopy = createImpactBuilderCopy(t);
@@ -65,10 +70,22 @@ export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
       draftPersistenceSuspendedRef.current = true;
 
       try {
+        recordWorkflowStart({
+          feature: 'work-entry',
+          operation: 'discard-draft',
+          screen: 'log',
+          step: flow.step,
+        });
         await workEntryDraftRepository.clearActive();
         return true;
-      } catch {
+      } catch (error) {
         draftPersistenceSuspendedRef.current = false;
+        captureWorkflowFailure(error, {
+          feature: 'work-entry',
+          operation: 'discard-draft',
+          screen: 'log',
+          step: flow.step,
+        });
         Alert.alert(
           t('log.discard.clearErrorTitle'),
           t('log.discard.clearErrorDescription'),
