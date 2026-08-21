@@ -1,28 +1,23 @@
-import { SymbolView } from 'expo-symbols';
-import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
+import { AppIcon, type AppIconName } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { HISTORY_SEARCH_MAX_LENGTH } from '@/domain/entry/history';
 import { useI18n } from '@/i18n/I18nProvider';
 
-type SymbolName = ComponentProps<typeof SymbolView>['name'];
-
 const SEARCH_LABEL_ID = 'history-search-label';
-const SEARCH_SYMBOL = {
+const SEARCH_ICON = {
   ios: 'magnifyingglass',
   android: 'search',
-  web: 'search',
-} satisfies SymbolName;
+} satisfies AppIconName;
 
-const CLEAR_SYMBOL = {
+const CLEAR_ICON = {
   ios: 'xmark.circle.fill',
   android: 'cancel',
-  web: 'cancel',
-} satisfies SymbolName;
+} satisfies AppIconName;
 
 type HistorySearchFieldProps = {
   value: string;
@@ -43,10 +38,10 @@ export function HistorySearchField({
       </Text>
       <View style={styles.fieldContainer}>
         <DecorativeView pointerEvents="none" style={styles.searchIcon}>
-          <SymbolView
-            name={SEARCH_SYMBOL}
+          <AppIcon
+            name={SEARCH_ICON}
             size={20}
-            tintColor={theme.colors.textMuted}
+            color={theme.colors.textMuted}
           />
         </DecorativeView>
         <TextField
@@ -74,10 +69,10 @@ export function HistorySearchField({
             ]}
           >
             <DecorativeView>
-              <SymbolView
-                name={CLEAR_SYMBOL}
+              <AppIcon
+                name={CLEAR_ICON}
                 size={20}
-                tintColor={theme.colors.textMuted}
+                color={theme.colors.textMuted}
               />
             </DecorativeView>
           </Pressable>
