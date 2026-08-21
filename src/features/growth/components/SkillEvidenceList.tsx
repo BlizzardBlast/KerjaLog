@@ -1,10 +1,11 @@
+import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import type { SkillEvidenceEntry } from '@/domain/growth/model';
 import { SkillEvidenceThreadItem } from '@/features/growth/components/SkillEvidenceThreadItem';
-import { formatEvidenceDate } from '@/features/growth/growthPresentation';
+import { createEvidenceDateFormatter } from '@/features/growth/growthPresentation';
 import type { SkillEvidenceState } from '@/features/growth/useSkillEvidence';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -26,6 +27,10 @@ export function SkillEvidenceList({
 }: SkillEvidenceListProps) {
   const { theme } = useTheme();
   const { t } = useI18n();
+  const dateFormatter = useMemo(
+    () => createEvidenceDateFormatter(locale),
+    [locale],
+  );
   const countLabel = t(
     state.entries.length === 1
       ? 'growth.detail.supportingOne'
@@ -42,7 +47,7 @@ export function SkillEvidenceList({
   }) => (
     <SkillEvidenceThreadItem
       entry={item}
-      dateLabel={formatEvidenceDate(item.occurredAt, locale)}
+      dateLabel={dateFormatter.format(new Date(item.occurredAt))}
       openHint={t('growth.detail.openEntry')}
       isLast={index === state.entries.length - 1}
       onPress={() => onOpenEntry(item.id)}
