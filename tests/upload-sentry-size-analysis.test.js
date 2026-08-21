@@ -120,7 +120,9 @@ describe('Sentry Size Analysis upload hook', () => {
 
   test('keeps Size Analysis failures non-blocking for successful EAS builds', () => {
     // Given
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const warn = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
 
     // When
     const uploaded = runAsBuildHook({
