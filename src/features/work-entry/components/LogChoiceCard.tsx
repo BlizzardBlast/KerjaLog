@@ -1,17 +1,14 @@
-import { SymbolView } from 'expo-symbols';
-import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon, type AppIconName } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
-
-type SymbolName = ComponentProps<typeof SymbolView>['name'];
 
 type LogChoiceCardProps = {
   title: string;
   description?: string | undefined;
-  icon?: SymbolName | undefined;
+  icon?: AppIconName | undefined;
   selected: boolean;
   onPress: () => void;
   mode?: 'single' | 'multiple';
@@ -55,12 +52,10 @@ export function LogChoiceCard({
             },
           ]}
         >
-          <SymbolView
+          <AppIcon
             name={icon}
             size={20}
-            tintColor={
-              selected ? theme.colors.onPrimary : theme.colors.textMuted
-            }
+            color={selected ? theme.colors.onPrimary : theme.colors.textMuted}
           />
         </DecorativeView>
       ) : null}
@@ -78,10 +73,10 @@ export function LogChoiceCard({
         <DecorativeView
           style={[styles.check, { backgroundColor: theme.colors.primary }]}
         >
-          <SymbolView
-            name={{ ios: 'checkmark', android: 'check', web: 'check' }}
+          <AppIcon
+            name={{ ios: 'checkmark', android: 'check' }}
             size={16}
-            tintColor={theme.colors.onPrimary}
+            color={theme.colors.onPrimary}
           />
         </DecorativeView>
       ) : null}
