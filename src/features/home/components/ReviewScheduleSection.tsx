@@ -1,7 +1,7 @@
-import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
 import { SectionHeading } from '@/features/home/components/SectionHeading';
@@ -50,14 +50,10 @@ export function ReviewScheduleSection({
             { backgroundColor: theme.colors.successSoft },
           ]}
         >
-          <SymbolView
-            name={{
-              ios: 'calendar',
-              android: 'calendar_month',
-              web: 'calendar_month',
-            }}
+          <AppIcon
+            name={{ ios: 'calendar', android: 'calendar_month' }}
             size={22}
-            tintColor={theme.colors.success}
+            color={theme.colors.success}
           />
         </DecorativeView>
         <View style={styles.reviewCopy}>

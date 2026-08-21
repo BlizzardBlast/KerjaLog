@@ -1,5 +1,5 @@
-import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet } from 'react-native';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -28,14 +28,14 @@ export function ThemeToggleButton() {
         pressed && styles.pressed,
       ]}
     >
-      <SymbolView
+      <AppIcon
         name={
           switchingToDark
-            ? { ios: 'moon.fill', android: 'dark_mode', web: 'dark_mode' }
-            : { ios: 'sun.max.fill', android: 'light_mode', web: 'light_mode' }
+            ? { ios: 'moon.fill', android: 'dark_mode' }
+            : { ios: 'sun.max.fill', android: 'light_mode' }
         }
         size={20}
-        tintColor={theme.colors.text}
+        color={theme.colors.text}
       />
     </Pressable>
   );

@@ -1,7 +1,7 @@
-import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { ONBOARDING_STEP_ORDER } from '@/features/onboarding/model';
@@ -40,14 +40,10 @@ export function OnboardingHeader({
             pressed && styles.pressed,
           ]}
         >
-          <SymbolView
-            name={{
-              ios: 'chevron.left',
-              android: 'arrow_back',
-              web: 'arrow_back',
-            }}
+          <AppIcon
+            name={{ ios: 'chevron.left', android: 'arrow_back' }}
             size={20}
-            tintColor={theme.colors.text}
+            color={theme.colors.text}
           />
         </Pressable>
       ) : null}

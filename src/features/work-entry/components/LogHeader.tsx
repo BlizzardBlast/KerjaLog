@@ -1,6 +1,6 @@
-import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 
@@ -77,14 +77,10 @@ export function LogHeader({
             pressed && styles.pressed,
           ]}
         >
-          <SymbolView
-            name={{
-              ios: 'chevron.left',
-              android: 'arrow_back',
-              web: 'arrow_back',
-            }}
+          <AppIcon
+            name={{ ios: 'chevron.left', android: 'arrow_back' }}
             size={22}
-            tintColor={theme.colors.text}
+            color={theme.colors.text}
           />
         </Pressable>
 

@@ -1,8 +1,8 @@
-import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { ToggleSwitch } from '@/design-system/components/ToggleSwitch';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { AppLockSettingFeedback } from '@/features/app-lock/AppLockSettingFeedback';
@@ -33,14 +33,10 @@ export function AppLockSettingCard() {
         <DecorativeView
           style={[styles.icon, { backgroundColor: theme.colors.primarySoft }]}
         >
-          <SymbolView
-            name={{
-              ios: 'lock.shield.fill',
-              android: 'shield_lock',
-              web: 'lock',
-            }}
+          <AppIcon
+            name={{ ios: 'lock.shield.fill', android: 'shield_lock' }}
             size={22}
-            tintColor={theme.colors.primary}
+            color={theme.colors.primary}
           />
         </DecorativeView>
 

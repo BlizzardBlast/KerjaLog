@@ -3,10 +3,10 @@ import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { themes } from '@/design-system/tokens/theme';
 import { HistorySearchField } from '@/features/history/components/HistorySearchField';
 
-const mockSymbolView = jest.fn((_props: unknown) => null);
+const mockAppIcon = jest.fn((_props: unknown) => null);
 
-jest.mock('expo-symbols', () => ({
-  SymbolView: (props: unknown) => mockSymbolView(props),
+jest.mock('@/design-system/icons/AppIcon', () => ({
+  AppIcon: (props: unknown) => mockAppIcon(props),
 }));
 
 jest.mock('@/i18n/I18nProvider', () => ({
@@ -20,7 +20,7 @@ describe('HistorySearchField', () => {
     jest.clearAllMocks();
   });
 
-  test('uses search semantics, accessible control borders, and cross-platform symbols', async () => {
+  test('uses search semantics, accessible control borders, and app icons', async () => {
     const onChangeText = jest.fn();
 
     await render(
@@ -44,20 +44,18 @@ describe('HistorySearchField', () => {
       borderColor: themes.light.colors.controlBorder,
     });
 
-    const symbolNames = mockSymbolView.mock.calls.map(([props]) => {
+    const iconNames = mockAppIcon.mock.calls.map(([props]) => {
       const { name } = props as { name?: unknown };
       return name;
     });
 
-    expect(symbolNames).toContainEqual({
+    expect(iconNames).toContainEqual({
       ios: 'magnifyingglass',
       android: 'search',
-      web: 'search',
     });
-    expect(symbolNames).toContainEqual({
+    expect(iconNames).toContainEqual({
       ios: 'xmark.circle.fill',
       android: 'cancel',
-      web: 'cancel',
     });
 
     await fireEvent.press(

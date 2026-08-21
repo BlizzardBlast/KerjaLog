@@ -3,6 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Modal } from 'react-native';
+import { useAppIconFontReady } from '@/design-system/icons/useAppIconFontReady';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { useAppLock } from '@/features/app-lock/AppLockProvider';
 import { AppLockScreen } from '@/features/app-lock/AppLockScreen';
@@ -19,7 +20,9 @@ export function RootNavigator() {
     locked: appLocked,
     isHydrated: isAppLockHydrated,
   } = useAppLock();
+  const areAppIconsReady = useAppIconFontReady();
   const isReady =
+    areAppIconsReady &&
     isThemeHydrated &&
     isLanguageHydrated &&
     isOnboardingHydrated &&

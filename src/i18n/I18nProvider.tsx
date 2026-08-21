@@ -6,12 +6,14 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { type TranslationKey, translations } from '@/i18n/catalog';
+import {
+  type Language,
+  type TranslationKey,
+  translations,
+} from '@/i18n/catalog';
 import { ignoreError } from '@/shared/utils/function';
 
 const LANGUAGE_STORAGE_KEY = '@kerjalog/language/v1';
-
-export type Language = keyof typeof translations;
 
 type TranslationParams = Record<string, string | number>;
 
@@ -107,3 +109,5 @@ export function useI18n() {
 
   return context;
 }
+
+export type { Language } from '@/i18n/catalog';

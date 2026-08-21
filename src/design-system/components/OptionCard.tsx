@@ -1,5 +1,3 @@
-import { SymbolView } from 'expo-symbols';
-import type { ComponentProps } from 'react';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -12,11 +10,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon, type AppIconName } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { motion } from '@/design-system/tokens/motion';
 import { radii, spacing } from '@/design-system/tokens/theme';
 
-export type OptionCardIcon = ComponentProps<typeof SymbolView>['name'];
+export type OptionCardIcon = AppIconName;
 
 export type OptionCardProps = {
   title: string;
@@ -87,10 +86,10 @@ export function OptionCard({
           {icon ? (
             <DecorativeView>
               <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
-                <SymbolView
+                <AppIcon
                   name={icon}
                   size={20}
-                  tintColor={
+                  color={
                     selected ? theme.colors.onPrimary : theme.colors.textMuted
                   }
                 />

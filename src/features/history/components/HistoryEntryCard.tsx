@@ -1,8 +1,7 @@
-import { SymbolView } from 'expo-symbols';
-import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon, type AppIconName } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing, type ThemeColors } from '@/design-system/tokens/theme';
 import type { EntryStatus, WorkEntry } from '@/domain/entry/model';
@@ -13,13 +12,10 @@ import {
 import { formatHistoryEntryDate } from '@/features/history/historyGrouping';
 import { useI18n } from '@/i18n/I18nProvider';
 
-type SymbolName = ComponentProps<typeof SymbolView>['name'];
-
-const PRIVATE_SYMBOL = {
+const PRIVATE_ICON = {
   ios: 'lock.fill',
   android: 'lock',
-  web: 'lock',
-} satisfies SymbolName;
+} satisfies AppIconName;
 
 type HistoryEntryCardProps = {
   entry: WorkEntry;
@@ -93,10 +89,10 @@ function StatusChip({ isPrivate, label, status }: StatusChipProps) {
     >
       {isPrivate ? (
         <DecorativeView>
-          <SymbolView
-            name={PRIVATE_SYMBOL}
+          <AppIcon
+            name={PRIVATE_ICON}
             size={13}
-            tintColor={theme.colors[palette.foreground]}
+            color={theme.colors[palette.foreground]}
           />
         </DecorativeView>
       ) : null}

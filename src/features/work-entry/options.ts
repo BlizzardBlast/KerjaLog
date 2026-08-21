@@ -1,16 +1,13 @@
-import type { SymbolView } from 'expo-symbols';
-import type { ComponentProps } from 'react';
+import type { AppIconName } from '@/design-system/icons/AppIcon';
 import type { LogEventIntent } from '@/domain/entry/impact';
 import type { EvidenceType, OutcomeType } from '@/domain/entry/model';
 import type { TranslationKey } from '@/i18n/catalog';
-
-type SymbolName = ComponentProps<typeof SymbolView>['name'];
 
 type LogOption<Value extends string> = {
   value: Value;
   titleKey: TranslationKey;
   descriptionKey?: TranslationKey;
-  icon?: SymbolName;
+  icon?: AppIconName;
 };
 
 export const logEventOptions: ReadonlyArray<LogOption<LogEventIntent>> = [
@@ -18,55 +15,43 @@ export const logEventOptions: ReadonlyArray<LogOption<LogEventIntent>> = [
     value: 'completed',
     titleKey: 'log.intent.completed.title',
     descriptionKey: 'log.intent.completed.description',
-    icon: {
-      ios: 'checkmark.circle.fill',
-      android: 'check_circle',
-      web: 'check_circle',
-    },
+    icon: { ios: 'checkmark.circle.fill', android: 'check_circle' },
   },
   {
     value: 'solved',
     titleKey: 'log.intent.solved.title',
     descriptionKey: 'log.intent.solved.description',
-    icon: {
-      ios: 'wrench.and.screwdriver.fill',
-      android: 'build',
-      web: 'build',
-    },
+    icon: { ios: 'wrench.and.screwdriver.fill', android: 'build' },
   },
   {
     value: 'helped',
     titleKey: 'log.intent.helped.title',
     descriptionKey: 'log.intent.helped.description',
-    icon: { ios: 'person.2.fill', android: 'group', web: 'group' },
+    icon: { ios: 'person.2.fill', android: 'group' },
   },
   {
     value: 'feedback',
     titleKey: 'log.intent.feedback.title',
     descriptionKey: 'log.intent.feedback.description',
-    icon: { ios: 'text.bubble.fill', android: 'chat', web: 'chat' },
+    icon: { ios: 'text.bubble.fill', android: 'chat' },
   },
   {
     value: 'learned',
     titleKey: 'log.intent.learned.title',
     descriptionKey: 'log.intent.learned.description',
-    icon: { ios: 'lightbulb.fill', android: 'lightbulb', web: 'lightbulb' },
+    icon: { ios: 'lightbulb.fill', android: 'lightbulb' },
   },
   {
     value: 'ownership',
     titleKey: 'log.intent.ownership.title',
     descriptionKey: 'log.intent.ownership.description',
-    icon: { ios: 'flag.fill', android: 'flag', web: 'flag' },
+    icon: { ios: 'flag.fill', android: 'flag' },
   },
   {
     value: 'challenge',
     titleKey: 'log.intent.challenge.title',
     descriptionKey: 'log.intent.challenge.description',
-    icon: {
-      ios: 'exclamationmark.triangle.fill',
-      android: 'warning',
-      web: 'warning',
-    },
+    icon: { ios: 'exclamationmark.triangle.fill', android: 'warning' },
   },
 ];
 

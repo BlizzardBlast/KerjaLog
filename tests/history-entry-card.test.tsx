@@ -3,10 +3,10 @@ import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import type { WorkEntry } from '@/domain/entry/model';
 import { HistoryEntryCard } from '@/features/history/components/HistoryEntryCard';
 
-const mockSymbolView = jest.fn((_props: unknown) => null);
+const mockAppIcon = jest.fn((_props: unknown) => null);
 
-jest.mock('expo-symbols', () => ({
-  SymbolView: (props: unknown) => mockSymbolView(props),
+jest.mock('@/design-system/icons/AppIcon', () => ({
+  AppIcon: (props: unknown) => mockAppIcon(props),
 }));
 
 jest.mock('@/i18n/I18nProvider', () => ({
@@ -80,16 +80,12 @@ describe('HistoryEntryCard', () => {
     const privateLabel = screen.getByText('history.status.private');
     expect(privateLabel).toBeTruthy();
     expect(privateLabel.props.numberOfLines).toBeUndefined();
-    expect(
-      mockSymbolView.mock.calls.some(([props]) => {
-        const { name } = props as { name?: unknown };
-
-        return (
-          JSON.stringify(name) ===
-          JSON.stringify({ ios: 'lock.fill', android: 'lock', web: 'lock' })
-        );
+    expect(mockAppIcon).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: { ios: 'lock.fill', android: 'lock' },
+        size: 13,
       }),
-    ).toBe(true);
+    );
 
     await fireEvent.press(screen.getByRole('button'));
 

@@ -1,0 +1,59 @@
+import type { AppIconName } from '@/design-system/icons/AppIcon';
+import type { SkillId } from '@/domain/skill/model';
+import type { TranslationKey } from '@/i18n/catalog';
+
+export type GrowthSkillIcon = AppIconName;
+
+const SKILL_DESCRIPTION_KEYS: Record<SkillId, TranslationKey> = {
+  communication: 'growth.skill.communication.description',
+  collaboration: 'growth.skill.collaboration.description',
+  problem_solving: 'growth.skill.problemSolving.description',
+  execution: 'growth.skill.execution.description',
+  attention_to_detail: 'growth.skill.attentionToDetail.description',
+  customer_orientation: 'growth.skill.customerOrientation.description',
+  ownership: 'growth.skill.ownership.description',
+  adaptability: 'growth.skill.adaptability.description',
+  leadership: 'growth.skill.leadership.description',
+  role_expertise: 'growth.skill.roleExpertise.description',
+};
+
+const SKILL_ICONS: Record<SkillId, GrowthSkillIcon> = {
+  communication: { ios: 'message.fill', android: 'chat' },
+  collaboration: { ios: 'person.2.fill', android: 'group' },
+  problem_solving: { ios: 'lightbulb.fill', android: 'lightbulb' },
+  execution: { ios: 'checkmark.circle.fill', android: 'check_circle' },
+  attention_to_detail: {
+    ios: 'checkmark.seal.fill',
+    android: 'fact_check',
+  },
+  customer_orientation: { ios: 'heart.fill', android: 'favorite' },
+  ownership: { ios: 'flag.fill', android: 'flag' },
+  adaptability: { ios: 'arrow.triangle.2.circlepath', android: 'sync' },
+  leadership: { ios: 'person.3.fill', android: 'groups' },
+  role_expertise: { ios: 'hammer.fill', android: 'build' },
+};
+
+const evidenceDateFormatters = new Map<string, Intl.DateTimeFormat>();
+
+export function getGrowthSkillDescriptionKey(skillId: SkillId): TranslationKey {
+  return SKILL_DESCRIPTION_KEYS[skillId];
+}
+
+export function getGrowthSkillIcon(skillId: SkillId): GrowthSkillIcon {
+  return SKILL_ICONS[skillId];
+}
+
+export function formatEvidenceDate(timestamp: string, locale: string): string {
+  let formatter = evidenceDateFormatters.get(locale);
+
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+    evidenceDateFormatters.set(locale, formatter);
+  }
+
+  return formatter.format(new Date(timestamp));
+}

@@ -1,7 +1,7 @@
-import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii } from '@/design-system/tokens/theme';
 import { SectionHeading } from '@/features/home/components/SectionHeading';
@@ -32,10 +32,10 @@ export function RecentEntriesEmptySection() {
             { backgroundColor: theme.colors.surfaceSubtle },
           ]}
         >
-          <SymbolView
-            name={{ ios: 'tray', android: 'inbox', web: 'inbox' }}
+          <AppIcon
+            name={{ ios: 'tray', android: 'inbox' }}
             size={24}
-            tintColor={theme.colors.textMuted}
+            color={theme.colors.textMuted}
           />
         </DecorativeView>
         <Text variant="bodyStrong">{t('home.recent.emptyTitle')}</Text>
