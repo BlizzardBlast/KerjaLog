@@ -57,7 +57,9 @@ export function GrowthEvidenceMapContent({
     );
   }
 
-  return <GrowthEvidenceMapLoadedContent state={state} onOpenSkill={onOpenSkill} />;
+  return (
+    <GrowthEvidenceMapLoadedContent state={state} onOpenSkill={onOpenSkill} />
+  );
 }
 
 const styles = StyleSheet.create({
