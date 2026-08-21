@@ -28,8 +28,7 @@ type AnchorFrame = {
   height: number;
 };
 
-const MENU_WIDTH = 220;
-const MENU_HEIGHT = 114;
+const PREFERRED_MENU_WIDTH = 220;
 
 const languageOptions = [
   {
@@ -50,7 +49,7 @@ export function LanguageSelector() {
   const { theme } = useTheme();
   const { language, setLanguage, t } = useI18n();
   const insets = useSafeAreaInsets();
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const { width: windowWidth } = useWindowDimensions();
   const triggerRef = useRef<View>(null);
   const [anchor, setAnchor] = useState<AnchorFrame | null>(null);
   const selectedOption =
@@ -71,22 +70,17 @@ export function LanguageSelector() {
   };
 
   const horizontalInset = Math.max(insets.left, insets.right, spacing[4]);
+  const availableMenuWidth = Math.max(0, windowWidth - horizontalInset * 2);
+  const menuWidth = Math.min(PREFERRED_MENU_WIDTH, availableMenuWidth);
   const menuLeft = anchor
     ? Math.min(
-        Math.max(anchor.x + anchor.width - MENU_WIDTH, horizontalInset),
-        windowWidth - MENU_WIDTH - horizontalInset,
+        Math.max(anchor.x + anchor.width - menuWidth, horizontalInset),
+        windowWidth - menuWidth - horizontalInset,
       )
     : horizontalInset;
-  const preferredMenuTop = anchor
+  const menuTop = anchor
     ? anchor.y + anchor.height + spacing[2]
     : insets.top + spacing[4];
-  const menuTop = Math.max(
-    insets.top + spacing[2],
-    Math.min(
-      preferredMenuTop,
-      windowHeight - insets.bottom - MENU_HEIGHT - spacing[4],
-    ),
-  );
 
   return (
     <>
@@ -146,6 +140,7 @@ export function LanguageSelector() {
                 borderColor: theme.colors.border,
                 left: menuLeft,
                 top: menuTop,
+                width: menuWidth,
               },
             ]}
           >
@@ -172,11 +167,7 @@ export function LanguageSelector() {
                   <Text variant="body" style={styles.flag}>
                     {option.flag}
                   </Text>
-                  <Text
-                    numberOfLines={1}
-                    variant="bodyStrong"
-                    style={styles.optionLabel}
-                  >
+                  <Text variant="bodyStrong" style={styles.optionLabel}>
                     {t(option.labelKey)}
                   </Text>
                   {selected ? (
@@ -223,7 +214,6 @@ const styles = StyleSheet.create({
     boxShadow: '0 12px 28px rgba(49, 32, 57, 0.16)',
     overflow: 'hidden',
     position: 'absolute',
-    width: MENU_WIDTH,
   },
   option: {
     alignItems: 'center',
