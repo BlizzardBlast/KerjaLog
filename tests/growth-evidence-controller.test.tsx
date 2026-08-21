@@ -57,9 +57,7 @@ function deferred<T>() {
 describe('Growth evidence controllers', () => {
   test('loads the evidence map through the narrow Growth reader', async () => {
     const repository = createRepository();
-    const { result } = await renderHook(() =>
-      useGrowthEvidenceMap(repository),
-    );
+    const { result } = await renderHook(() => useGrowthEvidenceMap(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('loaded'));
 
@@ -77,9 +75,7 @@ describe('Growth evidence controllers', () => {
     repository.loadEvidenceMap
       .mockRejectedValueOnce(new Error('database unavailable'))
       .mockResolvedValueOnce(evidenceMap);
-    const { result } = await renderHook(() =>
-      useGrowthEvidenceMap(repository),
-    );
+    const { result } = await renderHook(() => useGrowthEvidenceMap(repository));
 
     await waitFor(() => expect(result.current.state.status).toBe('error'));
 
