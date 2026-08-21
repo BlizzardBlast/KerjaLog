@@ -10,7 +10,6 @@ import { isSkillId, type SkillId } from '@/domain/skill/model';
 export type GrowthEvidenceMapRow = {
   skill_id: unknown;
   entry_count: unknown;
-  latest_occurred_at: unknown;
   total_entry_count: unknown;
 };
 
@@ -24,18 +23,6 @@ export type SkillEvidenceEntryRow = {
 function assertNonNegativeInteger(value: unknown, field: string): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
     throw new Error(`Stored Growth ${field} is invalid.`);
-  }
-
-  return value;
-}
-
-function mapOptionalTimestamp(value: unknown): string | null {
-  if (value === null) {
-    return null;
-  }
-
-  if (typeof value !== 'string' || !isCanonicalIsoTimestamp(value)) {
-    throw new Error('Stored Growth timestamp is invalid.');
   }
 
   return value;
@@ -73,7 +60,6 @@ export function mapGrowthEvidenceMapRows(
     summaries.set(row.skill_id, {
       skillId: row.skill_id,
       entryCount: assertNonNegativeInteger(row.entry_count, 'skill entry count'),
-      latestOccurredAt: mapOptionalTimestamp(row.latest_occurred_at),
     });
   }
 
