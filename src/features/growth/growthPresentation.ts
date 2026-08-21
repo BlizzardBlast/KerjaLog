@@ -27,9 +27,7 @@ const SKILL_SYMBOLS: Record<SkillId, string> = {
   role_expertise: '⌘',
 };
 
-export function getGrowthSkillDescriptionKey(
-  skillId: SkillId,
-): TranslationKey {
+export function getGrowthSkillDescriptionKey(skillId: SkillId): TranslationKey {
   return SKILL_DESCRIPTION_KEYS[skillId];
 }
 
