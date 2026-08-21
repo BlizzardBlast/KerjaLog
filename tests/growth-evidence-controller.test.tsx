@@ -96,12 +96,10 @@ describe('Growth evidence controllers', () => {
     );
 
     expect(result.current.state.status).toBe('loading');
-    unmount();
+    await unmount();
 
-    await act(async () => {
-      pending.resolve(evidenceMap);
-      await pending.promise;
-    });
+    pending.resolve(evidenceMap);
+    await pending.promise;
   });
 
   test('loads skill-specific entries without querying unrelated skills', async () => {
