@@ -59,7 +59,10 @@ export function mapGrowthEvidenceMapRows(
     totalEntries = rowTotalEntries;
     summaries.set(row.skill_id, {
       skillId: row.skill_id,
-      entryCount: assertNonNegativeInteger(row.entry_count, 'skill entry count'),
+      entryCount: assertNonNegativeInteger(
+        row.entry_count,
+        'skill entry count',
+      ),
     });
   }
 
