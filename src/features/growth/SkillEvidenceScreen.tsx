@@ -1,12 +1,12 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { Text } from '@/design-system/components/Text';
+import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, radii, spacing } from '@/design-system/tokens/theme';
 import { skillDefinitionById } from '@/domain/skill/catalog';
@@ -64,14 +64,10 @@ function ProfiledSkillEvidenceScreen({ skillId }: SkillEvidenceScreenProps) {
               },
             ]}
           >
-            <SymbolView
-              name={{
-                ios: 'chevron.left',
-                android: 'arrow_back',
-                web: 'arrow_back',
-              }}
+            <AppIcon
+              name={{ ios: 'chevron.left', android: 'arrow_back' }}
               size={22}
-              tintColor={theme.colors.text}
+              color={theme.colors.text}
             />
           </Pressable>
           <View style={styles.headerCopy}>
