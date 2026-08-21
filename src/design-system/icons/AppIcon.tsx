@@ -1,9 +1,5 @@
 import regular from 'expo-symbols/androidWeights/regular';
-import {
-  type AndroidSymbol,
-  type SFSymbol,
-  SymbolView,
-} from 'expo-symbols';
+import { type AndroidSymbol, type SFSymbol, SymbolView } from 'expo-symbols';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
 export type AppIconName = {
