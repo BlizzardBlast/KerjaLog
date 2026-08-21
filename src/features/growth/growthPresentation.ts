@@ -51,6 +51,8 @@ const SKILL_ICONS: Record<SkillId, GrowthSkillIcon> = {
   role_expertise: { ios: 'hammer.fill', android: 'build', web: 'build' },
 };
 
+const evidenceDateFormatters = new Map<string, Intl.DateTimeFormat>();
+
 export function getGrowthSkillDescriptionKey(skillId: SkillId): TranslationKey {
   return SKILL_DESCRIPTION_KEYS[skillId];
 }
@@ -59,10 +61,17 @@ export function getGrowthSkillIcon(skillId: SkillId): GrowthSkillIcon {
   return SKILL_ICONS[skillId];
 }
 
-export function createEvidenceDateFormatter(locale: string): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+export function formatEvidenceDate(timestamp: string, locale: string): string {
+  let formatter = evidenceDateFormatters.get(locale);
+
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+    evidenceDateFormatters.set(locale, formatter);
+  }
+
+  return formatter.format(new Date(timestamp));
 }
