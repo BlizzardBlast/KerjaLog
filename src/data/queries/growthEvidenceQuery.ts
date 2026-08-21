@@ -4,13 +4,10 @@ export const GROWTH_EVIDENCE_MAP_SQL = `
   SELECT
     skills.id AS skill_id,
     COUNT(entry_skills.entry_id) AS entry_count,
-    MAX(work_entries.occurred_at) AS latest_occurred_at,
     (SELECT COUNT(*) FROM work_entries) AS total_entry_count
   FROM skills
   LEFT JOIN entry_skills
     ON entry_skills.skill_id = skills.id
-  LEFT JOIN work_entries
-    ON work_entries.id = entry_skills.entry_id
   GROUP BY skills.id
 `;
 
