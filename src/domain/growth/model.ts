@@ -1,4 +1,3 @@
-import type { EntryStatus, EntryType } from '@/domain/entry/model';
 import type { SkillId } from '@/domain/skill/model';
 
 export type SkillEvidenceSummary = {
@@ -15,8 +14,6 @@ export type GrowthEvidenceMap = {
 export type SkillEvidenceEntry = {
   id: string;
   title: string;
-  type: EntryType;
-  status: EntryStatus;
   occurredAt: string;
   supportingText: string;
 };
