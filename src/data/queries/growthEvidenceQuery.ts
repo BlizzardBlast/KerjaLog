@@ -20,8 +20,6 @@ export function buildSkillEvidenceSqlQuery(skillId: SkillId) {
       SELECT
         work_entries.id,
         work_entries.title,
-        work_entries.type,
-        work_entries.status,
         work_entries.occurred_at,
         COALESCE(
           (
