@@ -1,12 +1,14 @@
+import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import type { GrowthSkillIcon } from '@/features/growth/growthPresentation';
 
 export type GrowthSkillRowProps = {
   name: string;
   description: string;
-  symbol: string;
+  icon: GrowthSkillIcon;
   countLabel: string;
   disabled: boolean;
   onPress: () => void;
@@ -15,7 +17,7 @@ export type GrowthSkillRowProps = {
 export function GrowthSkillRow({
   name,
   description,
-  symbol,
+  icon,
   countLabel,
   disabled,
   onPress,
@@ -37,7 +39,7 @@ export function GrowthSkillRow({
       <View
         accessible={false}
         style={[
-          styles.symbol,
+          styles.icon,
           {
             backgroundColor: disabled
               ? theme.colors.surfaceSubtle
@@ -45,17 +47,16 @@ export function GrowthSkillRow({
           },
         ]}
       >
-        <Text
-          importantForAccessibility="no"
-          accessibilityElementsHidden
-          color={disabled ? 'textMuted' : 'primary'}
-          variant="bodyStrong"
-        >
-          {symbol}
-        </Text>
+        <SymbolView
+          name={icon}
+          size={20}
+          tintColor={
+            disabled ? theme.colors.textMuted : theme.colors.primary
+          }
+        />
       </View>
       <View style={styles.copy}>
-        <Text variant="label">{name}</Text>
+        <Text variant="bodyStrong">{name}</Text>
         <Text variant="caption" color="textMuted">
           {description}
         </Text>
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[3],
   },
-  symbol: {
+  icon: {
     alignItems: 'center',
     borderRadius: radii.md,
     height: 42,
