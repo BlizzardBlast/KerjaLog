@@ -5,9 +5,9 @@ import { ThemeToggleButton } from '@/design-system/components/ThemeToggleButton'
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { InfoCard } from '@/features/onboarding/components/InfoCard';
-import { LanguageSelector } from '@/features/onboarding/components/LanguageSelector';
 import { PrivacyPoint } from '@/features/onboarding/components/PrivacyPoint';
 import { StepHeading } from '@/features/onboarding/components/StepHeading';
+import { LanguageSelector } from '@/i18n/components/LanguageSelector';
 import { useI18n } from '@/i18n/I18nProvider';
 
 export function WelcomeStep() {
