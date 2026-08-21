@@ -11,7 +11,7 @@ import type {
   SkillEvidenceSummary,
 } from '@/domain/growth/model';
 import { SKILL_CATALOG } from '@/domain/skill/catalog';
-import { SKILL_IDS, type SkillId } from '@/domain/skill/model';
+import { isSkillId, type SkillId } from '@/domain/skill/model';
 
 export type GrowthEvidenceMapRow = {
   skill_id: unknown;
@@ -28,10 +28,6 @@ export type SkillEvidenceEntryRow = {
   occurred_at: unknown;
   supporting_text: unknown;
 };
-
-function isSkillId(value: unknown): value is SkillId {
-  return typeof value === 'string' && SKILL_IDS.some((id) => id === value);
-}
 
 function isEntryType(value: unknown): value is EntryType {
   return typeof value === 'string' && ENTRY_TYPES.some((type) => type === value);
