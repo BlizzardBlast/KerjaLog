@@ -3,7 +3,8 @@ export const growthEn = {
   'growth.title': 'Your evidence map',
   'growth.description':
     'This is not a performance score. It only shows where KerjaLog has recorded supporting examples.',
-  'growth.summary.entries': '{{count}} work entries',
+  'growth.summary.entryOne': '1 work entry',
+  'growth.summary.entryMany': '{{count}} work entries',
   'growth.summary.skillAreaOne': 'Evidence across 1 skill area',
   'growth.summary.skillAreaMany': 'Evidence across {{count}} skill areas',
   'growth.summary.hint': 'Tap a skill to see the real work behind it.',
@@ -68,7 +69,8 @@ export const growthId: Record<GrowthTranslationKey, string> = {
   'growth.title': 'Peta bukti Anda',
   'growth.description':
     'Ini bukan skor performa. Bagian ini hanya menunjukkan area yang sudah memiliki contoh pendukung di KerjaLog.',
-  'growth.summary.entries': '{{count}} catatan kerja',
+  'growth.summary.entryOne': '1 catatan kerja',
+  'growth.summary.entryMany': '{{count}} catatan kerja',
   'growth.summary.skillAreaOne': 'Bukti di 1 area keterampilan',
   'growth.summary.skillAreaMany': 'Bukti di {{count}} area keterampilan',
   'growth.summary.hint':
