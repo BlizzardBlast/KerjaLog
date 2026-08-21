@@ -1,9 +1,3 @@
-import {
-  ENTRY_STATUSES,
-  ENTRY_TYPES,
-  type EntryStatus,
-  type EntryType,
-} from '@/domain/entry/model';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 import type {
   GrowthEvidenceMap,
@@ -23,21 +17,9 @@ export type GrowthEvidenceMapRow = {
 export type SkillEvidenceEntryRow = {
   id: unknown;
   title: unknown;
-  type: unknown;
-  status: unknown;
   occurred_at: unknown;
   supporting_text: unknown;
 };
-
-function isEntryType(value: unknown): value is EntryType {
-  return typeof value === 'string' && ENTRY_TYPES.some((type) => type === value);
-}
-
-function isEntryStatus(value: unknown): value is EntryStatus {
-  return (
-    typeof value === 'string' && ENTRY_STATUSES.some((status) => status === value)
-  );
-}
 
 function assertNonNegativeInteger(value: unknown, field: string): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
@@ -117,12 +99,6 @@ export function mapSkillEvidenceEntryRows(
     if (typeof row.title !== 'string' || row.title.trim().length === 0) {
       throw new Error('Stored Growth entry title is invalid.');
     }
-    if (!isEntryType(row.type)) {
-      throw new Error('Stored Growth entry type is invalid.');
-    }
-    if (!isEntryStatus(row.status)) {
-      throw new Error('Stored Growth entry status is invalid.');
-    }
     if (
       typeof row.occurred_at !== 'string' ||
       !isCanonicalIsoTimestamp(row.occurred_at)
@@ -139,8 +115,6 @@ export function mapSkillEvidenceEntryRows(
     return {
       id: row.id,
       title: row.title,
-      type: row.type,
-      status: row.status,
       occurredAt: row.occurred_at,
       supportingText: row.supporting_text,
     };
