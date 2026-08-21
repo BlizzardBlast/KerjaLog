@@ -74,9 +74,7 @@ export function LanguageSelectorMenu({
                   pressed && styles.pressed,
                 ]}
               >
-                <Text variant="body" style={styles.flag}>
-                  {option.flag}
-                </Text>
+                <Text variant="body">{option.flag}</Text>
                 <Text variant="bodyStrong" style={styles.optionLabel}>
                   {t(option.labelKey)}
                 </Text>
@@ -116,9 +114,6 @@ const styles = StyleSheet.create({
     minHeight: 56,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-  },
-  flag: {
-    lineHeight: 22,
   },
   optionLabel: {
     flex: 1,
