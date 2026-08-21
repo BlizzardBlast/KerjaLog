@@ -39,9 +39,7 @@ export function LanguageSelectorTrigger({
         pressed && styles.pressed,
       ]}
     >
-      <Text variant="body" style={styles.flag}>
-        {option.flag}
-      </Text>
+      <Text variant="body">{option.flag}</Text>
       <Text variant="label">{option.shortLabel}</Text>
       <AppIcon
         name={{ ios: 'chevron.down', android: 'keyboard_arrow_down' }}
@@ -64,9 +62,6 @@ const styles = StyleSheet.create({
     minWidth: 82,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-  },
-  flag: {
-    lineHeight: 22,
   },
   pressed: {
     opacity: 0.72,
