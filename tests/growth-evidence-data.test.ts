@@ -12,8 +12,6 @@ describe('Growth evidence data mapping', () => {
   const rows = SKILL_CATALOG.map((skill, index) => ({
     skill_id: skill.id,
     entry_count: index === 0 ? 2 : 0,
-    latest_occurred_at:
-      index === 0 ? '2026-08-20T08:00:00.000Z' : null,
     total_entry_count: 5,
   })).reverse();
 
@@ -27,7 +25,6 @@ describe('Growth evidence data mapping', () => {
     expect(result.skills[0]).toEqual({
       skillId: 'communication',
       entryCount: 2,
-      latestOccurredAt: '2026-08-20T08:00:00.000Z',
     });
     expect(result.skills[1]?.entryCount).toBe(0);
   });
@@ -38,7 +35,11 @@ describe('Growth evidence data mapping', () => {
     );
 
     const duplicated = [...rows];
-    duplicated[0] = { ...duplicated[1] };
+    const duplicateSource = duplicated.at(1);
+    if (!duplicateSource) {
+      throw new Error('Test fixture must contain at least two skills.');
+    }
+    duplicated[0] = { ...duplicateSource };
     expect(() => mapGrowthEvidenceMapRows(duplicated)).toThrow(
       'Stored Growth skill summary is duplicated.',
     );
