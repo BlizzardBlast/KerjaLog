@@ -8,6 +8,7 @@ import type { LanguageOption } from '@/i18n/components/languageSelectorOptions';
 type LanguageSelectorTriggerProps = {
   option: LanguageOption;
   accessibilityLabel: string;
+  accessibilityValue: string;
   expanded: boolean;
   onPress: () => void;
 };
@@ -15,6 +16,7 @@ type LanguageSelectorTriggerProps = {
 export function LanguageSelectorTrigger({
   option,
   accessibilityLabel,
+  accessibilityValue,
   expanded,
   onPress,
 }: LanguageSelectorTriggerProps) {
@@ -25,6 +27,7 @@ export function LanguageSelectorTrigger({
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       accessibilityState={{ expanded }}
+      accessibilityValue={{ text: accessibilityValue }}
       hitSlop={spacing[1]}
       onPress={onPress}
       style={({ pressed }) => [
