@@ -2,7 +2,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { radii } from '@/design-system/tokens/theme';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import type { SkillEvidenceSummary } from '@/domain/growth/model';
 import { GrowthEvidenceMapLoadedContent } from '@/features/growth/components/GrowthEvidenceMapLoadedContent';
 import type { GrowthEvidenceMapState } from '@/features/growth/useGrowthEvidenceMap';
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   stateCard: {
     borderRadius: radii.lg,
     borderWidth: 1,
-    gap: 12,
-    padding: 16,
+    gap: spacing[3],
+    padding: spacing[4],
   },
 });
