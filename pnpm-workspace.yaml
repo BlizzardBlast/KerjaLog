@@ -3,6 +3,12 @@
 overrides:
   expo-constants: 57.0.12
 
+# pnpm 11 blocks dependency lifecycle scripts unless they are explicitly trusted.
+# Sentry's CLI requires its install script to provision the platform binary used
+# for source maps, debug symbols, build events, and Size Analysis.
+allowBuilds:
+  '@sentry/cli': true
+
 # pnpm 11 applies a one-day release-age gate by default. Keep narrow exact-version
 # exceptions for packages already required by the committed Expo SDK lockfile
 # instead of disabling supply-chain verification globally.

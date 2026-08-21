@@ -19,6 +19,7 @@ const breadcrumbsIntegrationMock = jest.mocked(Sentry.breadcrumbsIntegration);
 const deeplinkIntegrationMock = jest.mocked(Sentry.deeplinkIntegration);
 const isRunningInExpoGoMock = jest.mocked(isRunningInExpoGo);
 const initialDevMode = __DEV__;
+const initialSentryEnvironment = process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT;
 
 function getSentryOptions() {
   const [options] = initMock.mock.calls.at(-1) ?? [];
@@ -37,6 +38,7 @@ describe('Sentry privacy configuration', () => {
       configurable: true,
       value: initialDevMode,
     });
+    delete process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT;
     isRunningInExpoGoMock.mockReturnValue(false);
   });
 
@@ -45,6 +47,12 @@ describe('Sentry privacy configuration', () => {
       configurable: true,
       value: initialDevMode,
     });
+
+    if (initialSentryEnvironment === undefined) {
+      delete process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT;
+    } else {
+      process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT = initialSentryEnvironment;
+    }
   });
 
   test('retains safe error context and redacts sensitive values', () => {
@@ -52,7 +60,9 @@ describe('Sentry privacy configuration', () => {
     initializeSentry();
     const options = getSentryOptions();
     const errorEvent = {
-      contexts: { feature: { screen: 'history' } },
+      contexts: {
+        feature: { note: 'private context note', screen: 'history' },
+      },
       extra: {
         operation: 'save-work-entry',
         rawNote: 'private note',
@@ -65,6 +75,10 @@ describe('Sentry privacy configuration', () => {
         method: 'POST',
         query_string: 'token=private-token',
         url: 'https://example.test/v1/worklogs?token=private-token',
+      },
+      tags: {
+        email: 'private@example.test',
+        feature: 'work-entry',
       },
       type: undefined,
       user: {
@@ -80,7 +94,9 @@ describe('Sentry privacy configuration', () => {
 
     // Then
     expect(sentEvent).toEqual({
-      contexts: { feature: { screen: 'history' } },
+      contexts: {
+        feature: { note: '[Filtered]', screen: 'history' },
+      },
       extra: {
         operation: 'save-work-entry',
         rawNote: '[Filtered]',
@@ -90,11 +106,17 @@ describe('Sentry privacy configuration', () => {
         method: 'POST',
         url: 'https://example.test/v1/worklogs',
       },
+      tags: {
+        email: '[Filtered]',
+        feature: 'work-entry',
+      },
       type: undefined,
       user: { id: 'opaque-user-id', role: 'member' },
     });
     expect(errorEvent).toEqual({
-      contexts: { feature: { screen: 'history' } },
+      contexts: {
+        feature: { note: 'private context note', screen: 'history' },
+      },
       extra: {
         operation: 'save-work-entry',
         rawNote: 'private note',
@@ -107,6 +129,10 @@ describe('Sentry privacy configuration', () => {
         method: 'POST',
         query_string: 'token=private-token',
         url: 'https://example.test/v1/worklogs?token=private-token',
+      },
+      tags: {
+        email: 'private@example.test',
+        feature: 'work-entry',
       },
       type: undefined,
       user: {
@@ -159,11 +185,15 @@ describe('Sentry privacy configuration', () => {
     initializeSentry();
     const options = getSentryOptions();
     const transactionEvent = {
+      contexts: {
+        workflow: { feedback: 'private feedback', screen: 'history' },
+      },
       extra: { evidence: 'private evidence', operation: 'load-history' },
       request: {
         method: 'GET',
         url: 'https://example.test/v1/worklogs?token=private-token',
       },
+      tags: { feature: 'history', token: 'private-token' },
       type: 'transaction' as const,
       user: { id: 'opaque-user-id', ip_address: '192.0.2.1' },
     };
@@ -173,26 +203,34 @@ describe('Sentry privacy configuration', () => {
 
     // Then
     expect(sentEvent).toEqual({
+      contexts: {
+        workflow: { feedback: '[Filtered]', screen: 'history' },
+      },
       extra: { evidence: '[Filtered]', operation: 'load-history' },
       request: {
         method: 'GET',
         url: 'https://example.test/v1/worklogs',
       },
+      tags: { feature: 'history', token: '[Filtered]' },
       type: 'transaction',
       user: { id: 'opaque-user-id' },
     });
     expect(transactionEvent).toEqual({
+      contexts: {
+        workflow: { feedback: 'private feedback', screen: 'history' },
+      },
       extra: { evidence: 'private evidence', operation: 'load-history' },
       request: {
         method: 'GET',
         url: 'https://example.test/v1/worklogs?token=private-token',
       },
+      tags: { feature: 'history', token: 'private-token' },
       type: 'transaction',
       user: { id: 'opaque-user-id', ip_address: '192.0.2.1' },
     });
   });
 
-  test('retains rich breadcrumbs after scrubbing sensitive values', () => {
+  test('drops console breadcrumbs and sanitizes network and deep-link URLs', () => {
     // Given
     initializeSentry();
     const options = getSentryOptions();
@@ -201,9 +239,9 @@ describe('Sentry privacy configuration', () => {
     const consoleBreadcrumb = options.beforeBreadcrumb?.({
       category: 'console',
       data: {
-        arguments: [{ email: 'private@example.test', status: 'sync-started' }],
+        arguments: ['Prepared confidential promotion notes for a colleague'],
       },
-      message: 'sync started for email=private@example.test',
+      message: 'Prepared confidential promotion notes for a colleague',
     });
     const requestBreadcrumb = options.beforeBreadcrumb?.({
       category: 'xhr',
@@ -213,18 +251,19 @@ describe('Sentry privacy configuration', () => {
         url: 'https://api.example.test/v1/worklogs?token=private-token',
       },
     });
+    const deepLinkBreadcrumb = options.beforeBreadcrumb?.({
+      category: 'deeplink',
+      data: {
+        url: 'kerjalog://entry/opaque-entry-key/edit?token=private-token',
+      },
+      message: 'kerjalog://entry/opaque-entry-key/edit?token=private-token',
+    });
     const touchBreadcrumb = options.beforeBreadcrumb?.({
       category: 'ui.click',
     });
 
     // Then
-    expect(consoleBreadcrumb).toEqual({
-      category: 'console',
-      data: {
-        arguments: [{ email: '[Filtered]', status: 'sync-started' }],
-      },
-      message: 'sync started for email=[Filtered]',
-    });
+    expect(consoleBreadcrumb).toBeNull();
     expect(requestBreadcrumb).toEqual({
       category: 'xhr',
       data: {
@@ -232,6 +271,13 @@ describe('Sentry privacy configuration', () => {
         method: 'POST',
         url: 'https://api.example.test/v1/worklogs',
       },
+    });
+    expect(deepLinkBreadcrumb).toEqual({
+      category: 'deeplink',
+      data: {
+        url: 'kerjalog://entry/[id]/edit',
+      },
+      message: 'kerjalog://entry/[id]/edit',
     });
     expect(touchBreadcrumb).toEqual({ category: 'ui.click' });
   });
@@ -249,11 +295,23 @@ describe('Sentry privacy configuration', () => {
     expect(options.tracePropagationTargets).toEqual([]);
     expect(breadcrumbsIntegration).toEqual([
       {
-        console: true,
+        console: false,
         fetch: false,
         xhr: true,
       },
     ]);
+  });
+
+  test('labels preview builds explicitly', () => {
+    // Given
+    process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT = 'preview';
+
+    // When
+    initializeSentry();
+    const options = getSentryOptions();
+
+    // Then
+    expect(options.environment).toBe('preview');
   });
 
   test('disables native frame timing inside Expo Go', () => {
@@ -278,6 +336,7 @@ describe('Sentry privacy configuration', () => {
     const options = getSentryOptions();
 
     // Then
+    expect(options.environment).toBe('development');
     expect(options.profilesSampleRate).toBe(1);
     expect(options.enableUserInteractionTracing).toBe(true);
     expect(options._experiments).toEqual({
@@ -298,7 +357,8 @@ describe('Sentry privacy configuration', () => {
     const options = getSentryOptions();
 
     // Then
-    expect(options.tracesSampleRate).toBe(0.2);
+    expect(options.environment).toBe('production');
+    expect(options.tracesSampleRate).toBe(0.1);
     expect(options.profilesSampleRate).toBe(0.1);
   });
 });

@@ -5,6 +5,7 @@ const {
   createUploadCommand,
   findArchive,
   readSentryPluginOptions,
+  runAsBuildHook,
   shouldUploadSizeAnalysis,
 } = require('../scripts/upload-sentry-size-analysis.cjs');
 
@@ -24,6 +25,8 @@ function writeArchive(directory, archivePath) {
 }
 
 afterEach(() => {
+  jest.restoreAllMocks();
+
   for (const directory of temporaryDirectories.splice(0)) {
     fs.rmSync(directory, { force: true, recursive: true });
   }
@@ -113,5 +116,26 @@ describe('Sentry Size Analysis upload hook', () => {
         'Release',
       ],
     });
+  });
+
+  test('keeps Size Analysis failures non-blocking for successful EAS builds', () => {
+    // Given
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    // When
+    const uploaded = runAsBuildHook({
+      environment: {
+        EAS_BUILD: 'true',
+        EAS_BUILD_PLATFORM: 'android',
+        EAS_BUILD_PROFILE: 'preview',
+      },
+      projectRoot: createTemporaryDirectory(),
+    });
+
+    // Then
+    expect(uploaded).toBe(false);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('SENTRY_AUTH_TOKEN is required'),
+    );
   });
 });

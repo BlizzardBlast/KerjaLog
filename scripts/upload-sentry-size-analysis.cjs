@@ -135,7 +135,9 @@ function main({ environment = process.env, projectRoot = process.cwd() } = {}) {
   }
 
   if (!environment.SENTRY_AUTH_TOKEN) {
-    throw new Error('SENTRY_AUTH_TOKEN is required for Sentry Size Analysis uploads.');
+    throw new Error(
+      'SENTRY_AUTH_TOKEN is required for Sentry Size Analysis uploads.',
+    );
   }
 
   const appConfigPath = path.join(projectRoot, 'app.json');
@@ -147,13 +149,18 @@ function main({ environment = process.env, projectRoot = process.cwd() } = {}) {
   return true;
 }
 
-if (require.main === module) {
+function runAsBuildHook(options) {
   try {
-    main();
+    return main(options);
   } catch (error) {
-    console.error(error);
-    process.exitCode = 1;
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`Sentry Size Analysis upload skipped: ${message}`);
+    return false;
   }
+}
+
+if (require.main === module) {
+  runAsBuildHook();
 }
 
 module.exports = {
@@ -161,5 +168,6 @@ module.exports = {
   findArchive,
   main,
   readSentryPluginOptions,
+  runAsBuildHook,
   shouldUploadSizeAnalysis,
 };
