@@ -8,6 +8,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppIcon } from '@/design-system/icons/AppIcon';
+import {
+  type AnchorFrame,
+  getAnchoredPopoverLayout,
+} from '@/design-system/layout/anchoredPopover';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
@@ -19,13 +23,6 @@ type LanguageOption = {
   flag: string;
   shortLabel: string;
   labelKey: TranslationKey;
-};
-
-type AnchorFrame = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 };
 
 const PREFERRED_MENU_WIDTH = 220;
@@ -70,17 +67,22 @@ export function LanguageSelector() {
   };
 
   const horizontalInset = Math.max(insets.left, insets.right, spacing[4]);
-  const availableMenuWidth = Math.max(0, windowWidth - horizontalInset * 2);
-  const menuWidth = Math.min(PREFERRED_MENU_WIDTH, availableMenuWidth);
-  const menuLeft = anchor
-    ? Math.min(
-        Math.max(anchor.x + anchor.width - menuWidth, horizontalInset),
-        windowWidth - menuWidth - horizontalInset,
-      )
-    : horizontalInset;
-  const menuTop = anchor
-    ? anchor.y + anchor.height + spacing[2]
-    : insets.top + spacing[4];
+  const menuLayout = anchor
+    ? getAnchoredPopoverLayout({
+        anchor,
+        windowWidth,
+        horizontalInset,
+        preferredWidth: PREFERRED_MENU_WIDTH,
+        gap: spacing[2],
+      })
+    : {
+        left: horizontalInset,
+        top: insets.top + spacing[4],
+        width: Math.min(
+          PREFERRED_MENU_WIDTH,
+          Math.max(0, windowWidth - horizontalInset * 2),
+        ),
+      };
 
   return (
     <>
@@ -138,9 +140,7 @@ export function LanguageSelector() {
               {
                 backgroundColor: theme.colors.surface,
                 borderColor: theme.colors.border,
-                left: menuLeft,
-                top: menuTop,
-                width: menuWidth,
+                ...menuLayout,
               },
             ]}
           >
