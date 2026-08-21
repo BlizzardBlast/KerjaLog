@@ -1,4 +1,9 @@
-import { ENTRY_STATUSES, ENTRY_TYPES } from '@/domain/entry/model';
+import {
+  ENTRY_STATUSES,
+  ENTRY_TYPES,
+  type EntryStatus,
+  type EntryType,
+} from '@/domain/entry/model';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 import type {
   GrowthEvidenceMap,
@@ -28,12 +33,22 @@ function isSkillId(value: unknown): value is SkillId {
   return typeof value === 'string' && SKILL_IDS.some((id) => id === value);
 }
 
+function isEntryType(value: unknown): value is EntryType {
+  return typeof value === 'string' && ENTRY_TYPES.some((type) => type === value);
+}
+
+function isEntryStatus(value: unknown): value is EntryStatus {
+  return (
+    typeof value === 'string' && ENTRY_STATUSES.some((status) => status === value)
+  );
+}
+
 function assertNonNegativeInteger(value: unknown, field: string): number {
-  if (!Number.isInteger(value) || (value as number) < 0) {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
     throw new Error(`Stored Growth ${field} is invalid.`);
   }
 
-  return value as number;
+  return value;
 }
 
 function mapOptionalTimestamp(value: unknown): string | null {
@@ -106,16 +121,10 @@ export function mapSkillEvidenceEntryRows(
     if (typeof row.title !== 'string' || row.title.trim().length === 0) {
       throw new Error('Stored Growth entry title is invalid.');
     }
-    if (
-      typeof row.type !== 'string' ||
-      !ENTRY_TYPES.some((type) => type === row.type)
-    ) {
+    if (!isEntryType(row.type)) {
       throw new Error('Stored Growth entry type is invalid.');
     }
-    if (
-      typeof row.status !== 'string' ||
-      !ENTRY_STATUSES.some((status) => status === row.status)
-    ) {
+    if (!isEntryStatus(row.status)) {
       throw new Error('Stored Growth entry status is invalid.');
     }
     if (
