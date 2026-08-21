@@ -10,7 +10,11 @@ The canonical v1 product scope, technical assessment, architecture, privacy mode
 
 - [Product Direction and Technical Architecture](./docs/PRODUCT_AND_ARCHITECTURE.md)
 
-Read that document before making major product, persistence, backend, AI, synchronization, or infrastructure decisions.
+Implementation sequencing and milestone status live separately in:
+
+- [v1 Delivery Roadmap](./docs/ROADMAP.md)
+
+The product and architecture document remains authoritative when the roadmap and product scope differ. Read it before making major product, persistence, backend, AI, synchronization, or infrastructure decisions.
 
 ## v1 at a glance
 
