@@ -44,3 +44,5 @@ export const id: Record<TranslationKey, string> = {
 };
 
 export const translations = { en, id } as const;
+
+export type Language = keyof typeof translations;
