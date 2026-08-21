@@ -39,7 +39,7 @@ name: Core Log entry journey
 - assertVisible: "Prepared the weekly status report before the team deadline"
 - tapOn: "Growth"
 - assertVisible: "Your evidence map"
-- assertVisible: "Evidence across 1 skill areas"
+- assertVisible: "Evidence across 1 skill area"
 - assertVisible: "Execution"
 - assertVisible: "1 entry"
 - tapOn: "Execution"
