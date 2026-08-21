@@ -20,7 +20,7 @@ describe('language selector components', () => {
     jest.clearAllMocks();
   });
 
-  test('trigger exposes expanded state and remains actionable', async () => {
+  test('trigger exposes selected value, expanded state, and remains actionable', async () => {
     const onPress = jest.fn();
 
     await render(
@@ -33,6 +33,7 @@ describe('language selector components', () => {
             labelKey: 'common.language.indonesian',
           }}
           accessibilityLabel="common.language.change"
+          accessibilityValue="Bahasa Indonesia"
           expanded
           onPress={onPress}
         />
@@ -43,6 +44,9 @@ describe('language selector components', () => {
       name: 'common.language.change',
     });
     expect(trigger.props.accessibilityState).toEqual({ expanded: true });
+    expect(trigger.props.accessibilityValue).toEqual({
+      text: 'Bahasa Indonesia',
+    });
 
     await fireEvent.press(trigger);
     expect(onPress).toHaveBeenCalledTimes(1);
