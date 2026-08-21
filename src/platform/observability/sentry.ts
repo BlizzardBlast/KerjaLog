@@ -132,7 +132,7 @@ export function initializeSentry(): void {
   const runningInExpoGo = isRunningInExpoGo();
 
   Sentry.init({
-    dsn: 'https://14ee0c9c15f1270cd72c729104c5df0c@o4511942233227264.ingest.us.sentry.io/4511942238666752',
+    dsn: 'https://bb2a08ee78d2da8d245c58cd125eacf5@o4511942233227264.ingest.us.sentry.io/4511946505781248',
     sendDefaultPii: false,
     tracesSampleRate: __DEV__ ? 1 : 0.2,
     ...(runningInExpoGo ? {} : { profilesSampleRate: __DEV__ ? 1 : 0.1 }),
