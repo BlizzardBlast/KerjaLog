@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -37,9 +37,8 @@ function ProfiledSkillEvidenceScreen({ skillId }: SkillEvidenceScreenProps) {
       edges={['top']}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
+      <View
+        style={[
           styles.content,
           {
             paddingLeft: Math.max(insets.left, layout.screenHorizontalPadding),
@@ -79,19 +78,21 @@ function ProfiledSkillEvidenceScreen({ skillId }: SkillEvidenceScreenProps) {
             <Text variant="overline" color="primary">
               {t('growth.detail.eyebrow')}
             </Text>
-            <Text accessibilityRole="header" variant="heading">
+            <Text accessibilityRole="header" variant="title">
               {skillName}
             </Text>
           </View>
         </View>
 
-        <SkillEvidenceContent
-          locale={locale}
-          state={controller.state}
-          onRetry={controller.retry}
-          onOpenEntry={openEntry}
-        />
-      </ScrollView>
+        <View style={styles.body}>
+          <SkillEvidenceContent
+            locale={locale}
+            state={controller.state}
+            onRetry={controller.retry}
+            onOpenEntry={openEntry}
+          />
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -105,8 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: spacing[5],
-    paddingBottom: spacing[8],
+    flex: 1,
     paddingTop: spacing[4],
   },
   header: {
@@ -125,5 +125,9 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing[1],
     minWidth: 0,
+  },
+  body: {
+    flex: 1,
+    marginTop: spacing[5],
   },
 });
