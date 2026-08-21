@@ -50,9 +50,7 @@ export function GrowthSkillRow({
         <SymbolView
           name={icon}
           size={20}
-          tintColor={
-            disabled ? theme.colors.textMuted : theme.colors.primary
-          }
+          tintColor={disabled ? theme.colors.textMuted : theme.colors.primary}
         />
       </View>
       <View style={styles.copy}>
