@@ -3,6 +3,7 @@ import {
   entryRefinementEn,
   entryRefinementId,
 } from '@/i18n/entryRefinementTranslations';
+import { growthEn, growthId } from '@/i18n/growthTranslations';
 import { historyEn, historyId } from '@/i18n/historyTranslations';
 import { homeEn, homeId } from '@/i18n/homeTranslations';
 import { logDraftEn, logDraftId } from '@/i18n/logDraftTranslations';
@@ -15,6 +16,7 @@ export const en = {
   ...baseEn,
   ...appLockEn,
   ...entryRefinementEn,
+  ...growthEn,
   ...historyEn,
   ...homeEn,
   ...logEn,
@@ -29,6 +31,7 @@ export const id: Record<TranslationKey, string> = {
   ...baseId,
   ...appLockId,
   ...entryRefinementId,
+  ...growthId,
   ...historyId,
   ...homeId,
   ...logId,
