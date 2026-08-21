@@ -93,7 +93,8 @@ describe('Growth evidence presentation', () => {
                 id: 'entry-1',
                 title: 'Resolved reconciliation discrepancies',
                 occurredAt: '2026-08-20T08:00:00.000Z',
-                supportingText: 'Removed 7 duplicate entries before submission.',
+                supportingText:
+                  'Removed 7 duplicate entries before submission.',
               },
             ],
             isRefreshing: false,
