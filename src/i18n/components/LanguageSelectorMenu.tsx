@@ -4,8 +4,9 @@ import { AppIcon } from '@/design-system/icons/AppIcon';
 import type { AnchoredPopoverLayout } from '@/design-system/layout/anchoredPopover';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import type { Language } from '@/i18n/catalog';
 import { LANGUAGE_OPTIONS } from '@/i18n/components/languageSelectorOptions';
-import { type Language, useI18n } from '@/i18n/I18nProvider';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type LanguageSelectorMenuProps = {
   layout: AnchoredPopoverLayout | null;
