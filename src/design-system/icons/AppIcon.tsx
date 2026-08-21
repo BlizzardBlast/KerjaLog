@@ -1,3 +1,4 @@
+import * as Font from 'expo-font';
 import regular from 'expo-symbols/androidWeights/regular';
 import { type AndroidSymbol, type SFSymbol, SymbolView } from 'expo-symbols';
 import {
@@ -11,7 +12,6 @@ import {
 export type AppIconName = {
   ios: SFSymbol;
   android: AndroidSymbol;
-  web?: AndroidSymbol;
 };
 
 export type AppIconProps = {
@@ -22,13 +22,12 @@ export type AppIconProps = {
 
 /**
  * Renders app icons without the per-instance Android font-loading blank frame
- * in expo-symbols. The Material Symbols font is loaded once at app startup by
- * useAppIconFontReady before Android UI is shown.
+ * in expo-symbols. Android uses the preloaded Material Symbols font when it is
+ * available and falls back to SymbolView if runtime font loading fails.
  */
 export function AppIcon({ name, size = 24, color }: AppIconProps) {
-  if (Platform.OS === 'ios') {
-    return <SymbolView name={name.ios} size={size} tintColor={color} />;
-  }
+  const useLoadedAndroidFont =
+    Platform.OS === 'android' && Font.isLoaded(regular.name);
 
   return (
     <View
@@ -38,22 +37,30 @@ export function AppIcon({ name, size = 24, color }: AppIconProps) {
       pointerEvents="none"
       style={[styles.container, { height: size, width: size }]}
     >
-      <Text
-        allowFontScaling={false}
-        style={[
-          styles.materialSymbol,
-          {
-            color,
-            fontFamily: regular.name,
-            fontSize: size,
-            height: size,
-            lineHeight: size,
-            width: size,
-          },
-        ]}
-      >
-        {name.android}
-      </Text>
+      {useLoadedAndroidFont ? (
+        <Text
+          allowFontScaling={false}
+          style={[
+            styles.materialSymbol,
+            {
+              color,
+              fontFamily: regular.name,
+              fontSize: size,
+              height: size,
+              lineHeight: size,
+              width: size,
+            },
+          ]}
+        >
+          {name.android}
+        </Text>
+      ) : (
+        <SymbolView
+          name={{ ios: name.ios, android: name.android, web: name.android }}
+          size={size}
+          tintColor={color}
+        />
+      )}
     </View>
   );
 }
