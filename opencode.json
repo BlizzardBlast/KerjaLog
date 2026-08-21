@@ -3,7 +3,7 @@
   "mcp": {
     "Sentry": {
       "type": "remote",
-      "url": "https://mcp.sentry.dev/mcp/blizzard-dw/react-native",
+      "url": "https://mcp.sentry.dev/mcp/blizzard-dw/kerjalog",
       "oauth": {}
     }
   }

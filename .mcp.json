@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "Sentry": {
-      "url": "https://mcp.sentry.dev/mcp/blizzard-dw/react-native"
+      "url": "https://mcp.sentry.dev/mcp/blizzard-dw/kerjalog"
     }
   }
 }

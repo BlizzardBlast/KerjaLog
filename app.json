@@ -118,7 +118,7 @@
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
-          "project": "react-native",
+          "project": "kerjalog",
           "organization": "blizzard-dw",
           "experimental_android": {
             "enableAndroidGradlePlugin": true,
