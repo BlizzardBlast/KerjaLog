@@ -1,6 +1,11 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -15,51 +20,58 @@ function ProfiledWeeklyReflectionScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const flow = useWeeklyReflectionController({
-    onOpenLog: () => router.push('/entry/new'),
-  });
+  const openLog = () => router.replace('/entry/new');
+  const flow = useWeeklyReflectionController({ onOpenLog: openLog });
 
   return (
     <SafeAreaView
-      edges={['top']}
+      edges={['top', 'bottom']}
       style={[styles.screen, { backgroundColor: theme.colors.canvas }]}
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingLeft: Math.max(insets.left, layout.screenHorizontalPadding),
-            paddingRight: Math.max(
-              insets.right,
-              layout.screenHorizontalPadding,
-            ),
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.screen}
       >
-        {flow.reviewing ? (
-          <WeeklyReflectionSummaryView
-            answeredPrompts={flow.answeredPrompts}
-            handoffState={flow.handoffState}
-            onBackHome={() => router.replace('/home')}
-            onLogAnswer={(prompt, answer) =>
-              flow.handoffToLog(prompt.id, answer)
-            }
-            onOpenDraft={() => router.push('/entry/new')}
-          />
-        ) : flow.prompt ? (
-          <WeeklyReflectionPromptView
-            currentAnswer={flow.currentAnswer}
-            onAnswerChange={flow.setCurrentAnswer}
-            onContinue={() => flow.advance(true)}
-            onSkip={() => flow.advance(false)}
-            prompt={flow.prompt}
-            promptIndex={flow.promptIndex}
-            totalPrompts={flow.totalPrompts}
-          />
-        ) : null}
-      </ScrollView>
+        <ScrollView
+          contentContainerStyle={[
+            styles.content,
+            {
+              paddingLeft: Math.max(
+                insets.left,
+                layout.screenHorizontalPadding,
+              ),
+              paddingRight: Math.max(
+                insets.right,
+                layout.screenHorizontalPadding,
+              ),
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {flow.reviewing ? (
+            <WeeklyReflectionSummaryView
+              answeredPrompts={flow.answeredPrompts}
+              handoffState={flow.handoffState}
+              onBackHome={() => router.replace('/home')}
+              onLogAnswer={(prompt, answer) =>
+                flow.handoffToLog(prompt.id, answer)
+              }
+              onOpenDraft={openLog}
+            />
+          ) : flow.prompt ? (
+            <WeeklyReflectionPromptView
+              currentAnswer={flow.currentAnswer}
+              onAnswerChange={flow.setCurrentAnswer}
+              onContinue={() => flow.advance(true)}
+              onSkip={() => flow.advance(false)}
+              prompt={flow.prompt}
+              promptIndex={flow.promptIndex}
+              totalPrompts={flow.totalPrompts}
+            />
+          ) : null}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
