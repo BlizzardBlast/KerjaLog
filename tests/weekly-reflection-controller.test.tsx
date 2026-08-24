@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 import { EMPTY_WORK_ENTRY_DRAFT } from '@/domain/entry/draft';
 import { useWeeklyReflectionController } from '@/features/weekly-reflection/useWeeklyReflectionController';
 
@@ -29,7 +29,9 @@ describe('weekly reflection controller', () => {
     );
 
     for (let index = 0; index < 4; index += 1) {
-      act(() => result.current.advance(false));
+      await act(async () => {
+        result.current.advance(false);
+      });
     }
 
     expect(result.current.reviewing).toBe(true);
@@ -79,9 +81,7 @@ describe('weekly reflection controller', () => {
       await result.current.handoffToLog('helped', 'Helped the operations team');
     });
 
-    await waitFor(() =>
-      expect(result.current.handoffState).toBe('active-draft'),
-    );
+    expect(result.current.handoffState).toBe('active-draft');
     expect(mockSaveActive).not.toHaveBeenCalled();
     expect(onOpenLog).not.toHaveBeenCalled();
   });
