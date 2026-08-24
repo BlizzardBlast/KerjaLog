@@ -26,6 +26,7 @@ export const weeklyReflectionEn = {
   'reflection.summary.emptyDescription':
     'That is okay. Reflection is here to help you remember, not to create pressure.',
   'reflection.summary.logThis': 'Log this',
+  'reflection.summary.logPrompt': 'Log answer for {{prompt}}',
   'reflection.summary.backHome': 'Back to Home',
   'reflection.handoff.activeDraftTitle':
     'You already have an unfinished work entry',
@@ -71,6 +72,7 @@ export const weeklyReflectionId: Record<
   'reflection.summary.emptyDescription':
     'Tidak masalah. Refleksi membantu Anda mengingat, bukan memberi tekanan.',
   'reflection.summary.logThis': 'Catat ini',
+  'reflection.summary.logPrompt': 'Catat jawaban untuk {{prompt}}',
   'reflection.summary.backHome': 'Kembali ke Beranda',
   'reflection.handoff.activeDraftTitle':
     'Anda masih punya catatan kerja yang belum selesai',
