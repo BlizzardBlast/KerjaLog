@@ -22,7 +22,7 @@ function ProfiledWeeklyReflectionScreen() {
   return (
     <SafeAreaView
       edges={['top']}
-      style={[styles.screen, { backgroundColor: theme.colors.background }]}
+      style={[styles.screen, { backgroundColor: theme.colors.canvas }]}
     >
       <ScrollView
         contentContainerStyle={[
