@@ -1,31 +1,33 @@
-import { act, renderHook } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { EMPTY_WORK_ENTRY_DRAFT } from '@/domain/entry/draft';
 import { useWeeklyReflectionController } from '@/features/weekly-reflection/useWeeklyReflectionController';
-
-const mockLoadActive = jest.fn();
-const mockSaveActive = jest.fn();
-
-jest.mock('@/data/repositories/workEntryDraftRepository', () => ({
-  workEntryDraftRepository: {
-    loadActive: (...args: unknown[]) => mockLoadActive(...args),
-    saveActive: (...args: unknown[]) => mockSaveActive(...args),
-  },
-}));
 
 jest.mock('@sentry/react-native', () => ({
   captureException: jest.fn(),
 }));
 
-describe('weekly reflection controller', () => {
-  beforeEach(() => {
-    mockLoadActive.mockReset();
-    mockSaveActive.mockReset();
+function createRepository() {
+  return {
+    loadActive: jest.fn(),
+    saveActive: jest.fn(),
+  };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
   });
 
-  test('lets users skip every prompt without creating an answer', async () => {
+  return { promise, resolve };
+}
+
+describe('weekly reflection controller', () => {
+  test('lets users skip every prompt without creating persisted work', async () => {
+    const repository = createRepository();
     const onOpenLog = jest.fn();
     const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog }),
+      useWeeklyReflectionController({ onOpenLog, repository }),
     );
 
     for (let index = 0; index < 4; index += 1) {
@@ -36,37 +38,39 @@ describe('weekly reflection controller', () => {
 
     expect(result.current.reviewing).toBe(true);
     expect(result.current.answeredPrompts).toEqual([]);
-    expect(mockSaveActive).not.toHaveBeenCalled();
+    expect(repository.saveActive).not.toHaveBeenCalled();
     expect(onOpenLog).not.toHaveBeenCalled();
   });
 
-  test('seeds the encrypted work-entry draft before opening Log', async () => {
-    mockLoadActive.mockResolvedValue(null);
-    mockSaveActive.mockResolvedValue(undefined);
+  test('seeds a normalized encrypted work-entry draft before opening Log', async () => {
+    const repository = createRepository();
+    repository.loadActive.mockResolvedValue(null);
+    repository.saveActive.mockResolvedValue(undefined);
     const onOpenLog = jest.fn();
     const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog }),
+      useWeeklyReflectionController({ onOpenLog, repository }),
     );
 
     await act(async () => {
       await result.current.handoffToLog(
         'problem',
-        'Resolved a duplicate reconciliation issue',
+        '  Resolved a duplicate reconciliation issue  ',
       );
     });
 
-    expect(mockSaveActive).toHaveBeenCalledWith({
+    expect(repository.saveActive).toHaveBeenCalledWith({
       ...EMPTY_WORK_ENTRY_DRAFT,
       step: 'event',
       intent: 'solved',
       rawNote: 'Resolved a duplicate reconciliation issue',
     });
     expect(onOpenLog).toHaveBeenCalledTimes(1);
-    expect(result.current.handoffState).toBe('idle');
+    expect(result.current.handoffState).toEqual({ status: 'idle' });
   });
 
   test('never overwrites an existing unfinished work-entry draft', async () => {
-    mockLoadActive.mockResolvedValue({
+    const repository = createRepository();
+    repository.loadActive.mockResolvedValue({
       ...EMPTY_WORK_ENTRY_DRAFT,
       step: 'event',
       intent: 'completed',
@@ -74,15 +78,84 @@ describe('weekly reflection controller', () => {
     });
     const onOpenLog = jest.fn();
     const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog }),
+      useWeeklyReflectionController({ onOpenLog, repository }),
     );
 
     await act(async () => {
       await result.current.handoffToLog('helped', 'Helped the operations team');
     });
 
-    expect(result.current.handoffState).toBe('active-draft');
-    expect(mockSaveActive).not.toHaveBeenCalled();
+    expect(result.current.handoffState).toEqual({
+      status: 'active-draft',
+      promptId: 'helped',
+    });
+    expect(repository.saveActive).not.toHaveBeenCalled();
+    expect(onOpenLog).not.toHaveBeenCalled();
+  });
+
+  test('does not persist empty reflection answers', async () => {
+    const repository = createRepository();
+    const onOpenLog = jest.fn();
+    const { result } = await renderHook(() =>
+      useWeeklyReflectionController({ onOpenLog, repository }),
+    );
+
+    await act(async () => {
+      await result.current.handoffToLog('learned', '   ');
+    });
+
+    expect(repository.loadActive).not.toHaveBeenCalled();
+    expect(repository.saveActive).not.toHaveBeenCalled();
+    expect(onOpenLog).not.toHaveBeenCalled();
+  });
+
+  test('serializes rapid handoff attempts so a double press cannot duplicate writes', async () => {
+    const repository = createRepository();
+    const activeDraft = deferred<null>();
+    repository.loadActive.mockReturnValue(activeDraft.promise);
+    repository.saveActive.mockResolvedValue(undefined);
+    const onOpenLog = jest.fn();
+    const { result } = await renderHook(() =>
+      useWeeklyReflectionController({ onOpenLog, repository }),
+    );
+
+    let firstHandoff!: Promise<void>;
+    await act(async () => {
+      firstHandoff = result.current.handoffToLog('helped', 'Helped finance');
+      void result.current.handoffToLog('problem', 'Fixed a report issue');
+    });
+
+    expect(repository.loadActive).toHaveBeenCalledTimes(1);
+
+    activeDraft.resolve(null);
+    await act(async () => {
+      await firstHandoff;
+    });
+
+    expect(repository.saveActive).toHaveBeenCalledTimes(1);
+    expect(onOpenLog).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not navigate after the reflection screen unmounts during a handoff', async () => {
+    const repository = createRepository();
+    const save = deferred<void>();
+    repository.loadActive.mockResolvedValue(null);
+    repository.saveActive.mockReturnValue(save.promise);
+    const onOpenLog = jest.fn();
+    const { result, unmount } = await renderHook(() =>
+      useWeeklyReflectionController({ onOpenLog, repository }),
+    );
+
+    let handoff!: Promise<void>;
+    await act(async () => {
+      handoff = result.current.handoffToLog('learned', 'Learned a new process');
+    });
+
+    await waitFor(() => expect(repository.saveActive).toHaveBeenCalledTimes(1));
+    unmount();
+    save.resolve();
+    await handoff;
+
     expect(onOpenLog).not.toHaveBeenCalled();
   });
 });
