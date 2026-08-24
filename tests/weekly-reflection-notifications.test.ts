@@ -59,7 +59,7 @@ function createNotificationResponse(
         trigger: null,
       },
     },
-  } as Notifications.NotificationResponse;
+  } as unknown as Notifications.NotificationResponse;
 }
 
 describe('weekly reflection notifications', () => {
