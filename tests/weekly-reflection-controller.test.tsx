@@ -79,6 +79,39 @@ describe('weekly reflection controller', () => {
     expect(result.current.handoffState).toEqual({ status: 'idle' });
   });
 
+  test('consumes a successfully handed-off answer so it cannot be logged twice on return', async () => {
+    const repository = createRepository();
+    repository.loadActive.mockResolvedValue(null);
+    repository.saveActive.mockResolvedValue(undefined);
+    const onOpenLog = jest.fn();
+    const { result } = await renderController(onOpenLog, repository);
+
+    await act(async () => {
+      result.current.setCurrentAnswer('Finished the month-end report');
+    });
+    await act(async () => {
+      result.current.advance(true);
+    });
+    for (let index = 1; index < 4; index += 1) {
+      await act(async () => {
+        result.current.advance(false);
+      });
+    }
+
+    expect(result.current.answeredPrompts).toHaveLength(1);
+
+    await act(async () => {
+      await result.current.handoffToLog(
+        'moved_forward',
+        'Finished the month-end report',
+      );
+    });
+
+    expect(result.current.answeredPrompts).toEqual([]);
+    expect(repository.saveActive).toHaveBeenCalledTimes(1);
+    expect(onOpenLog).toHaveBeenCalledTimes(1);
+  });
+
   test('never overwrites an existing unfinished work-entry draft', async () => {
     const repository = createRepository();
     repository.loadActive.mockResolvedValue({
