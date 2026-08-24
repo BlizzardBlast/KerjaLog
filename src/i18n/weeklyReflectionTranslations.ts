@@ -8,13 +8,16 @@ export const weeklyReflectionEn = {
   'reflection.prompt.helped': 'Who did you help?',
   'reflection.prompt.problem': 'What problem did you handle?',
   'reflection.prompt.learned': 'What did you learn?',
-  'reflection.placeholder':
-    'Write only what you remember. You can develop the details later.',
+  'reflection.placeholder.moved_forward': 'A task, project, or follow-up…',
+  'reflection.placeholder.helped': 'A colleague, team, or customer…',
+  'reflection.placeholder.problem': 'An error, blocker, delay, or risk…',
+  'reflection.placeholder.learned': 'A process, tool, lesson, or new approach…',
   'reflection.privacy':
     'Avoid passwords, account numbers, customer personal data, confidential documents, or company secrets.',
   'reflection.skip': 'Skip',
   'reflection.continue': 'Continue',
   'reflection.finish': 'Review answers',
+  'reflection.close': 'Close reflection',
   'reflection.summary.eyebrow': 'Reflection complete',
   'reflection.summary.title': 'Choose what is worth logging',
   'reflection.summary.description':
@@ -48,13 +51,17 @@ export const weeklyReflectionId: Record<
   'reflection.prompt.helped': 'Siapa yang Anda bantu?',
   'reflection.prompt.problem': 'Masalah apa yang Anda tangani?',
   'reflection.prompt.learned': 'Apa yang Anda pelajari?',
-  'reflection.placeholder':
-    'Tulis hanya yang Anda ingat. Detailnya dapat dikembangkan nanti.',
+  'reflection.placeholder.moved_forward': 'Tugas, proyek, atau tindak lanjut…',
+  'reflection.placeholder.helped': 'Rekan, tim, atau pelanggan…',
+  'reflection.placeholder.problem': 'Kesalahan, hambatan, keterlambatan, atau risiko…',
+  'reflection.placeholder.learned':
+    'Proses, alat, pelajaran, atau pendekatan baru…',
   'reflection.privacy':
     'Hindari kata sandi, nomor rekening, data pribadi pelanggan, dokumen rahasia, atau rahasia perusahaan.',
   'reflection.skip': 'Lewati',
   'reflection.continue': 'Lanjutkan',
   'reflection.finish': 'Tinjau jawaban',
+  'reflection.close': 'Tutup refleksi',
   'reflection.summary.eyebrow': 'Refleksi selesai',
   'reflection.summary.title': 'Pilih yang layak dicatat',
   'reflection.summary.description':
