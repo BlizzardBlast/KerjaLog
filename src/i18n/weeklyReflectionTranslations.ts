@@ -8,7 +8,8 @@ export const weeklyReflectionEn = {
   'reflection.prompt.helped': 'Who did you help?',
   'reflection.prompt.problem': 'What problem did you handle?',
   'reflection.prompt.learned': 'What did you learn?',
-  'reflection.placeholder': 'Write only what you remember. You can develop the details later.',
+  'reflection.placeholder':
+    'Write only what you remember. You can develop the details later.',
   'reflection.privacy':
     'Avoid passwords, account numbers, customer personal data, confidential documents, or company secrets.',
   'reflection.skip': 'Skip',
@@ -23,7 +24,8 @@ export const weeklyReflectionEn = {
     'That is okay. Reflection is here to help you remember, not to create pressure.',
   'reflection.summary.logThis': 'Log this',
   'reflection.summary.backHome': 'Back to Home',
-  'reflection.handoff.activeDraftTitle': 'You already have an unfinished work entry',
+  'reflection.handoff.activeDraftTitle':
+    'You already have an unfinished work entry',
   'reflection.handoff.activeDraftDescription':
     'Finish or discard the current draft before sending another reflection answer to Log.',
   'reflection.handoff.openDraft': 'Open current draft',
@@ -33,7 +35,10 @@ export const weeklyReflectionEn = {
 
 export type WeeklyReflectionTranslationKey = keyof typeof weeklyReflectionEn;
 
-export const weeklyReflectionId: Record<WeeklyReflectionTranslationKey, string> = {
+export const weeklyReflectionId: Record<
+  WeeklyReflectionTranslationKey,
+  string
+> = {
   'reflection.eyebrow': 'Refleksi mingguan',
   'reflection.title': 'Ingat kembali pekerjaan yang hampir terlupakan',
   'reflection.description':
@@ -59,7 +64,8 @@ export const weeklyReflectionId: Record<WeeklyReflectionTranslationKey, string> 
     'Tidak masalah. Refleksi membantu Anda mengingat, bukan memberi tekanan.',
   'reflection.summary.logThis': 'Catat ini',
   'reflection.summary.backHome': 'Kembali ke Beranda',
-  'reflection.handoff.activeDraftTitle': 'Anda masih punya catatan kerja yang belum selesai',
+  'reflection.handoff.activeDraftTitle':
+    'Anda masih punya catatan kerja yang belum selesai',
   'reflection.handoff.activeDraftDescription':
     'Selesaikan atau hapus draf saat ini sebelum mengirim jawaban refleksi lain ke alur Catat.',
   'reflection.handoff.openDraft': 'Buka draf saat ini',
