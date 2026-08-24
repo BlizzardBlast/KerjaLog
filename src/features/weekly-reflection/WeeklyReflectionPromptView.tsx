@@ -9,6 +9,8 @@ import { promptTranslationKeyById } from '@/features/weekly-reflection/reflectio
 import type { WeeklyReflectionPrompt } from '@/features/weekly-reflection/reflectionPrompts';
 import { useI18n } from '@/i18n/I18nProvider';
 
+const PROMPT_LABEL_ID = 'weekly-reflection-prompt-label';
+
 type WeeklyReflectionPromptViewProps = {
   prompt: WeeklyReflectionPrompt;
   promptIndex: number;
@@ -31,13 +33,16 @@ export function WeeklyReflectionPromptView({
   const { t } = useI18n();
   const { theme } = useTheme();
   const isLastPrompt = promptIndex === totalPrompts - 1;
+  const promptLabel = t(promptTranslationKeyById[prompt.id]);
 
   return (
     <>
       <Text variant="overline" color="primary">
         {t('reflection.eyebrow')}
       </Text>
-      <Text variant="title">{t('reflection.title')}</Text>
+      <Text accessibilityRole="header" variant="title">
+        {t('reflection.title')}
+      </Text>
       <Text color="textMuted">{t('reflection.description')}</Text>
       <Text variant="caption" color="textMuted">
         {t('reflection.progress', {
@@ -54,9 +59,16 @@ export function WeeklyReflectionPromptView({
           },
         ]}
       >
-        <Text variant="heading">{t(promptTranslationKeyById[prompt.id])}</Text>
+        <Text
+          accessibilityRole="header"
+          nativeID={PROMPT_LABEL_ID}
+          variant="heading"
+        >
+          {promptLabel}
+        </Text>
         <TextField
-          accessibilityLabel={t(promptTranslationKeyById[prompt.id])}
+          accessibilityLabel={promptLabel}
+          accessibilityLabelledBy={PROMPT_LABEL_ID}
           maxLength={WORK_ENTRY_TEXT_LIMITS.rawNote}
           multiline
           onChangeText={onAnswerChange}
