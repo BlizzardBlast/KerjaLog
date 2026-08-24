@@ -118,9 +118,8 @@ describe('weekly reflection notifications', () => {
     getLastNotificationResponse.mockReturnValue(response);
     const onOpenReflection = jest.fn();
 
-    const unsubscribe = observeWeeklyReflectionNotificationResponses(
-      onOpenReflection,
-    );
+    const unsubscribe =
+      observeWeeklyReflectionNotificationResponses(onOpenReflection);
 
     expect(onOpenReflection).toHaveBeenCalledTimes(1);
     expect(clearLastNotificationResponse).toHaveBeenCalledTimes(1);
