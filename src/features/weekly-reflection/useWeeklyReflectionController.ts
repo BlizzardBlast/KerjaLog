@@ -1,35 +1,54 @@
 import * as Sentry from '@sentry/react-native';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import {
   EMPTY_WORK_ENTRY_DRAFT,
   hasWorkEntryDraftContent,
 } from '@/domain/entry/draft';
+import type {
+  WorkEntryDraftReader,
+  WorkEntryDraftWriter,
+} from '@/domain/entry/repository';
 import {
   WEEKLY_REFLECTION_PROMPTS,
   type WeeklyReflectionPromptId,
 } from '@/features/weekly-reflection/reflectionPrompts';
 
 type ReflectionAnswers = Partial<Record<WeeklyReflectionPromptId, string>>;
+type WeeklyReflectionDraftRepository = WorkEntryDraftReader &
+  Pick<WorkEntryDraftWriter, 'saveActive'>;
+
 export type ReflectionHandoffState =
-  | 'idle'
-  | 'saving'
-  | 'active-draft'
-  | 'error';
+  | { status: 'idle' }
+  | { status: 'saving'; promptId: WeeklyReflectionPromptId }
+  | { status: 'active-draft'; promptId: WeeklyReflectionPromptId }
+  | { status: 'error'; promptId: WeeklyReflectionPromptId };
 
 type UseWeeklyReflectionControllerInput = {
   onOpenLog: () => void;
+  repository?: WeeklyReflectionDraftRepository;
 };
 
 export function useWeeklyReflectionController({
   onOpenLog,
+  repository = workEntryDraftRepository,
 }: UseWeeklyReflectionControllerInput) {
   const [promptIndex, setPromptIndex] = useState(0);
   const [answers, setAnswers] = useState<ReflectionAnswers>({});
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [reviewing, setReviewing] = useState(false);
-  const [handoffState, setHandoffState] =
-    useState<ReflectionHandoffState>('idle');
+  const [handoffState, setHandoffState] = useState<ReflectionHandoffState>({
+    status: 'idle',
+  });
+  const handoffInProgressRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(
+    () => () => {
+      mountedRef.current = false;
+    },
+    [],
+  );
 
   const prompt = WEEKLY_REFLECTION_PROMPTS[promptIndex] ?? null;
   const answeredPrompts = WEEKLY_REFLECTION_PROMPTS.flatMap((item) => {
@@ -43,22 +62,23 @@ export function useWeeklyReflectionController({
     }
 
     const nextAnswers = { ...answers };
-    if (saveAnswer && currentAnswer.trim()) {
-      nextAnswers[prompt.id] = currentAnswer.trim();
+    const normalizedAnswer = currentAnswer.trim();
+    if (saveAnswer && normalizedAnswer) {
+      nextAnswers[prompt.id] = normalizedAnswer;
     } else {
       delete nextAnswers[prompt.id];
     }
 
     setAnswers(nextAnswers);
     setCurrentAnswer('');
-    setHandoffState('idle');
+    setHandoffState({ status: 'idle' });
 
     if (promptIndex === WEEKLY_REFLECTION_PROMPTS.length - 1) {
       setReviewing(true);
       return;
     }
 
-    setPromptIndex((current) => current + 1);
+    setPromptIndex(promptIndex + 1);
   };
 
   const handoffToLog = async (
@@ -68,25 +88,35 @@ export function useWeeklyReflectionController({
     const promptToLog = WEEKLY_REFLECTION_PROMPTS.find(
       (item) => item.id === promptId,
     );
-    if (!promptToLog || handoffState === 'saving') {
+    const normalizedAnswer = answer.trim();
+    if (!promptToLog || !normalizedAnswer || handoffInProgressRef.current) {
       return;
     }
 
-    setHandoffState('saving');
+    handoffInProgressRef.current = true;
+    setHandoffState({ status: 'saving', promptId });
+
     try {
-      const activeDraft = await workEntryDraftRepository.loadActive();
+      const activeDraft = await repository.loadActive();
       if (activeDraft && hasWorkEntryDraftContent(activeDraft)) {
-        setHandoffState('active-draft');
+        if (mountedRef.current) {
+          setHandoffState({ status: 'active-draft', promptId });
+        }
         return;
       }
 
-      await workEntryDraftRepository.saveActive({
+      await repository.saveActive({
         ...EMPTY_WORK_ENTRY_DRAFT,
         step: 'event',
         intent: promptToLog.intent,
-        rawNote: answer.trim(),
+        rawNote: normalizedAnswer,
       });
-      setHandoffState('idle');
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      setHandoffState({ status: 'idle' });
       onOpenLog();
     } catch (error) {
       Sentry.captureException(error, {
@@ -95,7 +125,12 @@ export function useWeeklyReflectionController({
           operation: 'handoff-to-log',
         },
       });
-      setHandoffState('error');
+
+      if (mountedRef.current) {
+        setHandoffState({ status: 'error', promptId });
+      }
+    } finally {
+      handoffInProgressRef.current = false;
     }
   };
 
