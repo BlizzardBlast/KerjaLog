@@ -112,6 +112,11 @@ export function useWeeklyReflectionController({
         return;
       }
 
+      setAnswers((current) => {
+        const nextAnswers = { ...current };
+        delete nextAnswers[promptId];
+        return nextAnswers;
+      });
       setHandoffState({ status: 'idle' });
       onOpenLog();
     } catch (error) {
