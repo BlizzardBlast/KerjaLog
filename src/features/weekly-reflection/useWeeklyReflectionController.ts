@@ -41,14 +41,15 @@ export function useWeeklyReflectionController({
     status: 'idle',
   });
   const handoffInProgressRef = useRef(false);
-  const mountedRef = useRef(true);
+  const mountedRef = useRef(false);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
       mountedRef.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
 
   const prompt = WEEKLY_REFLECTION_PROMPTS[promptIndex] ?? null;
   const answeredPrompts = WEEKLY_REFLECTION_PROMPTS.flatMap((item) => {
