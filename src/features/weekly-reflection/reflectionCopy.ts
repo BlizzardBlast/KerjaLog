@@ -1,12 +1,29 @@
 import type { WeeklyReflectionPromptId } from '@/features/weekly-reflection/reflectionPrompts';
 import type { TranslationKey } from '@/i18n/catalog';
 
-export const promptTranslationKeyById: Record<
+type WeeklyReflectionPromptCopyKeys = {
+  label: TranslationKey;
+  placeholder: TranslationKey;
+};
+
+export const promptCopyKeysById: Record<
   WeeklyReflectionPromptId,
-  TranslationKey
+  WeeklyReflectionPromptCopyKeys
 > = {
-  moved_forward: 'reflection.prompt.moved_forward',
-  helped: 'reflection.prompt.helped',
-  problem: 'reflection.prompt.problem',
-  learned: 'reflection.prompt.learned',
+  moved_forward: {
+    label: 'reflection.prompt.moved_forward',
+    placeholder: 'reflection.placeholder.moved_forward',
+  },
+  helped: {
+    label: 'reflection.prompt.helped',
+    placeholder: 'reflection.placeholder.helped',
+  },
+  problem: {
+    label: 'reflection.prompt.problem',
+    placeholder: 'reflection.placeholder.problem',
+  },
+  learned: {
+    label: 'reflection.prompt.learned',
+    placeholder: 'reflection.placeholder.learned',
+  },
 };
