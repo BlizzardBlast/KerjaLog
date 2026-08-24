@@ -30,13 +30,16 @@ export function WeeklyReflectionSummaryView({
 }: WeeklyReflectionSummaryViewProps) {
   const { t } = useI18n();
   const { theme } = useTheme();
+  const isSaving = handoffState.status === 'saving';
 
   return (
     <>
       <Text variant="overline" color="primary">
         {t('reflection.summary.eyebrow')}
       </Text>
-      <Text variant="title">{t('reflection.summary.title')}</Text>
+      <Text accessibilityRole="header" variant="title">
+        {t('reflection.summary.title')}
+      </Text>
       <Text color="textMuted">{t('reflection.summary.description')}</Text>
 
       {answeredPrompts.length === 0 ? (
@@ -55,34 +58,40 @@ export function WeeklyReflectionSummaryView({
           </Text>
         </View>
       ) : (
-        answeredPrompts.map(({ prompt, answer }) => (
-          <View
-            key={prompt.id}
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.border,
-              },
-            ]}
-          >
-            <Text variant="bodyStrong">
-              {t(promptTranslationKeyById[prompt.id])}
-            </Text>
-            <Text>{answer}</Text>
-            <Button
-              disabled={handoffState === 'saving'}
-              loading={handoffState === 'saving'}
-              onPress={() => onLogAnswer(prompt, answer)}
-              variant="secondary"
+        answeredPrompts.map(({ prompt, answer }) => {
+          const isThisPromptSaving =
+            handoffState.status === 'saving' &&
+            handoffState.promptId === prompt.id;
+
+          return (
+            <View
+              key={prompt.id}
+              style={[
+                styles.card,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.border,
+                },
+              ]}
             >
-              {t('reflection.summary.logThis')}
-            </Button>
-          </View>
-        ))
+              <Text variant="bodyStrong">
+                {t(promptTranslationKeyById[prompt.id])}
+              </Text>
+              <Text>{answer}</Text>
+              <Button
+                disabled={isSaving}
+                loading={isThisPromptSaving}
+                onPress={() => onLogAnswer(prompt, answer)}
+                variant="secondary"
+              >
+                {t('reflection.summary.logThis')}
+              </Button>
+            </View>
+          );
+        })
       )}
 
-      {handoffState === 'active-draft' ? (
+      {handoffState.status === 'active-draft' ? (
         <View
           accessibilityRole="alert"
           style={[
@@ -103,13 +112,13 @@ export function WeeklyReflectionSummaryView({
         </View>
       ) : null}
 
-      {handoffState === 'error' ? (
+      {handoffState.status === 'error' ? (
         <Text accessibilityRole="alert" color="danger">
           {t('reflection.handoff.error')}
         </Text>
       ) : null}
 
-      <Button fullWidth onPress={onBackHome} size="lg">
+      <Button disabled={isSaving} fullWidth onPress={onBackHome} size="lg">
         {t('reflection.summary.backHome')}
       </Button>
     </>
