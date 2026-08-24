@@ -21,11 +21,8 @@ function ProfiledWeeklyReflectionScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const goHome = () => router.replace('/home');
-  const openNewLogFromReflection = () => router.push('/entry/new');
-  const openExistingDraft = () => router.replace('/entry/new');
-  const flow = useWeeklyReflectionController({
-    onOpenLog: openNewLogFromReflection,
-  });
+  const openLog = () => router.push('/entry/new');
+  const flow = useWeeklyReflectionController({ onOpenLog: openLog });
 
   return (
     <SafeAreaView
@@ -61,7 +58,7 @@ function ProfiledWeeklyReflectionScreen() {
               onLogAnswer={(prompt, answer) =>
                 flow.handoffToLog(prompt.id, answer)
               }
-              onOpenDraft={openExistingDraft}
+              onOpenDraft={openLog}
             />
           ) : flow.prompt ? (
             <WeeklyReflectionPromptView
