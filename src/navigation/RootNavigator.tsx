@@ -9,6 +9,7 @@ import { useAppLock } from '@/features/app-lock/AppLockProvider';
 import { AppLockScreen } from '@/features/app-lock/AppLockScreen';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useWeeklyReflectionNotificationNavigation } from '@/navigation/useWeeklyReflectionNotificationNavigation';
 
 export function RootNavigator() {
   const { theme, resolvedTheme, isHydrated: isThemeHydrated } = useTheme();
@@ -27,6 +28,8 @@ export function RootNavigator() {
     isLanguageHydrated &&
     isOnboardingHydrated &&
     isAppLockHydrated;
+
+  useWeeklyReflectionNotificationNavigation(isReady);
 
   useEffect(() => {
     if (isReady) {
