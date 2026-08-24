@@ -5,7 +5,7 @@ import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
-import { promptTranslationKeyById } from '@/features/weekly-reflection/reflectionCopy';
+import { promptCopyKeysById } from '@/features/weekly-reflection/reflectionCopy';
 import type { WeeklyReflectionPrompt } from '@/features/weekly-reflection/reflectionPrompts';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -19,6 +19,7 @@ type WeeklyReflectionPromptViewProps = {
   onAnswerChange: (value: string) => void;
   onSkip: () => void;
   onContinue: () => void;
+  onClose: () => void;
 };
 
 export function WeeklyReflectionPromptView({
@@ -29,11 +30,13 @@ export function WeeklyReflectionPromptView({
   onAnswerChange,
   onSkip,
   onContinue,
+  onClose,
 }: WeeklyReflectionPromptViewProps) {
   const { t } = useI18n();
   const { theme } = useTheme();
   const isLastPrompt = promptIndex === totalPrompts - 1;
-  const promptLabel = t(promptTranslationKeyById[prompt.id]);
+  const promptCopy = promptCopyKeysById[prompt.id];
+  const promptLabel = t(promptCopy.label);
 
   return (
     <>
@@ -72,7 +75,7 @@ export function WeeklyReflectionPromptView({
           maxLength={WORK_ENTRY_TEXT_LIMITS.rawNote}
           multiline
           onChangeText={onAnswerChange}
-          placeholder={t('reflection.placeholder')}
+          placeholder={t(promptCopy.placeholder)}
           style={styles.textarea}
           textAlignVertical="top"
           value={currentAnswer}
@@ -93,6 +96,9 @@ export function WeeklyReflectionPromptView({
           {t(isLastPrompt ? 'reflection.finish' : 'reflection.continue')}
         </Button>
       </View>
+      <Button fullWidth onPress={onClose} variant="ghost">
+        {t('reflection.close')}
+      </Button>
     </>
   );
 }
