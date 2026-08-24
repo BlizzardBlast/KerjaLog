@@ -41,7 +41,7 @@ describe('weekly reflection notification navigation', () => {
     await renderHook(() => useWeeklyReflectionNotificationNavigation(true));
     const onOpenReflection = mockObserve.mock.calls[0]?.[0];
 
-    act(() => {
+    await act(async () => {
       onOpenReflection?.();
     });
 
@@ -53,7 +53,7 @@ describe('weekly reflection notification navigation', () => {
     await renderHook(() => useWeeklyReflectionNotificationNavigation(true));
     const onOpenReflection = mockObserve.mock.calls[0]?.[0];
 
-    act(() => {
+    await act(async () => {
       onOpenReflection?.();
     });
 
