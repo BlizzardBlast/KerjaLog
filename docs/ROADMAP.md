@@ -2,7 +2,7 @@
 
 > Status: implementation sequencing for v1
 >
-> Last reviewed: 2026-08-21
+> Last reviewed: 2026-08-24
 
 This roadmap tracks delivery order and implementation status. It does **not** replace [`PRODUCT_AND_ARCHITECTURE.md`](./PRODUCT_AND_ARCHITECTURE.md), which remains the source of truth for product scope, privacy principles, architecture, and v1 `DO` / `DO NOT` decisions.
 
@@ -44,7 +44,7 @@ The sequencing intentionally proves the local-first evidence loop before account
 - [x] persisted confirmed `entry_skills` relationships
 - [x] History timeline with search, practical filters, and cursor pagination
 
-### Current milestone — Growth / Evidence Map
+### Completed — Growth / Evidence Map
 
 - [x] evidence map across all canonical skills
 - [x] supporting-entry counts without ratings, percentages, levels, or performance scores
@@ -57,22 +57,22 @@ The sequencing intentionally proves the local-first evidence loop before account
 
 Growth is a projection over the existing encrypted `skills`, `entry_skills`, `work_entries`, and `evidence` data. It does not create a second persisted source of truth and does not change export privacy rules.
 
+### Current milestone — Weekly Reflection
+
+- [x] four skippable prompts for work moved forward, people helped, problems handled, and learning
+- [x] explicit review step before any reflection answer enters the work-entry flow
+- [x] user-confirmed answers handed into the existing encrypted active work-entry draft
+- [x] existing unfinished work-entry drafts preserved instead of overwritten
+- [x] reflection answers kept ephemeral until the user deliberately chooses **Log this**
+- [x] existing work-entry validation, Quick Save, refinement, skill confirmation, and deterministic Impact Builder reused after handoff
+- [x] Home entry point plus English and Indonesian copy
+- [x] no streaks, guilt messaging, remote notification backend, AI generation, or second persisted reflection store
+
+Weekly Reflection is an orchestration layer over the existing local-first work-entry system. Reflection answers do not become work entries automatically, and free-form reflection content is not stored in AsyncStorage or passed through route parameters.
+
 ## Next milestones
 
-### 1. Weekly Reflection flow
-
-Turn the existing reminder into the retention loop described by the product direction.
-
-Scope:
-
-- four skippable prompts: work moved forward, people helped, problems handled, and learning;
-- convert only user-confirmed reflection answers into normal work-entry capture/refinement paths;
-- reuse existing work-entry validation, persistence, privacy warnings, and deterministic impact logic;
-- no streaks, guilt messaging, remote notification backend, or AI generation.
-
-Why next: reminders already exist, but the guided reflection experience is the missing mechanism for recovering work users forgot to log during the week.
-
-### 2. Projects / Work Areas
+### 1. Projects / Work Areas
 
 Add lightweight organization for the area of work an entry belongs to.
 
@@ -85,7 +85,7 @@ Scope:
 
 Architecture checkpoint: introduce the smallest forward-only schema change that satisfies the relation. Do not add task status, assignees, project planning, time tracking, or employer collaboration.
 
-### 3. Review Builder
+### 2. Review Builder
 
 Complete the second major value-return loop after Growth.
 
@@ -104,7 +104,7 @@ Scope:
 - preserve challenge/export exclusion defaults;
 - heavily test formatting and selection policy as pure logic.
 
-### 4. Export and native sharing
+### 3. Export and native sharing
 
 Make Review Builder output usable outside KerjaLog.
 
@@ -117,7 +117,7 @@ Scope:
 - confidentiality warning before file export/share;
 - no large KerjaLog watermark.
 
-### 5. User-controlled JSON export / import
+### 4. User-controlled JSON export / import
 
 Complete local-first data portability before release.
 
@@ -128,7 +128,7 @@ Scope:
 - clear confidentiality warning because exported data may contain workplace information;
 - no automatic cloud backup or sync.
 
-### 6. Release hardening and product validation
+### 5. Release hardening and product validation
 
 Before store release:
 
