@@ -6,6 +6,7 @@ const mockAppLockState = {
   locked: false,
   isHydrated: true,
 };
+const mockUseWeeklyReflectionNotificationNavigation = jest.fn();
 let mockStackMounts = 0;
 let mockStackUnmounts = 0;
 
@@ -61,16 +62,25 @@ jest.mock('@/i18n/I18nProvider', () => ({
   useI18n: () => ({ isHydrated: true }),
 }));
 
+jest.mock('@/navigation/useWeeklyReflectionNotificationNavigation', () => ({
+  useWeeklyReflectionNotificationNavigation: (enabled: boolean) =>
+    mockUseWeeklyReflectionNotificationNavigation(enabled),
+}));
+
 describe('RootNavigator app lock', () => {
   beforeEach(() => {
     mockAppLockState.locked = false;
     mockStackMounts = 0;
     mockStackUnmounts = 0;
+    mockUseWeeklyReflectionNotificationNavigation.mockClear();
   });
 
   test('keeps the navigation tree mounted while showing the lock screen', async () => {
     const view = await render(<RootNavigator />);
 
+    expect(mockUseWeeklyReflectionNotificationNavigation).toHaveBeenCalledWith(
+      true,
+    );
     expect(mockStackMounts).toBe(1);
     expect(mockStackUnmounts).toBe(0);
 
