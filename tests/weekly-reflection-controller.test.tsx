@@ -1,10 +1,15 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { StrictMode, type PropsWithChildren } from 'react';
 import { EMPTY_WORK_ENTRY_DRAFT } from '@/domain/entry/draft';
 import { useWeeklyReflectionController } from '@/features/weekly-reflection/useWeeklyReflectionController';
 
 jest.mock('@sentry/react-native', () => ({
   captureException: jest.fn(),
 }));
+
+function StrictModeWrapper({ children }: PropsWithChildren) {
+  return <StrictMode>{children}</StrictMode>;
+}
 
 function createRepository() {
   return {
@@ -22,13 +27,21 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
+function renderController(
+  onOpenLog: () => void,
+  repository: ReturnType<typeof createRepository>,
+) {
+  return renderHook(
+    () => useWeeklyReflectionController({ onOpenLog, repository }),
+    { wrapper: StrictModeWrapper },
+  );
+}
+
 describe('weekly reflection controller', () => {
   test('lets users skip every prompt without creating persisted work', async () => {
     const repository = createRepository();
     const onOpenLog = jest.fn();
-    const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog, repository }),
-    );
+    const { result } = await renderController(onOpenLog, repository);
 
     for (let index = 0; index < 4; index += 1) {
       await act(async () => {
@@ -47,9 +60,7 @@ describe('weekly reflection controller', () => {
     repository.loadActive.mockResolvedValue(null);
     repository.saveActive.mockResolvedValue(undefined);
     const onOpenLog = jest.fn();
-    const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog, repository }),
-    );
+    const { result } = await renderController(onOpenLog, repository);
 
     await act(async () => {
       await result.current.handoffToLog(
@@ -77,9 +88,7 @@ describe('weekly reflection controller', () => {
       rawNote: 'Existing unfinished note',
     });
     const onOpenLog = jest.fn();
-    const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog, repository }),
-    );
+    const { result } = await renderController(onOpenLog, repository);
 
     await act(async () => {
       await result.current.handoffToLog('helped', 'Helped the operations team');
@@ -96,9 +105,7 @@ describe('weekly reflection controller', () => {
   test('does not persist empty reflection answers', async () => {
     const repository = createRepository();
     const onOpenLog = jest.fn();
-    const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog, repository }),
-    );
+    const { result } = await renderController(onOpenLog, repository);
 
     await act(async () => {
       await result.current.handoffToLog('learned', '   ');
@@ -115,9 +122,7 @@ describe('weekly reflection controller', () => {
     repository.loadActive.mockReturnValue(activeDraft.promise);
     repository.saveActive.mockResolvedValue(undefined);
     const onOpenLog = jest.fn();
-    const { result } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog, repository }),
-    );
+    const { result } = await renderController(onOpenLog, repository);
 
     let firstHandoff!: Promise<void>;
     await act(async () => {
@@ -142,9 +147,7 @@ describe('weekly reflection controller', () => {
     repository.loadActive.mockResolvedValue(null);
     repository.saveActive.mockReturnValue(save.promise);
     const onOpenLog = jest.fn();
-    const { result, unmount } = await renderHook(() =>
-      useWeeklyReflectionController({ onOpenLog, repository }),
-    );
+    const { result, unmount } = await renderController(onOpenLog, repository);
 
     let handoff!: Promise<void>;
     await act(async () => {
