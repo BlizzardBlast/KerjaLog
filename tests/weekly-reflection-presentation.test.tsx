@@ -45,7 +45,7 @@ describe('weekly reflection presentation', () => {
     ).toBeTruthy();
   });
 
-  test('shows progress only on the reflection answer being handed off', async () => {
+  test('gives repeated handoff actions prompt-specific accessible names', async () => {
     await render(
       <ThemeProvider>
         <WeeklyReflectionSummaryView
@@ -67,16 +67,18 @@ describe('weekly reflection presentation', () => {
       </ThemeProvider>,
     );
 
-    const logButtons = screen.getAllByRole('button', {
-      name: 'reflection.summary.logThis',
+    const movedForwardButton = screen.getByRole('button', {
+      name: 'reflection.summary.logPrompt:{"prompt":"reflection.prompt.moved_forward"}',
+    });
+    const helpedButton = screen.getByRole('button', {
+      name: 'reflection.summary.logPrompt:{"prompt":"reflection.prompt.helped"}',
     });
 
-    expect(logButtons).toHaveLength(2);
-    expect(logButtons[0]?.props.accessibilityState).toEqual({
+    expect(movedForwardButton.props.accessibilityState).toEqual({
       disabled: true,
       busy: false,
     });
-    expect(logButtons[1]?.props.accessibilityState).toEqual({
+    expect(helpedButton.props.accessibilityState).toEqual({
       disabled: true,
       busy: true,
     });
