@@ -59,6 +59,7 @@ export function WeeklyReflectionSummaryView({
         </View>
       ) : (
         answeredPrompts.map(({ prompt, answer }) => {
+          const promptLabel = t(promptCopyKeysById[prompt.id].label);
           const isThisPromptSaving =
             handoffState.status === 'saving' &&
             handoffState.promptId === prompt.id;
@@ -74,11 +75,12 @@ export function WeeklyReflectionSummaryView({
                 },
               ]}
             >
-              <Text variant="bodyStrong">
-                {t(promptCopyKeysById[prompt.id].label)}
-              </Text>
+              <Text variant="bodyStrong">{promptLabel}</Text>
               <Text>{answer}</Text>
               <Button
+                accessibilityLabel={t('reflection.summary.logPrompt', {
+                  prompt: promptLabel,
+                })}
                 disabled={isSaving}
                 loading={isThisPromptSaving}
                 onPress={() => onLogAnswer(prompt, answer)}
