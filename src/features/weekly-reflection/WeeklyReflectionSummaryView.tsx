@@ -3,9 +3,9 @@ import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import type { ReflectionHandoffState } from '@/features/weekly-reflection/model';
 import { promptCopyKeysById } from '@/features/weekly-reflection/reflectionCopy';
 import type { WeeklyReflectionPrompt } from '@/features/weekly-reflection/reflectionPrompts';
-import type { ReflectionHandoffState } from '@/features/weekly-reflection/useWeeklyReflectionController';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type AnsweredPrompt = {
