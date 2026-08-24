@@ -1,10 +1,14 @@
 import { isRunningInExpoGo } from 'expo';
-import type { NotificationPermissionsStatus } from 'expo-notifications';
+import type {
+  NotificationPermissionsStatus,
+  NotificationResponse,
+} from 'expo-notifications';
 import { Platform } from 'react-native';
 import type { WeeklyReminderSchedule } from '@/features/onboarding/model';
 
 const WEEKLY_REFLECTION_CHANNEL_ID = 'weekly-reflection';
 const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
+const WEEKLY_REFLECTION_DESTINATION = 'weekly-reflection';
 
 type NotificationsModule = typeof import('expo-notifications');
 
@@ -48,6 +52,18 @@ function isNotificationPermissionGranted(
   return (
     permissions.granted ||
     permissions.ios?.status === notifications.IosAuthorizationStatus.PROVISIONAL
+  );
+}
+
+function isWeeklyReflectionResponse(
+  response: NotificationResponse,
+  notifications: NotificationsModule,
+): boolean {
+  const request = response.notification.request;
+
+  return (
+    response.actionIdentifier === notifications.DEFAULT_ACTION_IDENTIFIER &&
+    request.identifier === WEEKLY_REFLECTION_NOTIFICATION_ID
   );
 }
 
@@ -109,6 +125,43 @@ export async function configureNotificationHandling(): Promise<void> {
   });
 }
 
+export function observeWeeklyReflectionNotificationResponses(
+  onOpenReflection: () => void,
+): () => void {
+  const notifications = loadNotifications();
+
+  if (!notifications) {
+    return () => undefined;
+  }
+
+  const handledResponses = new Set<string>();
+  const handleResponse = (response: NotificationResponse): boolean => {
+    if (!isWeeklyReflectionResponse(response, notifications)) {
+      return false;
+    }
+
+    const responseKey = `${response.notification.request.identifier}:${response.notification.date}:${response.actionIdentifier}`;
+    if (handledResponses.has(responseKey)) {
+      return true;
+    }
+
+    handledResponses.add(responseKey);
+    onOpenReflection();
+    return true;
+  };
+
+  const subscription = notifications.addNotificationResponseReceivedListener(
+    handleResponse,
+  );
+  const initialResponse = notifications.getLastNotificationResponse();
+
+  if (initialResponse && handleResponse(initialResponse)) {
+    notifications.clearLastNotificationResponse();
+  }
+
+  return () => subscription.remove();
+}
+
 export async function getWeeklyReflectionNotificationStatus(): Promise<WeeklyReflectionNotificationStatus> {
   const notifications = loadNotifications();
 
@@ -159,6 +212,7 @@ export async function enableWeeklyReflectionNotification({
     content: {
       title: copy.title,
       body: copy.body,
+      data: { destination: WEEKLY_REFLECTION_DESTINATION },
     },
     trigger: {
       type: notifications.SchedulableTriggerInputTypes.WEEKLY,
