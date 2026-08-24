@@ -60,10 +60,12 @@ function isWeeklyReflectionResponse(
   notifications: NotificationsModule,
 ): boolean {
   const request = response.notification.request;
+  const destination = request.content.data?.destination;
 
   return (
     response.actionIdentifier === notifications.DEFAULT_ACTION_IDENTIFIER &&
-    request.identifier === WEEKLY_REFLECTION_NOTIFICATION_ID
+    request.identifier === WEEKLY_REFLECTION_NOTIFICATION_ID &&
+    (destination === undefined || destination === WEEKLY_REFLECTION_DESTINATION)
   );
 }
 
@@ -135,28 +137,27 @@ export function observeWeeklyReflectionNotificationResponses(
   }
 
   const handledResponses = new Set<string>();
-  const handleResponse = (response: NotificationResponse): boolean => {
+  const consumeResponse = (response: NotificationResponse): void => {
     if (!isWeeklyReflectionResponse(response, notifications)) {
-      return false;
+      return;
     }
 
     const responseKey = `${response.notification.request.identifier}:${response.notification.date}:${response.actionIdentifier}`;
-    if (handledResponses.has(responseKey)) {
-      return true;
+    if (!handledResponses.has(responseKey)) {
+      handledResponses.add(responseKey);
+      onOpenReflection();
     }
 
-    handledResponses.add(responseKey);
-    onOpenReflection();
-    return true;
+    notifications.clearLastNotificationResponse();
   };
 
   const subscription = notifications.addNotificationResponseReceivedListener(
-    handleResponse,
+    consumeResponse,
   );
   const initialResponse = notifications.getLastNotificationResponse();
 
-  if (initialResponse && handleResponse(initialResponse)) {
-    notifications.clearLastNotificationResponse();
+  if (initialResponse) {
+    consumeResponse(initialResponse);
   }
 
   return () => subscription.remove();
