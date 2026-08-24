@@ -13,12 +13,13 @@ jest.mock('@/i18n/I18nProvider', () => ({
 }));
 
 describe('weekly reflection presentation', () => {
-  test('exposes the screen title and current prompt as accessibility headings', async () => {
+  test('exposes accessible headings, contextual guidance, and an explicit close action', async () => {
     await render(
       <ThemeProvider>
         <WeeklyReflectionPromptView
           currentAnswer=""
           onAnswerChange={jest.fn()}
+          onClose={jest.fn()}
           onContinue={jest.fn()}
           onSkip={jest.fn()}
           prompt={WEEKLY_REFLECTION_PROMPTS[0]}
@@ -35,6 +36,12 @@ describe('weekly reflection presentation', () => {
       screen.getByRole('header', {
         name: 'reflection.prompt.moved_forward',
       }),
+    ).toBeTruthy();
+    expect(
+      screen.getByPlaceholderText('reflection.placeholder.moved_forward'),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'reflection.close' }),
     ).toBeTruthy();
   });
 
