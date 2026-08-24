@@ -26,8 +26,7 @@ describe('weekly reflection notification navigation', () => {
 
   test('subscribes only after the root navigator is ready', async () => {
     const view = await renderHook(
-      (enabled: boolean) =>
-        useWeeklyReflectionNotificationNavigation(enabled),
+      (enabled: boolean) => useWeeklyReflectionNotificationNavigation(enabled),
       { initialProps: false },
     );
 
