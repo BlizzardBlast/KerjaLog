@@ -151,9 +151,8 @@ export function observeWeeklyReflectionNotificationResponses(
     notifications.clearLastNotificationResponse();
   };
 
-  const subscription = notifications.addNotificationResponseReceivedListener(
-    consumeResponse,
-  );
+  const subscription =
+    notifications.addNotificationResponseReceivedListener(consumeResponse);
   const initialResponse = notifications.getLastNotificationResponse();
 
   if (initialResponse) {
