@@ -20,6 +20,7 @@ function ProfiledWeeklyReflectionScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  const goHome = () => router.replace('/home');
   const openLog = () => router.replace('/entry/new');
   const flow = useWeeklyReflectionController({ onOpenLog: openLog });
 
@@ -53,7 +54,7 @@ function ProfiledWeeklyReflectionScreen() {
             <WeeklyReflectionSummaryView
               answeredPrompts={flow.answeredPrompts}
               handoffState={flow.handoffState}
-              onBackHome={() => router.replace('/home')}
+              onBackHome={goHome}
               onLogAnswer={(prompt, answer) =>
                 flow.handoffToLog(prompt.id, answer)
               }
@@ -63,6 +64,7 @@ function ProfiledWeeklyReflectionScreen() {
             <WeeklyReflectionPromptView
               currentAnswer={flow.currentAnswer}
               onAnswerChange={flow.setCurrentAnswer}
+              onClose={goHome}
               onContinue={() => flow.advance(true)}
               onSkip={() => flow.advance(false)}
               prompt={flow.prompt}
