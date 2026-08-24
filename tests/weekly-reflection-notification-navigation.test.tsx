@@ -26,13 +26,14 @@ describe('weekly reflection notification navigation', () => {
 
   test('subscribes only after the root navigator is ready', async () => {
     const view = await renderHook(
-      ({ enabled }) => useWeeklyReflectionNotificationNavigation(enabled),
-      { initialProps: { enabled: false } },
+      (enabled: boolean) =>
+        useWeeklyReflectionNotificationNavigation(enabled),
+      { initialProps: false },
     );
 
     expect(mockObserve).not.toHaveBeenCalled();
 
-    await view.rerender({ enabled: true });
+    await view.rerender(true);
 
     expect(mockObserve).toHaveBeenCalledTimes(1);
   });
