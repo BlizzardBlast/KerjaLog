@@ -155,7 +155,9 @@ describe('weekly reflection controller', () => {
     });
 
     await waitFor(() => expect(repository.saveActive).toHaveBeenCalledTimes(1));
-    unmount();
+    await act(async () => {
+      unmount();
+    });
     save.resolve();
     await handoff;
 
