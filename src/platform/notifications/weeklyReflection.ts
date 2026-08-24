@@ -1,4 +1,3 @@
-import { isRunningInExpoGo } from 'expo';
 import type {
   NotificationPermissionsStatus,
   NotificationResponse,
@@ -33,16 +32,12 @@ export type WeeklyReflectionNotificationRequest = {
   copy: WeeklyReflectionNotificationCopy;
 };
 
-function isUnsupportedNotificationRuntime(): boolean {
-  return Platform.OS === 'android' && isRunningInExpoGo();
-}
-
 function loadNotifications(): NotificationsModule | null {
-  if (isUnsupportedNotificationRuntime()) {
+  try {
+    return require('expo-notifications') as NotificationsModule;
+  } catch {
     return null;
   }
-
-  return require('expo-notifications') as NotificationsModule;
 }
 
 function isNotificationPermissionGranted(
