@@ -53,7 +53,8 @@ export const weeklyReflectionId: Record<
   'reflection.prompt.learned': 'Apa yang Anda pelajari?',
   'reflection.placeholder.moved_forward': 'Tugas, proyek, atau tindak lanjut…',
   'reflection.placeholder.helped': 'Rekan, tim, atau pelanggan…',
-  'reflection.placeholder.problem': 'Kesalahan, hambatan, keterlambatan, atau risiko…',
+  'reflection.placeholder.problem':
+    'Kesalahan, hambatan, keterlambatan, atau risiko…',
   'reflection.placeholder.learned':
     'Proses, alat, pelajaran, atau pendekatan baru…',
   'reflection.privacy':
