@@ -2,13 +2,13 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { EMPTY_WORK_ENTRY_DRAFT } from '@/domain/entry/draft';
 import { useWeeklyReflectionController } from '@/features/weekly-reflection/useWeeklyReflectionController';
 
-const loadActive = jest.fn();
-const saveActive = jest.fn();
+const mockLoadActive = jest.fn();
+const mockSaveActive = jest.fn();
 
 jest.mock('@/data/repositories/workEntryDraftRepository', () => ({
   workEntryDraftRepository: {
-    loadActive: (...args: unknown[]) => loadActive(...args),
-    saveActive: (...args: unknown[]) => saveActive(...args),
+    loadActive: (...args: unknown[]) => mockLoadActive(...args),
+    saveActive: (...args: unknown[]) => mockSaveActive(...args),
   },
 }));
 
@@ -18,8 +18,8 @@ jest.mock('@sentry/react-native', () => ({
 
 describe('weekly reflection controller', () => {
   beforeEach(() => {
-    loadActive.mockReset();
-    saveActive.mockReset();
+    mockLoadActive.mockReset();
+    mockSaveActive.mockReset();
   });
 
   test('lets users skip every prompt without creating an answer', async () => {
@@ -34,13 +34,13 @@ describe('weekly reflection controller', () => {
 
     expect(result.current.reviewing).toBe(true);
     expect(result.current.answeredPrompts).toEqual([]);
-    expect(saveActive).not.toHaveBeenCalled();
+    expect(mockSaveActive).not.toHaveBeenCalled();
     expect(onOpenLog).not.toHaveBeenCalled();
   });
 
   test('seeds the encrypted work-entry draft before opening Log', async () => {
-    loadActive.mockResolvedValue(null);
-    saveActive.mockResolvedValue(undefined);
+    mockLoadActive.mockResolvedValue(null);
+    mockSaveActive.mockResolvedValue(undefined);
     const onOpenLog = jest.fn();
     const { result } = await renderHook(() =>
       useWeeklyReflectionController({ onOpenLog }),
@@ -53,7 +53,7 @@ describe('weekly reflection controller', () => {
       );
     });
 
-    expect(saveActive).toHaveBeenCalledWith({
+    expect(mockSaveActive).toHaveBeenCalledWith({
       ...EMPTY_WORK_ENTRY_DRAFT,
       step: 'event',
       intent: 'solved',
@@ -64,7 +64,7 @@ describe('weekly reflection controller', () => {
   });
 
   test('never overwrites an existing unfinished work-entry draft', async () => {
-    loadActive.mockResolvedValue({
+    mockLoadActive.mockResolvedValue({
       ...EMPTY_WORK_ENTRY_DRAFT,
       step: 'event',
       intent: 'completed',
@@ -82,7 +82,7 @@ describe('weekly reflection controller', () => {
     await waitFor(() =>
       expect(result.current.handoffState).toBe('active-draft'),
     );
-    expect(saveActive).not.toHaveBeenCalled();
+    expect(mockSaveActive).not.toHaveBeenCalled();
     expect(onOpenLog).not.toHaveBeenCalled();
   });
 });
