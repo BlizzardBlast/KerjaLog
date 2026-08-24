@@ -12,6 +12,10 @@ import { preferenceEn, preferenceId } from '@/i18n/preferenceTranslations';
 import { reminderEn, reminderId } from '@/i18n/reminderTranslations';
 import { skillEn, skillId } from '@/i18n/skillTranslations';
 import { en as baseEn, id as baseId } from '@/i18n/translations';
+import {
+  weeklyReflectionEn,
+  weeklyReflectionId,
+} from '@/i18n/weeklyReflectionTranslations';
 
 export const en = {
   ...baseEn,
@@ -25,6 +29,7 @@ export const en = {
   ...preferenceEn,
   ...reminderEn,
   ...skillEn,
+  ...weeklyReflectionEn,
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -41,6 +46,7 @@ export const id: Record<TranslationKey, string> = {
   ...preferenceId,
   ...reminderId,
   ...skillId,
+  ...weeklyReflectionId,
 };
 
 export const translations = { en, id } as const;
