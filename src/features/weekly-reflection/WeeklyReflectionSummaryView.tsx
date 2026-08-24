@@ -3,7 +3,7 @@ import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
-import { promptTranslationKeyById } from '@/features/weekly-reflection/reflectionCopy';
+import { promptCopyKeysById } from '@/features/weekly-reflection/reflectionCopy';
 import type { WeeklyReflectionPrompt } from '@/features/weekly-reflection/reflectionPrompts';
 import type { ReflectionHandoffState } from '@/features/weekly-reflection/useWeeklyReflectionController';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -75,7 +75,7 @@ export function WeeklyReflectionSummaryView({
               ]}
             >
               <Text variant="bodyStrong">
-                {t(promptTranslationKeyById[prompt.id])}
+                {t(promptCopyKeysById[prompt.id].label)}
               </Text>
               <Text>{answer}</Text>
               <Button
