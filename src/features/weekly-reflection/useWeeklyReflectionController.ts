@@ -9,6 +9,7 @@ import type {
   WorkEntryDraftReader,
   WorkEntryDraftWriter,
 } from '@/domain/entry/repository';
+import type { ReflectionHandoffState } from '@/features/weekly-reflection/model';
 import {
   WEEKLY_REFLECTION_PROMPTS,
   type WeeklyReflectionPromptId,
@@ -17,12 +18,6 @@ import {
 type ReflectionAnswers = Partial<Record<WeeklyReflectionPromptId, string>>;
 type WeeklyReflectionDraftRepository = WorkEntryDraftReader &
   Pick<WorkEntryDraftWriter, 'saveActive'>;
-
-export type ReflectionHandoffState =
-  | { status: 'idle' }
-  | { status: 'saving'; promptId: WeeklyReflectionPromptId }
-  | { status: 'active-draft'; promptId: WeeklyReflectionPromptId }
-  | { status: 'error'; promptId: WeeklyReflectionPromptId };
 
 type UseWeeklyReflectionControllerInput = {
   onOpenLog: () => void;
