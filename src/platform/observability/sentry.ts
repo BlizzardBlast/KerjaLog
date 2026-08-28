@@ -98,11 +98,7 @@ function isAlphaNumeric(character: string | undefined): boolean {
 }
 
 function isFieldKeyCharacter(character: string | undefined): boolean {
-  return (
-    isAlphaNumeric(character) ||
-    character === '-' ||
-    character === '_'
-  );
+  return isAlphaNumeric(character) || character === '-' || character === '_';
 }
 
 function isWhitespace(character: string | undefined): boolean {
@@ -181,9 +177,7 @@ function parseSensitiveAssignment(
   if (valueQuote) {
     const replacementStart = cursor + 1;
     const replacementEnd = value.indexOf(valueQuote, replacementStart);
-    return replacementEnd < 0
-      ? null
-      : { replacementStart, replacementEnd };
+    return replacementEnd < 0 ? null : { replacementStart, replacementEnd };
   }
 
   const replacementStart = cursor;
