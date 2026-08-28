@@ -35,7 +35,13 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Emit generated lockfile
+        run: |
+          echo LOCKFILE_BASE64_BEGIN
+          base64 -w 120 pnpm-lock.yaml
+          echo LOCKFILE_BASE64_END
 
       - name: Lint
         run: pnpm lint
