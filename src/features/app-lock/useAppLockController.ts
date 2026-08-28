@@ -81,10 +81,6 @@ async function persistDisabledAppLock(): Promise<AppLockError | null> {
   }
 }
 
-function persistAppLockSetting(enabled: boolean): Promise<AppLockError | null> {
-  return enabled ? persistEnabledAppLock() : persistDisabledAppLock();
-}
-
 export function useAppLockController(): AppLockContextValue {
   const { t } = useI18n();
   const [enabledState, setEnabledState] = useState(false);
@@ -208,7 +204,10 @@ export function useAppLockController(): AppLockContextValue {
         return false;
       }
 
-      const persistenceError = await persistAppLockSetting(nextEnabled);
+      const persistSetting = nextEnabled
+        ? persistEnabledAppLock
+        : persistDisabledAppLock;
+      const persistenceError = await persistSetting();
       if (persistenceError) {
         setError(persistenceError);
         return false;

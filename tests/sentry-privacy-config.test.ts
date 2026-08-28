@@ -187,13 +187,13 @@ describe('Sentry privacy configuration', () => {
     const breadcrumb = options.beforeBreadcrumb?.({
       category: 'custom',
       message:
-        'password: private api_key=secret "raw_note":"private note" status=ok',
+        'password: private api_key=secret "raw_note":"private note" authorization: Bearer private-token status=ok',
     });
 
     expect(breadcrumb).toEqual({
       category: 'custom',
       message:
-        'password: [Filtered] api_key=[Filtered] "raw_note":"[Filtered]" status=ok',
+        'password: [Filtered] api_key=[Filtered] "raw_note":"[Filtered]" authorization: [Filtered] status=ok',
     });
   });
 

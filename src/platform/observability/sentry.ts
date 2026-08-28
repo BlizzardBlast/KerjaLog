@@ -6,10 +6,6 @@ const FILTERED_VALUE = '[Filtered]';
 const PRODUCTION_TRACES_SAMPLE_RATE = 0.1;
 const PRODUCTION_PROFILES_SAMPLE_RATE = 0.1;
 const WORK_ENTRY_ROUTE_PATTERN = /(^|\/)entry\/[^/?#]+(?=\/|$)/gi;
-const QUOTED_FIELD_VALUE_PATTERN =
-  /(["']?)([a-z][a-z0-9_-]*)(["']?\s*:\s*["'])([^"']*)/gi;
-const UNQUOTED_FIELD_VALUE_PATTERN =
-  /([a-z][a-z0-9_-]*)(\s*[:=]\s*)(?:Bearer\s+)?([^,\s;]+)/gi;
 const SENSITIVE_FIELD_KEYS = new Set([
   'accountnumber',
   'address',
@@ -78,32 +74,157 @@ function isSensitiveFieldKey(key: string): boolean {
   return SENSITIVE_FIELD_KEYS.has(normalizeFieldKey(key));
 }
 
-function redactText(value: string): string {
-  const quotedValuesRedacted = value.replace(
-    QUOTED_FIELD_VALUE_PATTERN,
-    (match, openingQuote: string, key: string, separator: string) =>
-      isSensitiveFieldKey(key)
-        ? `${openingQuote}${key}${separator}${FILTERED_VALUE}`
-        : match,
-  );
+type SensitiveAssignment = {
+  replacementStart: number;
+  replacementEnd: number;
+};
 
-  return quotedValuesRedacted.replace(
-    UNQUOTED_FIELD_VALUE_PATTERN,
-    (match, key: string, separator: string) =>
-      isSensitiveFieldKey(key) ? `${key}${separator}${FILTERED_VALUE}` : match,
-  );
-}
-
-function isAlphaNumeric(character: string | undefined): boolean {
+function isAsciiLetter(character: string | undefined): boolean {
   if (!character) {
     return false;
   }
 
   return (
     (character >= 'a' && character <= 'z') ||
-    (character >= 'A' && character <= 'Z') ||
-    (character >= '0' && character <= '9')
+    (character >= 'A' && character <= 'Z')
   );
+}
+
+function isAlphaNumeric(character: string | undefined): boolean {
+  return (
+    isAsciiLetter(character) ||
+    (character !== undefined && character >= '0' && character <= '9')
+  );
+}
+
+function isFieldKeyCharacter(character: string | undefined): boolean {
+  return (
+    isAlphaNumeric(character) ||
+    character === '-' ||
+    character === '_'
+  );
+}
+
+function isWhitespace(character: string | undefined): boolean {
+  return (
+    character === ' ' ||
+    character === '\t' ||
+    character === '\n' ||
+    character === '\r'
+  );
+}
+
+function skipWhitespace(value: string, start: number): number {
+  let cursor = start;
+  while (isWhitespace(value[cursor])) {
+    cursor += 1;
+  }
+  return cursor;
+}
+
+function isQuote(character: string | undefined): character is '"' | "'" {
+  return character === '"' || character === "'";
+}
+
+function findUnquotedValueEnd(value: string, start: number): number {
+  let cursor = start;
+  while (
+    cursor < value.length &&
+    !isWhitespace(value[cursor]) &&
+    value[cursor] !== ',' &&
+    value[cursor] !== ';'
+  ) {
+    cursor += 1;
+  }
+  return cursor;
+}
+
+function parseSensitiveAssignment(
+  value: string,
+  start: number,
+): SensitiveAssignment | null {
+  let cursor = start;
+  const keyQuote = isQuote(value[cursor]) ? value[cursor] : null;
+  if (keyQuote) {
+    cursor += 1;
+  }
+
+  if (!isAsciiLetter(value[cursor])) {
+    return null;
+  }
+
+  const keyStart = cursor;
+  cursor += 1;
+  while (isFieldKeyCharacter(value[cursor])) {
+    cursor += 1;
+  }
+
+  const key = value.slice(keyStart, cursor);
+  if (!isSensitiveFieldKey(key)) {
+    return null;
+  }
+
+  if (keyQuote) {
+    if (value[cursor] !== keyQuote) {
+      return null;
+    }
+    cursor += 1;
+  }
+
+  cursor = skipWhitespace(value, cursor);
+  if (value[cursor] !== ':' && value[cursor] !== '=') {
+    return null;
+  }
+
+  cursor = skipWhitespace(value, cursor + 1);
+  const valueQuote = isQuote(value[cursor]) ? value[cursor] : null;
+  if (valueQuote) {
+    const replacementStart = cursor + 1;
+    const replacementEnd = value.indexOf(valueQuote, replacementStart);
+    return replacementEnd < 0
+      ? null
+      : { replacementStart, replacementEnd };
+  }
+
+  const replacementStart = cursor;
+  if (
+    value.slice(cursor, cursor + 6).toLowerCase() === 'bearer' &&
+    isWhitespace(value[cursor + 6])
+  ) {
+    cursor = skipWhitespace(value, cursor + 6);
+  }
+
+  const replacementEnd = findUnquotedValueEnd(value, cursor);
+  return replacementEnd === cursor
+    ? null
+    : { replacementStart, replacementEnd };
+}
+
+function redactText(value: string): string {
+  let redacted = '';
+  let copiedUntil = 0;
+  let cursor = 0;
+
+  while (cursor < value.length) {
+    const character = value[cursor];
+    if (!isAsciiLetter(character) && !isQuote(character)) {
+      cursor += 1;
+      continue;
+    }
+
+    const assignment = parseSensitiveAssignment(value, cursor);
+    if (!assignment) {
+      cursor += 1;
+      continue;
+    }
+
+    redacted +=
+      value.slice(copiedUntil, assignment.replacementStart) + FILTERED_VALUE;
+    copiedUntil = assignment.replacementEnd;
+    cursor = Math.max(assignment.replacementEnd, cursor + 1);
+  }
+
+  return redacted + value.slice(copiedUntil);
 }
 
 function isWorkEntryIdCharacter(character: string | undefined): boolean {
