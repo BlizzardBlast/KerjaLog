@@ -32,11 +32,7 @@ function createTabBarIconRenderer(tab: TabDefinition) {
           },
         ]}
       >
-        <AppIcon
-          name={tab.icon}
-          size={26}
-          color={theme.colors.onPrimary}
-        />
+        <AppIcon name={tab.icon} size={26} color={theme.colors.onPrimary} />
       </View>
     );
   };
@@ -120,7 +116,4 @@ const styles = StyleSheet.create({
 
 const tabBarIconRendererByName = Object.fromEntries(
   tabs.map((tab) => [tab.name, createTabBarIconRenderer(tab)]),
-) as Record<
-  TabDefinition['name'],
-  ReturnType<typeof createTabBarIconRenderer>
->;
+) as Record<TabDefinition['name'], ReturnType<typeof createTabBarIconRenderer>>;

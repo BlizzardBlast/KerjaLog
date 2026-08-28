@@ -31,9 +31,7 @@ function ProfiledWeeklyReflectionScreen() {
         answeredPrompts={flow.answeredPrompts}
         handoffState={flow.handoffState}
         onBackHome={goHome}
-        onLogAnswer={(prompt, answer) =>
-          flow.handoffToLog(prompt.id, answer)
-        }
+        onLogAnswer={(prompt, answer) => flow.handoffToLog(prompt.id, answer)}
         onOpenDraft={openLog}
       />
     );

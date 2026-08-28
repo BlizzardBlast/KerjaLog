@@ -3,7 +3,10 @@ import { View, type ViewProps } from 'react-native';
 
 export type DecorativeViewProps = PropsWithChildren<ViewProps>;
 
-export function DecorativeView({ children, ...props }: Readonly<DecorativeViewProps>) {
+export function DecorativeView({
+  children,
+  ...props
+}: Readonly<DecorativeViewProps>) {
   return (
     <View
       {...props}

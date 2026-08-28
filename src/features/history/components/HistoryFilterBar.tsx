@@ -98,7 +98,12 @@ type FilterChipProps = {
   onPress: () => void;
 };
 
-function FilterChip({ expanded, label, selected, onPress }: Readonly<FilterChipProps>) {
+function FilterChip({
+  expanded,
+  label,
+  selected,
+  onPress,
+}: Readonly<FilterChipProps>) {
   const { theme } = useTheme();
 
   return (

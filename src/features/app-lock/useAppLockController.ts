@@ -81,9 +81,7 @@ async function persistDisabledAppLock(): Promise<AppLockError | null> {
   }
 }
 
-function persistAppLockSetting(
-  enabled: boolean,
-): Promise<AppLockError | null> {
+function persistAppLockSetting(enabled: boolean): Promise<AppLockError | null> {
   return enabled ? persistEnabledAppLock() : persistDisabledAppLock();
 }
 

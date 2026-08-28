@@ -22,7 +22,10 @@ type HistoryEntryCardProps = {
   onPress: () => void;
 };
 
-export function HistoryEntryCard({ entry, onPress }: Readonly<HistoryEntryCardProps>) {
+export function HistoryEntryCard({
+  entry,
+  onPress,
+}: Readonly<HistoryEntryCardProps>) {
   const { theme } = useTheme();
   const { language, t } = useI18n();
   const locale = language === 'id' ? 'id-ID' : 'en-US';

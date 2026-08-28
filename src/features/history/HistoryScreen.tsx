@@ -121,7 +121,9 @@ const HistoryScreen = Sentry.withProfiler(ProfiledHistoryScreen);
 
 export { HistoryScreen };
 
-function HistoryMonthHeader({ section }: Readonly<{ section: HistorySection }>) {
+function HistoryMonthHeader({
+  section,
+}: Readonly<{ section: HistorySection }>) {
   return (
     <View style={styles.monthHeader}>
       <Text accessibilityRole="header" variant="heading">

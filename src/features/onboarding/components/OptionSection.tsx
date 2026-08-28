@@ -6,7 +6,10 @@ type OptionSectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-export function OptionSection({ title, children }: Readonly<OptionSectionProps>) {
+export function OptionSection({
+  title,
+  children,
+}: Readonly<OptionSectionProps>) {
   return (
     <View style={styles.section} accessibilityRole="radiogroup">
       <Text variant="label" color="textMuted">

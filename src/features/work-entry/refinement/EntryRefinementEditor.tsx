@@ -18,7 +18,9 @@ type EntryRefinementEditorProps = {
   entry: WorkEntryDetail;
 };
 
-export function EntryRefinementEditor({ entry }: Readonly<EntryRefinementEditorProps>) {
+export function EntryRefinementEditor({
+  entry,
+}: Readonly<EntryRefinementEditorProps>) {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { t } = useI18n();
   const refinement = useEntryRefinement({

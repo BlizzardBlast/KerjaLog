@@ -90,9 +90,7 @@ function redactText(value: string): string {
   return quotedValuesRedacted.replace(
     UNQUOTED_FIELD_VALUE_PATTERN,
     (match, key: string, separator: string) =>
-      isSensitiveFieldKey(key)
-        ? `${key}${separator}${FILTERED_VALUE}`
-        : match,
+      isSensitiveFieldKey(key) ? `${key}${separator}${FILTERED_VALUE}` : match,
   );
 }
 
@@ -109,11 +107,7 @@ function isAlphaNumeric(character: string | undefined): boolean {
 }
 
 function isWorkEntryIdCharacter(character: string | undefined): boolean {
-  return (
-    isAlphaNumeric(character) ||
-    character === '-' ||
-    character === '_'
-  );
+  return isAlphaNumeric(character) || character === '-' || character === '_';
 }
 
 function redactTokenAfterMarker(value: string, marker: string): string {
@@ -134,10 +128,7 @@ function redactTokenAfterMarker(value: string, marker: string): string {
 
     const token = result.slice(tokenStart, tokenEnd);
     if (token.length >= 8 && isAlphaNumeric(token[0])) {
-      result =
-        result.slice(0, tokenStart) +
-        FILTERED_VALUE +
-        result.slice(tokenEnd);
+      result = result.slice(0, tokenStart) + FILTERED_VALUE + result.slice(tokenEnd);
       searchFrom = tokenStart + FILTERED_VALUE.length;
     } else {
       searchFrom = Math.max(tokenEnd, tokenStart + 1);
@@ -149,8 +140,7 @@ function redactTokenAfterMarker(value: string, marker: string): string {
 
 function redactExceptionText(value: string): string {
   return WORK_ENTRY_REFERENCE_MARKERS.reduce(
-    (redactedValue, marker) =>
-      redactTokenAfterMarker(redactedValue, marker),
+    (redactedValue, marker) => redactTokenAfterMarker(redactedValue, marker),
     redactText(value),
   );
 }

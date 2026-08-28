@@ -71,9 +71,11 @@ export function ThemeProvider({ children }: Readonly<PropsWithChildren>) {
     persistThemeMode(nextMode).catch(ignoreError);
   }, []);
 
-  let resolvedTheme: ResolvedTheme = modeState;
+  let resolvedTheme: ResolvedTheme;
   if (modeState === 'system') {
     resolvedTheme = systemColorScheme === 'dark' ? 'dark' : 'light';
+  } else {
+    resolvedTheme = modeState;
   }
 
   const value = useMemo<ThemeContextValue>(

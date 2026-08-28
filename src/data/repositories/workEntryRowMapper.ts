@@ -67,11 +67,7 @@ function parseJoinedWorkEntryRow(row: JoinedWorkEntryRow): {
   const outcomeType =
     row.outcome_type === null
       ? null
-      : expectOneOf(
-          row.outcome_type,
-          OUTCOME_TYPES,
-          'work entry outcome type',
-        );
+      : expectOneOf(row.outcome_type, OUTCOME_TYPES, 'work entry outcome type');
   const evidenceType =
     row.evidence_type === null
       ? null
@@ -91,10 +87,7 @@ function parseJoinedWorkEntryRow(row: JoinedWorkEntryRow): {
         row.impact_statement,
         'work entry impact statement',
       ),
-      occurredAt: expectIsoTimestamp(
-        row.occurred_at,
-        'work entry occurred at',
-      ),
+      occurredAt: expectIsoTimestamp(row.occurred_at, 'work entry occurred at'),
       outcomeType,
       status: expectOneOf(row.status, ENTRY_STATUSES, 'work entry status'),
       evidence: null,
