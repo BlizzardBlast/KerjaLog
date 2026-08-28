@@ -128,7 +128,8 @@ function redactTokenAfterMarker(value: string, marker: string): string {
 
     const token = result.slice(tokenStart, tokenEnd);
     if (token.length >= 8 && isAlphaNumeric(token[0])) {
-      result = result.slice(0, tokenStart) + FILTERED_VALUE + result.slice(tokenEnd);
+      result =
+        result.slice(0, tokenStart) + FILTERED_VALUE + result.slice(tokenEnd);
       searchFrom = tokenStart + FILTERED_VALUE.length;
     } else {
       searchFrom = Math.max(tokenEnd, tokenStart + 1);
