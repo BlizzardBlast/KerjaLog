@@ -511,7 +511,7 @@ Expo SDK 57 maps to React Native 0.86 and targets Android SDK 36, which is appro
 | Reminders            | `expo-notifications`                               | Local weekly reflection reminders                                    |
 | PDF                  | `expo-print`                                       | Local HTML-to-PDF generation                                         |
 | Sharing              | `expo-sharing`                                     | Native share sheet for generated files                               |
-| File handling        | Expo file-system APIs                              | Export/import files                                                   |
+| File handling        | Expo file-system APIs                              | Export/import files                                                  |
 | Unit/component tests | Jest + React Native Testing Library                | Logic and component confidence                                       |
 | E2E                  | Maestro                                            | Core Android/iOS journey validation                                  |
 | Crash reporting      | Sentry, with aggressive scrubbing                  | Production diagnostics without career-content leakage                |

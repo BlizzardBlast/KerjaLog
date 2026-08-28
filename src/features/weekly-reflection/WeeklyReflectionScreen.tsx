@@ -12,9 +12,9 @@ import {
 } from 'react-native-safe-area-context';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
+import { useWeeklyReflectionController } from '@/features/weekly-reflection/useWeeklyReflectionController';
 import { WeeklyReflectionPromptView } from '@/features/weekly-reflection/WeeklyReflectionPromptView';
 import { WeeklyReflectionSummaryView } from '@/features/weekly-reflection/WeeklyReflectionSummaryView';
-import { useWeeklyReflectionController } from '@/features/weekly-reflection/useWeeklyReflectionController';
 
 function ProfiledWeeklyReflectionScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());

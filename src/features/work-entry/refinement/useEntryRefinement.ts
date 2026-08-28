@@ -15,8 +15,8 @@ import type { Translate } from '@/features/work-entry/components/logStepTypes';
 import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
 import { mapEntryToRefinementValues } from '@/features/work-entry/refinement/refinementMapper';
 import {
-  entryRefinementSchema,
   type EntryRefinementValues,
+  entryRefinementSchema,
 } from '@/features/work-entry/refinement/refinementSchema';
 import {
   getInitialRefinementStep,

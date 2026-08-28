@@ -2,8 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import {
   EMPTY_WORK_ENTRY_DRAFT,
   hasWorkEntryDraftContent,
-  type WorkEntryDraft,
   WORK_ENTRY_DRAFT_STEPS,
+  type WorkEntryDraft,
 } from '@/domain/entry/draft';
 import {
   buildImpactStatement,
@@ -24,8 +24,8 @@ import type {
 import { suggestSkillIds } from '@/domain/skill/suggestions';
 import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
 import {
-  saveWorkEntry,
   type SaveWorkEntryDraft,
+  saveWorkEntry,
 } from '@/features/work-entry/saveWorkEntry';
 import { useLogForm } from '@/features/work-entry/useLogForm';
 import { useSavedEntryCompletion } from '@/features/work-entry/useSavedEntryCompletion';
