@@ -62,7 +62,7 @@ export type HistoryEntriesController = {
 export function useHistoryEntries(
   repository: WorkEntryHistoryReader = workEntryRepository,
 ): HistoryEntriesController {
-  const [searchText, setSearchTextState] = useState('');
+  const [searchTextValue, setSearchTextValue] = useState('');
   const [debouncedSearchText, setDebouncedSearchText] = useState('');
   const [filters, setFilters] = useState<WorkEntryHistoryFilters>(
     EMPTY_WORK_ENTRY_HISTORY_FILTERS,
@@ -80,7 +80,7 @@ export function useHistoryEntries(
     pagination: 'idle',
     searchPending: false,
   });
-  const isSearchPending = searchText !== debouncedSearchText;
+  const isSearchPending = searchTextValue !== debouncedSearchText;
 
   useEffect(() => {
     runtimeRef.current.searchPending = isSearchPending;
@@ -90,13 +90,13 @@ export function useHistoryEntries(
     }
 
     const timeout = setTimeout(() => {
-      setDebouncedSearchText(searchText);
+      setDebouncedSearchText(searchTextValue);
     }, SEARCH_DEBOUNCE_MS);
 
     return () => {
       clearTimeout(timeout);
     };
-  }, [isSearchPending, searchText]);
+  }, [isSearchPending, searchTextValue]);
 
   const query = useMemo<Omit<WorkEntryHistoryQuery, 'cursor' | 'limit'>>(
     () => ({
@@ -263,15 +263,15 @@ export function useHistoryEntries(
     (value: string) => {
       const nextSearchText = value.slice(0, HISTORY_SEARCH_MAX_LENGTH);
 
-      if (nextSearchText === searchText) {
+      if (nextSearchText === searchTextValue) {
         return;
       }
 
       invalidateHistoryQuery();
       runtimeRef.current.searchPending = nextSearchText !== debouncedSearchText;
-      setSearchTextState(nextSearchText);
+      setSearchTextValue(nextSearchText);
     },
-    [debouncedSearchText, invalidateHistoryQuery, searchText],
+    [debouncedSearchText, invalidateHistoryQuery, searchTextValue],
   );
 
   const setEntryType = useCallback(
@@ -316,7 +316,7 @@ export function useHistoryEntries(
   }, [filters, invalidateHistoryQuery]);
 
   return {
-    searchText,
+    searchText: searchTextValue,
     isSearchPending,
     setSearchText,
     filters,

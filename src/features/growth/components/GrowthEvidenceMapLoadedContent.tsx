@@ -106,14 +106,14 @@ export function GrowthEvidenceMapLoadedContent({
           const description = hasEvidence
             ? t(getGrowthSkillDescriptionKey(summary.skillId))
             : t('growth.skill.none');
-          const countLabel = hasEvidence
-            ? t(
-                summary.entryCount === 1
-                  ? 'growth.skill.entryOne'
-                  : 'growth.skill.entryMany',
-                { count: summary.entryCount },
-              )
-            : '—';
+          let countLabel = '—';
+          if (hasEvidence) {
+            const countKey =
+              summary.entryCount === 1
+                ? 'growth.skill.entryOne'
+                : 'growth.skill.entryMany';
+            countLabel = t(countKey, { count: summary.entryCount });
+          }
 
           return (
             <View key={summary.skillId}>

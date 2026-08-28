@@ -33,6 +33,13 @@ export function TextField({
     onBlur?.(event);
   };
 
+  let borderColor = theme.colors.controlBorder;
+  if (hasError) {
+    borderColor = theme.colors.danger;
+  } else if (isFocused) {
+    borderColor = theme.colors.controlBorderFocused;
+  }
+
   return (
     <TextInput
       {...props}
@@ -45,11 +52,7 @@ export function TextField({
         style,
         {
           backgroundColor: theme.colors.surface,
-          borderColor: hasError
-            ? theme.colors.danger
-            : isFocused
-              ? theme.colors.controlBorderFocused
-              : theme.colors.controlBorder,
+          borderColor,
           color: theme.colors.text,
         },
       ]}

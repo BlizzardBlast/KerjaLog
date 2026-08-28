@@ -218,8 +218,8 @@ export function useLogFlow({
   }
 
   function toggleSkill(skillId: SkillId, source: EntrySkillSource) {
-    const existing = selectedSkills.find((skill) => skill.id === skillId);
-    const nextSkills: WorkEntrySkill[] = existing
+    const hasExisting = selectedSkills.some((skill) => skill.id === skillId);
+    const nextSkills: WorkEntrySkill[] = hasExisting
       ? selectedSkills.filter((skill) => skill.id !== skillId)
       : [...selectedSkills, { id: skillId, source }];
 

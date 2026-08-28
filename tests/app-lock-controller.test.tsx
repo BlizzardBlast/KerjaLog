@@ -109,6 +109,26 @@ describe('useAppLockController', () => {
     expect(result.current.enabled).toBe(true);
   });
 
+  test('rolls back native privacy if persisting an enabled setting fails', async () => {
+    readAppLockEnabledMock.mockResolvedValue(false);
+    const { result } = await renderHook(() => useAppLockController());
+
+    await waitFor(() => expect(result.current.isHydrated).toBe(true));
+    jest.clearAllMocks();
+    writeAppLockEnabledMock.mockRejectedValueOnce(
+      new Error('storage unavailable'),
+    );
+
+    await act(async () => {
+      await expect(result.current.setEnabled(true)).resolves.toBe(false);
+    });
+
+    expect(setScreenPrivacyMock.mock.calls).toEqual([[true], [false]]);
+    expect(writeAppLockEnabledMock).toHaveBeenCalledWith(true);
+    expect(result.current.enabled).toBe(false);
+    expect(result.current.error).toBe('storage-failed');
+  });
+
   test('removes native privacy before persisting a disabled App Lock setting', async () => {
     readAppLockEnabledMock.mockResolvedValue(true);
     const { result } = await renderHook(() => useAppLockController());

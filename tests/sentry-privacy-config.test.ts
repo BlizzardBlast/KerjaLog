@@ -180,6 +180,23 @@ describe('Sentry privacy configuration', () => {
     );
   });
 
+  test('redacts quoted and unquoted sensitive key-value text', () => {
+    initializeSentry();
+    const options = getSentryOptions();
+
+    const breadcrumb = options.beforeBreadcrumb?.({
+      category: 'custom',
+      message:
+        'password: private api_key=secret "raw_note":"private note" status=ok',
+    });
+
+    expect(breadcrumb).toEqual({
+      category: 'custom',
+      message:
+        'password: [Filtered] api_key=[Filtered] "raw_note":"[Filtered]" status=ok',
+    });
+  });
+
   test('retains safe transaction context and redacts sensitive values', () => {
     // Given
     initializeSentry();

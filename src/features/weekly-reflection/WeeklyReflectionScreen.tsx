@@ -24,6 +24,34 @@ function ProfiledWeeklyReflectionScreen() {
   const openLog = () => router.push('/entry/new');
   const flow = useWeeklyReflectionController({ onOpenLog: openLog });
 
+  let reflectionContent = null;
+  if (flow.reviewing) {
+    reflectionContent = (
+      <WeeklyReflectionSummaryView
+        answeredPrompts={flow.answeredPrompts}
+        handoffState={flow.handoffState}
+        onBackHome={goHome}
+        onLogAnswer={(prompt, answer) =>
+          flow.handoffToLog(prompt.id, answer)
+        }
+        onOpenDraft={openLog}
+      />
+    );
+  } else if (flow.prompt) {
+    reflectionContent = (
+      <WeeklyReflectionPromptView
+        currentAnswer={flow.currentAnswer}
+        onAnswerChange={flow.setCurrentAnswer}
+        onClose={goHome}
+        onContinue={() => flow.advance(true)}
+        onSkip={() => flow.advance(false)}
+        prompt={flow.prompt}
+        promptIndex={flow.promptIndex}
+        totalPrompts={flow.totalPrompts}
+      />
+    );
+  }
+
   return (
     <SafeAreaView
       edges={['top', 'bottom']}
@@ -50,28 +78,7 @@ function ProfiledWeeklyReflectionScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {flow.reviewing ? (
-            <WeeklyReflectionSummaryView
-              answeredPrompts={flow.answeredPrompts}
-              handoffState={flow.handoffState}
-              onBackHome={goHome}
-              onLogAnswer={(prompt, answer) =>
-                flow.handoffToLog(prompt.id, answer)
-              }
-              onOpenDraft={openLog}
-            />
-          ) : flow.prompt ? (
-            <WeeklyReflectionPromptView
-              currentAnswer={flow.currentAnswer}
-              onAnswerChange={flow.setCurrentAnswer}
-              onClose={goHome}
-              onContinue={() => flow.advance(true)}
-              onSkip={() => flow.advance(false)}
-              prompt={flow.prompt}
-              promptIndex={flow.promptIndex}
-              totalPrompts={flow.totalPrompts}
-            />
-          ) : null}
+          {reflectionContent}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

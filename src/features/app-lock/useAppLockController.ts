@@ -37,6 +37,56 @@ function mapAuthenticationError(error: string | undefined): AppLockError {
   return 'authentication-failed';
 }
 
+async function persistEnabledAppLock(): Promise<AppLockError | null> {
+  try {
+    await setAppLockScreenPrivacyEnabled(true);
+  } catch {
+    return 'privacy-failed';
+  }
+
+  try {
+    await writeAppLockEnabled(true);
+    return null;
+  } catch {
+    try {
+      await setAppLockScreenPrivacyEnabled(false);
+    } catch {
+      return 'privacy-failed';
+    }
+
+    return 'storage-failed';
+  }
+}
+
+async function persistDisabledAppLock(): Promise<AppLockError | null> {
+  // Remove native privacy first while the durable preference is still enabled.
+  // If persistence fails, restore privacy so the next launch remains fail-closed.
+  try {
+    await setAppLockScreenPrivacyEnabled(false);
+  } catch {
+    return 'privacy-failed';
+  }
+
+  try {
+    await writeAppLockEnabled(false);
+    return null;
+  } catch {
+    try {
+      await setAppLockScreenPrivacyEnabled(true);
+    } catch {
+      return 'privacy-failed';
+    }
+
+    return 'storage-failed';
+  }
+}
+
+function persistAppLockSetting(
+  enabled: boolean,
+): Promise<AppLockError | null> {
+  return enabled ? persistEnabledAppLock() : persistDisabledAppLock();
+}
+
 export function useAppLockController(): AppLockContextValue {
   const { t } = useI18n();
   const [enabledState, setEnabledState] = useState(false);
@@ -160,51 +210,10 @@ export function useAppLockController(): AppLockContextValue {
         return false;
       }
 
-      if (nextEnabled) {
-        try {
-          await setAppLockScreenPrivacyEnabled(true);
-        } catch {
-          setError('privacy-failed');
-          return false;
-        }
-
-        try {
-          await writeAppLockEnabled(true);
-        } catch {
-          try {
-            await setAppLockScreenPrivacyEnabled(false);
-          } catch {
-            setError('privacy-failed');
-            return false;
-          }
-
-          setError('storage-failed');
-          return false;
-        }
-      } else {
-        // Remove native privacy first, while the durable preference is still
-        // enabled. If persisting the disabled state fails, restore privacy and
-        // keep the next launch fail-closed because storage still says enabled.
-        try {
-          await setAppLockScreenPrivacyEnabled(false);
-        } catch {
-          setError('privacy-failed');
-          return false;
-        }
-
-        try {
-          await writeAppLockEnabled(false);
-        } catch {
-          try {
-            await setAppLockScreenPrivacyEnabled(true);
-          } catch {
-            setError('privacy-failed');
-            return false;
-          }
-
-          setError('storage-failed');
-          return false;
-        }
+      const persistenceError = await persistAppLockSetting(nextEnabled);
+      if (persistenceError) {
+        setError(persistenceError);
+        return false;
       }
 
       setEnabledState(nextEnabled);

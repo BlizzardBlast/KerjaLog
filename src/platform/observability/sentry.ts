@@ -6,14 +6,52 @@ const FILTERED_VALUE = '[Filtered]';
 const PRODUCTION_TRACES_SAMPLE_RATE = 0.1;
 const PRODUCTION_PROFILES_SAMPLE_RATE = 0.1;
 const WORK_ENTRY_ROUTE_PATTERN = /(^|\/)entry\/[^/?#]+(?=\/|$)/gi;
-const SENSITIVE_BREADCRUMB_KEY =
-  /^(account[-_]?number|address|api[-_]?key|authorization|birth(?:date)?|card[-_]?number|cif|content|cookie|cvv|description|email|evidence|feedback|ip[-_]?address|name|note|otp|passcode|password|phone|pin|raw[-_]?note|secret|session[-_]?id|text|token|user[-_]?id|username|work[-_]?entry)$/i;
-const SENSITIVE_BREADCRUMB_TEXT_PATTERNS = [
-  /((?:account[-_]?number|address|api[-_]?key|authorization|birth(?:date)?|card[-_]?number|cif|content|cookie|cvv|description|email|evidence|feedback|ip[-_]?address|name|note|otp|passcode|password|phone|pin|raw[-_]?note|secret|session[-_]?id|text|token|user[-_]?id|username|work[-_]?entry)\s*(?:=|:)\s*)(?:Bearer\s+)?[^,\s;]+/gi,
-  /((?:"|')?(?:account[-_]?number|address|api[-_]?key|authorization|birth(?:date)?|card[-_]?number|cif|content|cookie|cvv|description|email|evidence|feedback|ip[-_]?address|name|note|otp|passcode|password|phone|pin|raw[-_]?note|secret|session[-_]?id|text|token|user[-_]?id|username|work[-_]?entry)(?:"|')?\s*:\s*["'])[^"']*/gi,
-] as const;
-const SENSITIVE_EXCEPTION_TEXT_PATTERNS = [
-  /(\bwork[-_ ]?entry(?:\s+id)?\s+)[a-z0-9][a-z0-9_-]{7,}\b/gi,
+const QUOTED_FIELD_VALUE_PATTERN =
+  /(["']?)([a-z][a-z0-9_-]*)(["']?\s*:\s*["'])([^"']*)/gi;
+const UNQUOTED_FIELD_VALUE_PATTERN =
+  /([a-z][a-z0-9_-]*)(\s*[:=]\s*)(?:Bearer\s+)?([^,\s;]+)/gi;
+const SENSITIVE_FIELD_KEYS = new Set([
+  'accountnumber',
+  'address',
+  'apikey',
+  'authorization',
+  'birth',
+  'birthdate',
+  'cardnumber',
+  'cif',
+  'content',
+  'cookie',
+  'cvv',
+  'description',
+  'email',
+  'evidence',
+  'feedback',
+  'ipaddress',
+  'name',
+  'note',
+  'otp',
+  'passcode',
+  'password',
+  'phone',
+  'pin',
+  'rawnote',
+  'secret',
+  'sessionid',
+  'text',
+  'token',
+  'userid',
+  'username',
+  'workentry',
+]);
+const WORK_ENTRY_REFERENCE_MARKERS = [
+  'work entry id ',
+  'work-entry id ',
+  'work_entry id ',
+  'workentry id ',
+  'work entry ',
+  'work-entry ',
+  'work_entry ',
+  'workentry ',
 ] as const;
 
 type SentryEnvironment = 'development' | 'preview' | 'production';
@@ -32,18 +70,87 @@ function getSentryEnvironment(): SentryEnvironment {
   return __DEV__ ? 'development' : 'production';
 }
 
+function normalizeFieldKey(key: string): string {
+  return key.replaceAll('-', '').replaceAll('_', '').toLowerCase();
+}
+
+function isSensitiveFieldKey(key: string): boolean {
+  return SENSITIVE_FIELD_KEYS.has(normalizeFieldKey(key));
+}
+
 function redactText(value: string): string {
-  return SENSITIVE_BREADCRUMB_TEXT_PATTERNS.reduce(
-    (redactedValue, pattern) =>
-      redactedValue.replace(pattern, `$1${FILTERED_VALUE}`),
-    value,
+  const quotedValuesRedacted = value.replace(
+    QUOTED_FIELD_VALUE_PATTERN,
+    (match, openingQuote: string, key: string, separator: string) =>
+      isSensitiveFieldKey(key)
+        ? `${openingQuote}${key}${separator}${FILTERED_VALUE}`
+        : match,
+  );
+
+  return quotedValuesRedacted.replace(
+    UNQUOTED_FIELD_VALUE_PATTERN,
+    (match, key: string, separator: string) =>
+      isSensitiveFieldKey(key)
+        ? `${key}${separator}${FILTERED_VALUE}`
+        : match,
   );
 }
 
+function isAlphaNumeric(character: string | undefined): boolean {
+  if (!character) {
+    return false;
+  }
+
+  return (
+    (character >= 'a' && character <= 'z') ||
+    (character >= 'A' && character <= 'Z') ||
+    (character >= '0' && character <= '9')
+  );
+}
+
+function isWorkEntryIdCharacter(character: string | undefined): boolean {
+  return (
+    isAlphaNumeric(character) ||
+    character === '-' ||
+    character === '_'
+  );
+}
+
+function redactTokenAfterMarker(value: string, marker: string): string {
+  let result = value;
+  let searchFrom = 0;
+
+  while (searchFrom < result.length) {
+    const markerIndex = result.toLowerCase().indexOf(marker, searchFrom);
+    if (markerIndex < 0) {
+      break;
+    }
+
+    const tokenStart = markerIndex + marker.length;
+    let tokenEnd = tokenStart;
+    while (isWorkEntryIdCharacter(result[tokenEnd])) {
+      tokenEnd += 1;
+    }
+
+    const token = result.slice(tokenStart, tokenEnd);
+    if (token.length >= 8 && isAlphaNumeric(token[0])) {
+      result =
+        result.slice(0, tokenStart) +
+        FILTERED_VALUE +
+        result.slice(tokenEnd);
+      searchFrom = tokenStart + FILTERED_VALUE.length;
+    } else {
+      searchFrom = Math.max(tokenEnd, tokenStart + 1);
+    }
+  }
+
+  return result;
+}
+
 function redactExceptionText(value: string): string {
-  return SENSITIVE_EXCEPTION_TEXT_PATTERNS.reduce(
-    (redactedValue, pattern) =>
-      redactedValue.replace(pattern, `$1${FILTERED_VALUE}`),
+  return WORK_ENTRY_REFERENCE_MARKERS.reduce(
+    (redactedValue, marker) =>
+      redactTokenAfterMarker(redactedValue, marker),
     redactText(value),
   );
 }
@@ -77,6 +184,22 @@ function redactBreadcrumbValue(value: unknown, seen: WeakSet<object>): unknown {
   return redactObject(value, seen);
 }
 
+function redactObjectEntry(
+  key: string,
+  entry: unknown,
+  seen: WeakSet<object>,
+): unknown {
+  if (isSensitiveFieldKey(key)) {
+    return FILTERED_VALUE;
+  }
+
+  if (key === 'url' && typeof entry === 'string') {
+    return redactUrl(entry);
+  }
+
+  return redactBreadcrumbValue(entry, seen);
+}
+
 function redactObject(
   value: object,
   seen: WeakSet<object>,
@@ -84,11 +207,7 @@ function redactObject(
   return Object.fromEntries(
     Object.entries(value).map(([key, entry]) => [
       key,
-      SENSITIVE_BREADCRUMB_KEY.test(key)
-        ? FILTERED_VALUE
-        : key === 'url' && typeof entry === 'string'
-          ? redactUrl(entry)
-          : redactBreadcrumbValue(entry, seen),
+      redactObjectEntry(key, entry, seen),
     ]),
   );
 }
@@ -170,11 +289,13 @@ function redactBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb | null {
   const data = breadcrumb.data
     ? redactBreadcrumbValue(breadcrumb.data, new WeakSet<object>())
     : undefined;
-  const message = breadcrumb.message
-    ? breadcrumb.category === 'deeplink'
-      ? redactUrl(breadcrumb.message)
-      : redactText(breadcrumb.message)
-    : undefined;
+  let message: string | undefined;
+  if (breadcrumb.message) {
+    message =
+      breadcrumb.category === 'deeplink'
+        ? redactUrl(breadcrumb.message)
+        : redactText(breadcrumb.message);
+  }
 
   return {
     ...breadcrumb,
