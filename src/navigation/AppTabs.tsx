@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native';
 import { Tabs, useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { type ColorValue, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
@@ -9,7 +9,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { type TabDefinition, tabs } from '@/navigation/tabs';
 
 type TabBarIconRendererProps = {
-  color: string;
+  color: ColorValue;
 };
 
 function createTabBarIconRenderer(tab: TabDefinition) {
