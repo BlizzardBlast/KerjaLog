@@ -6,7 +6,7 @@ export type SectionHeadingProps = {
   description: string;
 };
 
-export function SectionHeading({ title, description }: SectionHeadingProps) {
+export function SectionHeading({ title, description }: Readonly<SectionHeadingProps>) {
   return (
     <View style={styles.container}>
       <Text variant="heading">{title}</Text>

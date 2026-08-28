@@ -39,7 +39,7 @@ function mapAuthenticationError(error: string | undefined): AppLockError {
 
 export function useAppLockController(): AppLockContextValue {
   const { t } = useI18n();
-  const [enabled, setEnabledState] = useState(false);
+  const [enabledState, setEnabledState] = useState(false);
   const [locked, setLocked] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -98,7 +98,7 @@ export function useAppLockController(): AppLockContextValue {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (
-        enabled &&
+        enabledState &&
         nextState !== 'active' &&
         !authenticationInProgress.current
       ) {
@@ -108,7 +108,7 @@ export function useAppLockController(): AppLockContextValue {
     });
 
     return () => subscription.remove();
-  }, [enabled]);
+  }, [enabledState]);
 
   const authenticate = useCallback(async (): Promise<boolean> => {
     if (authenticationInProgress.current) {
@@ -151,7 +151,7 @@ export function useAppLockController(): AppLockContextValue {
 
   const setEnabled = useCallback(
     async (nextEnabled: boolean): Promise<boolean> => {
-      if (nextEnabled === enabled) {
+      if (nextEnabled === enabledState) {
         return true;
       }
 
@@ -212,11 +212,11 @@ export function useAppLockController(): AppLockContextValue {
       setError(null);
       return true;
     },
-    [authenticate, enabled],
+    [authenticate, enabledState],
   );
 
   const unlock = useCallback(async (): Promise<boolean> => {
-    if (!enabled) {
+    if (!enabledState) {
       setLocked(false);
       return true;
     }
@@ -235,12 +235,12 @@ export function useAppLockController(): AppLockContextValue {
     }
 
     return authenticated;
-  }, [authenticate, enabled]);
+  }, [authenticate, enabledState]);
 
   const clearError = useCallback(() => setError(null), []);
 
   return {
-    enabled,
+    enabled: enabledState,
     locked,
     isHydrated,
     isAuthenticating,

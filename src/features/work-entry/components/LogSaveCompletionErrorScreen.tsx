@@ -13,7 +13,7 @@ type LogSaveCompletionErrorScreenProps = {
 
 export function LogSaveCompletionErrorScreen({
   onRetry,
-}: LogSaveCompletionErrorScreenProps) {
+}: Readonly<LogSaveCompletionErrorScreenProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const [retrying, setRetrying] = useState(false);

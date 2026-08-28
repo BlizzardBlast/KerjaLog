@@ -22,7 +22,7 @@ export function GrowthSkillRow({
   countLabel,
   disabled,
   onPress,
-}: GrowthSkillRowProps) {
+}: Readonly<GrowthSkillRowProps>) {
   const { theme } = useTheme();
 
   return (

@@ -8,7 +8,7 @@ type ProtectedAppRouteProps = {
   children: ReactNode;
 };
 
-export function ProtectedAppRoute({ children }: ProtectedAppRouteProps) {
+export function ProtectedAppRoute({ children }: Readonly<ProtectedAppRouteProps>) {
   const { t } = useI18n();
   const onboardingStatus = useOnboardingCompletion();
 

@@ -32,7 +32,7 @@ export function EntryTypeStep({
   onContinue,
   t,
   ...frame
-}: EntryTypeStepProps) {
+}: Readonly<EntryTypeStepProps>) {
   return (
     <>
       <LogHeader

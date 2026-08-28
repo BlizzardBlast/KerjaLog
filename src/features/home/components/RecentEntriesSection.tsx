@@ -13,7 +13,7 @@ type RecentEntriesSectionProps = {
 export function RecentEntriesSection({
   entries,
   onEntryPress,
-}: RecentEntriesSectionProps) {
+}: Readonly<RecentEntriesSectionProps>) {
   const { t } = useI18n();
 
   return (

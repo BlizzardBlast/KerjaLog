@@ -14,7 +14,7 @@ type LogDraftLoadErrorScreenProps = {
 export function LogDraftLoadErrorScreen({
   onRetry,
   onBackHome,
-}: LogDraftLoadErrorScreenProps) {
+}: Readonly<LogDraftLoadErrorScreenProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

@@ -12,7 +12,7 @@ type ReflectionSectionProps = {
 
 export function ReflectionSection({
   onStartReflection,
-}: ReflectionSectionProps) {
+}: Readonly<ReflectionSectionProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

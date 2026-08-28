@@ -22,7 +22,7 @@ type HistoryEntryCardProps = {
   onPress: () => void;
 };
 
-export function HistoryEntryCard({ entry, onPress }: HistoryEntryCardProps) {
+export function HistoryEntryCard({ entry, onPress }: Readonly<HistoryEntryCardProps>) {
   const { theme } = useTheme();
   const { language, t } = useI18n();
   const locale = language === 'id' ? 'id-ID' : 'en-US';
@@ -76,7 +76,7 @@ type StatusChipProps = {
   status: EntryStatus;
 };
 
-function StatusChip({ isPrivate, label, status }: StatusChipProps) {
+function StatusChip({ isPrivate, label, status }: Readonly<StatusChipProps>) {
   const { theme } = useTheme();
   const palette = getStatusPalette(isPrivate, status);
 

@@ -28,7 +28,7 @@ export function ToggleSwitch({
   value,
   disabled = false,
   onValueChange,
-}: ToggleSwitchProps) {
+}: Readonly<ToggleSwitchProps>) {
   const { theme } = useTheme();
   const progress = useSharedValue(value ? 1 : 0);
 

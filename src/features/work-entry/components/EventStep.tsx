@@ -40,7 +40,7 @@ export function EventStep({
   onContinue,
   t,
   ...frame
-}: EventStepProps) {
+}: Readonly<EventStepProps>) {
   const { theme } = useTheme();
 
   return (

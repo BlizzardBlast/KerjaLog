@@ -35,9 +35,9 @@ async function persistThemeMode(mode: ThemeMode): Promise<void> {
   await AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
 }
 
-export function ThemeProvider({ children }: PropsWithChildren) {
+export function ThemeProvider({ children }: Readonly<PropsWithChildren>) {
   const systemColorScheme = useColorScheme();
-  const [mode, setModeState] = useState<ThemeMode>('system');
+  const [modeState, setModeState] = useState<ThemeMode>('system');
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -70,15 +70,15 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   };
 
   const resolvedTheme: ResolvedTheme =
-    mode === 'system'
+    modeState === 'system'
       ? systemColorScheme === 'dark'
         ? 'dark'
         : 'light'
-      : mode;
+      : modeState;
 
   const value: ThemeContextValue = {
     theme: themes[resolvedTheme],
-    mode,
+    mode: modeState,
     resolvedTheme,
     isHydrated,
     setMode,

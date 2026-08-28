@@ -31,7 +31,7 @@ export function WeeklyReflectionPromptView({
   onSkip,
   onContinue,
   onClose,
-}: WeeklyReflectionPromptViewProps) {
+}: Readonly<WeeklyReflectionPromptViewProps>) {
   const { t } = useI18n();
   const { theme } = useTheme();
   const isLastPrompt = promptIndex === totalPrompts - 1;

@@ -22,7 +22,7 @@ type ReviewScheduleSectionProps = {
 
 export function ReviewScheduleSection({
   reviewSchedule,
-}: ReviewScheduleSectionProps) {
+}: Readonly<ReviewScheduleSectionProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const reviewScheduleLabel = reviewSchedule

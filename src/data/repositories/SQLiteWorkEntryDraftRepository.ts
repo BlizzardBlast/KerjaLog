@@ -101,7 +101,7 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
     throw new Error('Stored work entry draft intent is invalid.');
   }
   if (typeof row.raw_note !== 'string') {
-    throw new Error('Stored work entry draft note is invalid.');
+    throw new TypeError('Stored work entry draft note is invalid.');
   }
   if (row.outcome_type !== null && !isOutcomeType(row.outcome_type)) {
     throw new Error('Stored work entry draft outcome is invalid.');
@@ -110,7 +110,7 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
     typeof row.evidence_detail !== 'string' ||
     typeof row.impact_statement !== 'string'
   ) {
-    throw new Error('Stored work entry draft text is invalid.');
+    throw new TypeError('Stored work entry draft text is invalid.');
   }
   if (
     row.impact_statement_source !== null &&
@@ -136,7 +136,7 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
 
 function parseEvidenceTypes(value: unknown): WorkEntryDraft['evidenceTypes'] {
   if (typeof value !== 'string') {
-    throw new Error('Stored work entry draft evidence is invalid.');
+    throw new TypeError('Stored work entry draft evidence is invalid.');
   }
 
   let parsed: unknown;
@@ -157,7 +157,7 @@ function parseEvidenceTypes(value: unknown): WorkEntryDraft['evidenceTypes'] {
 
 function parseSkills(value: unknown): WorkEntrySkill[] {
   if (typeof value !== 'string') {
-    throw new Error('Stored work entry draft skills are invalid.');
+    throw new TypeError('Stored work entry draft skills are invalid.');
   }
 
   let parsed: unknown;

@@ -33,7 +33,7 @@ export function OptionCard({
   selected,
   onPress,
   disabled = false,
-}: OptionCardProps) {
+}: Readonly<OptionCardProps>) {
   const { theme } = useTheme();
   const selectionProgress = useSharedValue(selected ? 1 : 0);
 

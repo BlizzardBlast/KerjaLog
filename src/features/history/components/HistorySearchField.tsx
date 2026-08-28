@@ -27,7 +27,7 @@ type HistorySearchFieldProps = {
 export function HistorySearchField({
   value,
   onChangeText,
-}: HistorySearchFieldProps) {
+}: Readonly<HistorySearchFieldProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

@@ -121,7 +121,7 @@ const HistoryScreen = Sentry.withProfiler(ProfiledHistoryScreen);
 
 export { HistoryScreen };
 
-function HistoryMonthHeader({ section }: { section: HistorySection }) {
+function HistoryMonthHeader({ section }: Readonly<{ section: HistorySection }>) {
   return (
     <View style={styles.monthHeader}>
       <Text accessibilityRole="header" variant="heading">
@@ -147,7 +147,7 @@ function HistoryEmptyContent({
   isSearchPending,
   onRetry,
   status,
-}: HistoryEmptyContentProps) {
+}: Readonly<HistoryEmptyContentProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 
@@ -215,11 +215,11 @@ function HistoryListFooter({
   isSearchPending,
   onRetry,
   state,
-}: {
+}: Readonly<{
   isSearchPending: boolean;
   onRetry: () => void;
   state: HistoryEntriesState;
-}) {
+}>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

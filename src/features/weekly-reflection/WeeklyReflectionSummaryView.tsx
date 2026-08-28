@@ -27,7 +27,7 @@ export function WeeklyReflectionSummaryView({
   onLogAnswer,
   onOpenDraft,
   onBackHome,
-}: WeeklyReflectionSummaryViewProps) {
+}: Readonly<WeeklyReflectionSummaryViewProps>) {
   const { t } = useI18n();
   const { theme } = useTheme();
   const isSaving = handoffState.status === 'saving';

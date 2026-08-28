@@ -19,7 +19,7 @@ export function SkillEvidenceContent({
   state,
   onRetry,
   onOpenEntry,
-}: SkillEvidenceContentProps) {
+}: Readonly<SkillEvidenceContentProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

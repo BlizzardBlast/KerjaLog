@@ -25,7 +25,7 @@ type GrowthEvidenceMapLoadedContentProps = {
 export function GrowthEvidenceMapLoadedContent({
   state,
   onOpenSkill,
-}: GrowthEvidenceMapLoadedContentProps) {
+}: Readonly<GrowthEvidenceMapLoadedContentProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const skillAreaCount = state.evidenceMap.skills.filter(

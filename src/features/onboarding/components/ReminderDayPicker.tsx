@@ -23,7 +23,7 @@ export function ReminderDayPicker({
   value,
   onChange,
   onClose,
-}: ReminderDayPickerProps) {
+}: Readonly<ReminderDayPickerProps>) {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const { t } = useI18n();

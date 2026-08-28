@@ -104,7 +104,7 @@ export function Button({
   accessibilityState,
   accessibilityRole = 'button',
   ...props
-}: ButtonProps) {
+}: Readonly<ButtonProps>) {
   const { theme } = useTheme();
   const isDisabled = disabled || loading;
   const variantConfig = getVariantConfigs(theme)[variant];

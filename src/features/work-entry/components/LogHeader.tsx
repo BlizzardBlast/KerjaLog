@@ -24,7 +24,7 @@ export function LogHeader({
   currentStep,
   totalSteps,
   progressLabel,
-}: LogHeaderProps) {
+}: Readonly<LogHeaderProps>) {
   const { theme } = useTheme();
   const progressSegments = Array.from(
     { length: totalSteps },

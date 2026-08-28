@@ -1,6 +1,6 @@
 import { Text } from '@/design-system/components/Text';
 
-export function InlineError({ children }: { children: string }) {
+export function InlineError({ children }: Readonly<{ children: string }>) {
   return (
     <Text
       role="alert"

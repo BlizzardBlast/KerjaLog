@@ -9,7 +9,7 @@ type RecentEntryCardProps = {
   onPress: () => void;
 };
 
-export function RecentEntryCard({ entry, onPress }: RecentEntryCardProps) {
+export function RecentEntryCard({ entry, onPress }: Readonly<RecentEntryCardProps>) {
   const { theme } = useTheme();
 
   return (

@@ -9,7 +9,7 @@ export type {
 
 const AppLockContext = createContext<AppLockContextValue | null>(null);
 
-export function AppLockProvider({ children }: PropsWithChildren) {
+export function AppLockProvider({ children }: Readonly<PropsWithChildren>) {
   const value = useAppLockController();
 
   return <AppLockContext value={value}>{children}</AppLockContext>;

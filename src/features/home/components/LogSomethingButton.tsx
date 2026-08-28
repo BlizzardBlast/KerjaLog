@@ -7,7 +7,7 @@ type LogSomethingButtonProps = {
   onPress: () => void;
 };
 
-export function LogSomethingButton({ onPress }: LogSomethingButtonProps) {
+export function LogSomethingButton({ onPress }: Readonly<LogSomethingButtonProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

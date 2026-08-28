@@ -54,7 +54,7 @@ async function persistLanguage(language: Language): Promise<void> {
   await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
 }
 
-export function I18nProvider({ children }: PropsWithChildren) {
+export function I18nProvider({ children }: Readonly<PropsWithChildren>) {
   const [language, setLanguageState] = useState<Language>(getDeviceLanguage);
   const [isHydrated, setIsHydrated] = useState(false);
 

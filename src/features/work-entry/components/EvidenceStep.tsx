@@ -38,7 +38,7 @@ export function EvidenceStep({
   onContinue,
   t,
   ...frame
-}: EvidenceStepProps) {
+}: Readonly<EvidenceStepProps>) {
   return (
     <>
       <LogHeader

@@ -3,7 +3,7 @@ import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
 
-export function RouteLoadingScreen({ label }: { label: string }) {
+export function RouteLoadingScreen({ label }: Readonly<{ label: string }>) {
   const { theme } = useTheme();
 
   return (

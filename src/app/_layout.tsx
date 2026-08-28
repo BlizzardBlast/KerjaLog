@@ -21,7 +21,7 @@ initializeSentry();
 SplashScreen.preventAutoHideAsync().catch(ignoreError);
 configureNotificationHandling().catch(ignoreError);
 
-function RootErrorBoundary({ retry }: ErrorBoundaryProps) {
+function RootErrorBoundary({ retry }: Readonly<ErrorBoundaryProps>) {
   return <RootErrorScreen onRetry={retry} />;
 }
 

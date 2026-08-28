@@ -19,7 +19,7 @@ export function LanguageSelectorTrigger({
   accessibilityValue,
   expanded,
   onPress,
-}: LanguageSelectorTriggerProps) {
+}: Readonly<LanguageSelectorTriggerProps>) {
   const { theme } = useTheme();
 
   return (

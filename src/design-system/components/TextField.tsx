@@ -19,7 +19,7 @@ export function TextField({
   selectionColor,
   style,
   ...props
-}: TextFieldProps) {
+}: Readonly<TextFieldProps>) {
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 

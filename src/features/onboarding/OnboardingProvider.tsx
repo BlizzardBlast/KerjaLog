@@ -8,7 +8,7 @@ export const OnboardingContext = createContext<OnboardingContextValue | null>(
   null,
 );
 
-export function OnboardingProvider({ children }: PropsWithChildren) {
+export function OnboardingProvider({ children }: Readonly<PropsWithChildren>) {
   const value = useOnboardingController();
 
   return <OnboardingContext value={value}>{children}</OnboardingContext>;

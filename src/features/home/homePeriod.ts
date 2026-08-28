@@ -1,6 +1,6 @@
 export function getStartOfLocalWeekIso(now: Date = new Date()): string {
   if (Number.isNaN(now.getTime())) {
-    throw new Error('Current date must be valid.');
+    throw new TypeError('Current date must be valid.');
   }
 
   const start = new Date(now);

@@ -47,7 +47,7 @@ function getFallbackCopy(): RootErrorCopy {
   }
 }
 
-export function RootErrorScreen({ onRetry }: RootErrorScreenProps) {
+export function RootErrorScreen({ onRetry }: Readonly<RootErrorScreenProps>) {
   const colorScheme = useColorScheme();
   const colors = themes[colorScheme === 'dark' ? 'dark' : 'light'].colors;
   const copy = getFallbackCopy();

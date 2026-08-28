@@ -15,7 +15,7 @@ export type OnboardingHeaderProps = {
 export function OnboardingHeader({
   currentStepIndex,
   onBack,
-}: OnboardingHeaderProps) {
+}: Readonly<OnboardingHeaderProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const progressText = t('onboarding.progress', {

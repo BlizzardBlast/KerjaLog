@@ -24,7 +24,7 @@ export function ReminderScheduleCard({
   schedule,
   disabled = false,
   onChange,
-}: ReminderScheduleCardProps) {
+}: Readonly<ReminderScheduleCardProps>) {
   const { theme } = useTheme();
   const { language, t } = useI18n();
   const [dayPickerVisible, setDayPickerVisible] = useState(false);
@@ -102,7 +102,7 @@ function ScheduleRow({
   accessibilityLabel,
   disabled,
   onPress,
-}: ScheduleRowProps) {
+}: Readonly<ScheduleRowProps>) {
   return (
     <Pressable
       accessibilityLabel={`${accessibilityLabel}: ${value}`}

@@ -10,7 +10,7 @@ type AppLockSettingFeedbackProps = {
 export function AppLockSettingFeedback({
   enabled,
   error,
-}: AppLockSettingFeedbackProps) {
+}: Readonly<AppLockSettingFeedbackProps>) {
   const { t } = useI18n();
   const message =
     error === 'unavailable'

@@ -18,7 +18,7 @@ export function SkillEvidenceThreadItem({
   openHint,
   isLast,
   onPress,
-}: SkillEvidenceThreadItemProps) {
+}: Readonly<SkillEvidenceThreadItemProps>) {
   const { theme } = useTheme();
 
   return (
