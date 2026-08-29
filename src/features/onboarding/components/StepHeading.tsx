@@ -17,7 +17,9 @@ export function StepHeading({
       <Text variant="overline" color="primary">
         {eyebrow}
       </Text>
-      <Text accessibilityRole="header" variant="title">\n        {title}\n      </Text>
+      <Text accessibilityRole="header" variant="title">
+        {title}
+      </Text>
       <Text variant="body" color="textMuted">
         {description}
       </Text>
