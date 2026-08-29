@@ -23,7 +23,7 @@ export function LogDraftLoadErrorScreen({
       edges={['top', 'bottom']}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
-      <Text variant="title" style={styles.centeredText}>
+      <Text accessibilityRole="header" variant="title" style={styles.centeredText}>
         {t('log.draft.loadErrorTitle')}
       </Text>
       <Text
