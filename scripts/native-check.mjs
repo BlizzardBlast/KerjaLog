@@ -42,10 +42,15 @@ function runPlatformCommand({
   );
 }
 
+const prebuildArgs = ['exec', 'expo', 'prebuild', '--clean', '--no-install'];
+if (isWindows) {
+  prebuildArgs.push('--platform', 'android');
+}
+
 runPlatformCommand({
   unixCommand: 'pnpm',
   windowsCommand: 'pnpm.cmd',
-  args: ['exec', 'expo', 'prebuild', '--clean', '--no-install'],
+  args: prebuildArgs,
 });
 
 runPlatformCommand({
@@ -57,4 +62,9 @@ runPlatformCommand({
   },
 });
 
-run(process.execPath, ['scripts/verify-native-config.js']);
+const verificationArgs = ['scripts/verify-native-config.js'];
+if (isWindows) {
+  verificationArgs.push('--platform', 'android');
+}
+
+run(process.execPath, verificationArgs);
