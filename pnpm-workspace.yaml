@@ -1,3 +1,8 @@
+# Keep pnpm virtual-store directory names short enough for Windows CMake/Ninja
+# native builds. React Native dependencies add deeply nested Prefab/CMake paths,
+# and pnpm's Windows default of 60 can still exceed the 260-character tool limit.
+virtualStoreDirMaxLength: 40
+
 # Keep Expo native modules on the single SDK-compatible constants release even
 # when an older package manifest still points at the previous patch version.
 overrides:
