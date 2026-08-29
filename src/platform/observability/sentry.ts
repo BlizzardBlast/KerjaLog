@@ -135,63 +135,78 @@ function findUnquotedValueEnd(value: string, start: number): number {
   return cursor;
 }
 
-function parseSensitiveAssignment(
-  value: string,
-  start: number,
-): SensitiveAssignment | null {
-  let cursor = start;
-  const keyQuote = isQuote(value[cursor]) ? value[cursor] : null;
-  if (keyQuote) {
-    cursor += 1;
-  }
-
-  if (!isAsciiLetter(value[cursor])) {
-    return null;
-  }
-
-  const keyStart = cursor;
-  cursor += 1;
+function findFieldKeyEnd(value: string, start: number): number {
+  let cursor = start + 1;
   while (isFieldKeyCharacter(value[cursor])) {
     cursor += 1;
   }
+  return cursor;
+}
 
-  const key = value.slice(keyStart, cursor);
-  if (!isSensitiveFieldKey(key)) {
+function parseSensitiveFieldKeyEnd(
+  value: string,
+  start: number,
+): number | null {
+  const keyQuote = isQuote(value[start]) ? value[start] : null;
+  const keyStart = keyQuote ? start + 1 : start;
+  if (!isAsciiLetter(value[keyStart])) {
     return null;
   }
 
-  if (keyQuote) {
-    if (value[cursor] !== keyQuote) {
-      return null;
-    }
-    cursor += 1;
-  }
-
-  cursor = skipWhitespace(value, cursor);
-  if (value[cursor] !== ':' && value[cursor] !== '=') {
+  const keyEnd = findFieldKeyEnd(value, keyStart);
+  if (!isSensitiveFieldKey(value.slice(keyStart, keyEnd))) {
     return null;
   }
 
-  cursor = skipWhitespace(value, cursor + 1);
-  const valueQuote = isQuote(value[cursor]) ? value[cursor] : null;
+  if (!keyQuote) {
+    return keyEnd;
+  }
+
+  return value[keyEnd] === keyQuote ? keyEnd + 1 : null;
+}
+
+function parseSensitiveValue(
+  value: string,
+  start: number,
+): SensitiveAssignment | null {
+  const valueQuote = isQuote(value[start]) ? value[start] : null;
   if (valueQuote) {
-    const replacementStart = cursor + 1;
+    const replacementStart = start + 1;
     const replacementEnd = value.indexOf(valueQuote, replacementStart);
     return replacementEnd < 0 ? null : { replacementStart, replacementEnd };
   }
 
-  const replacementStart = cursor;
+  const replacementStart = start;
+  let valueStart = start;
   if (
-    value.slice(cursor, cursor + 6).toLowerCase() === 'bearer' &&
-    isWhitespace(value[cursor + 6])
+    value.slice(valueStart, valueStart + 6).toLowerCase() === 'bearer' &&
+    isWhitespace(value[valueStart + 6])
   ) {
-    cursor = skipWhitespace(value, cursor + 6);
+    valueStart = skipWhitespace(value, valueStart + 6);
   }
 
-  const replacementEnd = findUnquotedValueEnd(value, cursor);
-  return replacementEnd === cursor
+  const replacementEnd = findUnquotedValueEnd(value, valueStart);
+  return replacementEnd === valueStart
     ? null
     : { replacementStart, replacementEnd };
+}
+
+function parseSensitiveAssignment(
+  value: string,
+  start: number,
+): SensitiveAssignment | null {
+  const keyEnd = parseSensitiveFieldKeyEnd(value, start);
+  if (keyEnd === null) {
+    return null;
+  }
+
+  const separatorIndex = skipWhitespace(value, keyEnd);
+  if (value[separatorIndex] !== ':' && value[separatorIndex] !== '=') {
+    return null;
+  }
+
+  const valueStart = skipWhitespace(value, separatorIndex + 1);
+  return parseSensitiveValue(value, valueStart);
 }
 
 function redactText(value: string): string {
