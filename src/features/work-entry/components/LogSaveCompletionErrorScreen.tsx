@@ -32,7 +32,11 @@ export function LogSaveCompletionErrorScreen({
       edges={['top', 'bottom']}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
-      <Text\n        accessibilityRole="header"\n        variant="title"\n        style={styles.centeredText}\n      >
+      <Text
+        accessibilityRole="header"
+        variant="title"
+        style={styles.centeredText}
+      >
         {t('log.completion.title')}
       </Text>
       <Text
