@@ -34,7 +34,7 @@ function assertNotIncludes(value, unexpected, label) {
 
 function assertPermissionBlocked(manifest, permission) {
   const tag = manifest
-    .match(/<uses-permission\\b[^>]*>/gu)
+    .match(/<uses-permission\b[^>]*>/gu)
     ?.find((candidate) => candidate.includes(`android:name="${permission}"`));
 
   if (!tag?.includes('tools:node="remove"')) {
@@ -133,7 +133,7 @@ function verifyAndroidConfiguration() {
   ).filter(
     (candidate) =>
       /merged_manifest(?:s)?/u.test(candidate) &&
-      /[/\\\\]debug[/\\\\]/u.test(candidate),
+      /[/\\]debug[/\\]/u.test(candidate),
   );
 
   if (mergedManifestPaths.length === 0) {
