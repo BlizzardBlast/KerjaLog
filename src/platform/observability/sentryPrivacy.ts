@@ -126,9 +126,7 @@ export function redactEventMetadata(
   };
 }
 
-export function redactBreadcrumb(
-  breadcrumb: Breadcrumb,
-): Breadcrumb | null {
+export function redactBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb | null {
   if (breadcrumb.category === 'console') {
     return null;
   }
