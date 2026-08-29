@@ -197,6 +197,40 @@ describe('Sentry privacy configuration', () => {
     });
   });
 
+  test('redacts architecture-defined career content key variants', () => {
+    initializeSentry();
+    const options = getSentryOptions();
+
+    const sentEvent = options.beforeSend?.(
+      {
+        extra: {
+          company: 'Private employer',
+          companyName: 'Private employer name',
+          impact_statement: 'Private impact statement',
+          project: 'Private project',
+          projectName: 'Private project name',
+          reviewContent: 'Private review content',
+          safeOperation: 'load-history',
+        },
+        type: undefined,
+      },
+      {},
+    );
+
+    expect(sentEvent).toEqual({
+      extra: {
+        company: '[Filtered]',
+        companyName: '[Filtered]',
+        impact_statement: '[Filtered]',
+        project: '[Filtered]',
+        projectName: '[Filtered]',
+        reviewContent: '[Filtered]',
+        safeOperation: 'load-history',
+      },
+      type: undefined,
+    });
+  });
+
   test('retains safe transaction context and redacts sensitive values', () => {
     // Given
     initializeSentry();
