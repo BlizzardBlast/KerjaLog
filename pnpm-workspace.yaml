@@ -1,3 +1,8 @@
+# Expo recommends the hoisted pnpm linker when React Native native tooling has
+# issues with isolated/symlinked dependency layouts. It also keeps Windows
+# CMake/Ninja source paths short enough for native dependencies such as Sentry.
+nodeLinker: hoisted
+
 # Keep pnpm virtual-store directory names short enough for Windows CMake/Ninja
 # native builds. React Native dependencies add deeply nested Prefab/CMake paths,
 # and pnpm's Windows default of 60 can still exceed the 260-character tool limit.
