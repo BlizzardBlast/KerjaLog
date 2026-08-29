@@ -1,28 +1,28 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { ActivityIndicator, SectionList, StyleSheet, View } from 'react-native';
+import { SectionList, StyleSheet, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { layout, radii, spacing } from '@/design-system/tokens/theme';
+import { layout, spacing } from '@/design-system/tokens/theme';
 import { hasWorkEntryHistoryFilters } from '@/domain/entry/history';
 import type { WorkEntry } from '@/domain/entry/model';
 import { HistoryEntryCard } from '@/features/history/components/HistoryEntryCard';
 import { HistoryFilterBar } from '@/features/history/components/HistoryFilterBar';
+import {
+  HistoryEmptyContent,
+  HistoryListFooter,
+} from '@/features/history/components/HistoryListStateContent';
 import { HistorySearchField } from '@/features/history/components/HistorySearchField';
 import {
   groupHistoryEntries,
   type HistorySection,
 } from '@/features/history/historyGrouping';
-import {
-  type HistoryEntriesState,
-  useHistoryEntries,
-} from '@/features/history/useHistoryEntries';
+import { useHistoryEntries } from '@/features/history/useHistoryEntries';
 import { useI18n } from '@/i18n/I18nProvider';
 
 function ProfiledHistoryScreen() {
@@ -137,144 +137,6 @@ function EntrySeparator() {
   return <View style={styles.entrySeparator} />;
 }
 
-type HistoryEmptyContentProps = {
-  hasActiveQuery: boolean;
-  isSearchPending: boolean;
-  onRetry: () => void;
-  status: 'loading' | 'loaded' | 'error';
-};
-
-function HistoryEmptyContent({
-  hasActiveQuery,
-  isSearchPending,
-  onRetry,
-  status,
-}: Readonly<HistoryEmptyContentProps>) {
-  const { theme } = useTheme();
-  const { t } = useI18n();
-
-  if (status === 'loading' || isSearchPending) {
-    return (
-      <View
-        accessible
-        accessibilityLabel={t(
-          isSearchPending ? 'history.updating' : 'history.loading',
-        )}
-        accessibilityRole="progressbar"
-        accessibilityState={{ busy: true }}
-        style={styles.stateContainer}
-      >
-        <ActivityIndicator color={theme.colors.primary} />
-      </View>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <View
-        style={[
-          styles.stateCard,
-          {
-            backgroundColor: theme.colors.surfaceSubtle,
-            borderColor: theme.colors.border,
-          },
-        ]}
-      >
-        <Text variant="heading">{t('history.error.title')}</Text>
-        <Text color="textMuted">{t('history.error.description')}</Text>
-        <Button size="sm" onPress={onRetry} style={styles.retryButton}>
-          {t('history.error.retry')}
-        </Button>
-      </View>
-    );
-  }
-
-  return (
-    <View
-      style={[
-        styles.stateCard,
-        {
-          backgroundColor: theme.colors.surfaceSubtle,
-          borderColor: theme.colors.border,
-        },
-      ]}
-    >
-      <Text variant="subheading">
-        {t(hasActiveQuery ? 'history.noMatches.title' : 'history.empty.title')}
-      </Text>
-      <Text color="textMuted">
-        {t(
-          hasActiveQuery
-            ? 'history.noMatches.description'
-            : 'history.empty.description',
-        )}
-      </Text>
-    </View>
-  );
-}
-
-function HistoryListFooter({
-  isSearchPending,
-  onRetry,
-  state,
-}: Readonly<{
-  isSearchPending: boolean;
-  onRetry: () => void;
-  state: HistoryEntriesState;
-}>) {
-  const { theme } = useTheme();
-  const { t } = useI18n();
-
-  if (
-    state.entries.length > 0 &&
-    (isSearchPending || state.status === 'loading')
-  ) {
-    return (
-      <ActivityIndicator
-        accessible
-        accessibilityLabel={t('history.updating')}
-        accessibilityRole="progressbar"
-        accessibilityState={{ busy: true }}
-        color={theme.colors.primary}
-        style={styles.footerLoader}
-      />
-    );
-  }
-
-  if (state.status === 'loaded' && state.isLoadingMore) {
-    return (
-      <ActivityIndicator
-        accessible
-        accessibilityLabel={t('history.loadingMore')}
-        accessibilityRole="progressbar"
-        accessibilityState={{ busy: true }}
-        color={theme.colors.primary}
-        style={styles.footerLoader}
-      />
-    );
-  }
-
-  if (state.status === 'loaded' && state.loadMoreError) {
-    return (
-      <View style={styles.loadMoreError}>
-        <Text variant="caption" color="textMuted">
-          {t('history.loadMoreError')}
-        </Text>
-        <Button
-          size="sm"
-          variant="secondary"
-          onPress={onRetry}
-          style={styles.loadMoreRetryButton}
-        >
-          {t('history.loadMoreRetry')}
-        </Button>
-      </View>
-    );
-  }
-
-  return null;
-}
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -296,31 +158,5 @@ const styles = StyleSheet.create({
   },
   entrySeparator: {
     height: spacing[3],
-  },
-  stateContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 180,
-  },
-  stateCard: {
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    gap: spacing[2],
-    padding: spacing[5],
-  },
-  retryButton: {
-    alignSelf: 'flex-start',
-    marginTop: spacing[2],
-  },
-  footerLoader: {
-    marginTop: spacing[4],
-  },
-  loadMoreError: {
-    alignItems: 'center',
-    gap: spacing[2],
-    marginTop: spacing[4],
-  },
-  loadMoreRetryButton: {
-    alignSelf: 'center',
   },
 });
