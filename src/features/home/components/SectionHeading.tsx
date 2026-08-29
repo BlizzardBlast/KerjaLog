@@ -12,7 +12,9 @@ export function SectionHeading({
 }: Readonly<SectionHeadingProps>) {
   return (
     <View style={styles.container}>
-      <Text accessibilityRole="header" variant="heading">\n        {title}\n      </Text>
+      <Text accessibilityRole="header" variant="heading">
+        {title}
+      </Text>
       <Text variant="caption" color="textMuted">
         {description}
       </Text>
