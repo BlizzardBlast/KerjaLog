@@ -50,7 +50,7 @@ export function AppLockScreen() {
           <Text variant="overline" color="primary" style={styles.centeredText}>
             {t('appLock.screen.eyebrow')}
           </Text>
-          <Text variant="title" style={styles.centeredText}>
+          <Text accessibilityRole="header" variant="title" style={styles.centeredText}>
             {t('appLock.screen.title')}
           </Text>
           <Text variant="body" color="textMuted" style={styles.centeredText}>
