@@ -57,6 +57,7 @@ async function findWorkEntryDetail(
         work_entries.occurred_at,
         work_entries.outcome_type,
         work_entries.status,
+        work_entries.work_area_id,
         work_entries.excluded_from_exports,
         work_entries.created_at,
         work_entries.updated_at,
@@ -131,6 +132,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
               occurred_at,
               outcome_type,
               status,
+              work_area_id,
               excluded_from_exports,
               created_at,
               updated_at
@@ -150,6 +152,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             recent_entries.occurred_at,
             recent_entries.outcome_type,
             recent_entries.status,
+            recent_entries.work_area_id,
             recent_entries.excluded_from_exports,
             recent_entries.created_at,
             recent_entries.updated_at,
@@ -247,6 +250,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             occurred_at,
             outcome_type,
             status,
+            work_area_id,
             excluded_from_exports,
             created_at,
             updated_at
@@ -261,6 +265,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             $occurredAt,
             $outcomeType,
             $status,
+            $workAreaId,
             $excludedFromExports,
             $createdAt,
             $updatedAt
@@ -276,6 +281,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           $occurredAt: input.occurredAt,
           $outcomeType: input.outcomeType,
           $status: input.status,
+          $workAreaId: input.workAreaId,
           $excludedFromExports: input.excludedFromExports ? 1 : 0,
           $createdAt: now,
           $updatedAt: now,
@@ -321,6 +327,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       occurredAt: input.occurredAt,
       outcomeType: input.outcomeType,
       status: input.status,
+      workAreaId: input.workAreaId,
       evidence: input.evidence,
       excludedFromExports: input.excludedFromExports,
       createdAt: now,
@@ -348,6 +355,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             occurred_at = $occurredAt,
             outcome_type = $outcomeType,
             status = $status,
+            work_area_id = $workAreaId,
             excluded_from_exports = $excludedFromExports,
             updated_at = $updatedAt
           WHERE id = $id
@@ -362,6 +370,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           $occurredAt: input.occurredAt,
           $outcomeType: input.outcomeType,
           $status: input.status,
+          $workAreaId: input.workAreaId,
           $excludedFromExports: input.excludedFromExports ? 1 : 0,
           $updatedAt: now,
         },
@@ -440,13 +449,24 @@ async function insertEntrySkills(
 function assertEntryWriteInput(
   input: Pick<
     CreateWorkEntry,
-    'occurredAt' | 'impactStatement' | 'impactStatementSource' | 'skills'
+    | 'occurredAt'
+    | 'impactStatement'
+    | 'impactStatementSource'
+    | 'skills'
+    | 'workAreaId'
   >,
 ): void {
   if (!isCanonicalIsoTimestamp(input.occurredAt)) {
     throw new Error(
       'Work entry occurred at must be a canonical ISO timestamp.',
     );
+  }
+
+  if (
+    input.workAreaId !== null &&
+    (typeof input.workAreaId !== 'string' || !input.workAreaId.trim())
+  ) {
+    throw new Error('Work entry work area id is invalid.');
   }
 
   const hasStatement = input.impactStatement !== null;
