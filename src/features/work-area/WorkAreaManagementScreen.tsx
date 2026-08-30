@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { workAreaRepository } from '@/data/repositories/workAreaRepository';
@@ -223,7 +223,7 @@ type WorkAreaSectionProps = {
   title: string;
   emptyText: string;
   workAreas: WorkArea[];
-  renderActions: (workArea: WorkArea) => React.ReactNode;
+  renderActions: (workArea: WorkArea) => ReactNode;
 };
 
 function WorkAreaSection({
@@ -289,7 +289,9 @@ const styles = StyleSheet.create({
   name: { flex: 1 },
   rowActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing[2],
+    justifyContent: 'flex-end',
   },
   empty: {
     alignItems: 'flex-start',
