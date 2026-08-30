@@ -30,6 +30,7 @@ import type {
   WorkEntryDetail,
 } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
+import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 
 const ACTIVE_DRAFT_ID = 1;
 
