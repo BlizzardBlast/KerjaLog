@@ -15,7 +15,10 @@ describe('HistoryFilterBar', () => {
       <ThemeProvider>
         <HistoryFilterBar
           filters={EMPTY_WORK_ENTRY_HISTORY_FILTERS}
+          workAreas={[]}
           onEntryTypeChange={jest.fn()}
+          onWorkAreaChange={jest.fn()}
+          onManageWorkAreas={jest.fn()}
           onEvidenceToggle={jest.fn()}
           onReviewReadyToggle={jest.fn()}
           onClear={jest.fn()}
@@ -39,5 +42,45 @@ describe('HistoryFilterBar', () => {
         .accessibilityState,
     ).toEqual({ expanded: true, selected: false });
     expect(screen.getByText('history.type.contribution')).toBeTruthy();
+  });
+
+  test('discloses work areas and management when the catalog is available', async () => {
+    const onWorkAreaChange = jest.fn();
+    const onManageWorkAreas = jest.fn();
+
+    await render(
+      <ThemeProvider>
+        <HistoryFilterBar
+          filters={EMPTY_WORK_ENTRY_HISTORY_FILTERS}
+          workAreas={[
+            {
+              id: 'area-reporting',
+              name: 'Monthly Reporting',
+              archivedAt: null,
+              createdAt: '2026-08-30T01:00:00.000Z',
+              updatedAt: '2026-08-30T01:00:00.000Z',
+            },
+          ]}
+          onEntryTypeChange={jest.fn()}
+          onWorkAreaChange={onWorkAreaChange}
+          onManageWorkAreas={onManageWorkAreas}
+          onEvidenceToggle={jest.fn()}
+          onReviewReadyToggle={jest.fn()}
+          onClear={jest.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'history.filters.workArea' }),
+    );
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Monthly Reporting' }),
+    );
+
+    expect(onWorkAreaChange).toHaveBeenCalledWith('area-reporting');
+    expect(
+      screen.getByRole('button', { name: 'workArea.manage' }),
+    ).toBeTruthy();
   });
 });
