@@ -156,8 +156,8 @@ function ProfiledWorkAreaManagementScreen() {
               style={styles.flex}
             >
               {editing
-                  ? t('workArea.renameAction')
-                  : t('workArea.createAction')}
+                ? t('workArea.renameAction')
+                : t('workArea.createAction')}
             </Button>
           </View>
         </View>
