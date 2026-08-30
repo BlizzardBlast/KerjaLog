@@ -149,6 +149,7 @@ describe('History entries controller', () => {
       searchText: '',
       filters: {
         entryType: 'problem_solved',
+        workAreaId: null,
         hasEvidence: false,
         reviewReadyOnly: false,
       },
