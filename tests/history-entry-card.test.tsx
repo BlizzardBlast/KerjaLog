@@ -26,6 +26,7 @@ function createEntry(overrides: Partial<WorkEntry> = {}): WorkEntry {
     occurredAt: '2026-08-06T08:00:00.000Z',
     outcomeType: 'error_fixed_or_prevented',
     status: 'review_ready',
+    workAreaId: null,
     evidence: {
       types: ['number'],
       detail: '7 duplicate entries removed.',
