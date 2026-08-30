@@ -7,6 +7,7 @@ const draft: WorkEntryDraft = {
   step: 'event',
   intent: 'completed',
   rawNote: 'Prepared the weekly report.',
+  workAreaId: null,
   outcomeType: null,
   evidenceTypes: [],
   evidenceDetail: '',
