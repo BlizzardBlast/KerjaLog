@@ -55,7 +55,7 @@ describe('saveWorkEntry', () => {
       {
         intent: 'challenge',
         rawNote: 'The handoff became difficult',
-          workAreaId: null,
+        workAreaId: null,
         outcomeType: null,
         evidenceTypes: [],
         evidenceDetail: '',
@@ -76,7 +76,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: 'Prepared the monthly report',
-          workAreaId: null,
+        workAreaId: null,
           outcomeType: 'deadline_met',
           evidenceTypes: ['deadline'],
           evidenceDetail: '',
@@ -96,7 +96,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: 'Prepared the monthly report',
-          workAreaId: null,
+        workAreaId: null,
           outcomeType: 'deadline_met',
           evidenceTypes: [],
           evidenceDetail: '',
@@ -116,7 +116,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: '   ',
-          workAreaId: null,
+        workAreaId: null,
           outcomeType: null,
           evidenceTypes: [],
           evidenceDetail: '',
@@ -134,7 +134,7 @@ describe('saveWorkEntry', () => {
       field: 'note',
       draft: {
         rawNote: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.rawNote + 1),
-          workAreaId: null,
+        workAreaId: null,
         evidenceTypes: [] as const,
         evidenceDetail: '',
         impactStatement: null,
@@ -146,7 +146,7 @@ describe('saveWorkEntry', () => {
       field: 'evidence',
       draft: {
         rawNote: 'Prepared the report',
-          workAreaId: null,
+        workAreaId: null,
         evidenceTypes: ['number'] as const,
         evidenceDetail: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.evidenceDetail + 1),
         impactStatement: null,
@@ -158,7 +158,7 @@ describe('saveWorkEntry', () => {
       field: 'impact',
       draft: {
         rawNote: 'Prepared the report',
-          workAreaId: null,
+        workAreaId: null,
         evidenceTypes: [] as const,
         evidenceDetail: '',
         impactStatement: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.impactStatement + 1),
