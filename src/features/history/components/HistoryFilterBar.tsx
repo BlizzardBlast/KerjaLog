@@ -110,11 +110,6 @@ export function HistoryFilterBar({
               }
             />
           ))}
-          <FilterChip
-            label={t('workArea.manage')}
-            selected={false}
-            onPress={onManageWorkAreas}
-          />
         </ScrollView>
       ) : null}
 
@@ -146,6 +141,11 @@ export function HistoryFilterBar({
               }
             />
           ))}
+          <FilterChip
+            label={t('workArea.manage')}
+            selected={false}
+            onPress={onManageWorkAreas}
+          />
         </ScrollView>
       ) : null}
     </View>
