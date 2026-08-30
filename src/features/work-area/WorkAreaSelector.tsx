@@ -1,9 +1,12 @@
-import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { workAreaRepository } from '@/data/repositories/workAreaRepository';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
+import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { WORK_AREA_NAME_MAX_LENGTH } from '@/domain/work-area/validation';
 import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -18,12 +21,38 @@ export function WorkAreaSelector({
   onChange,
   disabled = false,
 }: Readonly<WorkAreaSelectorProps>) {
-  const router = useRouter();
   const { t } = useI18n();
   const { state, reload } = useWorkAreas({ includeArchived: true });
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [creatingBusy, setCreatingBusy] = useState(false);
+  const [createError, setCreateError] = useState(false);
   const visibleWorkAreas = state.workAreas.filter(
     (workArea) => workArea.archivedAt === null || workArea.id === selectedId,
   );
+
+  const cancelCreate = () => {
+    setCreating(false);
+    setNewName('');
+    setCreateError(false);
+  };
+
+  const createWorkArea = async () => {
+    if (!newName.trim() || creatingBusy || disabled) return;
+
+    setCreatingBusy(true);
+    setCreateError(false);
+    try {
+      const workArea = await workAreaRepository.create(newName);
+      onChange(workArea.id);
+      cancelCreate();
+      reload();
+    } catch {
+      setCreateError(true);
+    } finally {
+      setCreatingBusy(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -78,18 +107,61 @@ export function WorkAreaSelector({
         </ScrollView>
       )}
 
-      <Button
-        onPress={() => router.push('/work-areas')}
-        size="sm"
-        variant="secondary"
-        disabled={disabled}
-      >
-        {t(
-          state.workAreas.some((workArea) => workArea.archivedAt === null)
-            ? 'workArea.manage'
-            : 'workArea.createFirst',
-        )}
-      </Button>
+      {creating ? (
+        <View style={styles.createForm}>
+          <TextField
+            accessibilityLabel={t('workArea.nameLabel')}
+            editable={!disabled && !creatingBusy}
+            maxLength={WORK_AREA_NAME_MAX_LENGTH}
+            onChangeText={(value) => {
+              setNewName(value);
+              setCreateError(false);
+            }}
+            placeholder={t('workArea.namePlaceholder')}
+            value={newName}
+          />
+          {createError ? (
+            <Text role="alert" color="danger" variant="caption">
+              {t('workArea.mutationError')}
+            </Text>
+          ) : null}
+          <View style={styles.createActions}>
+            <Button
+              disabled={disabled || creatingBusy}
+              onPress={cancelCreate}
+              size="sm"
+              style={styles.flex}
+              variant="secondary"
+            >
+              {t('workArea.cancel')}
+            </Button>
+            <Button
+              disabled={!newName.trim() || disabled || creatingBusy}
+              loading={creatingBusy}
+              onPress={() => {
+                void createWorkArea();
+              }}
+              size="sm"
+              style={styles.flex}
+            >
+              {t('workArea.createAction')}
+            </Button>
+          </View>
+        </View>
+      ) : (
+        <Button
+          disabled={disabled}
+          onPress={() => setCreating(true)}
+          size="sm"
+          variant="secondary"
+        >
+          {t(
+            state.workAreas.some((workArea) => workArea.archivedAt === null)
+              ? 'workArea.addAnother'
+              : 'workArea.createFirst',
+          )}
+        </Button>
+      )}
     </View>
   );
 }
@@ -157,6 +229,16 @@ const styles = StyleSheet.create({
     minHeight: 44,
     maxWidth: 220,
     paddingHorizontal: spacing[4],
+  },
+  createForm: {
+    gap: spacing[2],
+  },
+  createActions: {
+    flexDirection: 'row',
+    gap: spacing[2],
+  },
+  flex: {
+    flex: 1,
   },
   error: {
     alignItems: 'flex-start',
