@@ -20,9 +20,11 @@ describe('saveWorkEntry', () => {
       {
         intent: 'helped',
         rawNote: 'Helped Finance reconcile the monthly report.',
+        workAreaId: 'area-finance',
         outcomeType: 'person_helped',
         evidenceTypes: ['deadline'],
         evidenceDetail: 'Completed before Friday close',
+        workAreaId: 'area-finance',
         skills: [
           { id: 'collaboration', source: 'rules' },
           { id: 'collaboration', source: 'rules' },
@@ -53,6 +55,7 @@ describe('saveWorkEntry', () => {
       {
         intent: 'challenge',
         rawNote: 'The handoff became difficult',
+        workAreaId: null,
         outcomeType: null,
         evidenceTypes: [],
         evidenceDetail: '',
@@ -73,6 +76,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: 'Prepared the monthly report',
+        workAreaId: null,
           outcomeType: 'deadline_met',
           evidenceTypes: ['deadline'],
           evidenceDetail: '',
@@ -92,6 +96,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: 'Prepared the monthly report',
+        workAreaId: null,
           outcomeType: 'deadline_met',
           evidenceTypes: [],
           evidenceDetail: '',
@@ -111,6 +116,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: '   ',
+        workAreaId: null,
           outcomeType: null,
           evidenceTypes: [],
           evidenceDetail: '',
@@ -128,6 +134,7 @@ describe('saveWorkEntry', () => {
       field: 'note',
       draft: {
         rawNote: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.rawNote + 1),
+        workAreaId: null,
         evidenceTypes: [] as const,
         evidenceDetail: '',
         impactStatement: null,
@@ -139,6 +146,7 @@ describe('saveWorkEntry', () => {
       field: 'evidence',
       draft: {
         rawNote: 'Prepared the report',
+        workAreaId: null,
         evidenceTypes: ['number'] as const,
         evidenceDetail: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.evidenceDetail + 1),
         impactStatement: null,
@@ -150,6 +158,7 @@ describe('saveWorkEntry', () => {
       field: 'impact',
       draft: {
         rawNote: 'Prepared the report',
+        workAreaId: null,
         evidenceTypes: [] as const,
         evidenceDetail: '',
         impactStatement: 'a'.repeat(WORK_ENTRY_TEXT_LIMITS.impactStatement + 1),
