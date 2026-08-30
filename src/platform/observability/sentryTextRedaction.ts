@@ -43,6 +43,8 @@ const SENSITIVE_FIELD_KEYS = new Set([
   'userid',
   'username',
   'workentry',
+  'workarea',
+  'workareaname',
 ]);
 const WORK_ENTRY_REFERENCE_MARKERS = [
   'work entry id ',
