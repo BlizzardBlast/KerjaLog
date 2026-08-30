@@ -24,6 +24,7 @@ const baseRow = {
   occurred_at: '2026-08-10T08:00:00.000Z',
   outcome_type: 'person_helped',
   status: 'review_ready',
+  work_area_id: null,
   excluded_from_exports: 0,
   created_at: '2026-08-10T08:01:00.000Z',
   updated_at: '2026-08-10T08:01:00.000Z',
@@ -128,6 +129,7 @@ describe('SQLiteWorkEntryRepository', () => {
       occurredAt: '2026-08-10T08:00:00.000Z',
       outcomeType: 'person_helped',
       status: 'review_ready',
+      workAreaId: null,
       evidence: {
         types: ['deadline', 'result'],
         detail: 'Completed before Friday close',
@@ -236,6 +238,7 @@ describe('SQLiteWorkEntryRepository', () => {
       occurredAt: '2026-08-10T08:00:00.000Z',
       outcomeType: 'person_helped',
       status: 'review_ready',
+      workAreaId: 'area-finance',
       evidence: {
         types: ['deadline', 'result'],
         detail: 'Completed before Friday close',
@@ -255,6 +258,7 @@ describe('SQLiteWorkEntryRepository', () => {
         $id: 'entry-created',
         $rawNote: input.rawNote,
         $impactStatementSource: 'generated',
+        $workAreaId: 'area-finance',
         $excludedFromExports: 0,
       }),
     );
@@ -301,6 +305,7 @@ describe('SQLiteWorkEntryRepository', () => {
       occurredAt: input.occurredAt,
       outcomeType: input.outcomeType,
       status: input.status,
+      workAreaId: input.workAreaId,
       evidence: input.evidence,
       excludedFromExports: input.excludedFromExports,
       createdAt: expect.any(String),
@@ -320,6 +325,7 @@ describe('SQLiteWorkEntryRepository', () => {
           impact_statement: 'Corrected the mismatch before submission.',
           impact_statement_source: 'user',
           outcome_type: 'error_fixed_or_prevented',
+          work_area_id: 'area-reconciliation',
           evidence_type: 'number',
           evidence_text_value: '7 duplicate rows removed',
         },
@@ -337,6 +343,7 @@ describe('SQLiteWorkEntryRepository', () => {
       occurredAt: '2026-08-10T08:00:00.000Z',
       outcomeType: 'error_fixed_or_prevented',
       status: 'review_ready',
+      workAreaId: 'area-reconciliation',
       evidence: {
         types: ['number'],
         detail: '7 duplicate rows removed',
@@ -357,6 +364,7 @@ describe('SQLiteWorkEntryRepository', () => {
         $rawNote: input.rawNote,
         $impactStatementSource: 'user',
         $status: 'review_ready',
+        $workAreaId: 'area-reconciliation',
       }),
     );
     expect(db.runAsync).toHaveBeenNthCalledWith(
