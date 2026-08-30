@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { workAreaRepository } from '@/data/repositories/workAreaRepository';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
@@ -22,7 +21,7 @@ export function WorkAreaSelector({
   disabled = false,
 }: Readonly<WorkAreaSelectorProps>) {
   const { t } = useI18n();
-  const { state, reload } = useWorkAreas({ includeArchived: true });
+  const { state, reload, create } = useWorkAreas({ includeArchived: true });
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [creatingBusy, setCreatingBusy] = useState(false);
@@ -43,10 +42,9 @@ export function WorkAreaSelector({
     setCreatingBusy(true);
     setCreateError(false);
     try {
-      const workArea = await workAreaRepository.create(newName);
+      const workArea = await create(newName);
       onChange(workArea.id);
       cancelCreate();
-      reload();
     } catch {
       setCreateError(true);
     } finally {
