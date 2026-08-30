@@ -21,14 +21,7 @@ export function WorkEntryWizardLayout({
 }: Readonly<WorkEntryWizardLayoutProps>) {
   const { theme } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
-  const previousStepKeyRef = useRef(stepKey);
-
   useEffect(() => {
-    if (previousStepKeyRef.current === stepKey) {
-      return;
-    }
-
-    previousStepKeyRef.current = stepKey;
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [stepKey]);
 
