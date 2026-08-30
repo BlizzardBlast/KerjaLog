@@ -12,13 +12,9 @@ import {
   type WorkflowTelemetry,
 } from '@/platform/observability/workflowTelemetry';
 
-export type LogSaveEntry = (
-  draft: SaveWorkEntryDraft,
-) => Promise<WorkEntry>;
+export type LogSaveEntry = (draft: SaveWorkEntryDraft) => Promise<WorkEntry>;
 
-export type CompleteSavedEntry = (
-  entry: WorkEntry,
-) => Promise<void> | void;
+export type CompleteSavedEntry = (entry: WorkEntry) => Promise<void> | void;
 
 export type PrepareLogDraftForCommit = (
   draft: WorkEntryDraft,
