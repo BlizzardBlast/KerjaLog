@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   EMPTY_WORK_ENTRY_DRAFT,
   hasWorkEntryDraftContent,
@@ -11,11 +11,7 @@ import {
   type ImpactBuilderCopy,
   type LogEventIntent,
 } from '@/domain/entry/impact';
-import type {
-  EvidenceType,
-  OutcomeType,
-  WorkEntry,
-} from '@/domain/entry/model';
+import type { EvidenceType, OutcomeType } from '@/domain/entry/model';
 import type {
   EntrySkillSource,
   SkillId,
@@ -23,33 +19,26 @@ import type {
 } from '@/domain/skill/model';
 import { suggestSkillIds } from '@/domain/skill/suggestions';
 import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
-import {
-  type SaveWorkEntryDraft,
-  saveWorkEntry,
-} from '@/features/work-entry/saveWorkEntry';
+import type { SaveWorkEntryDraft } from '@/features/work-entry/saveWorkEntry';
 import { useLogForm } from '@/features/work-entry/useLogForm';
-import { useSavedEntryCompletion } from '@/features/work-entry/useSavedEntryCompletion';
 import {
-  captureWorkflowFailure,
-  recordWorkflowStart,
-  type WorkflowTelemetry,
-} from '@/platform/observability/workflowTelemetry';
+  type CompleteSavedEntry,
+  type LogSaveEntry,
+  type PrepareLogDraftForCommit,
+  useLogSave,
+} from '@/features/work-entry/useLogSave';
 
 export const LOG_STEPS = WORK_ENTRY_DRAFT_STEPS;
 export type LogStep = (typeof LOG_STEPS)[number];
-
-type SaveEntry = (draft: SaveWorkEntryDraft) => Promise<WorkEntry>;
-type CompleteSavedEntry = (entry: WorkEntry) => Promise<void> | void;
-type PrepareForCommit = (draft: WorkEntryDraft) => Promise<void> | void;
 
 type UseLogFlowOptions = {
   impactCopy: ImpactBuilderCopy;
   initialDraft?: WorkEntryDraft | null;
   onExit: () => void;
   onSaved: CompleteSavedEntry;
-  prepareForCommit?: PrepareForCommit;
+  prepareForCommit?: PrepareLogDraftForCommit;
   onCommitFailed?: () => void;
-  saveEntry?: SaveEntry;
+  saveEntry?: LogSaveEntry;
 };
 
 export function useLogFlow({
@@ -59,16 +48,18 @@ export function useLogFlow({
   onSaved,
   prepareForCommit,
   onCommitFailed,
-  saveEntry = (draft) => saveWorkEntry(draft),
+  saveEntry,
 }: UseLogFlowOptions) {
   const startingDraft = initialDraft ?? EMPTY_WORK_ENTRY_DRAFT;
   const [step, setStep] = useState<LogStep>(startingDraft.step);
   const [noteError, setNoteError] = useState(false);
   const [evidenceError, setEvidenceError] = useState(false);
-  const [saveError, setSaveError] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const saveInProgressRef = useRef(false);
-  const savedEntryCompletion = useSavedEntryCompletion(onSaved);
+  const logSave = useLogSave({
+    onSaved,
+    prepareForCommit,
+    onCommitFailed,
+    saveEntry,
+  });
   const {
     form,
     intent,
@@ -116,7 +107,7 @@ export function useLogFlow({
     ],
   );
   const hasUnsavedDraft =
-    !savedEntryCompletion.hasCommittedEntry && hasWorkEntryDraftContent(draft);
+    !logSave.hasCommittedEntry && hasWorkEntryDraftContent(draft);
 
   function moveToStep(nextStep: LogStep) {
     setStep(nextStep);
@@ -147,7 +138,7 @@ export function useLogFlow({
 
   function selectIntent(nextIntent: LogEventIntent) {
     form.setFieldValue('intent', nextIntent);
-    setSaveError(false);
+    logSave.clearSaveError();
     invalidateGeneratedImpact();
   }
 
@@ -157,14 +148,14 @@ export function useLogFlow({
 
   function updateRawNote(value: string) {
     form.setFieldValue('rawNote', value);
-    setSaveError(false);
+    logSave.clearSaveError();
     if (value.trim()) setNoteError(false);
     invalidateGeneratedImpact();
   }
 
   function updateWorkArea(workAreaId: string | null) {
     form.setFieldValue('workAreaId', workAreaId);
-    setSaveError(false);
+    logSave.clearSaveError();
   }
 
   function continueFromEvent() {
@@ -178,7 +169,7 @@ export function useLogFlow({
 
   function selectOutcome(nextOutcomeType: OutcomeType) {
     form.setFieldValue('outcomeType', nextOutcomeType);
-    setSaveError(false);
+    logSave.clearSaveError();
     invalidateGeneratedImpact();
   }
 
@@ -194,13 +185,13 @@ export function useLogFlow({
         : [...evidenceTypes, type],
     );
     setEvidenceError(false);
-    setSaveError(false);
+    logSave.clearSaveError();
     invalidateGeneratedImpact();
   }
 
   function updateEvidenceDetail(value: string) {
     form.setFieldValue('evidenceDetail', value);
-    setSaveError(false);
+    logSave.clearSaveError();
     if (!hasIncompleteEvidence(evidenceTypes, value)) setEvidenceError(false);
     invalidateGeneratedImpact();
   }
@@ -221,7 +212,7 @@ export function useLogFlow({
     }
 
     setEvidenceError(false);
-    setSaveError(false);
+    logSave.clearSaveError();
     moveToStep('skills');
   }
 
@@ -232,7 +223,7 @@ export function useLogFlow({
       : [...selectedSkills, { id: skillId, source }];
 
     form.setFieldValue('skills', nextSkills);
-    setSaveError(false);
+    logSave.clearSaveError();
   }
 
   function continueToImpact() {
@@ -259,60 +250,37 @@ export function useLogFlow({
   function updateImpactStatement(value: string) {
     form.setFieldValue('impactStatement', value);
     form.setFieldValue('impactStatementSource', value.trim() ? 'user' : null);
-    setSaveError(false);
+    logSave.clearSaveError();
   }
 
   async function save(quickNote: boolean) {
-    if (saveInProgressRef.current) return;
-
-    if (savedEntryCompletion.hasCommitted()) {
-      await savedEntryCompletion.retryCompletion();
-      return;
-    }
-
     if (!intent || !rawNote.trim()) {
       setNoteError(true);
       return;
     }
-    if (!quickNote && !outcomeType) return;
 
-    saveInProgressRef.current = true;
-    setSaving(true);
-    setSaveError(false);
-
-    let entry: WorkEntry;
-    const workflow = {
-      feature: 'work-entry' as const,
-      mode: quickNote ? 'quick' : 'developed',
-      operation: 'save' as const,
-      screen: 'log' as const,
-      step,
-    } satisfies WorkflowTelemetry;
-    try {
-      recordWorkflowStart(workflow);
-      await prepareForCommit?.(draft);
-      entry = await saveEntry({
-        intent,
-        rawNote,
-        workAreaId,
-        outcomeType: quickNote ? null : outcomeType,
-        evidenceTypes: quickNote ? [] : evidenceTypes,
-        evidenceDetail: quickNote ? '' : evidenceDetail,
-        skills: quickNote ? [] : selectedSkills,
-        impactStatement: quickNote ? null : impactStatement,
-        impactStatementSource: quickNote ? null : impactStatementSource,
-      });
-    } catch (error) {
-      captureWorkflowFailure(error, workflow);
-      onCommitFailed?.();
-      setSaveError(true);
+    if (!quickNote && !outcomeType) {
       return;
-    } finally {
-      saveInProgressRef.current = false;
-      setSaving(false);
     }
 
-    await savedEntryCompletion.commitAndComplete(entry);
+    const entryDraft: SaveWorkEntryDraft = {
+      intent,
+      rawNote,
+      workAreaId,
+      outcomeType: quickNote ? null : outcomeType,
+      evidenceTypes: quickNote ? [] : evidenceTypes,
+      evidenceDetail: quickNote ? '' : evidenceDetail,
+      skills: quickNote ? [] : selectedSkills,
+      impactStatement: quickNote ? null : impactStatement,
+      impactStatementSource: quickNote ? null : impactStatementSource,
+    };
+
+    await logSave.save({
+      activeDraft: draft,
+      entryDraft,
+      mode: quickNote ? 'quick' : 'developed',
+      step,
+    });
   }
 
   return {
@@ -321,7 +289,7 @@ export function useLogFlow({
     totalSteps: LOG_STEPS.length,
     draft,
     hasUnsavedDraft,
-    hasCommittedEntry: savedEntryCompletion.hasCommittedEntry,
+    hasCommittedEntry: logSave.hasCommittedEntry,
     intent,
     rawNote,
     workAreaId,
@@ -333,9 +301,9 @@ export function useLogFlow({
     impactStatement,
     noteError,
     evidenceError,
-    saveError,
-    completionError: savedEntryCompletion.completionError,
-    saving,
+    saveError: logSave.saveError,
+    completionError: logSave.completionError,
+    saving: logSave.saving,
     goBack,
     selectIntent,
     continueFromType,
@@ -353,6 +321,6 @@ export function useLogFlow({
     updateImpactStatement,
     saveQuick: () => save(true),
     saveDeveloped: () => save(false),
-    retryCompletion: savedEntryCompletion.retryCompletion,
+    retryCompletion: logSave.retryCompletion,
   };
 }
