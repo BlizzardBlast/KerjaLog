@@ -63,6 +63,7 @@ export type WorkEntry = {
   occurredAt: string;
   outcomeType: OutcomeType | null;
   status: EntryStatus;
+  workAreaId: string | null;
   evidence: WorkEntryEvidence | null;
   excludedFromExports: boolean;
   createdAt: string;
