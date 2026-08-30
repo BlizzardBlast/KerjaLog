@@ -7,6 +7,7 @@ export function mapEntryToRefinementValues(
   return {
     type: entry.type,
     rawNote: entry.rawNote,
+    workAreaId: entry.workAreaId,
     outcomeType: entry.outcomeType,
     evidenceTypes: entry.evidence?.types ?? [],
     evidenceDetail: entry.evidence?.detail ?? '',
