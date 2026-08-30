@@ -19,7 +19,6 @@ export function WorkAreaSelector({
   disabled = false,
 }: Readonly<WorkAreaSelectorProps>) {
   const router = useRouter();
-  const { theme } = useTheme();
   const { t } = useI18n();
   const { state, reload } = useWorkAreas({ includeArchived: true });
   const visibleWorkAreas = state.workAreas.filter(
