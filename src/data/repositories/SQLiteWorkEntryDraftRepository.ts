@@ -106,9 +106,10 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
   if (typeof row.raw_note !== 'string') {
     throw new TypeError('Stored work entry draft note is invalid.');
   }
+  const workAreaId = row.work_area_id;
   if (
-    row.work_area_id !== null &&
-    (typeof row.work_area_id !== 'string' || !row.work_area_id.trim())
+    workAreaId !== null &&
+    (typeof workAreaId !== 'string' || !workAreaId.trim())
   ) {
     throw new Error('Stored work entry draft work area is invalid.');
   }
@@ -132,7 +133,7 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
     step: row.step,
     intent: row.intent,
     rawNote: row.raw_note,
-    workAreaId: row.work_area_id,
+    workAreaId,
     outcomeType: row.outcome_type,
     evidenceTypes: parseEvidenceTypes(row.evidence_types),
     evidenceDetail: row.evidence_detail,
