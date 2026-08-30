@@ -111,7 +111,7 @@ function ProfiledWorkAreaManagementScreen() {
           style={[
             styles.editor,
             {
-              backgroundColor: theme.colors.surfaceSecondary,
+              backgroundColor: theme.colors.surfaceSubtle,
               borderColor: theme.colors.border,
             },
           ]}
