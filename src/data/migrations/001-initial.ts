@@ -4,7 +4,7 @@ export const INITIAL_SCHEMA_SQL = `
   CREATE TABLE work_areas (
     id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
     name TEXT NOT NULL CHECK(length(trim(name)) > 0),
-    name_key TEXT NOT NULL UNIQUE CHECK(length(trim(name_key)) > 0),
+    name_key TEXT NOT NULL CHECK(length(trim(name_key)) > 0),
     archived_at TEXT,
     created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
     updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
@@ -163,6 +163,10 @@ export const INITIAL_SCHEMA_SQL = `
       REFERENCES work_areas(id)
       ON DELETE SET NULL
   );
+
+  CREATE UNIQUE INDEX idx_work_areas_active_name_key
+    ON work_areas(name_key)
+    WHERE archived_at IS NULL;
 
   CREATE INDEX idx_work_areas_archived_name
     ON work_areas(archived_at, name COLLATE NOCASE);
