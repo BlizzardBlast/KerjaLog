@@ -23,7 +23,9 @@ function ProfiledWorkAreaManagementScreen() {
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [mutationError, setMutationError] = useState(false);
-  const active = state.workAreas.filter((workArea) => workArea.archivedAt === null);
+  const active = state.workAreas.filter(
+    (workArea) => workArea.archivedAt === null,
+  );
   const archived = state.workAreas.filter(
     (workArea) => workArea.archivedAt !== null,
   );
