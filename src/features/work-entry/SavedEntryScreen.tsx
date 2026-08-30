@@ -8,6 +8,7 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, radii, spacing } from '@/design-system/tokens/theme';
 import type { EntryStatus } from '@/domain/entry/model';
 import { skillDefinitionById } from '@/domain/skill/catalog';
+import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { EntrySection } from '@/features/work-entry/components/EntrySection';
 import { StatusChip } from '@/features/work-entry/components/StatusChip';
 import { ThreadNode } from '@/features/work-entry/components/ThreadNode';
@@ -29,6 +30,7 @@ function ProfiledSavedEntryScreen({ id }: Readonly<SavedEntryScreenProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const { state, retry } = useWorkEntry(id);
+  const { state: workAreaState } = useWorkAreas({ includeArchived: true });
 
   if (state.status === 'loading') {
     const loadingLabel = t('log.saved.loading');
@@ -114,6 +116,12 @@ function ProfiledSavedEntryScreen({ id }: Readonly<SavedEntryScreenProps>) {
   const outcomeLabel = entry.outcomeType
     ? getOutcomeLabel(entry.outcomeType, t)
     : t('log.impact.notKnown');
+  const workArea =
+    entry.workAreaId === null
+      ? null
+      : (workAreaState.workAreas.find(
+          (candidate) => candidate.id === entry.workAreaId,
+        ) ?? null);
   const skillsSummary =
     entry.skills.length > 0
       ? entry.skills
@@ -147,6 +155,17 @@ function ProfiledSavedEntryScreen({ id }: Readonly<SavedEntryScreenProps>) {
             ) : null}
           </View>
         </View>
+
+        {workArea ? (
+          <EntrySection
+            title={t('workArea.savedLabel')}
+            value={
+              workArea.archivedAt
+                ? t('workArea.archivedName', { name: workArea.name })
+                : workArea.name
+            }
+          />
+        ) : null}
 
         <View
           style={[
