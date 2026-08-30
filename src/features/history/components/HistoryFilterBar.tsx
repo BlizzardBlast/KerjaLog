@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     borderWidth: 1,
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: spacing[12],
     paddingHorizontal: spacing[4],
   },
   pressed: {
