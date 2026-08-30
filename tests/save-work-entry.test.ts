@@ -24,7 +24,6 @@ describe('saveWorkEntry', () => {
         outcomeType: 'person_helped',
         evidenceTypes: ['deadline'],
         evidenceDetail: 'Completed before Friday close',
-        workAreaId: 'area-finance',
         skills: [
           { id: 'collaboration', source: 'rules' },
           { id: 'collaboration', source: 'rules' },
@@ -38,6 +37,7 @@ describe('saveWorkEntry', () => {
 
     expect(entry.type).toBe('contribution');
     expect(entry.status).toBe('review_ready');
+    expect(entry.workAreaId).toBe('area-finance');
     expect(repository.commit).toHaveBeenCalledWith(
       expect.objectContaining({
         skills: [
