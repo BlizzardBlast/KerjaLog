@@ -1,6 +1,15 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 export const INITIAL_SCHEMA_SQL = `
+  CREATE TABLE work_areas (
+    id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
+    name TEXT NOT NULL CHECK(length(trim(name)) > 0),
+    name_key TEXT NOT NULL UNIQUE CHECK(length(trim(name_key)) > 0),
+    archived_at TEXT,
+    created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
+    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+  );
+
   CREATE TABLE work_entries (
     id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
     type TEXT NOT NULL CHECK(type IN (
@@ -38,11 +47,15 @@ export const INITIAL_SCHEMA_SQL = `
       'developed',
       'review_ready'
     )),
+    work_area_id TEXT,
     excluded_from_exports INTEGER NOT NULL DEFAULT 0 CHECK(
       excluded_from_exports IN (0, 1)
     ),
     created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
     updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0),
+    FOREIGN KEY (work_area_id)
+      REFERENCES work_areas(id)
+      ON DELETE SET NULL,
     CHECK (
       (impact_statement IS NULL AND impact_statement_source IS NULL)
       OR
@@ -144,8 +157,18 @@ export const INITIAL_SCHEMA_SQL = `
     impact_statement_source TEXT CHECK(
       impact_statement_source IS NULL OR impact_statement_source IN ('generated', 'user')
     ),
-    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+    work_area_id TEXT,
+    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0),
+    FOREIGN KEY (work_area_id)
+      REFERENCES work_areas(id)
+      ON DELETE SET NULL
   );
+
+  CREATE INDEX idx_work_areas_archived_name
+    ON work_areas(archived_at, name COLLATE NOCASE);
+
+  CREATE INDEX idx_work_entries_work_area_id
+    ON work_entries(work_area_id, occurred_at DESC, created_at DESC, id DESC);
 
   CREATE INDEX idx_work_entries_history_order
     ON work_entries(occurred_at DESC, created_at DESC, id DESC);
