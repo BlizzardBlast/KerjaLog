@@ -30,6 +30,7 @@ export const en = {
   ...reminderEn,
   ...skillEn,
   ...weeklyReflectionEn,
+  ...workAreaEn,
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -47,6 +48,7 @@ export const id: Record<TranslationKey, string> = {
   ...reminderId,
   ...skillId,
   ...weeklyReflectionId,
+  ...workAreaId,
 };
 
 export const translations = { en, id } as const;
