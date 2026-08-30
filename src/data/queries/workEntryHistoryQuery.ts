@@ -52,6 +52,11 @@ export function buildWorkEntryHistorySqlQuery(
     parameters.$entryType = query.filters.entryType;
   }
 
+  if (query.filters.workAreaId !== null) {
+    whereClauses.push('work_entries.work_area_id = $workAreaId');
+    parameters.$workAreaId = query.filters.workAreaId;
+  }
+
   if (query.filters.hasEvidence) {
     whereClauses.push(`
       EXISTS (
@@ -103,6 +108,7 @@ export function buildWorkEntryHistorySqlQuery(
           work_entries.occurred_at,
           work_entries.outcome_type,
           work_entries.status,
+          work_entries.work_area_id,
           work_entries.excluded_from_exports,
           work_entries.created_at,
           work_entries.updated_at
@@ -123,6 +129,7 @@ export function buildWorkEntryHistorySqlQuery(
         matching_entries.occurred_at,
         matching_entries.outcome_type,
         matching_entries.status,
+        matching_entries.work_area_id,
         matching_entries.excluded_from_exports,
         matching_entries.created_at,
         matching_entries.updated_at,
@@ -161,10 +168,17 @@ function validateHistoryQuery(query: WorkEntryHistoryQuery): void {
     );
   }
 
-  const { entryType, hasEvidence, reviewReadyOnly } = query.filters;
+  const { entryType, workAreaId, hasEvidence, reviewReadyOnly } = query.filters;
 
   if (entryType !== null && !ENTRY_TYPES.includes(entryType)) {
     throw new Error('History entry type filter is invalid.');
+  }
+
+  if (
+    workAreaId !== null &&
+    (typeof workAreaId !== 'string' || !workAreaId.trim())
+  ) {
+    throw new Error('History work area filter is invalid.');
   }
 
   if (

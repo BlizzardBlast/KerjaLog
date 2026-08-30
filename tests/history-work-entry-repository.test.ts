@@ -21,6 +21,7 @@ const baseRow = {
   occurred_at: '2026-08-10T08:00:00.000Z',
   outcome_type: 'person_helped',
   status: 'review_ready',
+  work_area_id: 'area-finance',
   excluded_from_exports: 0,
   created_at: '2026-08-10T08:01:00.000Z',
   updated_at: '2026-08-10T08:01:00.000Z',
@@ -60,6 +61,7 @@ function createQuery(
     searchText: '',
     filters: {
       entryType: null,
+      workAreaId: null,
       hasEvidence: false,
       reviewReadyOnly: false,
     },
@@ -116,6 +118,7 @@ describe('History work entry repository', () => {
       searchText: "Finance closing' OR 1=1 --",
       filters: {
         entryType: 'contribution',
+        workAreaId: 'area-finance',
         hasEvidence: true,
         reviewReadyOnly: true,
       },
@@ -126,11 +129,15 @@ describe('History work entry repository', () => {
     const [sql, parameters] = getAllAsync.mock.calls[0] ?? [];
     expect(sql).toEqual(expect.stringContaining('work_entries.id IN ('));
     expect(sql).toEqual(expect.stringContaining('MATCH $searchQuery'));
+    expect(sql).toEqual(
+      expect.stringContaining('work_entries.work_area_id = $workAreaId'),
+    );
     expect(sql).not.toContain(query.searchText);
     expect(parameters).toEqual({
       $limitPlusOne: 51,
       $searchQuery: '"Finance"* AND "closing"* AND "OR"* AND "1"* AND "1"*',
       $entryType: 'contribution',
+      $workAreaId: 'area-finance',
     });
   });
 

@@ -1,4 +1,4 @@
-import { type PropsWithChildren, useEffect, useRef } from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -20,18 +20,6 @@ export function WorkEntryWizardLayout({
   children,
 }: Readonly<WorkEntryWizardLayoutProps>) {
   const { theme } = useTheme();
-  const scrollRef = useRef<ScrollView>(null);
-  const previousStepKeyRef = useRef(stepKey);
-
-  useEffect(() => {
-    if (previousStepKeyRef.current === stepKey) {
-      return;
-    }
-
-    previousStepKeyRef.current = stepKey;
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, [stepKey]);
-
   return (
     <SafeAreaView
       edges={SAFE_AREA_EDGES}
@@ -42,7 +30,7 @@ export function WorkEntryWizardLayout({
         style={styles.screen}
       >
         <ScrollView
-          ref={scrollRef}
+          key={stepKey}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

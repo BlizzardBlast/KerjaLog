@@ -17,6 +17,7 @@ export type JoinedWorkEntryRow = {
   occurred_at: string;
   outcome_type: string | null;
   status: string;
+  work_area_id: string | null;
   excluded_from_exports: number;
   created_at: string;
   updated_at: string;
@@ -90,6 +91,10 @@ function parseJoinedWorkEntryRow(row: JoinedWorkEntryRow): {
       occurredAt: expectIsoTimestamp(row.occurred_at, 'work entry occurred at'),
       outcomeType,
       status: expectOneOf(row.status, ENTRY_STATUSES, 'work entry status'),
+      workAreaId: expectNullableNonEmptyString(
+        row.work_area_id,
+        'work entry work area id',
+      ),
       evidence: null,
       excludedFromExports: expectBooleanInteger(
         row.excluded_from_exports,

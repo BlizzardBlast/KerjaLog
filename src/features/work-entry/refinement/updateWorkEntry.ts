@@ -32,6 +32,7 @@ export async function updateWorkEntry(
     type: parsed.data.type,
     title: buildEntryTitle(rawNote),
     rawNote,
+    workAreaId: parsed.data.workAreaId,
     impactStatement,
     impactStatementSource: impactStatement
       ? parsed.data.impactStatementSource

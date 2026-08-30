@@ -5,6 +5,7 @@ export const HISTORY_SEARCH_MAX_LENGTH = 256;
 
 export type WorkEntryHistoryFilters = {
   entryType: EntryType | null;
+  workAreaId: string | null;
   hasEvidence: boolean;
   reviewReadyOnly: boolean;
 };
@@ -29,6 +30,7 @@ export type WorkEntryHistoryPage = {
 
 export const EMPTY_WORK_ENTRY_HISTORY_FILTERS: WorkEntryHistoryFilters = {
   entryType: null,
+  workAreaId: null,
   hasEvidence: false,
   reviewReadyOnly: false,
 };
@@ -37,6 +39,9 @@ export function hasWorkEntryHistoryFilters(
   filters: WorkEntryHistoryFilters,
 ): boolean {
   return (
-    filters.entryType !== null || filters.hasEvidence || filters.reviewReadyOnly
+    filters.entryType !== null ||
+    filters.workAreaId !== null ||
+    filters.hasEvidence ||
+    filters.reviewReadyOnly
   );
 }

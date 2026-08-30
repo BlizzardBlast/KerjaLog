@@ -26,6 +26,7 @@ const entry: WorkEntry = {
   occurredAt: '2026-08-06T08:00:00.000Z',
   outcomeType: 'error_fixed_or_prevented',
   status: 'review_ready',
+  workAreaId: 'area-reconciliation',
   evidence: {
     types: ['number'],
     detail: '7 duplicate entries removed.',
@@ -89,6 +90,7 @@ describe('History entries controller', () => {
       searchText: '',
       filters: {
         entryType: null,
+        workAreaId: null,
         hasEvidence: false,
         reviewReadyOnly: false,
       },
@@ -106,6 +108,7 @@ describe('History entries controller', () => {
 
     await act(async () => {
       result.current.setEntryType('problem_solved');
+      result.current.setWorkArea('area-reconciliation');
       result.current.toggleEvidence();
       result.current.toggleReviewReady();
     });
@@ -115,6 +118,7 @@ describe('History entries controller', () => {
         searchText: '',
         filters: {
           entryType: 'problem_solved',
+          workAreaId: 'area-reconciliation',
           hasEvidence: true,
           reviewReadyOnly: true,
         },
@@ -145,6 +149,7 @@ describe('History entries controller', () => {
       searchText: '',
       filters: {
         entryType: 'problem_solved',
+        workAreaId: null,
         hasEvidence: false,
         reviewReadyOnly: false,
       },
@@ -221,6 +226,7 @@ describe('History entries controller', () => {
       searchText: 'finance',
       filters: {
         entryType: null,
+        workAreaId: null,
         hasEvidence: false,
         reviewReadyOnly: false,
       },

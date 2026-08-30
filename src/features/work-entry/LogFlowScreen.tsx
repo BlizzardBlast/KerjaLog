@@ -5,6 +5,7 @@ import { Alert } from 'react-native';
 import { workEntryDraftRepository } from '@/data/repositories/workEntryDraftRepository';
 import type { WorkEntryDraft } from '@/domain/entry/draft';
 import { skillDefinitionById } from '@/domain/skill/catalog';
+import { WorkAreaSelector } from '@/features/work-area/WorkAreaSelector';
 import { CaptureTypeStep } from '@/features/work-entry/components/CaptureTypeStep';
 import { EventStep } from '@/features/work-entry/components/EventStep';
 import { EvidenceStep } from '@/features/work-entry/components/EvidenceStep';
@@ -145,6 +146,13 @@ export function LogFlowScreen({ initialDraft }: Readonly<LogFlowScreenProps>) {
           onRawNoteChange={flow.updateRawNote}
           quickSave={{ onPress: flow.saveQuick, hasError: flow.saveError }}
           rawNote={flow.rawNote}
+          workAreaSelector={
+            <WorkAreaSelector
+              selectedId={flow.workAreaId}
+              onChange={flow.updateWorkArea}
+              disabled={flow.saving}
+            />
+          }
           t={t}
         />
       ) : null}

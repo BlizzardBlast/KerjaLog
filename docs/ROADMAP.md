@@ -2,7 +2,7 @@
 
 > Status: implementation sequencing for v1
 >
-> Last reviewed: 2026-08-24
+> Last reviewed: 2026-08-30
 
 This roadmap tracks delivery order and implementation status. It does **not** replace [`PRODUCT_AND_ARCHITECTURE.md`](./PRODUCT_AND_ARCHITECTURE.md), which remains the source of truth for product scope, privacy principles, architecture, and v1 `DO` / `DO NOT` decisions.
 
@@ -57,7 +57,7 @@ The sequencing intentionally proves the local-first evidence loop before account
 
 Growth is a projection over the existing encrypted `skills`, `entry_skills`, `work_entries`, and `evidence` data. It does not create a second persisted source of truth and does not change export privacy rules.
 
-### Current milestone — Weekly Reflection
+### Completed — Weekly Reflection
 
 - [x] four skippable prompts for work moved forward, people helped, problems handled, and learning
 - [x] explicit review step before any reflection answer enters the work-entry flow
@@ -70,22 +70,22 @@ Growth is a projection over the existing encrypted `skills`, `entry_skills`, `wo
 
 Weekly Reflection is an orchestration layer over the existing local-first work-entry system. Reflection answers do not become work entries automatically, and free-form reflection content is not stored in AsyncStorage or passed through route parameters.
 
+### Completed — Projects / Work Areas
+
+- [x] encrypted local work-area catalog for projects, recurring responsibilities, or areas of work;
+- [x] optional work-area association in Quick Save, full capture, encrypted draft recovery, and refinement;
+- [x] inline work-area creation without adding another mandatory capture step;
+- [x] rename and archive management without task/project-management concepts;
+- [x] archived work areas preserved on historical entries while excluded from new-entry choices;
+- [x] History filtering by work area, composed with existing search, evidence, entry-type, review-ready, and cursor-pagination behavior;
+- [x] Saved Entry metadata without adding organizational labels to the Evidence Thread;
+- [x] English and Indonesian copy with work-area names treated as private workplace content.
+
+Projects / Work Areas stays deliberately lightweight. There are no tasks, statuses, assignees, project planning, time tracking, collaboration, or employer visibility. Because KerjaLog has not yet had an external distribution containing valuable user data, this pre-release milestone updates `001-initial` directly rather than creating a second migration. Once the first real distribution ships, released migrations become immutable and future schema evolution is forward-only.
+
 ## Next milestones
 
-### 1. Projects / Work Areas
-
-Add lightweight organization for the area of work an entry belongs to.
-
-Scope:
-
-- local project/work-area catalog;
-- associate entries with a work area without turning KerjaLog into project management;
-- expose project/work-area filtering in History;
-- make the relation available to later Review Builder grouping.
-
-Architecture checkpoint: introduce the smallest forward-only schema change that satisfies the relation. Do not add task status, assignees, project planning, time tracking, or employer collaboration.
-
-### 2. Review Builder
+### Current milestone — Review Builder
 
 Complete the second major value-return loop after Growth.
 
@@ -104,7 +104,7 @@ Scope:
 - preserve challenge/export exclusion defaults;
 - heavily test formatting and selection policy as pure logic.
 
-### 3. Export and native sharing
+### 2. Export and native sharing
 
 Make Review Builder output usable outside KerjaLog.
 
@@ -117,7 +117,7 @@ Scope:
 - confidentiality warning before file export/share;
 - no large KerjaLog watermark.
 
-### 4. User-controlled JSON export / import
+### 3. User-controlled JSON export / import
 
 Complete local-first data portability before release.
 
@@ -128,7 +128,7 @@ Scope:
 - clear confidentiality warning because exported data may contain workplace information;
 - no automatic cloud backup or sync.
 
-### 5. Release hardening and product validation
+### 4. Release hardening and product validation
 
 Before store release:
 

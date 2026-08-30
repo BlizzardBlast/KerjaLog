@@ -16,6 +16,7 @@ const baseEntry: WorkEntryDetail = {
   occurredAt: '2026-08-10T08:00:00.000Z',
   outcomeType: 'deadline_met',
   status: 'review_ready',
+  workAreaId: null,
   evidence: {
     types: ['deadline'],
     detail: 'Submitted before Friday close.',
@@ -27,6 +28,19 @@ const baseEntry: WorkEntryDetail = {
 };
 
 describe('useEntryRefinement', () => {
+  test('updates organizational metadata without invalidating impact wording', async () => {
+    const { result } = await renderHook(() =>
+      useEntryRefinement({ entry: baseEntry, t, onSaved: jest.fn() }),
+    );
+
+    await act(async () => {
+      result.current.updateWorkArea('area-reporting');
+    });
+
+    expect(result.current.workAreaId).toBe('area-reporting');
+    expect(result.current.impactStatement).toBe(baseEntry.impactStatement);
+  });
+
   test('never overwrites user-authored impact wording when recorded facts change', async () => {
     const entry: WorkEntryDetail = {
       ...baseEntry,
