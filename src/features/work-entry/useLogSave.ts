@@ -26,9 +26,9 @@ export type PrepareLogDraftForCommit = (
 
 type UseLogSaveOptions = {
   onSaved: CompleteSavedEntry;
-  prepareForCommit?: PrepareLogDraftForCommit;
-  onCommitFailed?: () => void;
-  saveEntry?: LogSaveEntry;
+  prepareForCommit?: PrepareLogDraftForCommit | undefined;
+  onCommitFailed?: (() => void) | undefined;
+  saveEntry?: LogSaveEntry | undefined;
 };
 
 type SaveLogRequest = {
