@@ -28,7 +28,19 @@ describe('migrateDatabase', () => {
     expect(database.withTransactionAsync).toHaveBeenCalledTimes(1);
     expect(database.execAsync).toHaveBeenNthCalledWith(
       1,
+      expect.stringContaining('CREATE TABLE work_areas'),
+    );
+    expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
       expect.stringContaining('CREATE TABLE work_entries'),
+    );
+    expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
+      expect.stringContaining('work_area_id TEXT'),
+    );
+    expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
+      expect.stringContaining('REFERENCES work_areas(id)'),
+    );
+    expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
+      expect.stringContaining('idx_work_areas_active_name_key'),
     );
     expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
       expect.stringContaining('CREATE TABLE active_work_entry_draft'),
