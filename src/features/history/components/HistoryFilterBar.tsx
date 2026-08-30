@@ -19,6 +19,7 @@ type HistoryFilterBarProps = {
   workAreas: WorkArea[];
   onEntryTypeChange: (entryType: EntryType | null) => void;
   onWorkAreaChange: (workAreaId: string | null) => void;
+  onManageWorkAreas: () => void;
   onEvidenceToggle: () => void;
   onReviewReadyToggle: () => void;
   onClear: () => void;
@@ -29,6 +30,7 @@ export function HistoryFilterBar({
   workAreas,
   onEntryTypeChange,
   onWorkAreaChange,
+  onManageWorkAreas,
   onEvidenceToggle,
   onReviewReadyToggle,
   onClear,
@@ -108,6 +110,11 @@ export function HistoryFilterBar({
               }
             />
           ))}
+          <FilterChip
+            label={t('workArea.manage')}
+            selected={false}
+            onPress={onManageWorkAreas}
+          />
         </ScrollView>
       ) : null}
 
