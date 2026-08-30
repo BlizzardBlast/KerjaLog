@@ -199,11 +199,7 @@ try {
 
   db.prepare(
     'UPDATE work_areas SET archived_at = ?, updated_at = ? WHERE id = ?',
-  ).run(
-    '2026-08-10T09:00:00.000Z',
-    '2026-08-10T09:00:00.000Z',
-    'area-1',
-  );
+  ).run('2026-08-10T09:00:00.000Z', '2026-08-10T09:00:00.000Z', 'area-1');
 
   insertWorkArea.run(
     'area-2',
