@@ -18,6 +18,7 @@ export const entryRefinementSchema = z
   .object({
     type: z.enum(ENTRY_TYPES),
     rawNote: nonBlankString(WORK_ENTRY_TEXT_LIMITS.rawNote),
+    workAreaId: z.string().min(1).nullable(),
     outcomeType: z.enum(OUTCOME_TYPES).nullable(),
     evidenceTypes: z.array(z.enum(EVIDENCE_TYPES)),
     evidenceDetail: z.string().max(WORK_ENTRY_TEXT_LIMITS.evidenceDetail),
