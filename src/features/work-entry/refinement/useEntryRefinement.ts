@@ -78,6 +78,10 @@ export function useEntryRefinement({
 
   const entryType = useSelector(form.store, (state) => state.values.type);
   const rawNote = useSelector(form.store, (state) => state.values.rawNote);
+  const workAreaId = useSelector(
+    form.store,
+    (state) => state.values.workAreaId,
+  );
   const outcomeType = useSelector(
     form.store,
     (state) => state.values.outcomeType,
@@ -140,6 +144,11 @@ export function useEntryRefinement({
     setNoteError(false);
     setSaveError(false);
     invalidateGeneratedImpact();
+  };
+
+  const updateWorkArea = (workAreaId: string | null) => {
+    form.setFieldValue('workAreaId', workAreaId);
+    setSaveError(false);
   };
 
   const continueFromEvent = () => {
@@ -237,6 +246,7 @@ export function useEntryRefinement({
     totalSteps: REFINEMENT_STEPS.length,
     entryType,
     rawNote,
+    workAreaId,
     outcomeType,
     evidenceTypes,
     evidenceDetail,
@@ -254,6 +264,7 @@ export function useEntryRefinement({
     setCurrentStep,
     selectEntryType,
     updateRawNote,
+    updateWorkArea,
     continueFromEvent,
     selectOutcome,
     updateEvidenceDetail,
