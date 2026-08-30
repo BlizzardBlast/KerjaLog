@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
-import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { radii, spacing } from '@/design-system/tokens/theme';
-import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
+import { spacing } from '@/design-system/tokens/theme';
+import { WorkAreaChip } from '@/features/work-area/components/WorkAreaChip';
+import { WorkAreaInlineCreateForm } from '@/features/work-area/components/WorkAreaInlineCreateForm';
 import { useWorkAreaMutations } from '@/features/work-area/useWorkAreaMutations';
 import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -111,47 +111,20 @@ export function WorkAreaSelector({
           </ScrollView>
 
           {creating ? (
-            <View style={styles.createForm}>
-              <WorkAreaNameField
-                editable={!disabled && !creatingBusy}
-                hasError={createError}
-                onChangeText={(value) => {
-                  setNewName(value);
-                  setCreateError(false);
-                }}
-                onSubmitEditing={() => {
-                  void createWorkArea();
-                }}
-                value={newName}
-              />
-              {createError ? (
-                <Text role="alert" color="danger" variant="caption">
-                  {t('workArea.mutationError')}
-                </Text>
-              ) : null}
-              <View style={styles.createActions}>
-                <Button
-                  disabled={disabled || creatingBusy}
-                  onPress={cancelCreate}
-                  size="sm"
-                  style={styles.flex}
-                  variant="secondary"
-                >
-                  {t('workArea.cancel')}
-                </Button>
-                <Button
-                  disabled={!newName.trim() || disabled || creatingBusy}
-                  loading={creatingBusy}
-                  onPress={() => {
-                    void createWorkArea();
-                  }}
-                  size="sm"
-                  style={styles.flex}
-                >
-                  {t('workArea.createAction')}
-                </Button>
-              </View>
-            </View>
+            <WorkAreaInlineCreateForm
+              busy={creatingBusy}
+              disabled={disabled}
+              hasError={createError}
+              name={newName}
+              onCancel={cancelCreate}
+              onNameChange={(value) => {
+                setNewName(value);
+                setCreateError(false);
+              }}
+              onSubmit={() => {
+                void createWorkArea();
+              }}
+            />
           ) : (
             <Button
               disabled={disabled}
@@ -174,50 +147,6 @@ export function WorkAreaSelector({
   );
 }
 
-type WorkAreaChipProps = {
-  label: string;
-  selected: boolean;
-  disabled: boolean;
-  onPress: () => void;
-};
-
-function WorkAreaChip({
-  label,
-  selected,
-  disabled,
-  onPress,
-}: Readonly<WorkAreaChipProps>) {
-  const { theme } = useTheme();
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled, selected }}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.chip,
-        {
-          backgroundColor: selected
-            ? theme.colors.primarySoft
-            : theme.colors.surface,
-          borderColor: selected ? theme.colors.primary : theme.colors.border,
-        },
-        pressed && styles.pressed,
-        disabled && styles.disabled,
-      ]}
-    >
-      <Text
-        color={selected ? 'primary' : 'textMuted'}
-        numberOfLines={1}
-        variant="label"
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     gap: spacing[3],
@@ -229,33 +158,8 @@ const styles = StyleSheet.create({
     gap: spacing[2],
     paddingRight: spacing[4],
   },
-  chip: {
-    alignItems: 'center',
-    borderRadius: radii.full,
-    borderWidth: 1,
-    justifyContent: 'center',
-    maxWidth: 220,
-    minHeight: spacing[12],
-    paddingHorizontal: spacing[4],
-  },
-  createForm: {
-    gap: spacing[2],
-  },
-  createActions: {
-    flexDirection: 'row',
-    gap: spacing[2],
-  },
-  flex: {
-    flex: 1,
-  },
   error: {
     alignItems: 'flex-start',
     gap: spacing[2],
-  },
-  pressed: {
-    opacity: 0.76,
-  },
-  disabled: {
-    opacity: 0.55,
   },
 });
