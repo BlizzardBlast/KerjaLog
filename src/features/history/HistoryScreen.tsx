@@ -88,6 +88,7 @@ function ProfiledHistoryScreen() {
               workAreas={workAreaState.workAreas}
               onEntryTypeChange={controller.setEntryType}
               onWorkAreaChange={controller.setWorkArea}
+              onManageWorkAreas={() => router.push('/work-areas')}
               onEvidenceToggle={controller.toggleEvidence}
               onReviewReadyToggle={controller.toggleReviewReady}
               onClear={controller.clearFilters}
