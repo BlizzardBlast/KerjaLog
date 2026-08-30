@@ -31,6 +31,7 @@ const SENSITIVE_FIELD_KEYS = new Set([
   'phone',
   'pin',
   'project',
+  'projectid',
   'projectname',
   'rawnote',
   'reviewcontent',
@@ -43,7 +44,9 @@ const SENSITIVE_FIELD_KEYS = new Set([
   'userid',
   'username',
   'workentry',
+  'workentryid',
   'workarea',
+  'workareaid',
   'workareaname',
 ]);
 const WORK_ENTRY_REFERENCE_MARKERS = [
