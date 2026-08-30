@@ -12,9 +12,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { layout, radii, spacing } from '@/design-system/tokens/theme';
+import { layout, spacing } from '@/design-system/tokens/theme';
 import type { WorkArea } from '@/domain/work-area/model';
-import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
+import { WorkAreaEditorCard } from '@/features/work-area/components/WorkAreaEditorCard';
 import { WorkAreaSection } from '@/features/work-area/components/WorkAreaSection';
 import { useWorkAreaMutations } from '@/features/work-area/useWorkAreaMutations';
 import { useWorkAreas } from '@/features/work-area/useWorkAreas';
@@ -146,62 +146,20 @@ function ProfiledWorkAreaManagementScreen() {
 
         {!isInitialLoading && !hasBlockingLoadError ? (
           <>
-            <View
-              style={[
-                styles.editor,
-                {
-                  backgroundColor: theme.colors.surfaceSubtle,
-                  borderColor: theme.colors.border,
-                },
-              ]}
-            >
-              <Text variant="heading">
-                {editing
-                  ? t('workArea.renameTitle')
-                  : t('workArea.createTitle')}
-              </Text>
-              <WorkAreaNameField
-                editable={!busy}
-                hasError={editorError}
-                onChangeText={(value) => {
-                  setName(value);
-                  setEditorError(false);
-                }}
-                onSubmitEditing={() => {
-                  void submit();
-                }}
-                value={name}
-              />
-              {editorError ? (
-                <Text role="alert" color="danger" variant="caption">
-                  {t('workArea.mutationError')}
-                </Text>
-              ) : null}
-              <View style={styles.editorActions}>
-                {editing ? (
-                  <Button
-                    disabled={busy}
-                    onPress={resetEditor}
-                    style={styles.flex}
-                    variant="secondary"
-                  >
-                    {t('workArea.cancel')}
-                  </Button>
-                ) : null}
-                <Button
-                  disabled={!name.trim() || busy}
-                  loading={busy}
-                  onPress={() => {
-                    void submit();
-                  }}
-                  style={styles.flex}
-                >
-                  {editing
-                    ? t('workArea.renameAction')
-                    : t('workArea.createAction')}
-                </Button>
-              </View>
-            </View>
+            <WorkAreaEditorCard
+              busy={busy}
+              editing={editing !== null}
+              hasError={editorError}
+              name={name}
+              onCancel={resetEditor}
+              onNameChange={(value) => {
+                setName(value);
+                setEditorError(false);
+              }}
+              onSubmit={() => {
+                void submit();
+              }}
+            />
 
             {state.status === 'error' ? (
               <View style={styles.inlineError}>
@@ -285,17 +243,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing[5],
   },
   heading: { gap: spacing[2] },
-  editor: {
-    borderRadius: radii.xl,
-    borderWidth: 1,
-    gap: spacing[3],
-    padding: spacing[4],
-  },
-  editorActions: {
-    flexDirection: 'row',
-    gap: spacing[2],
-  },
-  flex: { flex: 1 },
   state: {
     alignItems: 'flex-start',
     gap: spacing[3],
