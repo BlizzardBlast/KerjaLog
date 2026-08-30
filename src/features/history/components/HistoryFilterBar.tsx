@@ -25,7 +25,7 @@ export function HistoryFilterBar({
   onEvidenceToggle,
   onReviewReadyToggle,
   onClear,
-}: HistoryFilterBarProps) {
+}: Readonly<HistoryFilterBarProps>) {
   const { t } = useI18n();
   const [showEntryTypes, setShowEntryTypes] = useState(
     filters.entryType !== null,
@@ -98,7 +98,12 @@ type FilterChipProps = {
   onPress: () => void;
 };
 
-function FilterChip({ expanded, label, selected, onPress }: FilterChipProps) {
+function FilterChip({
+  expanded,
+  label,
+  selected,
+  onPress,
+}: Readonly<FilterChipProps>) {
   const { theme } = useTheme();
 
   return (

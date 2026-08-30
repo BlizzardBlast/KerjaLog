@@ -6,7 +6,7 @@ export type PrivacyPointProps = {
   text: string;
 };
 
-export function PrivacyPoint({ text }: PrivacyPointProps) {
+export function PrivacyPoint({ text }: Readonly<PrivacyPointProps>) {
   const { theme } = useTheme();
 
   return (

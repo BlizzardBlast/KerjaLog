@@ -7,13 +7,19 @@ export type StepHeadingProps = {
   description: string;
 };
 
-export function StepHeading({ eyebrow, title, description }: StepHeadingProps) {
+export function StepHeading({
+  eyebrow,
+  title,
+  description,
+}: Readonly<StepHeadingProps>) {
   return (
     <View style={styles.container}>
       <Text variant="overline" color="primary">
         {eyebrow}
       </Text>
-      <Text variant="title">{title}</Text>
+      <Text accessibilityRole="header" variant="title">
+        {title}
+      </Text>
       <Text variant="body" color="textMuted">
         {description}
       </Text>

@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+/.pnpm/
 
 # Expo
 .expo/
@@ -28,6 +29,9 @@ coverage/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+
+# IDE
+.idea/
 
 # macOS
 .DS_Store

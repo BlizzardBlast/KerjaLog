@@ -19,7 +19,7 @@ export function ReviewRhythmStep({
   state,
   update,
   hasFinishError,
-}: OnboardingStepProps) {
+}: Readonly<OnboardingStepProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const reminder = useWeeklyReminderController(state, update);

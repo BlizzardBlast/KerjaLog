@@ -1,10 +1,9 @@
-import { useForm, useSelector } from '@tanstack/react-form';
 import { useMemo, useRef, useState } from 'react';
 import {
   EMPTY_WORK_ENTRY_DRAFT,
   hasWorkEntryDraftContent,
-  type WorkEntryDraft,
   WORK_ENTRY_DRAFT_STEPS,
+  type WorkEntryDraft,
 } from '@/domain/entry/draft';
 import {
   buildImpactStatement,
@@ -25,9 +24,10 @@ import type {
 import { suggestSkillIds } from '@/domain/skill/suggestions';
 import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
 import {
-  saveWorkEntry,
   type SaveWorkEntryDraft,
+  saveWorkEntry,
 } from '@/features/work-entry/saveWorkEntry';
+import { useLogForm } from '@/features/work-entry/useLogForm';
 import { useSavedEntryCompletion } from '@/features/work-entry/useSavedEntryCompletion';
 import {
   captureWorkflowFailure,
@@ -69,46 +69,17 @@ export function useLogFlow({
   const [saving, setSaving] = useState(false);
   const saveInProgressRef = useRef(false);
   const savedEntryCompletion = useSavedEntryCompletion(onSaved);
-
-  const form = useForm({
-    defaultValues: {
-      intent: startingDraft.intent,
-      rawNote: startingDraft.rawNote,
-      outcomeType: startingDraft.outcomeType,
-      evidenceTypes: startingDraft.evidenceTypes,
-      evidenceDetail: startingDraft.evidenceDetail,
-      skills: startingDraft.skills,
-      impactStatement: startingDraft.impactStatement,
-      impactStatementSource: startingDraft.impactStatementSource,
-    },
-  });
-
-  const intent = useSelector(form.store, (state) => state.values.intent);
-  const rawNote = useSelector(form.store, (state) => state.values.rawNote);
-  const outcomeType = useSelector(
-    form.store,
-    (state) => state.values.outcomeType,
-  );
-  const evidenceTypes = useSelector(
-    form.store,
-    (state) => state.values.evidenceTypes,
-  );
-  const evidenceDetail = useSelector(
-    form.store,
-    (state) => state.values.evidenceDetail,
-  );
-  const selectedSkills = useSelector(
-    form.store,
-    (state) => state.values.skills,
-  );
-  const impactStatement = useSelector(
-    form.store,
-    (state) => state.values.impactStatement,
-  );
-  const impactStatementSource = useSelector(
-    form.store,
-    (state) => state.values.impactStatementSource,
-  );
+  const {
+    form,
+    intent,
+    rawNote,
+    outcomeType,
+    evidenceTypes,
+    evidenceDetail,
+    selectedSkills,
+    impactStatement,
+    impactStatementSource,
+  } = useLogForm(startingDraft);
 
   const currentStep = LOG_STEPS.indexOf(step) + 1;
   const suggestedSkillIds = intent
@@ -247,8 +218,8 @@ export function useLogFlow({
   }
 
   function toggleSkill(skillId: SkillId, source: EntrySkillSource) {
-    const existing = selectedSkills.find((skill) => skill.id === skillId);
-    const nextSkills: WorkEntrySkill[] = existing
+    const hasExisting = selectedSkills.some((skill) => skill.id === skillId);
+    const nextSkills: WorkEntrySkill[] = hasExisting
       ? selectedSkills.filter((skill) => skill.id !== skillId)
       : [...selectedSkills, { id: skillId, source }];
 

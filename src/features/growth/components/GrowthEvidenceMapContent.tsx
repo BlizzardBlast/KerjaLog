@@ -18,7 +18,7 @@ export function GrowthEvidenceMapContent({
   state,
   onRetry,
   onOpenSkill,
-}: GrowthEvidenceMapContentProps) {
+}: Readonly<GrowthEvidenceMapContentProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

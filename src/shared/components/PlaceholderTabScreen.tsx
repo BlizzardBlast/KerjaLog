@@ -8,11 +8,11 @@ export function PlaceholderTabScreen({
   eyebrow,
   title,
   description,
-}: {
+}: Readonly<{
   eyebrow: string;
   title: string;
   description: string;
-}) {
+}>) {
   const { theme } = useTheme();
 
   return (
@@ -24,7 +24,9 @@ export function PlaceholderTabScreen({
         <Text variant="overline" color="primary">
           {eyebrow}
         </Text>
-        <Text variant="title">{title}</Text>
+        <Text accessibilityRole="header" variant="title">
+          {title}
+        </Text>
         <Text variant="body" color="textMuted">
           {description}
         </Text>

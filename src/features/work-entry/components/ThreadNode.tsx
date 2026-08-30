@@ -7,7 +7,7 @@ type ThreadNodeProps = {
   value: string;
 };
 
-export function ThreadNode({ label, value }: ThreadNodeProps) {
+export function ThreadNode({ label, value }: Readonly<ThreadNodeProps>) {
   return (
     <View style={styles.threadNode}>
       <Text variant="overline" color="primary">

@@ -31,7 +31,7 @@ export function SkillStep({
   onContinue,
   t,
   ...frame
-}: SkillStepProps) {
+}: Readonly<SkillStepProps>) {
   const selectedIds = new Set(selectedSkills.map((skill) => skill.id));
   const suggestedIds = new Set(suggestedSkillIds);
   const orderedSkills = [

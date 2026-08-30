@@ -1,10 +1,13 @@
-import { isRunningInExpoGo } from 'expo';
-import type { NotificationPermissionsStatus } from 'expo-notifications';
+import type {
+  NotificationPermissionsStatus,
+  NotificationResponse,
+} from 'expo-notifications';
 import { Platform } from 'react-native';
 import type { WeeklyReminderSchedule } from '@/features/onboarding/model';
 
 const WEEKLY_REFLECTION_CHANNEL_ID = 'weekly-reflection';
 const WEEKLY_REFLECTION_NOTIFICATION_ID = 'kerjalog-weekly-reflection';
+const WEEKLY_REFLECTION_DESTINATION = 'weekly-reflection';
 
 type NotificationsModule = typeof import('expo-notifications');
 
@@ -29,16 +32,12 @@ export type WeeklyReflectionNotificationRequest = {
   copy: WeeklyReflectionNotificationCopy;
 };
 
-function isUnsupportedNotificationRuntime(): boolean {
-  return Platform.OS === 'android' && isRunningInExpoGo();
-}
-
 function loadNotifications(): NotificationsModule | null {
-  if (isUnsupportedNotificationRuntime()) {
+  try {
+    return require('expo-notifications') as NotificationsModule;
+  } catch {
     return null;
   }
-
-  return require('expo-notifications') as NotificationsModule;
 }
 
 function isNotificationPermissionGranted(
@@ -48,6 +47,20 @@ function isNotificationPermissionGranted(
   return (
     permissions.granted ||
     permissions.ios?.status === notifications.IosAuthorizationStatus.PROVISIONAL
+  );
+}
+
+function isWeeklyReflectionResponse(
+  response: NotificationResponse,
+  notifications: NotificationsModule,
+): boolean {
+  const request = response.notification.request;
+  const destination = request.content.data?.destination;
+
+  return (
+    response.actionIdentifier === notifications.DEFAULT_ACTION_IDENTIFIER &&
+    request.identifier === WEEKLY_REFLECTION_NOTIFICATION_ID &&
+    (destination === undefined || destination === WEEKLY_REFLECTION_DESTINATION)
   );
 }
 
@@ -109,6 +122,41 @@ export async function configureNotificationHandling(): Promise<void> {
   });
 }
 
+export function observeWeeklyReflectionNotificationResponses(
+  onOpenReflection: () => void,
+): () => void {
+  const notifications = loadNotifications();
+
+  if (!notifications) {
+    return () => undefined;
+  }
+
+  const handledResponses = new Set<string>();
+  const consumeResponse = (response: NotificationResponse): void => {
+    if (!isWeeklyReflectionResponse(response, notifications)) {
+      return;
+    }
+
+    const responseKey = `${response.notification.request.identifier}:${response.notification.date}:${response.actionIdentifier}`;
+    if (!handledResponses.has(responseKey)) {
+      handledResponses.add(responseKey);
+      onOpenReflection();
+    }
+
+    notifications.clearLastNotificationResponse();
+  };
+
+  const subscription =
+    notifications.addNotificationResponseReceivedListener(consumeResponse);
+  const initialResponse = notifications.getLastNotificationResponse();
+
+  if (initialResponse) {
+    consumeResponse(initialResponse);
+  }
+
+  return () => subscription.remove();
+}
+
 export async function getWeeklyReflectionNotificationStatus(): Promise<WeeklyReflectionNotificationStatus> {
   const notifications = loadNotifications();
 
@@ -159,6 +207,7 @@ export async function enableWeeklyReflectionNotification({
     content: {
       title: copy.title,
       body: copy.body,
+      data: { destination: WEEKLY_REFLECTION_DESTINATION },
     },
     trigger: {
       type: notifications.SchedulableTriggerInputTypes.WEEKLY,

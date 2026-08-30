@@ -180,6 +180,57 @@ describe('Sentry privacy configuration', () => {
     );
   });
 
+  test('redacts quoted and unquoted sensitive key-value text', () => {
+    initializeSentry();
+    const options = getSentryOptions();
+
+    const breadcrumb = options.beforeBreadcrumb?.({
+      category: 'custom',
+      message:
+        'password: private api_key=secret "raw_note":"private note" authorization: Bearer private-token status=ok',
+    });
+
+    expect(breadcrumb).toEqual({
+      category: 'custom',
+      message:
+        'password: [Filtered] api_key=[Filtered] "raw_note":"[Filtered]" authorization: [Filtered] status=ok',
+    });
+  });
+
+  test('redacts architecture-defined career content key variants', () => {
+    initializeSentry();
+    const options = getSentryOptions();
+
+    const sentEvent = options.beforeSend?.(
+      {
+        extra: {
+          company: 'Private employer',
+          companyName: 'Private employer name',
+          impact_statement: 'Private impact statement',
+          project: 'Private project',
+          projectName: 'Private project name',
+          reviewContent: 'Private review content',
+          safeOperation: 'load-history',
+        },
+        type: undefined,
+      },
+      {},
+    );
+
+    expect(sentEvent).toEqual({
+      extra: {
+        company: '[Filtered]',
+        companyName: '[Filtered]',
+        impact_statement: '[Filtered]',
+        project: '[Filtered]',
+        projectName: '[Filtered]',
+        reviewContent: '[Filtered]',
+        safeOperation: 'load-history',
+      },
+      type: undefined,
+    });
+  });
+
   test('retains safe transaction context and redacts sensitive values', () => {
     // Given
     initializeSentry();

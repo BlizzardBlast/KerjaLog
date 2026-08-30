@@ -11,7 +11,10 @@ import {
 } from '@/features/onboarding/options';
 import { useI18n } from '@/i18n/I18nProvider';
 
-export function WorkContextStep({ state, update }: OnboardingStepProps) {
+export function WorkContextStep({
+  state,
+  update,
+}: Readonly<OnboardingStepProps>) {
   const { t } = useI18n();
 
   return (

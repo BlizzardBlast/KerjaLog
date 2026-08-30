@@ -26,7 +26,7 @@ export type AppIconProps = {
  * in expo-symbols. Android uses the preloaded Material Symbols font when it is
  * available and falls back to SymbolView if runtime font loading fails.
  */
-export function AppIcon({ name, size = 24, color }: AppIconProps) {
+export function AppIcon({ name, size = 24, color }: Readonly<AppIconProps>) {
   const useLoadedAndroidFont =
     Platform.OS === 'android' && Font.isLoaded(regular.name);
 

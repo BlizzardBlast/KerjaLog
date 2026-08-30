@@ -10,16 +10,16 @@ type AppLockSettingFeedbackProps = {
 export function AppLockSettingFeedback({
   enabled,
   error,
-}: AppLockSettingFeedbackProps) {
+}: Readonly<AppLockSettingFeedbackProps>) {
   const { t } = useI18n();
-  const message =
-    error === 'unavailable'
-      ? t('appLock.setting.unavailable')
-      : error
-        ? t('appLock.setting.failed')
-        : enabled
-          ? t('appLock.setting.enabled')
-          : t('appLock.setting.disabled');
+  let message = t(
+    enabled ? 'appLock.setting.enabled' : 'appLock.setting.disabled',
+  );
+  if (error === 'unavailable') {
+    message = t('appLock.setting.unavailable');
+  } else if (error) {
+    message = t('appLock.setting.failed');
+  }
 
   return (
     <Text

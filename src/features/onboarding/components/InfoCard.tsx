@@ -8,7 +8,7 @@ export type InfoCardProps = {
   body: string;
 };
 
-export function InfoCard({ title, body }: InfoCardProps) {
+export function InfoCard({ title, body }: Readonly<InfoCardProps>) {
   const { theme } = useTheme();
 
   return (

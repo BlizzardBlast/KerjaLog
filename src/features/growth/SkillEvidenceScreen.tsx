@@ -19,7 +19,9 @@ export type SkillEvidenceScreenProps = {
   skillId: SkillId;
 };
 
-function ProfiledSkillEvidenceScreen({ skillId }: SkillEvidenceScreenProps) {
+function ProfiledSkillEvidenceScreen({
+  skillId,
+}: Readonly<SkillEvidenceScreenProps>) {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { language, t } = useI18n();

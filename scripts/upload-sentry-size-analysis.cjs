@@ -20,7 +20,7 @@ function readSentryPluginOptions(appConfig) {
   const plugins = appConfig?.expo?.plugins;
 
   if (!Array.isArray(plugins)) {
-    throw new Error('Expected Expo plugin configuration in app.json.');
+    throw new TypeError('Expected Expo plugin configuration in app.json.');
   }
 
   const sentryPlugin = plugins.find(
@@ -36,7 +36,7 @@ function readSentryPluginOptions(appConfig) {
   const { organization, project } = sentryPlugin[1];
 
   if (typeof organization !== 'string' || typeof project !== 'string') {
-    throw new Error(
+    throw new TypeError(
       `Expected ${SENTRY_EXPO_PLUGIN} options with organization and project.`,
     );
   }

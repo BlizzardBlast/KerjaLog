@@ -3,7 +3,9 @@ import {
   createContext,
   type PropsWithChildren,
   use,
+  useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { useColorScheme } from 'react-native';
@@ -35,9 +37,9 @@ async function persistThemeMode(mode: ThemeMode): Promise<void> {
   await AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
 }
 
-export function ThemeProvider({ children }: PropsWithChildren) {
+export function ThemeProvider({ children }: Readonly<PropsWithChildren>) {
   const systemColorScheme = useColorScheme();
-  const [mode, setModeState] = useState<ThemeMode>('system');
+  const [modeState, setModeState] = useState<ThemeMode>('system');
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -64,25 +66,28 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setMode = (nextMode: ThemeMode) => {
+  const setMode = useCallback((nextMode: ThemeMode) => {
     setModeState(nextMode);
     persistThemeMode(nextMode).catch(ignoreError);
-  };
+  }, []);
 
-  const resolvedTheme: ResolvedTheme =
-    mode === 'system'
-      ? systemColorScheme === 'dark'
-        ? 'dark'
-        : 'light'
-      : mode;
+  let resolvedTheme: ResolvedTheme;
+  if (modeState === 'system') {
+    resolvedTheme = systemColorScheme === 'dark' ? 'dark' : 'light';
+  } else {
+    resolvedTheme = modeState;
+  }
 
-  const value: ThemeContextValue = {
-    theme: themes[resolvedTheme],
-    mode,
-    resolvedTheme,
-    isHydrated,
-    setMode,
-  };
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      theme: themes[resolvedTheme],
+      mode: modeState,
+      resolvedTheme,
+      isHydrated,
+      setMode,
+    }),
+    [isHydrated, modeState, resolvedTheme, setMode],
+  );
 
   return <ThemeContext value={value}>{children}</ThemeContext>;
 }

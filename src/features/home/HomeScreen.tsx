@@ -27,6 +27,7 @@ function ProfiledHomeScreen() {
   const workEntries = useHomeWorkEntries();
   const insets = useSafeAreaInsets();
   const openCapture = () => router.push('/entry/new');
+  const openReflection = () => router.push('/reflection');
   const openEntry = (id: string) =>
     router.push({ pathname: '/entry/[id]', params: { id } });
 
@@ -62,7 +63,7 @@ function ProfiledHomeScreen() {
           />
         )}
 
-        <ReflectionSection onLogSomething={openCapture} />
+        <ReflectionSection onStartReflection={openReflection} />
 
         {workEntries.status === 'loading' ? (
           <RecentEntriesLoadingSection />

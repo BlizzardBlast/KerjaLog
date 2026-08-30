@@ -21,7 +21,7 @@ export function LogChoiceCard({
   selected,
   onPress,
   mode = 'single',
-}: LogChoiceCardProps) {
+}: Readonly<LogChoiceCardProps>) {
   const { theme } = useTheme();
 
   return (

@@ -143,5 +143,15 @@ function ensureSentence(value: string): string {
 }
 
 function trimEndingPunctuation(value: string): string {
-  return value.trim().replace(/[.!?]+$/u, '');
+  let trimmed = value.trim();
+
+  while (
+    trimmed.endsWith('.') ||
+    trimmed.endsWith('!') ||
+    trimmed.endsWith('?')
+  ) {
+    trimmed = trimmed.slice(0, -1);
+  }
+
+  return trimmed;
 }

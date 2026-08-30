@@ -1,12 +1,42 @@
 import * as Sentry from '@sentry/react-native';
 import { Tabs, useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { type ColorValue, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
-import { tabs } from '@/navigation/tabs';
+import { type TabDefinition, tabs } from '@/navigation/tabs';
+
+type TabBarIconRendererProps = {
+  color: ColorValue;
+};
+
+function createTabBarIconRenderer(tab: TabDefinition) {
+  return function TabBarIconRenderer({
+    color,
+  }: Readonly<TabBarIconRendererProps>) {
+    const { theme } = useTheme();
+
+    if (!tab.capture) {
+      return <AppIcon name={tab.icon} size={22} color={color} />;
+    }
+
+    return (
+      <View
+        style={[
+          styles.captureButton,
+          {
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.surface,
+          },
+        ]}
+      >
+        <AppIcon name={tab.icon} size={26} color={theme.colors.onPrimary} />
+      </View>
+    );
+  };
+}
 
 export function AppTabs() {
   const router = Sentry.wrapExpoRouter(useRouter());
@@ -56,26 +86,7 @@ export function AppTabs() {
             title: t(tab.labelKey),
             tabBarAccessibilityLabel: t(tab.labelKey),
             tabBarLabel: t(tab.shortLabelKey ?? tab.labelKey),
-            tabBarIcon: ({ color }) =>
-              tab.capture ? (
-                <View
-                  style={[
-                    styles.captureButton,
-                    {
-                      backgroundColor: theme.colors.primary,
-                      borderColor: theme.colors.surface,
-                    },
-                  ]}
-                >
-                  <AppIcon
-                    name={tab.icon}
-                    size={26}
-                    color={theme.colors.onPrimary}
-                  />
-                </View>
-              ) : (
-                <AppIcon name={tab.icon} size={22} color={color} />
-              ),
+            tabBarIcon: tabBarIconRendererByName[tab.name],
           }}
         />
       ))}
@@ -102,3 +113,7 @@ const styles = StyleSheet.create({
     width: 58,
   },
 });
+
+const tabBarIconRendererByName = Object.fromEntries(
+  tabs.map((tab) => [tab.name, createTabBarIconRenderer(tab)]),
+) as Record<TabDefinition['name'], ReturnType<typeof createTabBarIconRenderer>>;

@@ -24,7 +24,7 @@ const statusLabelKeyByStatus: Record<EntryStatus, TranslationKey> = {
   review_ready: 'log.saved.reviewReady',
 };
 
-function ProfiledSavedEntryScreen({ id }: SavedEntryScreenProps) {
+function ProfiledSavedEntryScreen({ id }: Readonly<SavedEntryScreenProps>) {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();

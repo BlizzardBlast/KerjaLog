@@ -7,10 +7,12 @@ import { SectionHeading } from '@/features/home/components/SectionHeading';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type ReflectionSectionProps = {
-  onLogSomething: () => void;
+  onStartReflection: () => void;
 };
 
-export function ReflectionSection({ onLogSomething }: ReflectionSectionProps) {
+export function ReflectionSection({
+  onStartReflection,
+}: Readonly<ReflectionSectionProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 
@@ -38,7 +40,7 @@ export function ReflectionSection({ onLogSomething }: ReflectionSectionProps) {
           {t('home.reflection.note')}
         </Text>
         <Button
-          onPress={onLogSomething}
+          onPress={onStartReflection}
           style={styles.inlineButton}
           variant="secondary"
         >

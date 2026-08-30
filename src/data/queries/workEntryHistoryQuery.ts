@@ -171,7 +171,7 @@ function validateHistoryQuery(query: WorkEntryHistoryQuery): void {
     typeof hasEvidence !== 'boolean' ||
     typeof reviewReadyOnly !== 'boolean'
   ) {
-    throw new Error('History boolean filters are invalid.');
+    throw new TypeError('History boolean filters are invalid.');
   }
 
   if (

@@ -17,7 +17,7 @@ export function NoticeCard({
   title,
   description,
   style,
-}: NoticeCardProps) {
+}: Readonly<NoticeCardProps>) {
   return (
     <View style={[styles.notice, { backgroundColor, borderColor }, style]}>
       <Text variant="bodyStrong">{title}</Text>

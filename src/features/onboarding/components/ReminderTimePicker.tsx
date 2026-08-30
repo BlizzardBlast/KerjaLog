@@ -23,7 +23,7 @@ export function ReminderTimePicker({
   value,
   onChange,
   onClose,
-}: ReminderTimePickerProps) {
+}: Readonly<ReminderTimePickerProps>) {
   if (!visible) {
     return null;
   }
@@ -41,7 +41,7 @@ function VisibleReminderTimePicker({
   value,
   onChange,
   onClose,
-}: VisibleReminderTimePickerProps) {
+}: Readonly<VisibleReminderTimePickerProps>) {
   const insets = useSafeAreaInsets();
   const { theme, resolvedTheme } = useTheme();
   const { language, t } = useI18n();

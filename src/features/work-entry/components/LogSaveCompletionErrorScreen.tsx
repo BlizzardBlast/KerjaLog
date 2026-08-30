@@ -13,7 +13,7 @@ type LogSaveCompletionErrorScreenProps = {
 
 export function LogSaveCompletionErrorScreen({
   onRetry,
-}: LogSaveCompletionErrorScreenProps) {
+}: Readonly<LogSaveCompletionErrorScreenProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const [retrying, setRetrying] = useState(false);
@@ -32,7 +32,11 @@ export function LogSaveCompletionErrorScreen({
       edges={['top', 'bottom']}
       style={[styles.screen, { backgroundColor: theme.colors.surface }]}
     >
-      <Text variant="title" style={styles.centeredText}>
+      <Text
+        accessibilityRole="header"
+        variant="title"
+        style={styles.centeredText}
+      >
         {t('log.completion.title')}
       </Text>
       <Text

@@ -32,9 +32,9 @@ const issueCopy: Record<NotificationReminderIssue, IssueCopy> = {
 
 export function NotificationPermissionNotice({
   issue,
-}: {
+}: Readonly<{
   issue: NotificationReminderIssue;
-}) {
+}>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const copy = issueCopy[issue];

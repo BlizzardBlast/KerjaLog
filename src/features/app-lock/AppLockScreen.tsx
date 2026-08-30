@@ -14,16 +14,18 @@ export function AppLockScreen() {
   const { t } = useI18n();
   const { error, isAuthenticating, unlock } = useAppLock();
 
-  const errorMessage =
-    error === 'unavailable'
-      ? t('appLock.setting.unavailable')
-      : error === 'cancelled'
-        ? t('appLock.screen.cancelled')
-        : error === 'authentication-failed' ||
-            error === 'storage-failed' ||
-            error === 'privacy-failed'
-          ? t('appLock.screen.failed')
-          : null;
+  let errorMessage: string | null = null;
+  if (error === 'unavailable') {
+    errorMessage = t('appLock.setting.unavailable');
+  } else if (error === 'cancelled') {
+    errorMessage = t('appLock.screen.cancelled');
+  } else if (
+    error === 'authentication-failed' ||
+    error === 'storage-failed' ||
+    error === 'privacy-failed'
+  ) {
+    errorMessage = t('appLock.screen.failed');
+  }
 
   return (
     <SafeAreaView
@@ -48,7 +50,11 @@ export function AppLockScreen() {
           <Text variant="overline" color="primary" style={styles.centeredText}>
             {t('appLock.screen.eyebrow')}
           </Text>
-          <Text variant="title" style={styles.centeredText}>
+          <Text
+            accessibilityRole="header"
+            variant="title"
+            style={styles.centeredText}
+          >
             {t('appLock.screen.title')}
           </Text>
           <Text variant="body" color="textMuted" style={styles.centeredText}>

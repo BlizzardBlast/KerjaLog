@@ -40,7 +40,7 @@ export function Text({
   style,
   children,
   ...props
-}: TextProps) {
+}: Readonly<TextProps>) {
   const { theme } = useTheme();
   const variantStyle = theme.typography[variant] as TextStyle;
 

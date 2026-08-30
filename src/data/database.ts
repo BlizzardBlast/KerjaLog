@@ -16,12 +16,10 @@ const DATABASE_NAME = 'kerjalog-encrypted-v1.db';
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (!databasePromise) {
-    databasePromise = openDatabase().catch((error: unknown) => {
-      databasePromise = null;
-      throw error;
-    });
-  }
+  databasePromise ??= openDatabase().catch((error: unknown) => {
+    databasePromise = null;
+    throw error;
+  });
 
   return databasePromise;
 }

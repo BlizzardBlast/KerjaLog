@@ -28,7 +28,7 @@ type LogFlowScreenProps = {
   initialDraft: WorkEntryDraft | null;
 };
 
-export function LogFlowScreen({ initialDraft }: LogFlowScreenProps) {
+export function LogFlowScreen({ initialDraft }: Readonly<LogFlowScreenProps>) {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { t } = useI18n();
   const draftPersistenceSuspendedRef = useRef(false);

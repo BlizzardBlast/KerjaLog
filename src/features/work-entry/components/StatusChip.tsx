@@ -8,7 +8,7 @@ type StatusChipProps = {
   tone: 'success' | 'warning' | 'neutral';
 };
 
-export function StatusChip({ label, tone }: StatusChipProps) {
+export function StatusChip({ label, tone }: Readonly<StatusChipProps>) {
   const { theme } = useTheme();
   let backgroundColor = theme.colors.surfaceSubtle;
   let textColor: keyof ThemeColors = 'textMuted';

@@ -3,6 +3,7 @@ import {
   disableWeeklyReflectionNotification,
   enableWeeklyReflectionNotification,
   getWeeklyReflectionNotificationStatus,
+  observeWeeklyReflectionNotificationResponses,
 } from '@/platform/notifications/weeklyReflection';
 
 const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);
@@ -18,6 +19,15 @@ const cancelScheduledNotificationAsync = jest.mocked(
 const scheduleNotificationAsync = jest.mocked(
   Notifications.scheduleNotificationAsync,
 );
+const getLastNotificationResponse = jest.mocked(
+  Notifications.getLastNotificationResponse,
+);
+const clearLastNotificationResponse = jest.mocked(
+  Notifications.clearLastNotificationResponse,
+);
+const addNotificationResponseReceivedListener = jest.mocked(
+  Notifications.addNotificationResponseReceivedListener,
+);
 
 const copy = {
   title: 'A gentle weekly check-in',
@@ -31,12 +41,37 @@ const defaultSchedule = {
   minute: 30,
 };
 
+function createNotificationResponse(
+  identifier = 'kerjalog-weekly-reflection',
+  actionIdentifier = Notifications.DEFAULT_ACTION_IDENTIFIER,
+): Notifications.NotificationResponse {
+  return {
+    actionIdentifier,
+    notification: {
+      date: 1_776_500_000_000,
+      request: {
+        identifier,
+        content: {
+          title: copy.title,
+          body: copy.body,
+          data: { destination: 'weekly-reflection' },
+        },
+        trigger: null,
+      },
+    },
+  } as unknown as Notifications.NotificationResponse;
+}
+
 describe('weekly reflection notifications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getAllScheduledNotificationsAsync.mockResolvedValue([]);
     cancelScheduledNotificationAsync.mockResolvedValue(undefined);
     scheduleNotificationAsync.mockResolvedValue('kerjalog-weekly-reflection');
+    getLastNotificationResponse.mockReturnValue(null);
+    addNotificationResponseReceivedListener.mockReturnValue({
+      remove: jest.fn(),
+    });
   });
 
   test('requests permission just in time and schedules the selected weekly time', async () => {
@@ -66,6 +101,7 @@ describe('weekly reflection notifications', () => {
         content: {
           title: copy.title,
           body: copy.body,
+          data: { destination: 'weekly-reflection' },
         },
         trigger: expect.objectContaining({
           type: 'weekly',
@@ -75,6 +111,54 @@ describe('weekly reflection notifications', () => {
         }),
       }),
     );
+  });
+
+  test('opens reflection from a cold-start weekly reminder response exactly once', () => {
+    const response = createNotificationResponse();
+    getLastNotificationResponse.mockReturnValue(response);
+    const onOpenReflection = jest.fn();
+
+    const unsubscribe =
+      observeWeeklyReflectionNotificationResponses(onOpenReflection);
+
+    expect(onOpenReflection).toHaveBeenCalledTimes(1);
+    expect(clearLastNotificationResponse).toHaveBeenCalledTimes(1);
+
+    const listener = addNotificationResponseReceivedListener.mock.calls[0]?.[0];
+    listener?.(response);
+
+    expect(onOpenReflection).toHaveBeenCalledTimes(1);
+
+    unsubscribe();
+    const subscription =
+      addNotificationResponseReceivedListener.mock.results[0]?.value;
+    expect(subscription?.remove).toHaveBeenCalledTimes(1);
+  });
+
+  test('opens reflection when the weekly reminder is tapped while the app is running', () => {
+    const onOpenReflection = jest.fn();
+    observeWeeklyReflectionNotificationResponses(onOpenReflection);
+
+    const listener = addNotificationResponseReceivedListener.mock.calls[0]?.[0];
+    listener?.(createNotificationResponse());
+
+    expect(onOpenReflection).toHaveBeenCalledTimes(1);
+  });
+
+  test('ignores notification responses that are not the weekly reminder default action', () => {
+    const onOpenReflection = jest.fn();
+    observeWeeklyReflectionNotificationResponses(onOpenReflection);
+
+    const listener = addNotificationResponseReceivedListener.mock.calls[0]?.[0];
+    listener?.(createNotificationResponse('another-notification'));
+    listener?.(
+      createNotificationResponse(
+        'kerjalog-weekly-reflection',
+        'custom-notification-action',
+      ),
+    );
+
+    expect(onOpenReflection).not.toHaveBeenCalled();
   });
 
   test('does not schedule when notification permission cannot be granted', async () => {

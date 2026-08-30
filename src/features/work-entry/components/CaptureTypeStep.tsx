@@ -23,7 +23,7 @@ export function CaptureTypeStep({
   onContinue,
   t,
   ...frame
-}: CaptureTypeStepProps) {
+}: Readonly<CaptureTypeStepProps>) {
   return (
     <>
       <LogHeader

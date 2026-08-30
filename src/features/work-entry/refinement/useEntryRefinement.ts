@@ -15,8 +15,8 @@ import type { Translate } from '@/features/work-entry/components/logStepTypes';
 import { createImpactBuilderCopy } from '@/features/work-entry/impactBuilderCopy';
 import { mapEntryToRefinementValues } from '@/features/work-entry/refinement/refinementMapper';
 import {
-  entryRefinementSchema,
   type EntryRefinementValues,
+  entryRefinementSchema,
 } from '@/features/work-entry/refinement/refinementSchema';
 import {
   getInitialRefinementStep,
@@ -189,8 +189,8 @@ export function useEntryRefinement({
   };
 
   const toggleSkill = (skillId: SkillId, source: EntrySkillSource) => {
-    const existing = selectedSkills.find((skill) => skill.id === skillId);
-    const nextSkills: WorkEntrySkill[] = existing
+    const hasExisting = selectedSkills.some((skill) => skill.id === skillId);
+    const nextSkills: WorkEntrySkill[] = hasExisting
       ? selectedSkills.filter((skill) => skill.id !== skillId)
       : [...selectedSkills, { id: skillId, source }];
 

@@ -18,7 +18,7 @@ export function SettingToggle({
   value,
   disabled = false,
   onValueChange,
-}: SettingToggleProps) {
+}: Readonly<SettingToggleProps>) {
   const { theme } = useTheme();
 
   return (

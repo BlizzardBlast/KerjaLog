@@ -13,7 +13,7 @@ export function EntrySection({
   title,
   value,
   emphasized = false,
-}: EntrySectionProps) {
+}: Readonly<EntrySectionProps>) {
   const { theme } = useTheme();
 
   return (

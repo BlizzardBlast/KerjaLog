@@ -8,7 +8,7 @@ type ThisWeekCardProps = {
   entryCount: number | null;
 };
 
-export function ThisWeekCard({ entryCount }: ThisWeekCardProps) {
+export function ThisWeekCard({ entryCount }: Readonly<ThisWeekCardProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const countLabel =

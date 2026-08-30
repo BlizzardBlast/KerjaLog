@@ -46,7 +46,7 @@ export function ImpactStep({
   onSave,
   t,
   ...frame
-}: ImpactStepProps) {
+}: Readonly<ImpactStepProps>) {
   const { theme } = useTheme();
 
   return (

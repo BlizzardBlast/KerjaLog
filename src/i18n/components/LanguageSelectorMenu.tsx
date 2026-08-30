@@ -20,7 +20,7 @@ export function LanguageSelectorMenu({
   selectedLanguage,
   onDismiss,
   onSelect,
-}: LanguageSelectorMenuProps) {
+}: Readonly<LanguageSelectorMenuProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
 

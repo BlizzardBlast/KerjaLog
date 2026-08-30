@@ -18,7 +18,7 @@ type WorkEntryWizardLayoutProps = PropsWithChildren<{
 export function WorkEntryWizardLayout({
   stepKey,
   children,
-}: WorkEntryWizardLayoutProps) {
+}: Readonly<WorkEntryWizardLayoutProps>) {
   const { theme } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
   const previousStepKeyRef = useRef(stepKey);

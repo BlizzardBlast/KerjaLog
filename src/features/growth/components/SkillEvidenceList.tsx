@@ -23,7 +23,7 @@ export function SkillEvidenceList({
   locale,
   state,
   onOpenEntry,
-}: SkillEvidenceListProps) {
+}: Readonly<SkillEvidenceListProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const countLabel = t(

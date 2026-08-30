@@ -23,7 +23,7 @@ export function OutcomeStep({
   onContinue,
   t,
   ...frame
-}: OutcomeStepProps) {
+}: Readonly<OutcomeStepProps>) {
   return (
     <>
       <LogHeader

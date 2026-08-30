@@ -3,7 +3,9 @@ import {
   createContext,
   type PropsWithChildren,
   use,
+  useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import {
@@ -54,8 +56,9 @@ async function persistLanguage(language: Language): Promise<void> {
   await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
 }
 
-export function I18nProvider({ children }: PropsWithChildren) {
-  const [language, setLanguageState] = useState<Language>(getDeviceLanguage);
+export function I18nProvider({ children }: Readonly<PropsWithChildren>) {
+  const [languageState, setLanguageState] =
+    useState<Language>(getDeviceLanguage);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -82,20 +85,26 @@ export function I18nProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setLanguage = (nextLanguage: Language) => {
+  const setLanguage = useCallback((nextLanguage: Language) => {
     setLanguageState(nextLanguage);
     persistLanguage(nextLanguage).catch(ignoreError);
-  };
+  }, []);
 
-  const t = (key: TranslationKey, params?: TranslationParams) =>
-    interpolate(translations[language][key], params);
+  const t = useCallback(
+    (key: TranslationKey, params?: TranslationParams) =>
+      interpolate(translations[languageState][key], params),
+    [languageState],
+  );
 
-  const value: I18nContextValue = {
-    language,
-    isHydrated,
-    setLanguage,
-    t,
-  };
+  const value = useMemo<I18nContextValue>(
+    () => ({
+      language: languageState,
+      isHydrated,
+      setLanguage,
+      t,
+    }),
+    [isHydrated, languageState, setLanguage, t],
+  );
 
   return <I18nContext value={value}>{children}</I18nContext>;
 }

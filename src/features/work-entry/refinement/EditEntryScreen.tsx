@@ -16,7 +16,7 @@ type EditEntryScreenProps = {
   id: string;
 };
 
-function ProfiledEditEntryScreen({ id }: EditEntryScreenProps) {
+function ProfiledEditEntryScreen({ id }: Readonly<EditEntryScreenProps>) {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
