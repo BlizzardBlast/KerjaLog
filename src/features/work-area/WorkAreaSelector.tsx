@@ -133,9 +133,7 @@ export function WorkAreaSelector({
               variant="secondary"
             >
               {t(
-                state.workAreas.some(
-                  (workArea) => workArea.archivedAt === null,
-                )
+                state.workAreas.some((workArea) => workArea.archivedAt === null)
                   ? 'workArea.addAnother'
                   : 'workArea.createFirst',
               )}
