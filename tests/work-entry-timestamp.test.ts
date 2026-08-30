@@ -15,6 +15,7 @@ const input: CreateWorkEntry = {
   occurredAt: '2026-08-10T08:00:00.000Z',
   outcomeType: 'person_helped',
   status: 'review_ready',
+  workAreaId: null,
   evidence: null,
   skills: [],
   excludedFromExports: false,
