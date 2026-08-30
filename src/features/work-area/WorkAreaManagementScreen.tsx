@@ -1,15 +1,22 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
-import { type ReactNode, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
-import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, radii, spacing } from '@/design-system/tokens/theme';
 import type { WorkArea } from '@/domain/work-area/model';
-import { WORK_AREA_NAME_MAX_LENGTH } from '@/domain/work-area/validation';
+import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
+import { WorkAreaSection } from '@/features/work-area/components/WorkAreaSection';
+import { useWorkAreaMutations } from '@/features/work-area/useWorkAreaMutations';
 import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -17,13 +24,15 @@ function ProfiledWorkAreaManagementScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
-  const { state, reload, create, rename, archive } = useWorkAreas({
-    includeArchived: true,
+  const { state, reload } = useWorkAreas({ includeArchived: true });
+  const { create, rename, archive } = useWorkAreaMutations({
+    onMutated: reload,
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
-  const [mutationError, setMutationError] = useState(false);
+  const [editorError, setEditorError] = useState(false);
+  const [archiveError, setArchiveError] = useState(false);
   const active = state.workAreas.filter(
     (workArea) => workArea.archivedAt === null,
   );
@@ -31,24 +40,29 @@ function ProfiledWorkAreaManagementScreen() {
     (workArea) => workArea.archivedAt !== null,
   );
   const editing = active.find((workArea) => workArea.id === editingId) ?? null;
+  const hasCatalogData = state.workAreas.length > 0;
+  const isInitialLoading = state.status === 'loading' && !hasCatalogData;
+  const hasBlockingLoadError = state.status === 'error' && !hasCatalogData;
 
   const resetEditor = () => {
     setEditingId(null);
     setName('');
-    setMutationError(false);
+    setEditorError(false);
   };
 
   const startRename = (workArea: WorkArea) => {
     setEditingId(workArea.id);
     setName(workArea.name);
-    setMutationError(false);
+    setEditorError(false);
   };
 
   const submit = async () => {
-    if (!name.trim() || busy) return;
+    if (!name.trim() || busy || isInitialLoading || hasBlockingLoadError) {
+      return;
+    }
 
     setBusy(true);
-    setMutationError(false);
+    setEditorError(false);
     try {
       if (editingId) {
         await rename(editingId, name);
@@ -57,7 +71,7 @@ function ProfiledWorkAreaManagementScreen() {
       }
       resetEditor();
     } catch {
-      setMutationError(true);
+      setEditorError(true);
     } finally {
       setBusy(false);
     }
@@ -74,12 +88,12 @@ function ProfiledWorkAreaManagementScreen() {
           style: 'destructive',
           onPress: () => {
             setBusy(true);
-            setMutationError(false);
+            setArchiveError(false);
             void archive(workArea.id)
               .then(() => {
                 if (editingId === workArea.id) resetEditor();
               })
-              .catch(() => setMutationError(true))
+              .catch(() => setArchiveError(true))
               .finally(() => setBusy(false));
           },
         },
@@ -107,61 +121,20 @@ function ProfiledWorkAreaManagementScreen() {
           <Text color="textMuted">{t('workArea.description')}</Text>
         </View>
 
-        <View
-          style={[
-            styles.editor,
-            {
-              backgroundColor: theme.colors.surfaceSubtle,
-              borderColor: theme.colors.border,
-            },
-          ]}
-        >
-          <Text variant="heading">
-            {editing ? t('workArea.renameTitle') : t('workArea.createTitle')}
-          </Text>
-          <TextField
-            accessibilityLabel={t('workArea.nameLabel')}
-            maxLength={WORK_AREA_NAME_MAX_LENGTH}
-            onChangeText={(value) => {
-              setName(value);
-              setMutationError(false);
-            }}
-            placeholder={t('workArea.namePlaceholder')}
-            value={name}
-          />
-          {mutationError ? (
-            <Text role="alert" color="danger" variant="caption">
-              {t('workArea.mutationError')}
-            </Text>
-          ) : null}
-          <View style={styles.editorActions}>
-            {editing ? (
-              <Button
-                disabled={busy}
-                onPress={resetEditor}
-                variant="secondary"
-                style={styles.flex}
-              >
-                {t('workArea.cancel')}
-              </Button>
-            ) : null}
-            <Button
-              disabled={!name.trim() || busy}
-              loading={busy}
-              onPress={() => {
-                void submit();
-              }}
-              style={styles.flex}
-            >
-              {editing
-                ? t('workArea.renameAction')
-                : t('workArea.createAction')}
-            </Button>
+        {isInitialLoading ? (
+          <View
+            accessibilityLabel={t('workArea.loading')}
+            accessibilityRole="progressbar"
+            accessibilityState={{ busy: true }}
+            style={styles.state}
+          >
+            <ActivityIndicator color={theme.colors.primary} size="small" />
+            <Text color="textMuted">{t('workArea.loading')}</Text>
           </View>
-        </View>
+        ) : null}
 
-        {state.status === 'error' && state.workAreas.length === 0 ? (
-          <View style={styles.empty}>
+        {hasBlockingLoadError ? (
+          <View style={styles.state}>
             <Text role="alert" color="textMuted">
               {t('workArea.loadError')}
             </Text>
@@ -169,12 +142,86 @@ function ProfiledWorkAreaManagementScreen() {
               {t('workArea.retry')}
             </Button>
           </View>
-        ) : (
+        ) : null}
+
+        {!isInitialLoading && !hasBlockingLoadError ? (
           <>
+            <View
+              style={[
+                styles.editor,
+                {
+                  backgroundColor: theme.colors.surfaceSubtle,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+            >
+              <Text variant="heading">
+                {editing
+                  ? t('workArea.renameTitle')
+                  : t('workArea.createTitle')}
+              </Text>
+              <WorkAreaNameField
+                editable={!busy}
+                hasError={editorError}
+                onChangeText={(value) => {
+                  setName(value);
+                  setEditorError(false);
+                }}
+                onSubmitEditing={() => {
+                  void submit();
+                }}
+                value={name}
+              />
+              {editorError ? (
+                <Text role="alert" color="danger" variant="caption">
+                  {t('workArea.mutationError')}
+                </Text>
+              ) : null}
+              <View style={styles.editorActions}>
+                {editing ? (
+                  <Button
+                    disabled={busy}
+                    onPress={resetEditor}
+                    style={styles.flex}
+                    variant="secondary"
+                  >
+                    {t('workArea.cancel')}
+                  </Button>
+                ) : null}
+                <Button
+                  disabled={!name.trim() || busy}
+                  loading={busy}
+                  onPress={() => {
+                    void submit();
+                  }}
+                  style={styles.flex}
+                >
+                  {editing
+                    ? t('workArea.renameAction')
+                    : t('workArea.createAction')}
+                </Button>
+              </View>
+            </View>
+
+            {state.status === 'error' ? (
+              <View style={styles.inlineError}>
+                <Text role="alert" color="textMuted" variant="caption">
+                  {t('workArea.loadError')}
+                </Text>
+                <Button onPress={reload} size="sm" variant="secondary">
+                  {t('workArea.retry')}
+                </Button>
+              </View>
+            ) : null}
+
+            {archiveError ? (
+              <Text role="alert" color="danger" variant="caption">
+                {t('workArea.mutationError')}
+              </Text>
+            ) : null}
+
             <WorkAreaSection
-              title={t('workArea.activeTitle')}
               emptyText={t('workArea.activeEmpty')}
-              workAreas={active}
               renderActions={(workArea) => (
                 <>
                   <Button
@@ -195,19 +242,27 @@ function ProfiledWorkAreaManagementScreen() {
                   </Button>
                 </>
               )}
+              title={t('workArea.activeTitle')}
+              workAreas={active}
             />
+
             {archived.length > 0 ? (
               <WorkAreaSection
-                title={t('workArea.archivedTitle')}
                 emptyText=""
-                workAreas={archived}
                 renderActions={() => null}
+                title={t('workArea.archivedTitle')}
+                workAreas={archived}
               />
             ) : null}
           </>
-        )}
+        ) : null}
 
-        <Button fullWidth onPress={() => router.back()} variant="secondary">
+        <Button
+          disabled={busy}
+          fullWidth
+          onPress={() => router.back()}
+          variant="secondary"
+        >
           {t('workArea.done')}
         </Button>
       </ScrollView>
@@ -220,45 +275,6 @@ const WorkAreaManagementScreen = Sentry.withProfiler(
 );
 
 export { WorkAreaManagementScreen };
-
-type WorkAreaSectionProps = {
-  title: string;
-  emptyText: string;
-  workAreas: WorkArea[];
-  renderActions: (workArea: WorkArea) => ReactNode;
-};
-
-function WorkAreaSection({
-  title,
-  emptyText,
-  workAreas,
-  renderActions,
-}: Readonly<WorkAreaSectionProps>) {
-  const { theme } = useTheme();
-
-  return (
-    <View style={styles.section}>
-      <Text accessibilityRole="header" variant="heading">
-        {title}
-      </Text>
-      {workAreas.length === 0 ? (
-        <Text color="textMuted">{emptyText}</Text>
-      ) : (
-        workAreas.map((workArea) => (
-          <View
-            key={workArea.id}
-            style={[styles.row, { borderColor: theme.colors.border }]}
-          >
-            <Text style={styles.name} variant="bodyStrong">
-              {workArea.name}
-            </Text>
-            <View style={styles.rowActions}>{renderActions(workArea)}</View>
-          </View>
-        ))
-      )}
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
@@ -280,23 +296,12 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   flex: { flex: 1 },
-  section: { gap: spacing[3] },
-  row: {
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    gap: spacing[3],
-    paddingBottom: spacing[3],
-  },
-  name: { flex: 1 },
-  rowActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing[2],
-    justifyContent: 'flex-end',
-  },
-  empty: {
+  state: {
     alignItems: 'flex-start',
     gap: spacing[3],
+  },
+  inlineError: {
+    alignItems: 'flex-start',
+    gap: spacing[2],
   },
 });
