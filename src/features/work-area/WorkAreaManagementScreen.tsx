@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { workAreaRepository } from '@/data/repositories/workAreaRepository';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
@@ -18,7 +17,9 @@ function ProfiledWorkAreaManagementScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
-  const { state, reload } = useWorkAreas({ includeArchived: true });
+  const { state, reload, create, rename, archive } = useWorkAreas({
+    includeArchived: true,
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -50,12 +51,11 @@ function ProfiledWorkAreaManagementScreen() {
     setMutationError(false);
     try {
       if (editingId) {
-        await workAreaRepository.rename(editingId, name);
+        await rename(editingId, name);
       } else {
-        await workAreaRepository.create(name);
+        await create(name);
       }
       resetEditor();
-      reload();
     } catch {
       setMutationError(true);
     } finally {
@@ -75,11 +75,9 @@ function ProfiledWorkAreaManagementScreen() {
           onPress: () => {
             setBusy(true);
             setMutationError(false);
-            void workAreaRepository
-              .archive(workArea.id)
+            void archive(workArea.id)
               .then(() => {
                 if (editingId === workArea.id) resetEditor();
-                reload();
               })
               .catch(() => setMutationError(true))
               .finally(() => setBusy(false));
