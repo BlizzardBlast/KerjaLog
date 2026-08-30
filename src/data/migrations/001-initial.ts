@@ -86,7 +86,7 @@ export const INITIAL_SCHEMA_SQL = `
   CREATE TABLE skills (
     id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
     slug TEXT NOT NULL UNIQUE CHECK(length(trim(slug)) > 0),
-    name_key TEXT NOT NULL UNIQUE CHECK(length(trim(name_key)) > 0),
+    name_key TEXT NOT NULL CHECK(length(trim(name_key)) > 0),
     category TEXT NOT NULL CHECK(category IN ('core', 'role_specific'))
   );
 
@@ -163,6 +163,10 @@ export const INITIAL_SCHEMA_SQL = `
       REFERENCES work_areas(id)
       ON DELETE SET NULL
   );
+
+  CREATE UNIQUE INDEX idx_work_areas_active_name_key
+    ON work_areas(name_key)
+    WHERE archived_at IS NULL;
 
   CREATE UNIQUE INDEX idx_work_areas_active_name_key
     ON work_areas(name_key)
