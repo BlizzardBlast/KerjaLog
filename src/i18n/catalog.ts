@@ -16,6 +16,7 @@ import {
   weeklyReflectionEn,
   weeklyReflectionId,
 } from '@/i18n/weeklyReflectionTranslations';
+import { workAreaEn, workAreaId } from '@/i18n/workAreaTranslations';
 
 export const en = {
   ...baseEn,
