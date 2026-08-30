@@ -73,6 +73,7 @@ export function useLogFlow({
     form,
     intent,
     rawNote,
+    workAreaId,
     outcomeType,
     evidenceTypes,
     evidenceDetail,
@@ -93,6 +94,7 @@ export function useLogFlow({
       step,
       intent,
       rawNote,
+      workAreaId,
       outcomeType,
       evidenceTypes,
       evidenceDetail,
@@ -108,6 +110,7 @@ export function useLogFlow({
       intent,
       outcomeType,
       rawNote,
+      workAreaId,
       selectedSkills,
       step,
     ],
@@ -157,6 +160,11 @@ export function useLogFlow({
     setSaveError(false);
     if (value.trim()) setNoteError(false);
     invalidateGeneratedImpact();
+  }
+
+  function updateWorkArea(workAreaId: string | null) {
+    form.setFieldValue('workAreaId', workAreaId);
+    setSaveError(false);
   }
 
   function continueFromEvent() {
@@ -286,6 +294,7 @@ export function useLogFlow({
       entry = await saveEntry({
         intent,
         rawNote,
+        workAreaId,
         outcomeType: quickNote ? null : outcomeType,
         evidenceTypes: quickNote ? [] : evidenceTypes,
         evidenceDetail: quickNote ? '' : evidenceDetail,
@@ -315,6 +324,7 @@ export function useLogFlow({
     hasCommittedEntry: savedEntryCompletion.hasCommittedEntry,
     intent,
     rawNote,
+    workAreaId,
     outcomeType,
     evidenceTypes,
     evidenceDetail,
@@ -330,6 +340,7 @@ export function useLogFlow({
     selectIntent,
     continueFromType,
     updateRawNote,
+    updateWorkArea,
     continueFromEvent,
     selectOutcome,
     continueFromOutcome,
