@@ -12,6 +12,7 @@ const originalEntry: WorkEntryDetail = {
   occurredAt: '2026-08-10T08:00:00.000Z',
   outcomeType: null,
   status: 'quick_note',
+  workAreaId: null,
   evidence: null,
   skills: [],
   excludedFromExports: false,
@@ -41,6 +42,7 @@ describe('updateWorkEntry', () => {
       {
         type: 'problem_solved',
         rawNote: '  Fixed a reconciliation mismatch.  ',
+        workAreaId: 'area-reconciliation',
         outcomeType: 'error_fixed_or_prevented',
         evidenceTypes: ['number', 'number', 'result'],
         evidenceDetail: '  7 duplicate rows removed.  ',
@@ -61,6 +63,7 @@ describe('updateWorkEntry', () => {
         type: 'problem_solved',
         title: 'Fixed a reconciliation mismatch',
         rawNote: 'Fixed a reconciliation mismatch.',
+        workAreaId: 'area-reconciliation',
         status: 'review_ready',
         evidence: {
           types: ['number', 'result'],
@@ -84,6 +87,7 @@ describe('updateWorkEntry', () => {
       {
         type: 'contribution',
         rawNote: 'Prepared the report',
+        workAreaId: null,
         outcomeType: 'deadline_met',
         evidenceTypes: ['deadline'],
         evidenceDetail: 'Submitted Friday',
@@ -116,6 +120,7 @@ describe('updateWorkEntry', () => {
       {
         type: 'contribution',
         rawNote: 'Recovered from a difficult handoff',
+        workAreaId: null,
         outcomeType: 'work_clearer',
         evidenceTypes: [],
         evidenceDetail: '',
