@@ -2,7 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { workAreaRepository } from '@/data/repositories/workAreaRepository';
 import type { WorkArea } from '@/domain/work-area/model';
-import type { WorkAreaRepository } from '@/domain/work-area/repository';
+import type { WorkAreaReader } from '@/domain/work-area/repository';
 
 export type WorkAreasState =
   | { status: 'loading'; workAreas: WorkArea[] }
@@ -11,7 +11,7 @@ export type WorkAreasState =
 
 type UseWorkAreasOptions = {
   includeArchived?: boolean;
-  repository?: WorkAreaRepository;
+  repository?: WorkAreaReader;
 };
 
 export function useWorkAreas({
@@ -58,31 +58,5 @@ export function useWorkAreas({
     }, [reload]),
   );
 
-  const create = useCallback(
-    async (name: string) => {
-      const workArea = await repository.create(name);
-      reload();
-      return workArea;
-    },
-    [reload, repository],
-  );
-
-  const rename = useCallback(
-    async (id: string, name: string) => {
-      const workArea = await repository.rename(id, name);
-      reload();
-      return workArea;
-    },
-    [reload, repository],
-  );
-
-  const archive = useCallback(
-    async (id: string) => {
-      await repository.archive(id);
-      reload();
-    },
-    [reload, repository],
-  );
-
-  return { state, reload, create, rename, archive };
+  return { state, reload };
 }
