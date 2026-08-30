@@ -20,6 +20,7 @@ import { entryTypeByIntent } from '@/features/work-entry/intentMapping';
 export type SaveWorkEntryDraft = {
   intent: LogEventIntent;
   rawNote: string;
+  workAreaId: string | null;
   outcomeType: OutcomeType | null;
   evidenceTypes: EvidenceType[];
   evidenceDetail: string;
@@ -61,6 +62,7 @@ export async function saveWorkEntry(
     type: entryTypeByIntent[draft.intent],
     title: buildEntryTitle(rawNote),
     rawNote,
+    workAreaId: draft.workAreaId,
     impactStatement,
     impactStatementSource: draft.impactStatementSource,
     occurredAt: now,
