@@ -76,7 +76,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: 'Prepared the monthly report',
-        workAreaId: null,
+          workAreaId: null,
           outcomeType: 'deadline_met',
           evidenceTypes: ['deadline'],
           evidenceDetail: '',
@@ -96,7 +96,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: 'Prepared the monthly report',
-        workAreaId: null,
+          workAreaId: null,
           outcomeType: 'deadline_met',
           evidenceTypes: [],
           evidenceDetail: '',
@@ -116,7 +116,7 @@ describe('saveWorkEntry', () => {
         {
           intent: 'completed',
           rawNote: '   ',
-        workAreaId: null,
+          workAreaId: null,
           outcomeType: null,
           evidenceTypes: [],
           evidenceDetail: '',
