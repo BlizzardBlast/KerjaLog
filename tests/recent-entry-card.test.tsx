@@ -12,6 +12,7 @@ const entry: WorkEntry = {
   occurredAt: '2026-08-06T08:00:00.000Z',
   outcomeType: 'error_fixed_or_prevented',
   status: 'review_ready',
+  workAreaId: null,
   evidence: null,
   excludedFromExports: false,
   createdAt: '2026-08-06T08:01:00.000Z',
