@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
-import { TextField } from '@/design-system/components/TextField';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
-import { WORK_AREA_NAME_MAX_LENGTH } from '@/domain/work-area/validation';
+import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
+import { useWorkAreaMutations } from '@/features/work-area/useWorkAreaMutations';
 import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -21,7 +21,8 @@ export function WorkAreaSelector({
   disabled = false,
 }: Readonly<WorkAreaSelectorProps>) {
   const { t } = useI18n();
-  const { state, reload, create } = useWorkAreas({ includeArchived: true });
+  const { state, reload } = useWorkAreas({ includeArchived: true });
+  const { create } = useWorkAreaMutations({ onMutated: reload });
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [creatingBusy, setCreatingBusy] = useState(false);
@@ -29,6 +30,8 @@ export function WorkAreaSelector({
   const visibleWorkAreas = state.workAreas.filter(
     (workArea) => workArea.archivedAt === null || workArea.id === selectedId,
   );
+  const hasCatalogData = state.workAreas.length > 0;
+  const catalogReady = state.status === 'loaded' || hasCatalogData;
 
   const cancelCreate = () => {
     setCreating(false);
@@ -37,7 +40,7 @@ export function WorkAreaSelector({
   };
 
   const createWorkArea = async () => {
-    if (!newName.trim() || creatingBusy || disabled) return;
+    if (!newName.trim() || creatingBusy || disabled || !catalogReady) return;
 
     setCreatingBusy(true);
     setCreateError(false);
@@ -61,13 +64,13 @@ export function WorkAreaSelector({
         </Text>
       </View>
 
-      {state.status === 'loading' && state.workAreas.length === 0 ? (
+      {state.status === 'loading' && !hasCatalogData ? (
         <Text variant="caption" color="textMuted">
           {t('workArea.loading')}
         </Text>
       ) : null}
 
-      {state.status === 'error' && state.workAreas.length === 0 ? (
+      {state.status === 'error' ? (
         <View style={styles.error}>
           <Text role="alert" variant="caption" color="textMuted">
             {t('workArea.loadError')}
@@ -76,90 +79,97 @@ export function WorkAreaSelector({
             {t('workArea.retry')}
           </Button>
         </View>
-      ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chips}
-          accessibilityLabel={t('workArea.selector.accessibilityLabel')}
-        >
-          <WorkAreaChip
-            label={t('workArea.none')}
-            selected={selectedId === null}
-            disabled={disabled}
-            onPress={() => onChange(null)}
-          />
-          {visibleWorkAreas.map((workArea) => (
-            <WorkAreaChip
-              key={workArea.id}
-              label={
-                workArea.archivedAt
-                  ? t('workArea.archivedName', { name: workArea.name })
-                  : workArea.name
-              }
-              selected={selectedId === workArea.id}
-              disabled={disabled || workArea.archivedAt !== null}
-              onPress={() => onChange(workArea.id)}
-            />
-          ))}
-        </ScrollView>
-      )}
+      ) : null}
 
-      {creating ? (
-        <View style={styles.createForm}>
-          <TextField
-            accessibilityLabel={t('workArea.nameLabel')}
-            editable={!disabled && !creatingBusy}
-            maxLength={WORK_AREA_NAME_MAX_LENGTH}
-            onChangeText={(value) => {
-              setNewName(value);
-              setCreateError(false);
-            }}
-            placeholder={t('workArea.namePlaceholder')}
-            value={newName}
-          />
-          {createError ? (
-            <Text role="alert" color="danger" variant="caption">
-              {t('workArea.mutationError')}
-            </Text>
-          ) : null}
-          <View style={styles.createActions}>
+      {catalogReady ? (
+        <>
+          <ScrollView
+            accessibilityLabel={t('workArea.selector.accessibilityLabel')}
+            contentContainerStyle={styles.chips}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            <WorkAreaChip
+              disabled={disabled}
+              label={t('workArea.none')}
+              onPress={() => onChange(null)}
+              selected={selectedId === null}
+            />
+            {visibleWorkAreas.map((workArea) => (
+              <WorkAreaChip
+                disabled={disabled || workArea.archivedAt !== null}
+                key={workArea.id}
+                label={
+                  workArea.archivedAt
+                    ? t('workArea.archivedName', { name: workArea.name })
+                    : workArea.name
+                }
+                onPress={() => onChange(workArea.id)}
+                selected={selectedId === workArea.id}
+              />
+            ))}
+          </ScrollView>
+
+          {creating ? (
+            <View style={styles.createForm}>
+              <WorkAreaNameField
+                editable={!disabled && !creatingBusy}
+                hasError={createError}
+                onChangeText={(value) => {
+                  setNewName(value);
+                  setCreateError(false);
+                }}
+                onSubmitEditing={() => {
+                  void createWorkArea();
+                }}
+                value={newName}
+              />
+              {createError ? (
+                <Text role="alert" color="danger" variant="caption">
+                  {t('workArea.mutationError')}
+                </Text>
+              ) : null}
+              <View style={styles.createActions}>
+                <Button
+                  disabled={disabled || creatingBusy}
+                  onPress={cancelCreate}
+                  size="sm"
+                  style={styles.flex}
+                  variant="secondary"
+                >
+                  {t('workArea.cancel')}
+                </Button>
+                <Button
+                  disabled={!newName.trim() || disabled || creatingBusy}
+                  loading={creatingBusy}
+                  onPress={() => {
+                    void createWorkArea();
+                  }}
+                  size="sm"
+                  style={styles.flex}
+                >
+                  {t('workArea.createAction')}
+                </Button>
+              </View>
+            </View>
+          ) : (
             <Button
-              disabled={disabled || creatingBusy}
-              onPress={cancelCreate}
+              disabled={disabled}
+              onPress={() => setCreating(true)}
               size="sm"
-              style={styles.flex}
               variant="secondary"
             >
-              {t('workArea.cancel')}
+              {t(
+                state.workAreas.some(
+                  (workArea) => workArea.archivedAt === null,
+                )
+                  ? 'workArea.addAnother'
+                  : 'workArea.createFirst',
+              )}
             </Button>
-            <Button
-              disabled={!newName.trim() || disabled || creatingBusy}
-              loading={creatingBusy}
-              onPress={() => {
-                void createWorkArea();
-              }}
-              size="sm"
-              style={styles.flex}
-            >
-              {t('workArea.createAction')}
-            </Button>
-          </View>
-        </View>
-      ) : (
-        <Button
-          disabled={disabled}
-          onPress={() => setCreating(true)}
-          size="sm"
-          variant="secondary"
-        >
-          {t(
-            state.workAreas.some((workArea) => workArea.archivedAt === null)
-              ? 'workArea.addAnother'
-              : 'workArea.createFirst',
           )}
-        </Button>
-      )}
+        </>
+      ) : null}
     </View>
   );
 }
@@ -224,8 +234,8 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     borderWidth: 1,
     justifyContent: 'center',
-    minHeight: 44,
     maxWidth: 220,
+    minHeight: spacing[12],
     paddingHorizontal: spacing[4],
   },
   createForm: {
