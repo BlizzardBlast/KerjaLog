@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
@@ -24,9 +24,10 @@ export function WorkAreaSelector({
   const { state, reload } = useWorkAreas({ includeArchived: true });
   const { create } = useWorkAreaMutations({ onMutated: reload });
   const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState('');
   const [creatingBusy, setCreatingBusy] = useState(false);
   const [createError, setCreateError] = useState(false);
+  // State updates do not synchronously close this event-handler critical section.
+  const createInFlightRef = useRef(false);
   const visibleWorkAreas = state.workAreas.filter(
     (workArea) => workArea.archivedAt === null || workArea.id === selectedId,
   );
@@ -35,22 +36,30 @@ export function WorkAreaSelector({
 
   const cancelCreate = () => {
     setCreating(false);
-    setNewName('');
     setCreateError(false);
   };
 
-  const createWorkArea = async () => {
-    if (!newName.trim() || creatingBusy || disabled || !catalogReady) return;
+  const createWorkArea = async (name: string) => {
+    if (
+      creatingBusy ||
+      createInFlightRef.current ||
+      disabled ||
+      !catalogReady
+    ) {
+      return;
+    }
 
+    createInFlightRef.current = true;
     setCreatingBusy(true);
     setCreateError(false);
     try {
-      const workArea = await create(newName);
+      const workArea = await create(name);
       onChange(workArea.id);
       cancelCreate();
     } catch {
       setCreateError(true);
     } finally {
+      createInFlightRef.current = false;
       setCreatingBusy(false);
     }
   };
@@ -114,16 +123,12 @@ export function WorkAreaSelector({
             <WorkAreaInlineCreateForm
               busy={creatingBusy}
               disabled={disabled}
-              hasError={createError}
-              name={newName}
+              hasMutationError={createError}
               onCancel={cancelCreate}
-              onNameChange={(value) => {
-                setNewName(value);
+              onNameChange={() => {
                 setCreateError(false);
               }}
-              onSubmit={() => {
-                void createWorkArea();
-              }}
+              onSubmitName={createWorkArea}
             />
           ) : (
             <Button

@@ -10,7 +10,7 @@ const WORK_AREA_NAME_LABEL_ID = 'work-area-name-label';
 
 type WorkAreaNameFieldProps = Pick<
   TextInputProps,
-  'editable' | 'onSubmitEditing'
+  'editable' | 'onBlur' | 'onSubmitEditing'
 > & {
   value: string;
   hasError?: boolean;
@@ -21,6 +21,7 @@ export function WorkAreaNameField({
   value,
   hasError = false,
   editable = true,
+  onBlur,
   onChangeText,
   onSubmitEditing,
 }: Readonly<WorkAreaNameFieldProps>) {
@@ -39,6 +40,7 @@ export function WorkAreaNameField({
         hasError={hasError}
         maxLength={WORK_AREA_NAME_MAX_LENGTH}
         onChangeText={onChangeText}
+        onBlur={onBlur}
         onSubmitEditing={onSubmitEditing}
         placeholder={t('workArea.namePlaceholder')}
         returnKeyType="done"

@@ -35,7 +35,9 @@ export function useWeeklyReflectionController({
   const [handoffState, setHandoffState] = useState<ReflectionHandoffState>({
     status: 'idle',
   });
+  // Closes rapid handoff presses before state updates rerender the prompt.
   const handoffInProgressRef = useRef(false);
+  // Rejects stale async completion after this controller unmounts.
   const mountedRef = useRef(false);
 
   useEffect(() => {

@@ -27,7 +27,9 @@ export type OnboardingContextValue = {
 export function useOnboardingController(): OnboardingContextValue {
   const [state, setState] = useState<OnboardingState>(DEFAULT_ONBOARDING_STATE);
   const [isHydrated, setIsHydrated] = useState(false);
+  // Serializes durable snapshots so rapid onboarding edits persist in order.
   const writeQueueRef = useRef<Promise<void>>(Promise.resolve());
+  // Suppresses the autosave effect after complete() performs its final write.
   const skipNextAutosaveRef = useRef(true);
 
   useEffect(() => {

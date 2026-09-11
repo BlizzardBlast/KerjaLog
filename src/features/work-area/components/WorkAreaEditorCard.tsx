@@ -1,39 +1,45 @@
 import { StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
+import { getWorkAreaNameValidationIssue } from '@/domain/work-area/validation';
+import { getWorkAreaNameErrorKey } from '@/features/work-area/components/workAreaNameError';
+import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
+import { useWorkAreaNameForm } from '@/features/work-area/useWorkAreaNameForm';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
-import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type WorkAreaEditorCardProps = {
   editing: boolean;
-  name: string;
+  initialName: string;
   busy: boolean;
-  hasError: boolean;
-  onNameChange: (value: string) => void;
+  hasMutationError: boolean;
+  onNameChange: () => void;
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmitName: (name: string) => Promise<void> | void;
 };
 
 export function WorkAreaEditorCard({
   editing,
-  name,
+  initialName,
   busy,
-  hasError,
+  hasMutationError,
   onNameChange,
   onCancel,
-  onSubmit,
+  onSubmitName,
 }: Readonly<WorkAreaEditorCardProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
+  const { form, name, canSubmit, isSubmitting, validationIssue } =
+    useWorkAreaNameForm({ initialName, onSubmitName });
+  const isBusy = busy || isSubmitting;
 
   return (
     <View
       style={[
         styles.editor,
         {
-          backgroundColor: theme.colors.surfaceSubtle,
+          backgroundColor: theme.colors.surface,
           borderColor: theme.colors.border,
         },
       ]}
@@ -41,22 +47,54 @@ export function WorkAreaEditorCard({
       <Text variant="heading">
         {editing ? t('workArea.renameTitle') : t('workArea.createTitle')}
       </Text>
-      <WorkAreaNameField
-        editable={!busy}
-        hasError={hasError}
-        onChangeText={onNameChange}
-        onSubmitEditing={onSubmit}
-        value={name}
-      />
-      {hasError ? (
-        <Text role="alert" color="danger" variant="caption">
-          {t('workArea.mutationError')}
-        </Text>
-      ) : null}
+      <form.Field
+        name="name"
+        validators={{
+          onChange: ({ value }) =>
+            getWorkAreaNameValidationIssue(value) ?? undefined,
+        }}
+      >
+        {(field) => {
+          const errorKey = getWorkAreaNameErrorKey({
+            hasMutationError,
+            isTouched: field.state.meta.isTouched,
+            validationIssue,
+          });
+          const errorMessage = errorKey ? t(errorKey) : null;
+
+          return (
+            <>
+              <WorkAreaNameField
+                editable={!isBusy}
+                hasError={errorMessage !== null}
+                onBlur={field.handleBlur}
+                onChangeText={(value) => {
+                  field.handleChange(value);
+                  onNameChange();
+                }}
+                onSubmitEditing={() => {
+                  void form.handleSubmit();
+                }}
+                value={name}
+              />
+              {errorMessage ? (
+                <Text
+                  accessibilityLiveRegion="polite"
+                  role="alert"
+                  color="danger"
+                  variant="caption"
+                >
+                  {errorMessage}
+                </Text>
+              ) : null}
+            </>
+          );
+        }}
+      </form.Field>
       <View style={styles.actions}>
         {editing ? (
           <Button
-            disabled={busy}
+            disabled={isBusy}
             onPress={onCancel}
             style={styles.flex}
             variant="secondary"
@@ -65,9 +103,11 @@ export function WorkAreaEditorCard({
           </Button>
         ) : null}
         <Button
-          disabled={!name.trim() || busy}
-          loading={busy}
-          onPress={onSubmit}
+          disabled={!canSubmit || isBusy}
+          loading={isBusy}
+          onPress={() => {
+            void form.handleSubmit();
+          }}
           style={styles.flex}
         >
           {editing ? t('workArea.renameAction') : t('workArea.createAction')}
@@ -79,7 +119,7 @@ export function WorkAreaEditorCard({
 
 const styles = StyleSheet.create({
   editor: {
-    borderRadius: radii.xl,
+    borderRadius: radii.lg,
     borderWidth: 1,
     gap: spacing[3],
     padding: spacing[4],

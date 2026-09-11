@@ -18,6 +18,8 @@ export const workAreaEn = {
   'workArea.renameTitle': 'Rename work area',
   'workArea.nameLabel': 'Work area name',
   'workArea.namePlaceholder': 'Example: Mobile App Revamp',
+  'workArea.nameRequired': 'Enter a work area name.',
+  'workArea.nameTooLong': 'Work area names can be at most 80 characters.',
   'workArea.createAction': 'Create',
   'workArea.renameAction': 'Rename',
   'workArea.cancel': 'Cancel',
@@ -56,6 +58,9 @@ export const workAreaId: Record<keyof typeof workAreaEn, string> = {
   'workArea.renameTitle': 'Ubah nama area kerja',
   'workArea.nameLabel': 'Nama area kerja',
   'workArea.namePlaceholder': 'Contoh: Pembaruan Aplikasi Mobile',
+  'workArea.nameRequired': 'Masukkan nama area kerja.',
+  'workArea.nameTooLong':
+    'Nama area kerja dapat berisi paling banyak 80 karakter.',
   'workArea.createAction': 'Buat',
   'workArea.renameAction': 'Ubah nama',
   'workArea.cancel': 'Batal',

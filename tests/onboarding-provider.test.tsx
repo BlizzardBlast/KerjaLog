@@ -19,6 +19,15 @@ const scheduleNotificationAsync = jest.mocked(
   Notifications.scheduleNotificationAsync,
 );
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+}
+
 function wrapper({ children }: PropsWithChildren) {
   return (
     <I18nProvider>
@@ -88,6 +97,39 @@ describe('OnboardingProvider', () => {
     await expect(result.current.complete()).rejects.toThrow(
       'Cannot complete onboarding without required answers.',
     );
+  });
+
+  test('serializes rapid onboarding autosaves in snapshot order', async () => {
+    getItemMock.mockResolvedValueOnce(null);
+    const firstWrite = deferred<void>();
+    setItemMock
+      .mockReturnValueOnce(firstWrite.promise)
+      .mockResolvedValueOnce(undefined);
+    const { result } = await renderHook(() => useOnboarding(), { wrapper });
+
+    await waitFor(() => expect(result.current.isHydrated).toBe(true));
+
+    await act(async () => {
+      result.current.update({ workArea: 'technology-product' });
+    });
+    await waitFor(() => expect(setItemMock).toHaveBeenCalledTimes(1));
+
+    await act(async () => {
+      result.current.update({ careerLevel: 'junior-contributor' });
+    });
+    expect(setItemMock).toHaveBeenCalledTimes(1);
+
+    firstWrite.resolve();
+    await waitFor(() => expect(setItemMock).toHaveBeenCalledTimes(2));
+
+    const firstSnapshot = JSON.parse(String(setItemMock.mock.calls[0]?.[1]));
+    const secondSnapshot = JSON.parse(String(setItemMock.mock.calls[1]?.[1]));
+    expect(firstSnapshot.workArea).toBe('technology-product');
+    expect(firstSnapshot.careerLevel).toBeUndefined();
+    expect(secondSnapshot).toMatchObject({
+      workArea: 'technology-product',
+      careerLevel: 'junior-contributor',
+    });
   });
 
   test('turns off a persisted reminder when its native schedule no longer exists', async () => {

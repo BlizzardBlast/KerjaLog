@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -13,71 +12,18 @@ import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
-import type { WorkArea } from '@/domain/work-area/model';
 import { WorkAreaEditorCard } from '@/features/work-area/components/WorkAreaEditorCard';
 import { WorkAreaSection } from '@/features/work-area/components/WorkAreaSection';
-import { useWorkAreaMutations } from '@/features/work-area/useWorkAreaMutations';
-import { useWorkAreas } from '@/features/work-area/useWorkAreas';
+import { useWorkAreaManagement } from '@/features/work-area/useWorkAreaManagement';
 import { useI18n } from '@/i18n/I18nProvider';
 
 function ProfiledWorkAreaManagementScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { theme } = useTheme();
   const { t } = useI18n();
-  const { state, reload } = useWorkAreas({ includeArchived: true });
-  const { create, rename, archive } = useWorkAreaMutations({
-    onMutated: reload,
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [editorError, setEditorError] = useState(false);
-  const [archiveError, setArchiveError] = useState(false);
-  const active = state.workAreas.filter(
-    (workArea) => workArea.archivedAt === null,
-  );
-  const archived = state.workAreas.filter(
-    (workArea) => workArea.archivedAt !== null,
-  );
-  const editing = active.find((workArea) => workArea.id === editingId) ?? null;
-  const hasCatalogData = state.workAreas.length > 0;
-  const isInitialLoading = state.status === 'loading' && !hasCatalogData;
-  const hasBlockingLoadError = state.status === 'error' && !hasCatalogData;
+  const controller = useWorkAreaManagement();
 
-  const resetEditor = () => {
-    setEditingId(null);
-    setName('');
-    setEditorError(false);
-  };
-
-  const startRename = (workArea: WorkArea) => {
-    setEditingId(workArea.id);
-    setName(workArea.name);
-    setEditorError(false);
-  };
-
-  const submit = async () => {
-    if (!name.trim() || busy || isInitialLoading || hasBlockingLoadError) {
-      return;
-    }
-
-    setBusy(true);
-    setEditorError(false);
-    try {
-      if (editingId) {
-        await rename(editingId, name);
-      } else {
-        await create(name);
-      }
-      resetEditor();
-    } catch {
-      setEditorError(true);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const confirmArchive = (workArea: WorkArea) => {
+  const confirmArchive = (workAreaId: string) => {
     Alert.alert(
       t('workArea.archive.title'),
       t('workArea.archive.description'),
@@ -87,14 +33,7 @@ function ProfiledWorkAreaManagementScreen() {
           text: t('workArea.archive.action'),
           style: 'destructive',
           onPress: () => {
-            setBusy(true);
-            setArchiveError(false);
-            void archive(workArea.id)
-              .then(() => {
-                if (editingId === workArea.id) resetEditor();
-              })
-              .catch(() => setArchiveError(true))
-              .finally(() => setBusy(false));
+            void controller.archive(workAreaId);
           },
         },
       ],
@@ -121,7 +60,7 @@ function ProfiledWorkAreaManagementScreen() {
           <Text color="textMuted">{t('workArea.description')}</Text>
         </View>
 
-        {isInitialLoading ? (
+        {controller.isInitialLoading ? (
           <View
             accessibilityLabel={t('workArea.loading')}
             accessibilityRole="progressbar"
@@ -133,46 +72,46 @@ function ProfiledWorkAreaManagementScreen() {
           </View>
         ) : null}
 
-        {hasBlockingLoadError ? (
+        {controller.hasBlockingLoadError ? (
           <View style={styles.state}>
             <Text role="alert" color="textMuted">
               {t('workArea.loadError')}
             </Text>
-            <Button onPress={reload} variant="secondary">
+            <Button onPress={controller.reload} variant="secondary">
               {t('workArea.retry')}
             </Button>
           </View>
         ) : null}
 
-        {!isInitialLoading && !hasBlockingLoadError ? (
+        {!controller.isInitialLoading && !controller.hasBlockingLoadError ? (
           <>
             <WorkAreaEditorCard
-              busy={busy}
-              editing={editing !== null}
-              hasError={editorError}
-              name={name}
-              onCancel={resetEditor}
-              onNameChange={(value) => {
-                setName(value);
-                setEditorError(false);
-              }}
-              onSubmit={() => {
-                void submit();
-              }}
+              busy={controller.isMutating}
+              editing={controller.editor.mode === 'rename'}
+              hasMutationError={controller.error === 'editor'}
+              initialName={controller.editor.initialName}
+              key={controller.editor.revision}
+              onCancel={controller.resetEditor}
+              onNameChange={controller.clearEditorError}
+              onSubmitName={controller.submit}
             />
 
-            {state.status === 'error' ? (
+            {controller.state.status === 'error' ? (
               <View style={styles.inlineError}>
                 <Text role="alert" color="textMuted" variant="caption">
                   {t('workArea.loadError')}
                 </Text>
-                <Button onPress={reload} size="sm" variant="secondary">
+                <Button
+                  onPress={controller.reload}
+                  size="sm"
+                  variant="secondary"
+                >
                   {t('workArea.retry')}
                 </Button>
               </View>
             ) : null}
 
-            {archiveError ? (
+            {controller.error === 'archive' ? (
               <Text role="alert" color="danger" variant="caption">
                 {t('workArea.mutationError')}
               </Text>
@@ -183,40 +122,40 @@ function ProfiledWorkAreaManagementScreen() {
               renderActions={(workArea) => (
                 <>
                   <Button
-                    disabled={busy}
-                    onPress={() => startRename(workArea)}
+                    disabled={controller.isMutating}
+                    onPress={() => controller.startRename(workArea)}
                     size="sm"
                     variant="secondary"
                   >
                     {t('workArea.renameAction')}
                   </Button>
                   <Button
-                    disabled={busy}
-                    onPress={() => confirmArchive(workArea)}
+                    disabled={controller.isMutating}
+                    onPress={() => confirmArchive(workArea.id)}
                     size="sm"
-                    variant="secondary"
+                    variant="destructive"
                   >
                     {t('workArea.archive.action')}
                   </Button>
                 </>
               )}
               title={t('workArea.activeTitle')}
-              workAreas={active}
+              workAreas={controller.activeWorkAreas}
             />
 
-            {archived.length > 0 ? (
+            {controller.archivedWorkAreas.length > 0 ? (
               <WorkAreaSection
                 emptyText=""
                 renderActions={() => null}
                 title={t('workArea.archivedTitle')}
-                workAreas={archived}
+                workAreas={controller.archivedWorkAreas}
               />
             ) : null}
           </>
         ) : null}
 
         <Button
-          disabled={busy}
+          disabled={controller.isMutating}
           fullWidth
           onPress={() => router.back()}
           variant="secondary"

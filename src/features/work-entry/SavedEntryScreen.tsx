@@ -158,6 +158,7 @@ function ProfiledSavedEntryScreen({ id }: Readonly<SavedEntryScreenProps>) {
 
         {workArea ? (
           <EntrySection
+            emphasized
             title={t('workArea.savedLabel')}
             value={
               workArea.archivedAt

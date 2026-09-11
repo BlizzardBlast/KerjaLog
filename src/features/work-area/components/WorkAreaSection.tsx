@@ -47,15 +47,17 @@ export function WorkAreaSection({
 const styles = StyleSheet.create({
   section: { gap: spacing[3] },
   row: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing[3],
     paddingBottom: spacing[3],
   },
-  name: { flex: 1 },
+  name: { flexBasis: 120, flexGrow: 1, flexShrink: 1, minWidth: 120 },
   rowActions: {
     flexDirection: 'row',
+    flexShrink: 0,
     flexWrap: 'wrap',
     gap: spacing[2],
     justifyContent: 'flex-end',

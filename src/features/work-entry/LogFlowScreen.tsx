@@ -32,6 +32,7 @@ type LogFlowScreenProps = {
 export function LogFlowScreen({ initialDraft }: Readonly<LogFlowScreenProps>) {
   const router = Sentry.wrapExpoRouter(useRouter());
   const { t } = useI18n();
+  // Prevents autosave from racing commit or discard's authoritative draft write.
   const draftPersistenceSuspendedRef = useRef(false);
   const impactCopy = createImpactBuilderCopy(t);
   const flow = useLogFlow({
