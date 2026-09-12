@@ -50,6 +50,7 @@ export type HistoryEntriesController = {
   setSearchText: (value: string) => void;
   filters: WorkEntryHistoryFilters;
   setEntryType: (entryType: EntryType | null) => void;
+  setWorkArea: (workAreaId: string | null) => void;
   toggleEvidence: () => void;
   toggleReviewReady: () => void;
   clearFilters: () => void;
@@ -286,6 +287,18 @@ export function useHistoryEntries(
     [filters.entryType, invalidateHistoryQuery],
   );
 
+  const setWorkArea = useCallback(
+    (workAreaId: string | null) => {
+      if (workAreaId === filters.workAreaId) {
+        return;
+      }
+
+      invalidateHistoryQuery();
+      setFilters((current) => ({ ...current, workAreaId }));
+    },
+    [filters.workAreaId, invalidateHistoryQuery],
+  );
+
   const toggleEvidence = useCallback(() => {
     invalidateHistoryQuery();
     setFilters((current) => ({
@@ -305,6 +318,7 @@ export function useHistoryEntries(
   const clearFilters = useCallback(() => {
     if (
       filters.entryType === null &&
+      filters.workAreaId === null &&
       !filters.hasEvidence &&
       !filters.reviewReadyOnly
     ) {
@@ -321,6 +335,7 @@ export function useHistoryEntries(
     setSearchText,
     filters,
     setEntryType,
+    setWorkArea,
     toggleEvidence,
     toggleReviewReady,
     clearFilters,

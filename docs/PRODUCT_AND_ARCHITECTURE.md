@@ -2,7 +2,7 @@
 
 > Status: product and architecture direction for v1
 >
-> Last reviewed: 2026-08-20
+> Last reviewed: 2026-08-30
 
 KerjaLog is a private, local-first career achievement tracker for office workers. It helps people capture everyday work while it is still fresh, understand the impact of that work, preserve evidence, and turn that evidence into useful material for performance reviews, one-on-ones, resumes, and interviews.
 
@@ -653,7 +653,7 @@ src/
 ├── domain/
 │   ├── entry/
 │   ├── evidence/
-│   ├── project/
+│   ├── work-area/
 │   ├── skill/
 │   └── review/
 │
@@ -694,16 +694,18 @@ Keep reusable app-shell navigation composition in `src/navigation`; it may depen
 
 The exact schema may evolve, but the model should begin relational rather than storing the entire app as serialized JSON.
 
-### `projects`
+### `work_areas`
 
 ```text
 id
 name
-color
+name_key
 archived_at
 created_at
 updated_at
 ```
+
+Work areas are lightweight organizational labels for projects, recurring responsibilities, or areas of work. They are not project-management objects. Active names are unique after normalization; archived areas remain attached to historical entries and are excluded from normal new-entry choices.
 
 ### `work_entries`
 
@@ -715,7 +717,7 @@ raw_note
 impact_statement
 impact_statement_source
 occurred_at
-project_id
+work_area_id
 outcome_type
 status
 excluded_from_exports
@@ -807,9 +809,9 @@ The database key should be generated on device. Store the key in SecureStore and
 ### 11.2 Migrations
 
 - Keep migrations in source control.
-- Migrations are forward-only for released app versions.
-- Never edit a migration that has already shipped.
-- Test migration from the oldest still-supported schema to the latest schema.
+- Before the first external distribution containing valuable user data, the pre-release `001-initial` schema may still be edited and development databases may be recreated.
+- Once a migration has shipped, migrations are forward-only and that shipped migration is immutable.
+- Test migration from the oldest still-supported shipped schema to the latest schema.
 - Make app startup fail safely and visibly if migration cannot complete.
 
 ### 11.3 Queries
@@ -817,7 +819,7 @@ The database key should be generated on device. Store the key in SecureStore and
 - Always bind user input as parameters.
 - Use transactions for operations that update multiple tables.
 - Keep high-level queries in `data/queries` or repository implementations.
-- Add indexes based on actual query paths, especially date, project, status, and foreign keys.
+- Add indexes based on actual query paths, especially date, work area, status, and foreign keys.
 
 ### 11.4 Full-text search
 

@@ -11,6 +11,7 @@ const baseEntry: WorkEntryDetail = {
   occurredAt: '2026-08-10T08:00:00.000Z',
   outcomeType: null,
   status: 'quick_note',
+  workAreaId: null,
   evidence: null,
   skills: [],
   excludedFromExports: false,

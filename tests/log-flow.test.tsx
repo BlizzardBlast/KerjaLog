@@ -49,6 +49,7 @@ const savedEntry: WorkEntry = {
   occurredAt: '2026-08-11T00:00:00.000Z',
   outcomeType: null,
   status: 'quick_note',
+  workAreaId: null,
   evidence: null,
   excludedFromExports: false,
   createdAt: '2026-08-11T00:00:00.000Z',
@@ -84,6 +85,7 @@ describe('useLogFlow', () => {
       step: 'evidence',
       intent: 'solved',
       rawNote: 'Fixed duplicate records before submission.',
+      workAreaId: 'area-operations',
       outcomeType: 'error_fixed_or_prevented',
       evidenceTypes: ['number'],
       evidenceDetail: '7 duplicate records fixed.',
@@ -104,6 +106,7 @@ describe('useLogFlow', () => {
     expect(result.current.draft).toEqual(initialDraft);
     expect(result.current.currentStep).toBe(4);
     expect(result.current.selectedSkills).toEqual(initialDraft.skills);
+    expect(result.current.workAreaId).toBe('area-operations');
     expect(result.current.hasUnsavedDraft).toBe(true);
   });
 
@@ -249,6 +252,7 @@ describe('useLogFlow', () => {
     await act(async () => {
       result.current.selectIntent('completed');
       result.current.updateRawNote('  Prepared the weekly report  ');
+      result.current.updateWorkArea('area-reporting');
     });
 
     await act(async () => {
@@ -258,6 +262,7 @@ describe('useLogFlow', () => {
     expect(saveEntry).toHaveBeenCalledWith({
       intent: 'completed',
       rawNote: '  Prepared the weekly report  ',
+      workAreaId: 'area-reporting',
       outcomeType: null,
       evidenceTypes: [],
       evidenceDetail: '',

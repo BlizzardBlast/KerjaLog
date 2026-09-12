@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
@@ -26,6 +27,7 @@ type EventStepProps = LogStepFrameProps & {
   noteError: boolean;
   busy: boolean;
   quickSave?: QuickSaveAction;
+  workAreaSelector?: ReactNode;
   onRawNoteChange: (value: string) => void;
   onContinue: () => void;
   t: Translate;
@@ -36,6 +38,7 @@ export function EventStep({
   noteError,
   busy,
   quickSave,
+  workAreaSelector,
   onRawNoteChange,
   onContinue,
   t,
@@ -73,6 +76,7 @@ export function EventStep({
           <InlineError>{t('log.event.required')}</InlineError>
         ) : null}
       </View>
+      {workAreaSelector}
       <NoticeCard
         backgroundColor={theme.colors.warningSoft}
         borderColor={theme.colors.warning}

@@ -39,6 +39,15 @@ const getDeviceAuthenticationAvailabilityMock = jest.mocked(
 );
 const setScreenPrivacyMock = jest.mocked(setAppLockScreenPrivacyEnabled);
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+}
+
 describe('useAppLockController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -166,5 +175,42 @@ describe('useAppLockController', () => {
     expect(writeAppLockEnabledMock).toHaveBeenCalledWith(false);
     expect(result.current.enabled).toBe(true);
     expect(result.current.error).toBe('storage-failed');
+  });
+
+  test('serializes rapid unlock attempts before React rerenders', async () => {
+    readAppLockEnabledMock.mockResolvedValue(true);
+    const availability =
+      deferred<
+        Awaited<ReturnType<typeof getDeviceAuthenticationAvailability>>
+      >();
+    getDeviceAuthenticationAvailabilityMock.mockReturnValue(
+      availability.promise,
+    );
+    const { result } = await renderHook(() => useAppLockController());
+
+    await waitFor(() => expect(result.current.isHydrated).toBe(true));
+
+    let firstUnlock: Promise<boolean> | undefined;
+    let secondUnlock: Promise<boolean> | undefined;
+    await act(async () => {
+      firstUnlock = result.current.unlock();
+      secondUnlock = result.current.unlock();
+    });
+
+    await waitFor(() => {
+      expect(getDeviceAuthenticationAvailabilityMock).toHaveBeenCalledTimes(1);
+    });
+
+    availability.resolve({
+      level: LocalAuthentication.SecurityLevel.SECRET,
+      hasBiometricHardware: false,
+      hasEnrolledBiometrics: false,
+      canAuthenticate: true,
+    });
+    await act(async () => {
+      await Promise.all([firstUnlock, secondUnlock]);
+    });
+
+    expect(authenticateDeviceMock).toHaveBeenCalledTimes(1);
   });
 });

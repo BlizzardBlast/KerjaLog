@@ -30,6 +30,7 @@ export type WorkEntryDraft = {
   step: WorkEntryDraftStep;
   intent: LogEventIntent | null;
   rawNote: string;
+  workAreaId: string | null;
   outcomeType: OutcomeType | null;
   evidenceTypes: EvidenceType[];
   evidenceDetail: string;
@@ -42,6 +43,7 @@ export const EMPTY_WORK_ENTRY_DRAFT: WorkEntryDraft = {
   step: 'type',
   intent: null,
   rawNote: '',
+  workAreaId: null,
   outcomeType: null,
   evidenceTypes: [],
   evidenceDetail: '',
@@ -54,6 +56,7 @@ export function hasWorkEntryDraftContent(draft: WorkEntryDraft): boolean {
   return (
     draft.intent !== null ||
     draft.rawNote.trim().length > 0 ||
+    draft.workAreaId !== null ||
     draft.outcomeType !== null ||
     draft.evidenceTypes.length > 0 ||
     draft.evidenceDetail.trim().length > 0 ||

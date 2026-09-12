@@ -14,6 +14,7 @@ function createEntry(id: string, occurredAt: string): WorkEntry {
     occurredAt,
     outcomeType: null,
     status: 'quick_note',
+    workAreaId: null,
     evidence: null,
     excludedFromExports: false,
     createdAt: occurredAt,

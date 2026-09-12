@@ -6,6 +6,7 @@ export function useLogForm(startingDraft: WorkEntryDraft) {
     defaultValues: {
       intent: startingDraft.intent,
       rawNote: startingDraft.rawNote,
+      workAreaId: startingDraft.workAreaId,
       outcomeType: startingDraft.outcomeType,
       evidenceTypes: startingDraft.evidenceTypes,
       evidenceDetail: startingDraft.evidenceDetail,
@@ -17,6 +18,10 @@ export function useLogForm(startingDraft: WorkEntryDraft) {
 
   const intent = useSelector(form.store, (state) => state.values.intent);
   const rawNote = useSelector(form.store, (state) => state.values.rawNote);
+  const workAreaId = useSelector(
+    form.store,
+    (state) => state.values.workAreaId,
+  );
   const outcomeType = useSelector(
     form.store,
     (state) => state.values.outcomeType,
@@ -46,6 +51,7 @@ export function useLogForm(startingDraft: WorkEntryDraft) {
     form,
     intent,
     rawNote,
+    workAreaId,
     outcomeType,
     evidenceTypes,
     evidenceDetail,

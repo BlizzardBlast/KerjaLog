@@ -12,6 +12,7 @@ const baseRow: JoinedWorkEntryRow = {
   occurred_at: '2026-08-10T08:00:00.000Z',
   outcome_type: 'person_helped',
   status: 'review_ready',
+  work_area_id: 'area-finance',
   excluded_from_exports: 0,
   created_at: '2026-08-10T08:01:00.000Z',
   updated_at: '2026-08-10T08:01:00.000Z',
@@ -29,6 +30,7 @@ describe('mapJoinedWorkEntryRows', () => {
       baseRow,
     ]);
 
+    expect(entries[0]?.workAreaId).toBe('area-finance');
     expect(entries[0]?.evidence).toEqual({
       types: ['deadline', 'result'],
       detail: 'Completed before Friday close',
@@ -66,6 +68,17 @@ describe('mapJoinedWorkEntryRows', () => {
         },
       ]),
     ).toThrow('Stored work entry title is invalid.');
+  });
+
+  test('rejects a blank persisted work area id', () => {
+    expect(() =>
+      mapJoinedWorkEntryRows([
+        {
+          ...baseRow,
+          work_area_id: '   ',
+        },
+      ]),
+    ).toThrow('Stored work entry work area id is invalid.');
   });
 
   test('rejects malformed persisted timestamps', () => {

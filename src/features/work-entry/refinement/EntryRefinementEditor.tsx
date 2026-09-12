@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import type { WorkEntryDetail } from '@/domain/entry/model';
 import { skillDefinitionById } from '@/domain/skill/catalog';
+import { WorkAreaSelector } from '@/features/work-area/WorkAreaSelector';
 import { EventStep } from '@/features/work-entry/components/EventStep';
 import { EvidenceStep } from '@/features/work-entry/components/EvidenceStep';
 import { ImpactStep } from '@/features/work-entry/components/ImpactStep';
@@ -97,6 +98,13 @@ export function EntryRefinementEditor({
           onContinue={refinement.continueFromEvent}
           onRawNoteChange={refinement.updateRawNote}
           rawNote={refinement.rawNote}
+          workAreaSelector={
+            <WorkAreaSelector
+              selectedId={refinement.workAreaId}
+              onChange={refinement.updateWorkArea}
+              disabled={refinement.isSubmitting}
+            />
+          }
           t={t}
         />
       ) : null}

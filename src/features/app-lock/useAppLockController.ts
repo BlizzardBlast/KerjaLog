@@ -88,6 +88,7 @@ export function useAppLockController(): AppLockContextValue {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<AppLockError | null>(null);
+  // Prevents overlapping native authentication prompts before state rerenders.
   const authenticationInProgress = useRef(false);
 
   useEffect(() => {

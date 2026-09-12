@@ -11,6 +11,7 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
 import { hasWorkEntryHistoryFilters } from '@/domain/entry/history';
 import type { WorkEntry } from '@/domain/entry/model';
+import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { HistoryEntryCard } from '@/features/history/components/HistoryEntryCard';
 import { HistoryFilterBar } from '@/features/history/components/HistoryFilterBar';
 import {
@@ -31,6 +32,7 @@ function ProfiledHistoryScreen() {
   const { language, t } = useI18n();
   const insets = useSafeAreaInsets();
   const controller = useHistoryEntries();
+  const { state: workAreaState } = useWorkAreas({ includeArchived: true });
   const locale = language === 'id' ? 'id-ID' : 'en-US';
   const sections = useMemo(
     () => groupHistoryEntries(controller.state.entries, locale),
@@ -83,7 +85,10 @@ function ProfiledHistoryScreen() {
             />
             <HistoryFilterBar
               filters={controller.filters}
+              workAreas={workAreaState.workAreas}
               onEntryTypeChange={controller.setEntryType}
+              onWorkAreaChange={controller.setWorkArea}
+              onManageWorkAreas={() => router.push('/work-areas')}
               onEvidenceToggle={controller.toggleEvidence}
               onReviewReadyToggle={controller.toggleReviewReady}
               onClear={controller.clearFilters}

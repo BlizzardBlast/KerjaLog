@@ -121,4 +121,46 @@ describe('Growth evidence controllers', () => {
       refreshError: false,
     });
   });
+
+  test('ignores stale skill evidence when the selected skill changes', async () => {
+    const first = deferred<SkillEvidenceEntry[]>();
+    const second = deferred<SkillEvidenceEntry[]>();
+    const repository = createRepository();
+    repository.findSkillEvidence
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+    const { result, rerender } = await renderHook(
+      ({ skillId }: { skillId: 'attention_to_detail' | 'execution' }) =>
+        useSkillEvidence(skillId, repository),
+      { initialProps: { skillId: 'attention_to_detail' as const } },
+    );
+
+    await rerender({ skillId: 'execution' });
+    await waitFor(() =>
+      expect(repository.findSkillEvidence).toHaveBeenCalledTimes(2),
+    );
+
+    await act(async () => {
+      second.resolve(evidenceEntries);
+    });
+    await waitFor(() =>
+      expect(result.current.state).toEqual({
+        status: 'loaded',
+        entries: evidenceEntries,
+        isRefreshing: false,
+        refreshError: false,
+      }),
+    );
+
+    await act(async () => {
+      first.resolve([]);
+    });
+
+    expect(result.current.state).toEqual({
+      status: 'loaded',
+      entries: evidenceEntries,
+      isRefreshing: false,
+      refreshError: false,
+    });
+  });
 });

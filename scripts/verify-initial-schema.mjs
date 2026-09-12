@@ -45,6 +45,41 @@ try {
     'Initial SQLite skill seed must exactly match the runtime skill catalog.',
   );
 
+  const insertWorkArea = db.prepare(`
+    INSERT INTO work_areas (
+      id,
+      name,
+      name_key,
+      archived_at,
+      created_at,
+      updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+
+  insertWorkArea.run(
+    'area-1',
+    'Monthly Reporting',
+    'monthly reporting',
+    null,
+    '2026-08-10T07:00:00.000Z',
+    '2026-08-10T07:00:00.000Z',
+  );
+
+  assert.throws(
+    () =>
+      insertWorkArea.run(
+        'area-duplicate-active',
+        'MONTHLY REPORTING',
+        'monthly reporting',
+        null,
+        '2026-08-10T07:01:00.000Z',
+        '2026-08-10T07:01:00.000Z',
+      ),
+    /UNIQUE constraint failed/u,
+    'Active work area names must be unique after normalization.',
+  );
+
   const insertEntry = db.prepare(`
     INSERT INTO work_entries (
       id,
@@ -56,11 +91,12 @@ try {
       occurred_at,
       outcome_type,
       status,
+      work_area_id,
       excluded_from_exports,
       created_at,
       updated_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   insertEntry.run(
@@ -73,6 +109,7 @@ try {
     '2026-08-10T08:00:00.000Z',
     'error_fixed_or_prevented',
     'review_ready',
+    'area-1',
     0,
     '2026-08-10T08:01:00.000Z',
     '2026-08-10T08:01:00.000Z',
@@ -90,12 +127,21 @@ try {
         '2026-08-10T08:00:00.000Z',
         'deadline_met',
         'developed',
+        null,
         0,
         '2026-08-10T08:01:00.000Z',
         '2026-08-10T08:01:00.000Z',
       ),
     /CHECK constraint failed/u,
     'Saved impact statements must require provenance.',
+  );
+
+  assert.equal(
+    db
+      .prepare('SELECT work_area_id FROM work_entries WHERE id = ?')
+      .get('entry-1')?.work_area_id,
+    'area-1',
+    'Work entries must preserve their optional work-area relationship.',
   );
 
   db.prepare(`
@@ -150,6 +196,36 @@ try {
 
   db.prepare('DELETE FROM evidence WHERE id = ?').run('evidence-1');
   assert.deepEqual(searchIds('"proofnine"*'), []);
+
+  db.prepare(
+    'UPDATE work_areas SET archived_at = ?, updated_at = ? WHERE id = ?',
+  ).run('2026-08-10T09:00:00.000Z', '2026-08-10T09:00:00.000Z', 'area-1');
+
+  insertWorkArea.run(
+    'area-2',
+    'Monthly Reporting',
+    'monthly reporting',
+    null,
+    '2026-08-10T09:01:00.000Z',
+    '2026-08-10T09:01:00.000Z',
+  );
+
+  assert.equal(
+    db
+      .prepare('SELECT work_area_id FROM work_entries WHERE id = ?')
+      .get('entry-1')?.work_area_id,
+    'area-1',
+    'Archiving a work area must not detach historical entries.',
+  );
+
+  db.prepare('DELETE FROM work_areas WHERE id = ?').run('area-1');
+  assert.equal(
+    db
+      .prepare('SELECT work_area_id FROM work_entries WHERE id = ?')
+      .get('entry-1')?.work_area_id,
+    null,
+    'Deleting a work area must safely detach entries through ON DELETE SET NULL.',
+  );
 
   db.prepare('DELETE FROM work_entries WHERE id = ?').run('entry-1');
   assert.deepEqual(searchIds('"monthly"*'), []);

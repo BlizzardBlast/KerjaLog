@@ -37,6 +37,13 @@ jest.mock('@/features/history/useHistoryEntries', () => ({
   useHistoryEntries: () => mockUseHistoryEntries(),
 }));
 
+jest.mock('@/features/work-area/useWorkAreas', () => ({
+  useWorkAreas: () => ({
+    state: { status: 'loaded', workAreas: [] },
+    reload: jest.fn(),
+  }),
+}));
+
 jest.mock('@/i18n/I18nProvider', () => ({
   useI18n: () => ({
     language: 'en',
@@ -53,6 +60,7 @@ const entry: WorkEntry = {
   occurredAt: '2026-08-06T08:00:00.000Z',
   outcomeType: 'error_fixed_or_prevented',
   status: 'review_ready',
+  workAreaId: null,
   evidence: null,
   excludedFromExports: false,
   createdAt: '2026-08-06T08:01:00.000Z',
@@ -68,6 +76,7 @@ function createController(
     setSearchText: jest.fn(),
     filters: EMPTY_WORK_ENTRY_HISTORY_FILTERS,
     setEntryType: jest.fn(),
+    setWorkArea: jest.fn(),
     toggleEvidence: jest.fn(),
     toggleReviewReady: jest.fn(),
     clearFilters: jest.fn(),

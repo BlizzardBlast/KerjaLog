@@ -21,6 +21,7 @@ const updateInput: UpdateWorkEntry = {
   occurredAt: '2026-08-10T08:00:00.000Z',
   outcomeType: 'error_fixed_or_prevented',
   status: 'review_ready',
+  workAreaId: 'area-reconciliation',
   evidence: {
     types: ['number'],
     detail: '7 duplicate rows removed',

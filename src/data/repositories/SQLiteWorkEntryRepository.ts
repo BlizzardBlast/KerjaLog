@@ -1,5 +1,4 @@
 import * as Crypto from 'expo-crypto';
-import type { SQLiteDatabase } from 'expo-sqlite';
 import { getDatabase } from '@/data/database';
 import {
   withKeyedDatabaseAccess,
@@ -10,93 +9,30 @@ import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
 } from '@/data/repositories/workEntryRowMapper';
+import { findWorkEntryDetail } from '@/data/repositories/workEntryDetailQuery';
 import {
-  mapWorkEntrySkillRows,
-  type WorkEntrySkillRow,
-} from '@/data/repositories/workEntrySkillRowMapper';
+  assertWorkEntryWriteInput,
+  dedupeWorkEntrySkills,
+  insertWorkEntryEvidence,
+  insertWorkEntrySkills,
+  replaceWorkEntryEvidence,
+  replaceWorkEntrySkills,
+} from '@/data/repositories/workEntryWriteHelpers';
 import type {
   WorkEntryHistoryCursor,
   WorkEntryHistoryPage,
   WorkEntryHistoryQuery,
 } from '@/domain/entry/history';
-import {
-  IMPACT_STATEMENT_SOURCES,
-  type ImpactStatementSource,
-  type CreateWorkEntry,
-  type UpdateWorkEntry,
-  type WorkEntry,
-  type WorkEntryDetail,
+import type {
+  CreateWorkEntry,
+  UpdateWorkEntry,
+  WorkEntry,
+  WorkEntryDetail,
 } from '@/domain/entry/model';
 import type { WorkEntryRepository } from '@/domain/entry/repository';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
-import {
-  ENTRY_SKILL_SOURCES,
-  SKILL_IDS,
-  type WorkEntrySkill,
-} from '@/domain/skill/model';
 
 const ACTIVE_DRAFT_ID = 1;
-
-type DetailedJoinedWorkEntryRow = JoinedWorkEntryRow & {
-  impact_statement_source: unknown;
-};
-
-async function findWorkEntryDetail(
-  db: SQLiteDatabase,
-  id: string,
-): Promise<WorkEntryDetail | null> {
-  const rows = await db.getAllAsync<DetailedJoinedWorkEntryRow>(
-    `
-      SELECT
-        work_entries.id,
-        work_entries.type,
-        work_entries.title,
-        work_entries.raw_note,
-        work_entries.impact_statement,
-        work_entries.impact_statement_source,
-        work_entries.occurred_at,
-        work_entries.outcome_type,
-        work_entries.status,
-        work_entries.excluded_from_exports,
-        work_entries.created_at,
-        work_entries.updated_at,
-        evidence.type AS evidence_type,
-        evidence.text_value AS evidence_text_value
-      FROM work_entries
-      LEFT JOIN evidence
-        ON evidence.entry_id = work_entries.id
-      WHERE work_entries.id = $id
-      ORDER BY evidence.created_at ASC
-    `,
-    { $id: id },
-  );
-
-  const firstRow = rows[0];
-  const entry = mapJoinedWorkEntryRows(rows)[0];
-  if (!entry || !firstRow) {
-    return null;
-  }
-
-  const impactStatementSource = mapImpactStatementSource(
-    firstRow.impact_statement_source,
-    entry.impactStatement,
-  );
-  const skillRows = await db.getAllAsync<WorkEntrySkillRow>(
-    `
-      SELECT skill_id, source
-      FROM entry_skills
-      WHERE entry_id = $id
-      ORDER BY skill_id ASC
-    `,
-    { $id: id },
-  );
-
-  return {
-    ...entry,
-    skills: mapWorkEntrySkillRows(skillRows),
-    impactStatementSource,
-  };
-}
 
 export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   async findById(id: string): Promise<WorkEntryDetail | null> {
@@ -131,6 +67,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
               occurred_at,
               outcome_type,
               status,
+              work_area_id,
               excluded_from_exports,
               created_at,
               updated_at
@@ -150,6 +87,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             recent_entries.occurred_at,
             recent_entries.outcome_type,
             recent_entries.status,
+            recent_entries.work_area_id,
             recent_entries.excluded_from_exports,
             recent_entries.created_at,
             recent_entries.updated_at,
@@ -227,12 +165,12 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 
   async commit(input: CreateWorkEntry): Promise<WorkEntry> {
-    assertEntryWriteInput(input);
+    assertWorkEntryWriteInput(input);
 
     const db = await getDatabase();
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
-    const uniqueSkills = dedupeSkills(input.skills);
+    const uniqueSkills = dedupeWorkEntrySkills(input.skills);
 
     await withKeyedTransaction(db, async (transaction) => {
       await transaction.runAsync(
@@ -247,6 +185,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             occurred_at,
             outcome_type,
             status,
+            work_area_id,
             excluded_from_exports,
             created_at,
             updated_at
@@ -261,6 +200,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             $occurredAt,
             $outcomeType,
             $status,
+            $workAreaId,
             $excludedFromExports,
             $createdAt,
             $updatedAt
@@ -276,35 +216,15 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           $occurredAt: input.occurredAt,
           $outcomeType: input.outcomeType,
           $status: input.status,
+          $workAreaId: input.workAreaId,
           $excludedFromExports: input.excludedFromExports ? 1 : 0,
           $createdAt: now,
           $updatedAt: now,
         },
       );
 
-      for (const type of input.evidence?.types ?? []) {
-        await transaction.runAsync(
-          `
-            INSERT INTO evidence (
-              id,
-              entry_id,
-              type,
-              text_value,
-              created_at
-            )
-            VALUES ($id, $entryId, $type, $textValue, $createdAt)
-          `,
-          {
-            $id: Crypto.randomUUID(),
-            $entryId: id,
-            $type: type,
-            $textValue: input.evidence?.detail ?? null,
-            $createdAt: now,
-          },
-        );
-      }
-
-      await insertEntrySkills(transaction, id, uniqueSkills);
+      await insertWorkEntryEvidence(transaction, id, input.evidence, now);
+      await insertWorkEntrySkills(transaction, id, uniqueSkills);
 
       await transaction.runAsync(
         'DELETE FROM active_work_entry_draft WHERE id = $activeDraftId',
@@ -321,6 +241,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       occurredAt: input.occurredAt,
       outcomeType: input.outcomeType,
       status: input.status,
+      workAreaId: input.workAreaId,
       evidence: input.evidence,
       excludedFromExports: input.excludedFromExports,
       createdAt: now,
@@ -329,11 +250,11 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
   }
 
   async update(id: string, input: UpdateWorkEntry): Promise<WorkEntryDetail> {
-    assertEntryWriteInput(input);
+    assertWorkEntryWriteInput(input);
 
     const db = await getDatabase();
     const now = new Date().toISOString();
-    const uniqueSkills = dedupeSkills(input.skills);
+    const uniqueSkills = dedupeWorkEntrySkills(input.skills);
 
     return withKeyedTransaction(db, async (transaction) => {
       const result = await transaction.runAsync(
@@ -348,6 +269,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
             occurred_at = $occurredAt,
             outcome_type = $outcomeType,
             status = $status,
+            work_area_id = $workAreaId,
             excluded_from_exports = $excludedFromExports,
             updated_at = $updatedAt
           WHERE id = $id
@@ -362,6 +284,7 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
           $occurredAt: input.occurredAt,
           $outcomeType: input.outcomeType,
           $status: input.status,
+          $workAreaId: input.workAreaId,
           $excludedFromExports: input.excludedFromExports ? 1 : 0,
           $updatedAt: now,
         },
@@ -371,37 +294,8 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
         throw new Error('Work entry to update was not found.');
       }
 
-      await transaction.runAsync('DELETE FROM evidence WHERE entry_id = $id', {
-        $id: id,
-      });
-
-      for (const type of input.evidence?.types ?? []) {
-        await transaction.runAsync(
-          `
-            INSERT INTO evidence (
-              id,
-              entry_id,
-              type,
-              text_value,
-              created_at
-            )
-            VALUES ($id, $entryId, $type, $textValue, $createdAt)
-          `,
-          {
-            $id: Crypto.randomUUID(),
-            $entryId: id,
-            $type: type,
-            $textValue: input.evidence?.detail ?? null,
-            $createdAt: now,
-          },
-        );
-      }
-
-      await transaction.runAsync(
-        'DELETE FROM entry_skills WHERE entry_id = $id',
-        { $id: id },
-      );
-      await insertEntrySkills(transaction, id, uniqueSkills);
+      await replaceWorkEntryEvidence(transaction, id, input.evidence, now);
+      await replaceWorkEntrySkills(transaction, id, uniqueSkills);
 
       const updatedEntry = await findWorkEntryDetail(transaction, id);
       if (!updatedEntry) {
@@ -411,90 +305,6 @@ export class SQLiteWorkEntryRepository implements WorkEntryRepository {
       return updatedEntry;
     });
   }
-}
-
-function dedupeSkills(skills: WorkEntrySkill[]): WorkEntrySkill[] {
-  return [...new Map(skills.map((skill) => [skill.id, skill])).values()];
-}
-
-async function insertEntrySkills(
-  db: SQLiteDatabase,
-  entryId: string,
-  skills: WorkEntrySkill[],
-): Promise<void> {
-  for (const skill of skills) {
-    await db.runAsync(
-      `
-        INSERT INTO entry_skills (entry_id, skill_id, source)
-        VALUES ($entryId, $skillId, $source)
-      `,
-      {
-        $entryId: entryId,
-        $skillId: skill.id,
-        $source: skill.source,
-      },
-    );
-  }
-}
-
-function assertEntryWriteInput(
-  input: Pick<
-    CreateWorkEntry,
-    'occurredAt' | 'impactStatement' | 'impactStatementSource' | 'skills'
-  >,
-): void {
-  if (!isCanonicalIsoTimestamp(input.occurredAt)) {
-    throw new Error(
-      'Work entry occurred at must be a canonical ISO timestamp.',
-    );
-  }
-
-  const hasStatement = input.impactStatement !== null;
-  const hasSource = input.impactStatementSource !== null;
-  if (hasStatement !== hasSource) {
-    throw new Error('Work entry impact statement provenance is inconsistent.');
-  }
-
-  if (
-    input.impactStatementSource !== null &&
-    !IMPACT_STATEMENT_SOURCES.includes(input.impactStatementSource)
-  ) {
-    throw new Error('Work entry impact statement source is invalid.');
-  }
-
-  for (const skill of input.skills) {
-    if (
-      !SKILL_IDS.includes(skill.id) ||
-      !ENTRY_SKILL_SOURCES.includes(skill.source)
-    ) {
-      throw new Error('Work entry skill is invalid.');
-    }
-  }
-}
-
-function mapImpactStatementSource(
-  value: unknown,
-  impactStatement: string | null,
-): ImpactStatementSource | null {
-  if (value === null) {
-    if (impactStatement !== null) {
-      throw new Error('Stored work entry impact provenance is inconsistent.');
-    }
-    return null;
-  }
-
-  if (
-    typeof value !== 'string' ||
-    !IMPACT_STATEMENT_SOURCES.includes(value as ImpactStatementSource)
-  ) {
-    throw new Error('Stored work entry impact source is invalid.');
-  }
-
-  if (impactStatement === null) {
-    throw new Error('Stored work entry impact provenance is inconsistent.');
-  }
-
-  return value as ImpactStatementSource;
 }
 
 function createHistoryCursor(entry: WorkEntry): WorkEntryHistoryCursor {

@@ -20,6 +20,7 @@ type ActiveDraftRow = {
   step: unknown;
   intent: unknown;
   raw_note: unknown;
+  work_area_id: unknown;
   outcome_type: unknown;
   evidence_types: unknown;
   evidence_detail: unknown;
@@ -35,8 +36,8 @@ export class SQLiteWorkEntryDraftRepository
     const db = await getDatabase();
     return withKeyedDatabaseAccess(async () => {
       const row = await db.getFirstAsync<ActiveDraftRow>(
-        `SELECT step, intent, raw_note, outcome_type, evidence_types, evidence_detail,
-          selected_skills, impact_statement, impact_statement_source
+        `SELECT step, intent, raw_note, work_area_id, outcome_type, evidence_types,
+          evidence_detail, selected_skills, impact_statement, impact_statement_source
          FROM active_work_entry_draft WHERE id = $id`,
         { $id: ACTIVE_DRAFT_ID },
       );
@@ -50,15 +51,16 @@ export class SQLiteWorkEntryDraftRepository
     await withKeyedDatabaseAccess(async () => {
       await db.runAsync(
         `INSERT INTO active_work_entry_draft (
-          id, step, intent, raw_note, outcome_type, evidence_types, evidence_detail,
-          selected_skills, impact_statement, impact_statement_source, updated_at
+          id, step, intent, raw_note, work_area_id, outcome_type, evidence_types,
+          evidence_detail, selected_skills, impact_statement, impact_statement_source, updated_at
         ) VALUES (
-          $id, $step, $intent, $rawNote, $outcomeType, $evidenceTypes, $evidenceDetail,
-          $selectedSkills, $impactStatement, $impactStatementSource, $updatedAt
+          $id, $step, $intent, $rawNote, $workAreaId, $outcomeType, $evidenceTypes,
+          $evidenceDetail, $selectedSkills, $impactStatement, $impactStatementSource, $updatedAt
         ) ON CONFLICT(id) DO UPDATE SET
           step = excluded.step,
           intent = excluded.intent,
           raw_note = excluded.raw_note,
+          work_area_id = excluded.work_area_id,
           outcome_type = excluded.outcome_type,
           evidence_types = excluded.evidence_types,
           evidence_detail = excluded.evidence_detail,
@@ -71,6 +73,7 @@ export class SQLiteWorkEntryDraftRepository
           $step: draft.step,
           $intent: draft.intent,
           $rawNote: draft.rawNote,
+          $workAreaId: draft.workAreaId,
           $outcomeType: draft.outcomeType,
           $evidenceTypes: JSON.stringify(draft.evidenceTypes),
           $evidenceDetail: draft.evidenceDetail,
@@ -103,6 +106,13 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
   if (typeof row.raw_note !== 'string') {
     throw new TypeError('Stored work entry draft note is invalid.');
   }
+  const workAreaId = row.work_area_id;
+  if (
+    workAreaId !== null &&
+    (typeof workAreaId !== 'string' || !workAreaId.trim())
+  ) {
+    throw new Error('Stored work entry draft work area is invalid.');
+  }
   if (row.outcome_type !== null && !isOutcomeType(row.outcome_type)) {
     throw new Error('Stored work entry draft outcome is invalid.');
   }
@@ -123,6 +133,7 @@ function mapActiveDraftRow(row: ActiveDraftRow): WorkEntryDraft {
     step: row.step,
     intent: row.intent,
     rawNote: row.raw_note,
+    workAreaId,
     outcomeType: row.outcome_type,
     evidenceTypes: parseEvidenceTypes(row.evidence_types),
     evidenceDetail: row.evidence_detail,
