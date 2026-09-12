@@ -28,4 +28,13 @@ describe('work area validation', () => {
       `Work area name must be at most ${WORK_AREA_NAME_MAX_LENGTH} characters.`,
     );
   });
+
+  test('counts non-BMP characters at the length boundary', () => {
+    const eightyEmoji = '😀'.repeat(80);
+
+    expect(normalizeWorkAreaName(eightyEmoji)).toBe(eightyEmoji);
+    expect(() => normalizeWorkAreaName('😀'.repeat(81))).toThrow(
+      'Work area name must be at most 80 characters.',
+    );
+  });
 });
