@@ -8,11 +8,11 @@ import { radii, spacing } from '@/design-system/tokens/theme';
 import { WORK_ENTRY_TEXT_LIMITS } from '@/domain/entry/limits';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
+import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import type {
   LogStepFrameProps,
   Translate,
 } from '@/features/work-entry/components/logStepTypes';
-import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { NoticeCard } from '@/features/work-entry/components/NoticeCard';
 
 const EVENT_NOTE_LABEL_ID = 'work-entry-event-note-label';

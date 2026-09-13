@@ -6,8 +6,8 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
 import { SectionHeading } from '@/features/home/components/SectionHeading';
 import type { ReviewSchedule } from '@/features/onboarding/model';
-import type { TranslationKey } from '@/i18n/translations';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translations';
 
 const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
   'within-3-months': 'home.review.within3Months',

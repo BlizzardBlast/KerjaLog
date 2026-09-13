@@ -1,8 +1,8 @@
 import * as Crypto from 'expo-crypto';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import {
-  IMPACT_STATEMENT_SOURCES,
   type CreateWorkEntry,
+  IMPACT_STATEMENT_SOURCES,
   type WorkEntry,
 } from '@/domain/entry/model';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';

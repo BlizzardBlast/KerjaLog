@@ -1,12 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
-import { getWorkAreaNameValidationIssue } from '@/domain/work-area/validation';
-import { getWorkAreaNameErrorKey } from '@/features/work-area/components/workAreaNameError';
-import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
-import { useWorkAreaNameForm } from '@/features/work-area/useWorkAreaNameForm';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
+import { getWorkAreaNameValidationIssue } from '@/domain/work-area/validation';
+import { WorkAreaNameField } from '@/features/work-area/components/WorkAreaNameField';
+import { getWorkAreaNameErrorKey } from '@/features/work-area/components/workAreaNameError';
+import { useWorkAreaNameForm } from '@/features/work-area/useWorkAreaNameForm';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type WorkAreaEditorCardProps = {

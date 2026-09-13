@@ -11,7 +11,6 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
 import { hasWorkEntryHistoryFilters } from '@/domain/entry/history';
 import type { WorkEntry } from '@/domain/entry/model';
-import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { HistoryEntryCard } from '@/features/history/components/HistoryEntryCard';
 import { HistoryFilterBar } from '@/features/history/components/HistoryFilterBar';
 import {
@@ -24,6 +23,7 @@ import {
   type HistorySection,
 } from '@/features/history/historyGrouping';
 import { useHistoryEntries } from '@/features/history/useHistoryEntries';
+import { useWorkAreas } from '@/features/work-area/useWorkAreas';
 import { useI18n } from '@/i18n/I18nProvider';
 
 function ProfiledHistoryScreen() {

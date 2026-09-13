@@ -1,8 +1,8 @@
 import {
   getPortableBackupSummary,
+  type PortableBackup,
   parsePortableBackup,
   parsePortableBackupJson,
-  type PortableBackup,
 } from '@/domain/portability/model';
 
 function createBackup(): PortableBackup {

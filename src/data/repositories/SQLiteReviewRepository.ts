@@ -8,8 +8,8 @@ import { EVIDENCE_TYPES, OUTCOME_TYPES } from '@/domain/entry/model';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 import { assertReviewDraftDocument } from '@/domain/review/documentValidation';
 import {
-  REVIEW_PURPOSES,
   type CreateReviewDraft,
+  REVIEW_PURPOSES,
   type ReviewCandidate,
   type ReviewDraft,
   type ReviewDraftDocument,

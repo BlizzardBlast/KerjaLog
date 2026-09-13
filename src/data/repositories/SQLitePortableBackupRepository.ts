@@ -5,8 +5,8 @@ import {
   withKeyedTransaction,
 } from '@/data/keyedDatabaseAccess';
 import type {
-  PortableBackup,
   PortableActiveDraft,
+  PortableBackup,
   PortablePreferences,
 } from '@/domain/portability/model';
 import { parsePortableBackup } from '@/domain/portability/model';

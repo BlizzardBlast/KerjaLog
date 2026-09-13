@@ -1,5 +1,10 @@
 import { z } from 'zod';
 import {
+  isLogEventIntent,
+  WORK_ENTRY_DRAFT_STEPS,
+  type WorkEntryDraft,
+} from '@/domain/entry/draft';
+import {
   ENTRY_STATUSES,
   ENTRY_TYPES,
   EVIDENCE_TYPES,
@@ -7,11 +12,6 @@ import {
   OUTCOME_TYPES,
   type WorkEntryDetail,
 } from '@/domain/entry/model';
-import {
-  isLogEventIntent,
-  type WorkEntryDraft,
-  WORK_ENTRY_DRAFT_STEPS,
-} from '@/domain/entry/draft';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
 import {
   REVIEW_PURPOSES,

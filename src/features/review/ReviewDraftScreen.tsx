@@ -1,16 +1,16 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { reviewRepository } from '@/data/repositories/reviewRepository';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
-import { reviewRepository } from '@/data/repositories/reviewRepository';
 import type { ReviewDraft } from '@/domain/review/model';
 import { ReviewDraftEditor } from '@/features/review/ReviewDraftEditor';
 import { useI18n } from '@/i18n/I18nProvider';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ReviewDraftScreenProps = { id: string };
 

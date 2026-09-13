@@ -3,8 +3,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import {
-  parsePortableBackupJson,
   type PortableBackup,
+  parsePortableBackupJson,
 } from '@/domain/portability/model';
 
 export const MAX_PORTABLE_BACKUP_BYTES = 5 * 1024 * 1024;

@@ -1,10 +1,11 @@
 import { useForm, useSelector } from '@tanstack/react-form';
-import { Alert, StyleSheet, View } from 'react-native';
 import { useRef, useState } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
+import { reviewRepository } from '@/data/repositories/reviewRepository';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { TextField } from '@/design-system/components/TextField';
-import { reviewRepository } from '@/data/repositories/reviewRepository';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import {
   getReviewDraftDocumentValidationIssue,
   type ReviewDraftDocumentValidationIssue,
@@ -12,7 +13,6 @@ import {
 import type { ReviewDraft, ReviewDraftDocument } from '@/domain/review/model';
 import { ReviewDraftDocumentEditor } from '@/features/review/ReviewDraftDocumentEditor';
 import { ReviewDraftOutputActions } from '@/features/review/ReviewDraftOutputActions';
-import { radii, spacing } from '@/design-system/tokens/theme';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type EditorValues = { title: string; document: ReviewDraftDocument };

@@ -5,8 +5,8 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { Text } from '@/design-system/components/Text';
 import { Button } from '@/design-system/components/Button';
+import { Text } from '@/design-system/components/Text';
 import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, radii, spacing } from '@/design-system/tokens/theme';

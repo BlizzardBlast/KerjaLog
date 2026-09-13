@@ -1,16 +1,18 @@
 import { useForm, useSelector } from '@tanstack/react-form';
 import { useFocusEffect } from 'expo-router';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { reviewRepository } from '@/data/repositories/reviewRepository';
 import { Button } from '@/design-system/components/Button';
 import { OptionCard } from '@/design-system/components/OptionCard';
 import { Text } from '@/design-system/components/Text';
+import { useTheme } from '@/design-system/theme/ThemeProvider';
+import { radii, spacing } from '@/design-system/tokens/theme';
 import {
   createReviewDraftDocument,
   createReviewDraftEntries,
   recommendReviewCandidates,
 } from '@/domain/review/document';
-import { getReviewPeriod } from '@/domain/review/period';
 import {
   REVIEW_PERIOD_PRESETS,
   REVIEW_PURPOSES,
@@ -20,7 +22,7 @@ import {
   type ReviewPeriodPreset,
   type ReviewPurpose,
 } from '@/domain/review/model';
-import { reviewRepository } from '@/data/repositories/reviewRepository';
+import { getReviewPeriod } from '@/domain/review/period';
 import { isSkillId } from '@/domain/skill/model';
 import { ReviewDatePicker } from '@/features/review/ReviewDatePicker';
 import {
@@ -28,8 +30,6 @@ import {
   getReviewPurposeTitle,
 } from '@/features/review/reviewCopy';
 import { useI18n } from '@/i18n/I18nProvider';
-import { useTheme } from '@/design-system/theme/ThemeProvider';
-import { radii, spacing } from '@/design-system/tokens/theme';
 
 type CandidateState =
   | { status: 'loading' }

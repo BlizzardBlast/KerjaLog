@@ -3,11 +3,11 @@ import { Button } from '@/design-system/components/Button';
 import type { OutcomeType } from '@/domain/entry/model';
 import { LogChoiceCard } from '@/features/work-entry/components/LogChoiceCard';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
+import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import type {
   LogStepFrameProps,
   Translate,
 } from '@/features/work-entry/components/logStepTypes';
-import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { outcomeOptions } from '@/features/work-entry/options';
 
 type OutcomeStepProps = LogStepFrameProps & {

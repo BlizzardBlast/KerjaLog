@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -7,13 +8,13 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { useCallback, useRef, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { portableBackupRepository } from '@/data/repositories/portableBackupRepository';
+import { reviewRepository } from '@/data/repositories/reviewRepository';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, radii, spacing } from '@/design-system/tokens/theme';
-import { reviewRepository } from '@/data/repositories/reviewRepository';
-import { portableBackupRepository } from '@/data/repositories/portableBackupRepository';
 import type { PortableBackup } from '@/domain/portability/model';
 import type { ReviewDraft } from '@/domain/review/model';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
@@ -21,7 +22,6 @@ import { ReviewBackupPanel } from '@/features/review/ReviewBackupPanel';
 import { ReviewSetupForm } from '@/features/review/ReviewSetupForm';
 import { useI18n } from '@/i18n/I18nProvider';
 import { portableBackupFile } from '@/platform/portability/portableBackupFile';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type DraftListState =
   | { status: 'loading' }

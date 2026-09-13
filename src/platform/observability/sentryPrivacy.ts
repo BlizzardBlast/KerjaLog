@@ -1,5 +1,5 @@
-import type { Breadcrumb } from '@sentry/react-native';
 import type * as Sentry from '@sentry/react-native';
+import type { Breadcrumb } from '@sentry/react-native';
 import {
   isSensitiveFieldKey,
   redactExceptionText,

@@ -6,6 +6,7 @@ import { DEFAULT_ONBOARDING_STATE } from '@/features/onboarding/model';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { I18nProvider } from '@/i18n/I18nProvider';
+
 const getItemMock = jest.mocked(AsyncStorage.getItem);
 const setItemMock = jest.mocked(AsyncStorage.setItem);
 const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);

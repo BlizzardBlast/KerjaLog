@@ -7,12 +7,12 @@ import {
   renderReviewDocumentMarkdown,
   renderReviewDocumentPlainText,
 } from '@/domain/review/document';
-import { getReviewPeriod } from '@/domain/review/period';
 import type {
   ReviewCandidate,
   ReviewDocumentCopy,
   ReviewPurpose,
 } from '@/domain/review/model';
+import { getReviewPeriod } from '@/domain/review/period';
 
 const copy: ReviewDocumentCopy = {
   performance_self_review: {

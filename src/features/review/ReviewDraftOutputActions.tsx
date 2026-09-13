@@ -1,14 +1,14 @@
-import { Alert, StyleSheet, View } from 'react-native';
 import { useRef, useState } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
-import type { ReviewDraftDocument } from '@/domain/review/model';
+import { spacing } from '@/design-system/tokens/theme';
 import {
   renderReviewDocumentHtml,
   renderReviewDocumentMarkdown,
   renderReviewDocumentPlainText,
 } from '@/domain/review/document';
-import { spacing } from '@/design-system/tokens/theme';
+import type { ReviewDraftDocument } from '@/domain/review/model';
 import { useI18n } from '@/i18n/I18nProvider';
 import { reviewOutput } from '@/platform/review-output/reviewOutput';
 
