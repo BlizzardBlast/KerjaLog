@@ -316,17 +316,23 @@ export function getPortableBackupSummary(
 }
 
 function assertPortableBackupRelations(backup: PortableBackup): void {
-  assertUnique(backup.data.workAreas, (area) => area.id, 'work area IDs');
-  assertUnique(backup.data.entries, (entry) => entry.id, 'entry IDs');
-  assertUnique(
-    backup.data.reviewDrafts,
-    (draft) => draft.id,
-    'review draft IDs',
-  );
+  const { activeDraft, entries, preferences, reviewDrafts, workAreas } =
+    backup.data;
+  assertUnique(workAreas, (area) => area.id, 'work area IDs');
+  assertUnique(entries, (entry) => entry.id, 'entry IDs');
+  assertUnique(reviewDrafts, (draft) => draft.id, 'review draft IDs');
 
-  const workAreaIds = new Set(backup.data.workAreas.map((area) => area.id));
+  const workAreaIds = new Set(workAreas.map((area) => area.id));
+  assertActiveWorkAreaNames(workAreas);
+  assertPortableEntries(entries, workAreaIds);
+  assertPortableActiveDraft(activeDraft, workAreaIds);
+  assertPortableOnboarding(preferences.onboarding);
+  assertPortableReviewDrafts(reviewDrafts);
+}
+
+function assertActiveWorkAreaNames(workAreas: readonly WorkArea[]): void {
   const activeWorkAreaKeys = new Set<string>();
-  for (const area of backup.data.workAreas) {
+  for (const area of workAreas) {
     if (area.archivedAt === null) {
       const key = createWorkAreaNameKey(area.name);
       if (activeWorkAreaKeys.has(key)) {
@@ -337,8 +343,13 @@ function assertPortableBackupRelations(backup: PortableBackup): void {
       activeWorkAreaKeys.add(key);
     }
   }
+}
 
-  for (const entry of backup.data.entries) {
+function assertPortableEntries(
+  entries: readonly WorkEntryDetail[],
+  workAreaIds: ReadonlySet<string>,
+): void {
+  for (const entry of entries) {
     if (entry.workAreaId !== null && !workAreaIds.has(entry.workAreaId)) {
       throw new Error('Portable backup entry references an unknown work area.');
     }
@@ -347,26 +358,32 @@ function assertPortableBackupRelations(backup: PortableBackup): void {
       assertUnique(entry.evidence.types, (type) => type, 'evidence types');
     }
   }
+}
 
-  const activeDraft = backup.data.activeDraft;
-  if (
-    activeDraft?.draft.workAreaId !== null &&
-    activeDraft?.draft.workAreaId !== undefined &&
-    !workAreaIds.has(activeDraft.draft.workAreaId)
-  ) {
+function assertPortableActiveDraft(
+  activeDraft: PortableActiveDraft | null,
+  workAreaIds: ReadonlySet<string>,
+): void {
+  if (!activeDraft) {
+    return;
+  }
+
+  const workAreaId = activeDraft.draft.workAreaId;
+  if (workAreaId !== null && !workAreaIds.has(workAreaId)) {
     throw new Error('Portable active draft references an unknown work area.');
   }
-  if (activeDraft) {
-    assertUnique(activeDraft.draft.skills, (skill) => skill.id, 'draft skills');
-    assertUnique(
-      activeDraft.draft.evidenceTypes,
-      (type) => type,
-      'draft evidence types',
-    );
-    assertPortableDraftProgression(activeDraft.draft);
-  }
+  assertUnique(activeDraft.draft.skills, (skill) => skill.id, 'draft skills');
+  assertUnique(
+    activeDraft.draft.evidenceTypes,
+    (type) => type,
+    'draft evidence types',
+  );
+  assertPortableDraftProgression(activeDraft.draft);
+}
 
-  const onboarding = backup.data.preferences.onboarding;
+function assertPortableOnboarding(
+  onboarding: PortablePreferences['onboarding'],
+): void {
   if (
     onboarding.completed &&
     (!onboarding.workArea ||
@@ -376,8 +393,12 @@ function assertPortableBackupRelations(backup: PortableBackup): void {
   ) {
     throw new Error('Portable onboarding state is incomplete.');
   }
+}
 
-  for (const reviewDraft of backup.data.reviewDrafts) {
+function assertPortableReviewDrafts(
+  reviewDrafts: readonly ReviewDraft[],
+): void {
+  for (const reviewDraft of reviewDrafts) {
     assertReviewPeriod(reviewDraft.period as ReviewPeriod);
     assertUnique(
       reviewDraft.document.sections,

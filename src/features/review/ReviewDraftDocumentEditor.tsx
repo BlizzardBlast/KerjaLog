@@ -47,6 +47,50 @@ export function ReviewDraftDocumentEditor({
     sections[targetIndex] = current;
     onChange({ sections });
   };
+  const updateSectionTitle = (sectionIndex: number, title: string) => {
+    updateSection(sectionIndex, (section) => ({ ...section, title }));
+  };
+  const updateBullet = (
+    sectionIndex: number,
+    bulletIndex: number,
+    value: string,
+  ) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      bullets: section.bullets.map((bullet, index) =>
+        index === bulletIndex ? value : bullet,
+      ),
+    }));
+  };
+  const removeBullet = (sectionIndex: number, bulletIndex: number) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      bullets: section.bullets.filter((_, index) => index !== bulletIndex),
+    }));
+  };
+  const addBullet = (sectionIndex: number) => {
+    updateSection(sectionIndex, (section) => ({
+      ...section,
+      bullets: [...section.bullets, t('review.editor.emptyBullet')],
+    }));
+  };
+  const removeSection = (sectionIndex: number) => {
+    onChange({
+      sections: document.sections.filter((_, index) => index !== sectionIndex),
+    });
+  };
+  const addSection = () => {
+    onChange({
+      sections: [
+        ...document.sections,
+        {
+          id: Crypto.randomUUID(),
+          title: t('review.editor.emptySection'),
+          bullets: [t('review.editor.emptyBullet')],
+        },
+      ],
+    });
+  };
 
   return (
     <View style={styles.sections}>
@@ -68,12 +112,7 @@ export function ReviewDraftDocumentEditor({
             accessibilityLabel={t('review.editor.sectionTitle')}
             hasError={!section.title.trim()}
             value={section.title}
-            onChangeText={(value) =>
-              updateSection(sectionIndex, (current) => ({
-                ...current,
-                title: value,
-              }))
-            }
+            onChangeText={(value) => updateSectionTitle(sectionIndex, value)}
             style={styles.textInput}
           />
           {section.bullets.map((bullet, bulletIndex) => (
@@ -87,12 +126,7 @@ export function ReviewDraftDocumentEditor({
                 multiline
                 value={bullet}
                 onChangeText={(value) =>
-                  updateSection(sectionIndex, (current) => ({
-                    ...current,
-                    bullets: current.bullets.map((item, index) =>
-                      index === bulletIndex ? value : item,
-                    ),
-                  }))
+                  updateBullet(sectionIndex, bulletIndex, value)
                 }
                 style={[styles.textInput, styles.bulletInput]}
               />
@@ -100,14 +134,7 @@ export function ReviewDraftDocumentEditor({
                 accessibilityLabel={t('review.editor.removeBullet')}
                 accessibilityRole="button"
                 hitSlop={8}
-                onPress={() =>
-                  updateSection(sectionIndex, (current) => ({
-                    ...current,
-                    bullets: current.bullets.filter(
-                      (_, index) => index !== bulletIndex,
-                    ),
-                  }))
-                }
+                onPress={() => removeBullet(sectionIndex, bulletIndex)}
                 style={styles.iconButton}
               >
                 <Text color="danger">×</Text>
@@ -118,12 +145,7 @@ export function ReviewDraftDocumentEditor({
             <Button
               size="sm"
               variant="secondary"
-              onPress={() =>
-                updateSection(sectionIndex, (current) => ({
-                  ...current,
-                  bullets: [...current.bullets, t('review.editor.emptyBullet')],
-                }))
-              }
+              onPress={() => addBullet(sectionIndex)}
             >
               {t('review.editor.addBullet')}
             </Button>
@@ -146,35 +168,14 @@ export function ReviewDraftDocumentEditor({
             <Button
               size="sm"
               variant="ghost"
-              onPress={() =>
-                onChange({
-                  sections: document.sections.filter(
-                    (_, index) => index !== sectionIndex,
-                  ),
-                })
-              }
+              onPress={() => removeSection(sectionIndex)}
             >
               {t('review.editor.removeSection')}
             </Button>
           </View>
         </View>
       ))}
-      <Button
-        fullWidth
-        variant="secondary"
-        onPress={() =>
-          onChange({
-            sections: [
-              ...document.sections,
-              {
-                id: Crypto.randomUUID(),
-                title: t('review.editor.emptySection'),
-                bullets: [t('review.editor.emptyBullet')],
-              },
-            ],
-          })
-        }
-      >
+      <Button fullWidth variant="secondary" onPress={addSection}>
         {t('review.editor.addSection')}
       </Button>
     </View>

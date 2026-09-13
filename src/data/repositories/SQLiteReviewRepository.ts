@@ -293,62 +293,87 @@ async function loadReviewDraft(
 function mapReviewCandidateRows(rows: ReviewCandidateRow[]): ReviewCandidate[] {
   const candidates = new Map<string, ReviewCandidate>();
   for (const row of rows) {
-    const id = expectNonEmptyString(row.id, 'review candidate id');
-    let candidate = candidates.get(id);
-    if (!candidate) {
-      candidate = {
-        id,
-        title: expectNonEmptyString(row.title, 'review candidate title'),
-        impactStatement: expectNullableText(
-          row.impact_statement,
-          'review candidate impact statement',
-        ),
-        rawNote: expectNonEmptyString(row.raw_note, 'review candidate note'),
-        occurredAt: expectIsoTimestamp(
-          row.occurred_at,
-          'review candidate date',
-        ),
-        outcomeType:
-          row.outcome_type === null
-            ? null
-            : expectOneOf(
-                row.outcome_type,
-                OUTCOME_TYPES,
-                'review candidate outcome',
-              ),
-        evidence: null,
-        skillIds: [],
-      };
-      candidates.set(id, candidate);
-    }
-    if (row.evidence_type !== null || row.evidence_detail !== null) {
-      const detail = expectNonEmptyString(
-        row.evidence_detail,
-        'review candidate evidence',
-      );
-      candidate.evidence ??= { types: [], detail };
-      if (candidate.evidence.detail !== detail) {
-        throw new Error('Stored review candidate evidence is inconsistent.');
-      }
-      const type = expectOneOf(
-        row.evidence_type,
-        EVIDENCE_TYPES,
-        'review candidate evidence type',
-      );
-      if (!candidate.evidence.types.includes(type)) {
-        candidate.evidence.types.push(type);
-      }
-    }
-    if (row.skill_id !== null) {
-      if (!isSkillId(row.skill_id)) {
-        throw new Error('Stored review candidate skill is invalid.');
-      }
-      if (!candidate.skillIds.includes(row.skill_id)) {
-        candidate.skillIds.push(row.skill_id);
-      }
-    }
+    const candidate = getOrCreateReviewCandidate(candidates, row);
+    addReviewCandidateEvidence(candidate, row);
+    addReviewCandidateSkill(candidate, row);
   }
   return [...candidates.values()];
+}
+
+function getOrCreateReviewCandidate(
+  candidates: Map<string, ReviewCandidate>,
+  row: ReviewCandidateRow,
+): ReviewCandidate {
+  const id = expectNonEmptyString(row.id, 'review candidate id');
+  const existing = candidates.get(id);
+  if (existing) {
+    return existing;
+  }
+
+  const candidate: ReviewCandidate = {
+    id,
+    title: expectNonEmptyString(row.title, 'review candidate title'),
+    impactStatement: expectNullableText(
+      row.impact_statement,
+      'review candidate impact statement',
+    ),
+    rawNote: expectNonEmptyString(row.raw_note, 'review candidate note'),
+    occurredAt: expectIsoTimestamp(row.occurred_at, 'review candidate date'),
+    outcomeType: getReviewCandidateOutcome(row.outcome_type),
+    evidence: null,
+    skillIds: [],
+  };
+  candidates.set(id, candidate);
+  return candidate;
+}
+
+function getReviewCandidateOutcome(
+  value: unknown,
+): ReviewCandidate['outcomeType'] {
+  return value === null
+    ? null
+    : expectOneOf(value, OUTCOME_TYPES, 'review candidate outcome');
+}
+
+function addReviewCandidateEvidence(
+  candidate: ReviewCandidate,
+  row: ReviewCandidateRow,
+): void {
+  if (row.evidence_type === null && row.evidence_detail === null) {
+    return;
+  }
+
+  const detail = expectNonEmptyString(
+    row.evidence_detail,
+    'review candidate evidence',
+  );
+  const type = expectOneOf(
+    row.evidence_type,
+    EVIDENCE_TYPES,
+    'review candidate evidence type',
+  );
+  candidate.evidence ??= { types: [], detail };
+  if (candidate.evidence.detail !== detail) {
+    throw new Error('Stored review candidate evidence is inconsistent.');
+  }
+  if (!candidate.evidence.types.includes(type)) {
+    candidate.evidence.types.push(type);
+  }
+}
+
+function addReviewCandidateSkill(
+  candidate: ReviewCandidate,
+  row: ReviewCandidateRow,
+): void {
+  if (row.skill_id === null) {
+    return;
+  }
+  if (!isSkillId(row.skill_id)) {
+    throw new Error('Stored review candidate skill is invalid.');
+  }
+  if (!candidate.skillIds.includes(row.skill_id)) {
+    candidate.skillIds.push(row.skill_id);
+  }
 }
 
 function mapReviewDraftRow(row: ReviewDraftRow): Omit<ReviewDraft, 'entries'> {
@@ -457,7 +482,7 @@ function assertUpdateReviewDraft(input: UpdateReviewDraft): void {
 
 function parseReviewDocument(value: unknown): ReviewDraftDocument {
   if (typeof value !== 'string') {
-    throw new Error('Stored review draft document is invalid.');
+    throw new TypeError('Stored review draft document is invalid.');
   }
   let parsed: unknown;
   try {

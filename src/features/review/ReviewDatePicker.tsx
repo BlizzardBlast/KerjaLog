@@ -25,11 +25,8 @@ export function ReviewDatePicker({
       DateTimePickerAndroid.open({
         value: date,
         mode: 'date',
-        onChange: (_, selectedDate) => {
-          if (selectedDate) {
-            onChange(formatLocalDate(selectedDate));
-          }
-        },
+        onValueChange: (_, selectedDate) =>
+          onChange(formatLocalDate(selectedDate)),
       });
     }
   };
@@ -44,11 +41,9 @@ export function ReviewDatePicker({
           mode="date"
           display="compact"
           style={styles.iosPicker}
-          onChange={(_, selectedDate) => {
-            if (selectedDate) {
-              onChange(formatLocalDate(selectedDate));
-            }
-          }}
+          onValueChange={(_, selectedDate) =>
+            onChange(formatLocalDate(selectedDate))
+          }
         />
       ) : (
         <Pressable

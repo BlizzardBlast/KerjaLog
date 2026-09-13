@@ -79,5 +79,6 @@ function createTemporaryBackupUri(): string {
   }
   const filename = createPortableBackupFilename();
   const suffix = Crypto.randomUUID();
-  return `${FileSystem.cacheDirectory}${filename.replace('.json', `-${suffix}.json`)}`;
+  const filenameStem = filename.slice(0, -'.json'.length);
+  return `${FileSystem.cacheDirectory}${filenameStem}-${suffix}.json`;
 }

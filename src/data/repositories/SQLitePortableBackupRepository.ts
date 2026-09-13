@@ -374,7 +374,7 @@ function mapBoolean(value: unknown, field: string): boolean {
 
 function parseStoredJson(value: unknown, field: string): unknown {
   if (typeof value !== 'string') {
-    throw new Error(`Stored ${field} is invalid.`);
+    throw new TypeError(`Stored ${field} is invalid.`);
   }
   try {
     return JSON.parse(value);

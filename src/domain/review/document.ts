@@ -6,6 +6,11 @@ import type {
   ReviewPurpose,
 } from '@/domain/review/model';
 
+const markdownInlineEscapePattern = new RegExp(
+  String.raw`([\\${String.fromCodePoint(0x60)}*_{}[\]<>()#+.!|])`,
+  'gu',
+);
+
 export function recommendReviewCandidates(
   candidates: readonly ReviewCandidate[],
   maximum = 3,
@@ -123,7 +128,8 @@ export function renderReviewDocumentHtml(
         .filter((bullet) => bullet.trim())
         .map((bullet) => `<li>${escapeHtml(bullet.trim())}</li>`)
         .join('');
-      return `<section><h2>${escapeHtml(section.title.trim())}</h2>${bullets ? `<ul>${bullets}</ul>` : ''}</section>`;
+      const bulletList = bullets ? `<ul>${bullets}</ul>` : '';
+      return `<section><h2>${escapeHtml(section.title.trim())}</h2>${bulletList}</section>`;
     })
     .join('');
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111827;padding:32px;line-height:1.5}h1{font-size:24px}h2{font-size:18px;margin-top:24px}li{margin:8px 0}</style></head><body><h1>${escapeHtml(title.trim())}</h1>${sections}</body></html>`;
@@ -175,5 +181,5 @@ function renderSections(
 }
 
 function escapeMarkdownInline(value: string): string {
-  return value.replace(/([\\`*_{}[\]<>()#+.!|])/gu, '\\$1');
+  return value.replace(markdownInlineEscapePattern, String.raw`\$1`);
 }

@@ -163,15 +163,11 @@ export function ReviewSetupForm({
             return;
           }
           initializedSelectionKey.current = candidateRequestKey;
-          const suggested = selectedSourceDraft
-            ? candidates.filter((candidate) =>
-                selectedSourceDraft.entries.some(
-                  (entry) => entry.sourceEntryId === candidate.id,
-                ),
-              )
-            : supportedSkillId
-              ? []
-              : recommendReviewCandidates(candidates);
+          const suggested = getInitialCandidateSelection(
+            candidates,
+            selectedSourceDraft,
+            supportedSkillId,
+          );
           form.setFieldValue(
             'selectedEntryIds',
             suggested.map((candidate) => candidate.id),
@@ -404,6 +400,20 @@ export function ReviewSetupForm({
       </View>
     </View>
   );
+}
+
+function getInitialCandidateSelection(
+  candidates: readonly ReviewCandidate[],
+  sourceDraft: ReviewDraft | null,
+  supportedSkillId: string | null,
+): ReviewCandidate[] {
+  if (sourceDraft) {
+    return candidates.filter((candidate) =>
+      sourceDraft.entries.some((entry) => entry.sourceEntryId === candidate.id),
+    );
+  }
+
+  return supportedSkillId ? [] : recommendReviewCandidates(candidates);
 }
 
 const styles = StyleSheet.create({

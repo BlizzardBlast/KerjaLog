@@ -1,5 +1,4 @@
-import type * as Sentry from '@sentry/react-native';
-import type { Breadcrumb } from '@sentry/react-native';
+import type { Breadcrumb, Event } from '@sentry/react-native';
 import {
   isSensitiveFieldKey,
   redactExceptionText,
@@ -61,7 +60,7 @@ function redactEventObject<Value extends object>(value: Value): Value {
   return redactObject(value, new WeakSet<object>()) as Value;
 }
 
-function redactEventRequest(request: NonNullable<Sentry.Event['request']>) {
+function redactEventRequest(request: NonNullable<Event['request']>) {
   const {
     cookies: _cookies,
     data: _data,
@@ -78,7 +77,7 @@ function redactEventRequest(request: NonNullable<Sentry.Event['request']>) {
   };
 }
 
-function redactEventUser(user: NonNullable<Sentry.Event['user']>) {
+function redactEventUser(user: NonNullable<Event['user']>) {
   const {
     email: _email,
     geo: _geo,
@@ -95,7 +94,7 @@ function redactEventUser(user: NonNullable<Sentry.Event['user']>) {
 }
 
 export function redactEventException(
-  exception: NonNullable<Sentry.Event['exception']>,
+  exception: NonNullable<Event['exception']>,
 ) {
   if (!exception.values) {
     return exception;
@@ -111,11 +110,11 @@ export function redactEventException(
 }
 
 export function redactEventMetadata(
-  contexts: Sentry.Event['contexts'],
-  extra: Sentry.Event['extra'],
-  request: Sentry.Event['request'],
-  tags: Sentry.Event['tags'],
-  user: Sentry.Event['user'],
+  contexts: Event['contexts'],
+  extra: Event['extra'],
+  request: Event['request'],
+  tags: Event['tags'],
+  user: Event['user'],
 ) {
   return {
     ...(contexts ? { contexts: redactEventObject(contexts) } : {}),
