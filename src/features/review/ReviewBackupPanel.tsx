@@ -1,6 +1,7 @@
 import { Alert, StyleSheet, View } from 'react-native';
 import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
+import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { radii, spacing } from '@/design-system/tokens/theme';
 import {
   getPortableBackupSummary,
@@ -30,9 +31,18 @@ export function ReviewBackupPanel({
   onReplace,
 }: Readonly<ReviewBackupPanelProps>) {
   const { t } = useI18n();
+  const { theme } = useTheme();
 
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.colors.surfaceSubtle,
+          borderColor: theme.colors.border,
+        },
+      ]}
+    >
       <Text accessibilityRole="header" variant="subheading">
         {t('review.backup.title')}
       </Text>
@@ -69,12 +79,21 @@ export function ReviewBackupPanel({
         </Button>
       </View>
       {error ? (
-        <Text accessibilityRole="alert" color="danger" variant="caption">
+        <Text
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
+          color="danger"
+          variant="caption"
+        >
           {t(`review.backup.${error}Error`)}
         </Text>
       ) : null}
       {pendingImport ? (
-        <View accessibilityRole="alert" style={styles.summary}>
+        <View
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
+          style={styles.summary}
+        >
           <Text variant="bodyStrong">{t('review.backup.readyTitle')}</Text>
           <Text color="textMuted" variant="caption">
             {t(
@@ -129,6 +148,7 @@ export function ReviewBackupPanel({
 const styles = StyleSheet.create({
   card: {
     borderRadius: radii.lg,
+    borderWidth: 1,
     gap: spacing[3],
     padding: spacing[4],
   },

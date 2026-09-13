@@ -3,7 +3,7 @@ import * as Crypto from 'expo-crypto';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Platform, Share } from 'react-native';
+import { Share } from 'react-native';
 
 export type ReviewOutputDocument = {
   html: string;
@@ -12,6 +12,7 @@ export type ReviewOutputDocument = {
 };
 
 export type ReviewOutputAdapter = {
+  copyPlainText(document: ReviewOutputDocument): Promise<void>;
   copyFormatted(document: ReviewOutputDocument): Promise<void>;
   shareMarkdown(document: ReviewOutputDocument): Promise<void>;
   sharePdf(document: ReviewOutputDocument): Promise<void>;
@@ -19,14 +20,14 @@ export type ReviewOutputAdapter = {
 };
 
 export const reviewOutput: ReviewOutputAdapter = {
-  async copyFormatted({ html, plainText }) {
-    if (Platform.OS === 'android') {
-      await Clipboard.setStringAsync(html, {
-        inputFormat: Clipboard.StringFormat.HTML,
-      });
-      return;
-    }
+  async copyPlainText({ plainText }) {
     await Clipboard.setStringAsync(plainText);
+  },
+
+  async copyFormatted({ html }) {
+    await Clipboard.setStringAsync(html, {
+      inputFormat: Clipboard.StringFormat.HTML,
+    });
   },
 
   async shareMarkdown({ markdown }) {

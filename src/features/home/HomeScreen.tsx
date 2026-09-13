@@ -28,7 +28,8 @@ function ProfiledHomeScreen() {
   const insets = useSafeAreaInsets();
   const openCapture = () => router.push('/entry/new');
   const openReflection = () => router.push('/reflection');
-  const openReview = () => router.push('/review');
+  const openReview = () =>
+    router.push({ pathname: '/review', params: { create: 'true' } });
   const openEntry = (id: string) =>
     router.push({ pathname: '/entry/[id]', params: { id } });
 

@@ -30,7 +30,8 @@ type DraftListState =
 
 function ProfiledReviewScreen() {
   const router = Sentry.wrapExpoRouter(useRouter());
-  const { skillId, copyFrom } = useLocalSearchParams<{
+  const { create, skillId, copyFrom } = useLocalSearchParams<{
+    create?: string;
     skillId?: string;
     copyFrom?: string;
   }>();
@@ -39,7 +40,10 @@ function ProfiledReviewScreen() {
   const { restoreImportedState, state: onboarding } = useOnboarding();
   const insets = useSafeAreaInsets();
   const [state, setState] = useState<DraftListState>({ status: 'loading' });
-  const [isCreating, setIsCreating] = useState(Boolean(copyFrom));
+  const opensSetupFromHandoff =
+    create === 'true' || Boolean(copyFrom) || Boolean(skillId);
+  const [isCreating, setIsCreating] = useState(opensSetupFromHandoff);
+  const showsSetup = isCreating || opensSetupFromHandoff;
   const [portableAction, setPortableAction] = useState<
     'export' | 'import' | null
   >(null);
@@ -81,6 +85,11 @@ function ProfiledReviewScreen() {
   };
   const handleCreated = (draft: ReviewDraft) => {
     setIsCreating(false);
+    router.setParams({
+      copyFrom: undefined,
+      create: undefined,
+      skillId: undefined,
+    });
     void loadDrafts();
     router.push({ pathname: '/review/[id]', params: { id: draft.id } });
   };
@@ -161,13 +170,17 @@ function ProfiledReviewScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {isCreating || copyFrom ? (
+      {showsSetup ? (
         <ReviewSetupForm
           skillId={typeof skillId === 'string' ? skillId : undefined}
           copyFromDraftId={typeof copyFrom === 'string' ? copyFrom : undefined}
           onCancel={() => {
             setIsCreating(false);
-            router.setParams({ copyFrom: undefined, skillId: undefined });
+            router.setParams({
+              copyFrom: undefined,
+              create: undefined,
+              skillId: undefined,
+            });
           }}
           onCreated={handleCreated}
         />
@@ -205,7 +218,17 @@ function ProfiledReviewScreen() {
             </View>
           ) : null}
           {state.status === 'error' ? (
-            <View accessibilityRole="alert" style={styles.stateCard}>
+            <View
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+              style={[
+                styles.stateCard,
+                {
+                  backgroundColor: theme.colors.surfaceSubtle,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+            >
               <Text variant="subheading">{t('review.error.title')}</Text>
               <Text color="textMuted">{t('review.error.description')}</Text>
               <Button
@@ -218,7 +241,15 @@ function ProfiledReviewScreen() {
             </View>
           ) : null}
           {state.status === 'loaded' && state.drafts.length === 0 ? (
-            <View style={styles.stateCard}>
+            <View
+              style={[
+                styles.stateCard,
+                {
+                  backgroundColor: theme.colors.surfaceSubtle,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+            >
               <Text variant="subheading">{t('review.empty.title')}</Text>
               <Text color="textMuted">{t('review.empty.description')}</Text>
             </View>
@@ -279,7 +310,12 @@ const styles = StyleSheet.create({
   },
   heading: { gap: spacing[2] },
   loading: { alignItems: 'center', justifyContent: 'center', minHeight: 160 },
-  stateCard: { borderRadius: radii.lg, gap: spacing[3], padding: spacing[4] },
+  stateCard: {
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    gap: spacing[3],
+    padding: spacing[4],
+  },
   drafts: { gap: spacing[3] },
   draft: {
     alignItems: 'center',

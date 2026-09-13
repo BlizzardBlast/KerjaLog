@@ -6,6 +6,7 @@ import {
 } from '@/data/keyedDatabaseAccess';
 import { EVIDENCE_TYPES, OUTCOME_TYPES } from '@/domain/entry/model';
 import { isCanonicalIsoTimestamp } from '@/domain/entry/timestamp';
+import { assertReviewDraftDocument } from '@/domain/review/documentValidation';
 import {
   REVIEW_PURPOSES,
   type CreateReviewDraft,
@@ -53,6 +54,10 @@ type ReviewDraftEntryRow = {
   evidence_detail: unknown;
   occurred_at: unknown;
   sort_order: unknown;
+};
+
+type ReviewDraftEntryListRow = ReviewDraftEntryRow & {
+  review_draft_id: unknown;
 };
 
 export class SQLiteReviewRepository implements ReviewRepository {
@@ -111,7 +116,20 @@ export class SQLiteReviewRepository implements ReviewRepository {
          FROM review_drafts
          ORDER BY updated_at DESC, created_at DESC, id DESC`,
       );
-      return Promise.all(rows.map((row) => loadReviewDraft(db, row)));
+      const entryRows = await db.getAllAsync<ReviewDraftEntryListRow>(
+        `SELECT review_draft_id, source_entry_id, title, statement,
+          evidence_detail, occurred_at, sort_order
+         FROM review_draft_entries
+         ORDER BY review_draft_id ASC, sort_order ASC`,
+      );
+      const entriesByDraftId = groupReviewDraftEntries(entryRows);
+      return rows.map((row) => {
+        const draft = mapReviewDraftRow(row);
+        return {
+          ...draft,
+          entries: entriesByDraftId.get(draft.id) ?? [],
+        };
+      });
     });
   }
 
@@ -384,6 +402,22 @@ function mapReviewDraftEntryRow(
   };
 }
 
+function groupReviewDraftEntries(
+  rows: readonly ReviewDraftEntryListRow[],
+): Map<string, ReviewDraftEntrySnapshot[]> {
+  const entriesByDraftId = new Map<string, ReviewDraftEntrySnapshot[]>();
+  for (const row of rows) {
+    const draftId = expectNonEmptyString(
+      row.review_draft_id,
+      'review draft entry draft id',
+    );
+    const entries = entriesByDraftId.get(draftId) ?? [];
+    entries.push(mapReviewDraftEntryRow(row));
+    entriesByDraftId.set(draftId, entries);
+  }
+  return entriesByDraftId;
+}
+
 function assertCreateReviewDraft(input: CreateReviewDraft): void {
   assertUpdateReviewDraft(input);
   if (!REVIEW_PURPOSES.includes(input.purpose)) {
@@ -418,39 +452,7 @@ function assertUpdateReviewDraft(input: UpdateReviewDraft): void {
   if (!input.title.trim()) {
     throw new Error('Review draft title is required.');
   }
-  assertReviewDocument(input.document);
-}
-
-function assertReviewDocument(document: ReviewDraftDocument): void {
-  if (!Array.isArray(document.sections)) {
-    throw new Error('Review draft document is invalid.');
-  }
-  const ids = new Set<string>();
-  for (const section of document.sections) {
-    if (
-      typeof section !== 'object' ||
-      section === null ||
-      !('id' in section) ||
-      !('title' in section) ||
-      !('bullets' in section) ||
-      typeof section.id !== 'string' ||
-      typeof section.title !== 'string' ||
-      !section.id.trim() ||
-      !section.title.trim() ||
-      !Array.isArray(section.bullets) ||
-      ids.has(section.id)
-    ) {
-      throw new Error('Review draft section is invalid.');
-    }
-    if (
-      !section.bullets.every(
-        (bullet) => typeof bullet === 'string' && bullet.trim(),
-      )
-    ) {
-      throw new Error('Review draft bullet is invalid.');
-    }
-    ids.add(section.id);
-  }
+  assertReviewDraftDocument(input.document);
 }
 
 function parseReviewDocument(value: unknown): ReviewDraftDocument {
@@ -470,8 +472,8 @@ function parseReviewDocument(value: unknown): ReviewDraftDocument {
   ) {
     throw new Error('Stored review draft document is invalid.');
   }
-  assertReviewDocument(parsed as ReviewDraftDocument);
-  return parsed as ReviewDraftDocument;
+  assertReviewDraftDocument(parsed);
+  return parsed;
 }
 
 function sortSnapshots(

@@ -32,6 +32,16 @@ jest.mock('@/data/repositories/reviewRepository', () => ({
   },
 }));
 
+jest.mock('@/platform/review-output/reviewOutput', () => ({
+  reviewOutput: {
+    copyFormatted: jest.fn(),
+    copyPlainText: jest.fn(),
+    shareMarkdown: jest.fn(),
+    sharePdf: jest.fn(),
+    sharePlainText: jest.fn(),
+  },
+}));
+
 jest.mock('@/i18n/I18nProvider', () => ({
   useI18n: () => ({
     t: (key: string, params?: Record<string, string | number>) =>
@@ -118,13 +128,67 @@ describe('ReviewDraftScreen', () => {
       </ThemeProvider>,
     );
 
-    await screen.findByRole('button', { name: 'review.output.copy' });
-    fireEvent.press(screen.getByRole('button', { name: 'review.output.copy' }));
+    await screen.findByRole('button', { name: 'review.output.copyFormatted' });
+    fireEvent.press(
+      screen.getByRole('button', { name: 'review.output.copyFormatted' }),
+    );
 
     expect(alert).toHaveBeenCalledWith(
       'review.output.confirmTitle',
       'review.output.confirmDescription',
       expect.any(Array),
+    );
+  });
+
+  test('resets editor form values when navigation changes the draft id', async () => {
+    const nextDraft: ReviewDraft = {
+      ...draft,
+      id: 'review-2',
+      title: 'October review',
+      document: {
+        sections: [
+          {
+            id: 'next-highlights',
+            title: 'October highlights',
+            bullets: ['Closed a reporting gap.'],
+          },
+        ],
+      },
+    };
+    const view = await render(
+      <ThemeProvider>
+        <ReviewDraftScreen id="review-1" />
+      </ThemeProvider>,
+    );
+
+    const firstName = await screen.findByLabelText('review.editor.titleLabel');
+    expect(firstName.props.value).toBe('September review');
+    repository.findDraft.mockResolvedValue(nextDraft);
+
+    await act(async () => {
+      view.rerender(
+        <ThemeProvider>
+          <ReviewDraftScreen id="review-2" />
+        </ThemeProvider>,
+      );
+    });
+
+    await waitFor(() =>
+      expect(
+        screen.getByLabelText('review.editor.titleLabel').props.value,
+      ).toBe('October review'),
+    );
+    await act(async () => {
+      fireEvent.press(
+        screen.getByRole('button', { name: 'review.editor.save' }),
+      );
+    });
+
+    await waitFor(() =>
+      expect(repository.updateDraft).toHaveBeenLastCalledWith(
+        'review-2',
+        expect.objectContaining({ title: 'October review' }),
+      ),
     );
   });
 });

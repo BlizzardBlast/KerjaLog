@@ -2,7 +2,6 @@ import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Platform } from 'react-native';
 import {
   createReviewOutputFilename,
   reviewOutput,
@@ -51,23 +50,13 @@ describe('review output adapter', () => {
     ).toBe('kerjalog-review-2026-09-12.md');
   });
 
-  test('copies HTML only on Android and keeps a plain fallback for other native platforms', async () => {
-    const originalPlatform = Platform.OS;
-    Object.defineProperty(Platform, 'OS', {
-      configurable: true,
-      value: 'android',
-    });
+  test('copies either plain text or escaped HTML on every native platform', async () => {
+    await reviewOutput.copyPlainText(document);
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith('Review');
+
     await reviewOutput.copyFormatted(document);
     expect(Clipboard.setStringAsync).toHaveBeenCalledWith('<h1>Review</h1>', {
       inputFormat: Clipboard.StringFormat.HTML,
-    });
-
-    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
-    await reviewOutput.copyFormatted(document);
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('Review');
-    Object.defineProperty(Platform, 'OS', {
-      configurable: true,
-      value: originalPlatform,
     });
   });
 

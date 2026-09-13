@@ -39,6 +39,7 @@ export function ReviewDatePicker({
       <Text variant="label">{label}</Text>
       {Platform.OS === 'ios' ? (
         <DateTimePicker
+          accessibilityLabel={label}
           value={date}
           mode="date"
           display="compact"

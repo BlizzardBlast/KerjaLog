@@ -108,4 +108,48 @@ describe('SQLiteReviewRepository', () => {
     );
     expect(created).toMatchObject({ id: 'review-1', entries: draft.entries });
   });
+
+  test('loads all listed draft snapshots with one additional ordered query', async () => {
+    const getAllAsync = jest
+      .fn()
+      .mockResolvedValueOnce([
+        {
+          id: 'review-1',
+          title: draft.title,
+          purpose: draft.purpose,
+          period_start_date: draft.period.startDate,
+          period_end_date: draft.period.endDate,
+          document_json: JSON.stringify(draft.document),
+          created_at: '2026-09-03T08:00:00.000Z',
+          updated_at: '2026-09-03T08:00:00.000Z',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          review_draft_id: 'review-1',
+          source_entry_id: 'entry-1',
+          title: 'Simplified handoff',
+          statement: 'Simplified the handoff.',
+          evidence_detail: 'Team adopted the checklist.',
+          occurred_at: '2026-09-02T08:00:00.000Z',
+          sort_order: 0,
+        },
+      ]);
+    getDatabaseMock.mockResolvedValue({
+      getAllAsync,
+    } as unknown as Awaited<ReturnType<typeof getDatabase>>);
+
+    const drafts = await new SQLiteReviewRepository().listDrafts();
+
+    expect(getAllAsync).toHaveBeenCalledTimes(2);
+    expect(getAllAsync.mock.calls[1]?.[0]).toContain(
+      'FROM review_draft_entries',
+    );
+    expect(drafts).toEqual([
+      expect.objectContaining({
+        id: 'review-1',
+        entries: [expect.objectContaining({ sourceEntryId: 'entry-1' })],
+      }),
+    ]);
+  });
 });

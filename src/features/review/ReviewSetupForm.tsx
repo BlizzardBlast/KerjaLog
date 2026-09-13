@@ -62,6 +62,8 @@ export function ReviewSetupForm({
   const candidateRequestId = useRef(0);
   const sourceDraftRequestId = useRef(0);
   const initializedSelectionKey = useRef<string | null>(null);
+  const selectedSourceDraft =
+    copyFromDraft?.id === copyFromDraftId ? copyFromDraft : null;
   const initialPeriod = getReviewPeriod('this_month', new Date());
   const form = useForm({
     defaultValues: {
@@ -84,6 +86,7 @@ export function ReviewSetupForm({
       setSelectionError(false);
       setCreateError(false);
       try {
+        const entries = createReviewDraftEntries(selected);
         const purposeTitle = getReviewPurposeTitle(value.purpose, t);
         const created = await reviewRepository.createDraft({
           title:
@@ -91,10 +94,10 @@ export function ReviewSetupForm({
             t('review.draft.defaultName', { purpose: purposeTitle }),
           purpose: value.purpose,
           period: value.period,
-          entries: createReviewDraftEntries(selected),
+          entries,
           document: createReviewDraftDocument(
             value.purpose,
-            createReviewDraftEntries(selected),
+            entries,
             createReviewDocumentCopy(t),
           ),
         });
@@ -112,7 +115,7 @@ export function ReviewSetupForm({
     (state) => state.values.selectedEntryIds,
   );
   const isSubmitting = useSelector(form.store, (state) => state.isSubmitting);
-  const candidateRequestKey = `${period.startDate}:${period.endDate}:${supportedSkillId ?? ''}:${copyFromDraft?.id ?? ''}:${candidateReload}`;
+  const candidateRequestKey = `${period.startDate}:${period.endDate}:${supportedSkillId ?? ''}:${selectedSourceDraft?.id ?? ''}:${candidateReload}`;
 
   useEffect(() => {
     if (!copyFromDraftId?.trim()) {
@@ -139,6 +142,10 @@ export function ReviewSetupForm({
         }
       },
     );
+
+    return () => {
+      sourceDraftRequestId.current += 1;
+    };
   }, [copyFromDraftId, form, t]);
 
   const reloadCandidates = useCallback(() => {
@@ -156,9 +163,9 @@ export function ReviewSetupForm({
             return;
           }
           initializedSelectionKey.current = candidateRequestKey;
-          const suggested = copyFromDraft
+          const suggested = selectedSourceDraft
             ? candidates.filter((candidate) =>
-                copyFromDraft.entries.some(
+                selectedSourceDraft.entries.some(
                   (entry) => entry.sourceEntryId === candidate.id,
                 ),
               )
@@ -176,7 +183,13 @@ export function ReviewSetupForm({
           }
         },
       );
-  }, [candidateRequestKey, copyFromDraft, form, period, supportedSkillId]);
+  }, [
+    candidateRequestKey,
+    form,
+    period,
+    selectedSourceDraft,
+    supportedSkillId,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -286,7 +299,11 @@ export function ReviewSetupForm({
           </View>
         ) : null}
         {candidateState.status === 'error' ? (
-          <View accessibilityRole="alert" style={styles.alert}>
+          <View
+            accessibilityLiveRegion="polite"
+            accessibilityRole="alert"
+            style={styles.alert}
+          >
             <Text color="textMuted">{t('review.setup.candidatesError')}</Text>
             <Button
               size="sm"
@@ -302,7 +319,15 @@ export function ReviewSetupForm({
         ) : null}
         {candidateState.status === 'loaded' &&
         candidateState.candidates.length === 0 ? (
-          <View style={styles.emptyCard}>
+          <View
+            style={[
+              styles.emptyCard,
+              {
+                backgroundColor: theme.colors.surfaceSubtle,
+                borderColor: theme.colors.border,
+              },
+            ]}
+          >
             <Text color="textMuted">{t('review.setup.noCandidates')}</Text>
           </View>
         ) : null}
@@ -345,14 +370,23 @@ export function ReviewSetupForm({
             })
           : null}
         {selectionError ? (
-          <Text accessibilityRole="alert" color="danger" variant="caption">
+          <Text
+            accessibilityLiveRegion="polite"
+            accessibilityRole="alert"
+            color="danger"
+            variant="caption"
+          >
             {t('review.setup.chooseEntry')}
           </Text>
         ) : null}
       </View>
 
       {createError ? (
-        <Text accessibilityRole="alert" color="danger">
+        <Text
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
+          color="danger"
+        >
           {t('review.setup.createError')}
         </Text>
       ) : null}
@@ -380,7 +414,7 @@ const styles = StyleSheet.create({
   optionCell: { flexBasis: '46%', flexGrow: 1, minWidth: 140 },
   loading: { alignItems: 'center', justifyContent: 'center', minHeight: 80 },
   alert: { gap: spacing[3] },
-  emptyCard: { borderRadius: radii.md, padding: spacing[3] },
+  emptyCard: { borderRadius: radii.md, borderWidth: 1, padding: spacing[3] },
   candidate: {
     alignItems: 'center',
     borderRadius: radii.md,

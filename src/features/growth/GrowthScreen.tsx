@@ -55,7 +55,9 @@ function ProfiledGrowthScreen() {
         <Button
           fullWidth
           variant="secondary"
-          onPress={() => router.push('/review')}
+          onPress={() =>
+            router.push({ pathname: '/review', params: { create: 'true' } })
+          }
         >
           {t('review.open')}
         </Button>
