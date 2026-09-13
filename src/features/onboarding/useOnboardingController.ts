@@ -11,7 +11,10 @@ import {
   loadOnboardingState,
   saveOnboardingState,
 } from '@/features/onboarding/storage';
-import { getWeeklyReflectionNotificationStatus } from '@/platform/notifications/weeklyReflection';
+import {
+  disableWeeklyReflectionNotification,
+  getWeeklyReflectionNotificationStatus,
+} from '@/platform/notifications/weeklyReflection';
 import { ignoreError } from '@/shared/utils/function';
 
 export type OnboardingContextValue = {
@@ -22,6 +25,7 @@ export type OnboardingContextValue = {
   goNext: () => void;
   goBack: () => void;
   complete: () => Promise<void>;
+  restoreImportedState: (state: OnboardingState) => Promise<void>;
 };
 
 export function useOnboardingController(): OnboardingContextValue {
@@ -182,6 +186,20 @@ export function useOnboardingController(): OnboardingContextValue {
     setState(completedState);
   };
 
+  const restoreImportedState = async (importedState: OnboardingState) => {
+    const restoredState: OnboardingState = {
+      ...importedState,
+      weeklyReminderEnabled: false,
+    };
+
+    await disableWeeklyReflectionNotification();
+    await writeQueueRef.current;
+    await saveOnboardingState(restoredState);
+
+    skipNextAutosaveRef.current = true;
+    setState(restoredState);
+  };
+
   return {
     state,
     isHydrated,
@@ -190,5 +208,6 @@ export function useOnboardingController(): OnboardingContextValue {
     goNext,
     goBack,
     complete,
+    restoreImportedState,
   };
 }

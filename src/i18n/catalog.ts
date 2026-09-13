@@ -10,6 +10,7 @@ import { logDraftEn, logDraftId } from '@/i18n/logDraftTranslations';
 import { logEn, logId } from '@/i18n/logTranslations';
 import { preferenceEn, preferenceId } from '@/i18n/preferenceTranslations';
 import { reminderEn, reminderId } from '@/i18n/reminderTranslations';
+import { reviewEn, reviewId } from '@/i18n/reviewTranslations';
 import { skillEn, skillId } from '@/i18n/skillTranslations';
 import { en as baseEn, id as baseId } from '@/i18n/translations';
 import {
@@ -29,6 +30,7 @@ export const en = {
   ...logDraftEn,
   ...preferenceEn,
   ...reminderEn,
+  ...reviewEn,
   ...skillEn,
   ...weeklyReflectionEn,
   ...workAreaEn,
@@ -47,6 +49,7 @@ export const id: Record<TranslationKey, string> = {
   ...logDraftId,
   ...preferenceId,
   ...reminderId,
+  ...reviewId,
   ...skillId,
   ...weeklyReflectionId,
   ...workAreaId,

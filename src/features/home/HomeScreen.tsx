@@ -28,6 +28,7 @@ function ProfiledHomeScreen() {
   const insets = useSafeAreaInsets();
   const openCapture = () => router.push('/entry/new');
   const openReflection = () => router.push('/reflection');
+  const openReview = () => router.push('/review');
   const openEntry = (id: string) =>
     router.push({ pathname: '/entry/[id]', params: { id } });
 
@@ -80,7 +81,10 @@ function ProfiledHomeScreen() {
           />
         ) : null}
 
-        <ReviewScheduleSection reviewSchedule={state.reviewSchedule} />
+        <ReviewScheduleSection
+          reviewSchedule={state.reviewSchedule}
+          onOpenReview={openReview}
+        />
         <AppLockSettingCard />
       </ScrollView>
     </SafeAreaView>
