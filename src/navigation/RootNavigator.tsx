@@ -10,10 +10,11 @@ import { AppLockScreen } from '@/features/app-lock/AppLockScreen';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useWeeklyReflectionNotificationNavigation } from '@/navigation/useWeeklyReflectionNotificationNavigation';
+import { RouteLoadingScreen } from '@/shared/components/RouteLoadingScreen';
 
 export function RootNavigator() {
   const { theme, resolvedTheme, isHydrated: isThemeHydrated } = useTheme();
-  const { isHydrated: isLanguageHydrated } = useI18n();
+  const { isHydrated: isLanguageHydrated, t } = useI18n();
   const { state: onboardingState, isHydrated: isOnboardingHydrated } =
     useOnboarding();
   const {
@@ -38,7 +39,7 @@ export function RootNavigator() {
   }, [isReady]);
 
   if (!isReady) {
-    return null;
+    return <RouteLoadingScreen label={t('common.loading.opening')} />;
   }
 
   const statusBarStyle = resolvedTheme === 'dark' ? 'light' : 'dark';
