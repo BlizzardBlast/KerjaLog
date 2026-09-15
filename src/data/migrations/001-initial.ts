@@ -164,6 +164,38 @@ export const INITIAL_SCHEMA_SQL = `
       ON DELETE SET NULL
   );
 
+  CREATE TABLE review_drafts (
+    id TEXT PRIMARY KEY NOT NULL CHECK(length(trim(id)) > 0),
+    title TEXT NOT NULL CHECK(length(trim(title)) > 0),
+    purpose TEXT NOT NULL CHECK(purpose IN (
+      'performance_self_review',
+      'one_on_one',
+      'resume',
+      'interview'
+    )),
+    period_start_date TEXT NOT NULL CHECK(length(trim(period_start_date)) > 0),
+    period_end_date TEXT NOT NULL CHECK(length(trim(period_end_date)) > 0),
+    document_json TEXT NOT NULL CHECK(length(trim(document_json)) > 0),
+    created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
+    updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+  );
+
+  /* Source snapshots have no work_entries foreign key so a saved draft stays intact. */
+  CREATE TABLE review_draft_entries (
+    review_draft_id TEXT NOT NULL CHECK(length(trim(review_draft_id)) > 0),
+    source_entry_id TEXT NOT NULL CHECK(length(trim(source_entry_id)) > 0),
+    title TEXT NOT NULL CHECK(length(trim(title)) > 0),
+    statement TEXT NOT NULL CHECK(length(trim(statement)) > 0),
+    evidence_detail TEXT,
+    occurred_at TEXT NOT NULL CHECK(length(trim(occurred_at)) > 0),
+    sort_order INTEGER NOT NULL CHECK(sort_order >= 0),
+    PRIMARY KEY (review_draft_id, source_entry_id),
+    UNIQUE (review_draft_id, sort_order),
+    FOREIGN KEY (review_draft_id)
+      REFERENCES review_drafts(id)
+      ON DELETE CASCADE
+  );
+
   CREATE UNIQUE INDEX idx_work_areas_active_name_key
     ON work_areas(name_key)
     WHERE archived_at IS NULL;
@@ -173,6 +205,12 @@ export const INITIAL_SCHEMA_SQL = `
 
   CREATE INDEX idx_work_entries_work_area_id
     ON work_entries(work_area_id, occurred_at DESC, created_at DESC, id DESC);
+
+  CREATE INDEX idx_review_drafts_updated_at
+    ON review_drafts(updated_at DESC, created_at DESC, id DESC);
+
+  CREATE INDEX idx_review_draft_entries_order
+    ON review_draft_entries(review_draft_id, sort_order ASC);
 
   CREATE INDEX idx_work_entries_history_order
     ON work_entries(occurred_at DESC, created_at DESC, id DESC);

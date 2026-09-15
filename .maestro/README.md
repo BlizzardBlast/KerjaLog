@@ -24,6 +24,15 @@ This flow saves a quick note, develops it later through outcome, evidence, confi
 maestro test .maestro/draft-recovery.yaml
 ```
 
+## Automated Review Builder
+
+```bash
+maestro test .maestro/review-builder.yaml
+```
+
+This journey develops a review-ready entry, creates an editable Review Builder
+draft, and verifies the draft’s native output and backup/restore controls.
+
 This flow creates a partial Log draft, stops and relaunches KerjaLog, reopens capture, and verifies that the free-form draft text was restored from encrypted SQLCipher storage rather than AsyncStorage.
 
 ## Native security scenario

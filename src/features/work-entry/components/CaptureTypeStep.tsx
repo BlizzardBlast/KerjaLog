@@ -3,11 +3,11 @@ import { Button } from '@/design-system/components/Button';
 import type { LogEventIntent } from '@/domain/entry/impact';
 import { LogChoiceCard } from '@/features/work-entry/components/LogChoiceCard';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
+import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import type {
   LogStepFrameProps,
   Translate,
 } from '@/features/work-entry/components/logStepTypes';
-import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { logEventOptions } from '@/features/work-entry/options';
 
 type CaptureTypeStepProps = LogStepFrameProps & {

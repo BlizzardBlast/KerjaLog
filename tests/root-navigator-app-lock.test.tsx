@@ -36,11 +36,17 @@ jest.mock('expo-status-bar', () => ({
 }));
 
 jest.mock('@/design-system/theme/ThemeProvider', () => ({
-  useTheme: () => ({
-    theme: { colors: { surface: '#fff' } },
-    resolvedTheme: 'light',
-    isHydrated: true,
-  }),
+  useTheme: () => {
+    const { themes } = jest.requireActual<
+      typeof import('@/design-system/tokens/theme')
+    >('@/design-system/tokens/theme');
+
+    return {
+      theme: themes.light,
+      resolvedTheme: 'light',
+      isHydrated: true,
+    };
+  },
 }));
 
 jest.mock('@/features/app-lock/AppLockProvider', () => ({
@@ -59,7 +65,7 @@ jest.mock('@/features/onboarding/useOnboarding', () => ({
 }));
 
 jest.mock('@/i18n/I18nProvider', () => ({
-  useI18n: () => ({ isHydrated: true }),
+  useI18n: () => ({ isHydrated: true, t: () => 'Opening KerjaLog' }),
 }));
 
 jest.mock('@/navigation/useWeeklyReflectionNotificationNavigation', () => ({
@@ -98,5 +104,14 @@ describe('RootNavigator app lock', () => {
 
     await view.unmount();
     expect(mockStackUnmounts).toBe(1);
+  });
+
+  test('shows a startup progress state instead of a blank screen while App Lock hydrates', async () => {
+    mockAppLockState.isHydrated = false;
+
+    const view = await render(<RootNavigator />);
+
+    expect(view.getByRole('progressbar')).toBeTruthy();
+    expect(mockStackMounts).toBe(0);
   });
 });

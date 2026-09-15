@@ -8,11 +8,11 @@ import type { EvidenceType } from '@/domain/entry/model';
 import { InlineError } from '@/features/work-entry/components/InlineError';
 import { LogChoiceCard } from '@/features/work-entry/components/LogChoiceCard';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
+import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import type {
   LogStepFrameProps,
   Translate,
 } from '@/features/work-entry/components/logStepTypes';
-import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import { evidenceOptions } from '@/features/work-entry/options';
 
 const EVIDENCE_DETAIL_LABEL_ID = 'work-entry-evidence-detail-label';

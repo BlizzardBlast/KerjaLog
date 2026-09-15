@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react-native';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
+import { WEEKLY_REFLECTION_PROMPTS } from '@/features/weekly-reflection/reflectionPrompts';
 import { WeeklyReflectionPromptView } from '@/features/weekly-reflection/WeeklyReflectionPromptView';
 import { WeeklyReflectionSummaryView } from '@/features/weekly-reflection/WeeklyReflectionSummaryView';
-import { WEEKLY_REFLECTION_PROMPTS } from '@/features/weekly-reflection/reflectionPrompts';
 
 jest.mock('@/i18n/I18nProvider', () => ({
   useI18n: () => ({

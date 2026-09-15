@@ -8,11 +8,11 @@ import type {
 } from '@/domain/skill/model';
 import { LogChoiceCard } from '@/features/work-entry/components/LogChoiceCard';
 import { LogHeader } from '@/features/work-entry/components/LogHeader';
+import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 import type {
   LogStepFrameProps,
   Translate,
 } from '@/features/work-entry/components/logStepTypes';
-import { logStepStyles } from '@/features/work-entry/components/logStepStyles';
 
 const skillById = new Map(SKILL_CATALOG.map((skill) => [skill.id, skill]));
 

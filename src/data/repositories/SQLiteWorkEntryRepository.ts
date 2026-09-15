@@ -5,11 +5,11 @@ import {
   withKeyedTransaction,
 } from '@/data/keyedDatabaseAccess';
 import { buildWorkEntryHistorySqlQuery } from '@/data/queries/workEntryHistoryQuery';
+import { findWorkEntryDetail } from '@/data/repositories/workEntryDetailQuery';
 import {
   type JoinedWorkEntryRow,
   mapJoinedWorkEntryRows,
 } from '@/data/repositories/workEntryRowMapper';
-import { findWorkEntryDetail } from '@/data/repositories/workEntryDetailQuery';
 import {
   assertWorkEntryWriteInput,
   dedupeWorkEntrySkills,

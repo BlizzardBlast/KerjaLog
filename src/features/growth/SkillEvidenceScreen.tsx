@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { AppIcon } from '@/design-system/icons/AppIcon';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
@@ -83,6 +84,15 @@ function ProfiledSkillEvidenceScreen({
         </View>
 
         <View style={styles.body}>
+          <Button
+            fullWidth
+            variant="secondary"
+            onPress={() =>
+              router.push({ pathname: '/review', params: { skillId } })
+            }
+          >
+            {t('review.open')}
+          </Button>
           <SkillEvidenceContent
             locale={locale}
             state={controller.state}
@@ -126,6 +136,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    gap: spacing[4],
     marginTop: spacing[5],
   },
 });

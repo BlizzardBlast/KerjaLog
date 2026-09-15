@@ -2,8 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { render, screen, waitFor } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
-import type { WorkArea } from '@/domain/work-area/model';
 import type { WorkEntryDetail } from '@/domain/entry/model';
+import type { WorkArea } from '@/domain/work-area/model';
 import { SavedEntryScreen } from '@/features/work-entry/SavedEntryScreen';
 
 const mockUseWorkEntry = jest.fn();

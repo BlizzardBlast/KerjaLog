@@ -6,6 +6,7 @@ import { DEFAULT_ONBOARDING_STATE } from '@/features/onboarding/model';
 import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { I18nProvider } from '@/i18n/I18nProvider';
+
 const getItemMock = jest.mocked(AsyncStorage.getItem);
 const setItemMock = jest.mocked(AsyncStorage.setItem);
 const getPermissionsAsync = jest.mocked(Notifications.getPermissionsAsync);
@@ -160,6 +161,36 @@ describe('OnboardingProvider', () => {
     expect(JSON.parse(String(setItemMock.mock.calls[0]?.[1]))).toEqual(
       expect.objectContaining({
         weeklyReminderEnabled: false,
+      }),
+    );
+  });
+
+  test('restores an imported reminder schedule while forcing the reminder off', async () => {
+    getItemMock.mockResolvedValueOnce(null);
+    setItemMock.mockResolvedValue(undefined);
+
+    const { result } = await renderHook(() => useOnboarding(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrated).toBe(true));
+
+    await act(async () => {
+      await result.current.restoreImportedState({
+        ...DEFAULT_ONBOARDING_STATE,
+        weeklyReminderEnabled: true,
+        weeklyReminderSchedule: { weekday: 2, hour: 9, minute: 15 },
+      });
+    });
+
+    expect(cancelScheduledNotificationAsync).toHaveBeenCalledWith(
+      'kerjalog-weekly-reflection',
+    );
+    expect(result.current.state).toMatchObject({
+      weeklyReminderEnabled: false,
+      weeklyReminderSchedule: { weekday: 2, hour: 9, minute: 15 },
+    });
+    expect(JSON.parse(String(setItemMock.mock.calls.at(-1)?.[1]))).toEqual(
+      expect.objectContaining({
+        weeklyReminderEnabled: false,
+        weeklyReminderSchedule: { weekday: 2, hour: 9, minute: 15 },
       }),
     );
   });

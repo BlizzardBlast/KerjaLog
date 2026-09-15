@@ -22,6 +22,7 @@ type TranslationParams = Record<string, string | number>;
 type I18nContextValue = {
   language: Language;
   isHydrated: boolean;
+  restoreImportedLanguage: (language: Language) => Promise<void>;
   setLanguage: (language: Language) => void;
   t: (key: TranslationKey, params?: TranslationParams) => string;
 };
@@ -90,6 +91,14 @@ export function I18nProvider({ children }: Readonly<PropsWithChildren>) {
     persistLanguage(nextLanguage).catch(ignoreError);
   }, []);
 
+  const restoreImportedLanguage = useCallback(
+    async (nextLanguage: Language) => {
+      await persistLanguage(nextLanguage);
+      setLanguageState(nextLanguage);
+    },
+    [],
+  );
+
   const t = useCallback(
     (key: TranslationKey, params?: TranslationParams) =>
       interpolate(translations[languageState][key], params),
@@ -100,10 +109,11 @@ export function I18nProvider({ children }: Readonly<PropsWithChildren>) {
     () => ({
       language: languageState,
       isHydrated,
+      restoreImportedLanguage,
       setLanguage,
       t,
     }),
-    [isHydrated, languageState, setLanguage, t],
+    [isHydrated, languageState, restoreImportedLanguage, setLanguage, t],
   );
 
   return <I18nContext value={value}>{children}</I18nContext>;

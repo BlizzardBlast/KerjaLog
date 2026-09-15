@@ -23,6 +23,7 @@ const allowScreenCaptureMock = jest.mocked(
 );
 
 const originalPlatform = Platform.OS;
+const originalDevelopment = __DEV__;
 
 function setPlatform(os: typeof Platform.OS) {
   Object.defineProperty(Platform, 'OS', {
@@ -31,9 +32,17 @@ function setPlatform(os: typeof Platform.OS) {
   });
 }
 
+function setDevelopment(isDevelopment: boolean) {
+  Object.defineProperty(globalThis, '__DEV__', {
+    configurable: true,
+    value: isDevelopment,
+  });
+}
+
 afterEach(() => {
   jest.clearAllMocks();
   setPlatform(originalPlatform);
+  setDevelopment(originalDevelopment);
 });
 
 describe('App Lock screen privacy', () => {
@@ -50,12 +59,21 @@ describe('App Lock screen privacy', () => {
 
   test('uses FLAG_SECURE-backed screen capture protection on Android', async () => {
     setPlatform('android');
-
+    setDevelopment(false);
     await setAppLockScreenPrivacyEnabled(true);
     await setAppLockScreenPrivacyEnabled(false);
 
     expect(preventScreenCaptureMock).toHaveBeenCalledWith('kerjalog-app-lock');
     expect(allowScreenCaptureMock).toHaveBeenCalledWith('kerjalog-app-lock');
     expect(enableIosPrivacyMock).not.toHaveBeenCalled();
+  });
+
+  test('does not set a secure screenshot flag in Android development runtimes', async () => {
+    setPlatform('android');
+    setDevelopment(true);
+    await setAppLockScreenPrivacyEnabled(true);
+
+    expect(preventScreenCaptureMock).not.toHaveBeenCalled();
+    expect(allowScreenCaptureMock).toHaveBeenCalledWith('kerjalog-app-lock');
   });
 });

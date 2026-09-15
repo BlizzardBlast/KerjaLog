@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { DecorativeView } from '@/design-system/components/DecorativeView';
 import { Text } from '@/design-system/components/Text';
 import { AppIcon } from '@/design-system/icons/AppIcon';
@@ -6,8 +6,8 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { spacing } from '@/design-system/tokens/theme';
 import { SectionHeading } from '@/features/home/components/SectionHeading';
 import type { ReviewSchedule } from '@/features/onboarding/model';
-import type { TranslationKey } from '@/i18n/translations';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translations';
 
 const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
   'within-3-months': 'home.review.within3Months',
@@ -18,10 +18,12 @@ const reviewScheduleLabelKeys: Record<ReviewSchedule, TranslationKey> = {
 
 type ReviewScheduleSectionProps = {
   reviewSchedule: ReviewSchedule | undefined;
+  onOpenReview: () => void;
 };
 
 export function ReviewScheduleSection({
   reviewSchedule,
+  onOpenReview,
 }: Readonly<ReviewScheduleSectionProps>) {
   const { theme } = useTheme();
   const { t } = useI18n();
@@ -35,11 +37,16 @@ export function ReviewScheduleSection({
         title={t('home.review.title')}
         description={t('home.review.description')}
       />
-      <View
-        style={[
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('review.open')}
+        onPress={onOpenReview}
+        style={({ pressed }) => [
           styles.reviewRow,
           {
-            backgroundColor: theme.colors.surface,
+            backgroundColor: pressed
+              ? theme.colors.primarySoft
+              : theme.colors.surface,
             borderColor: theme.colors.border,
           },
         ]}
@@ -62,7 +69,10 @@ export function ReviewScheduleSection({
             {reviewScheduleLabel}
           </Text>
         </View>
-      </View>
+        <Text color="primary" variant="caption">
+          {t('review.open')}
+        </Text>
+      </Pressable>
     </>
   );
 }
@@ -74,6 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     gap: 14,
+    minHeight: 64,
     padding: spacing[4],
   },
   reviewIcon: {
