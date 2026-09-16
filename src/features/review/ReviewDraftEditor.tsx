@@ -19,17 +19,20 @@ type EditorValues = { title: string; document: ReviewDraftDocument };
 
 type ReviewDraftEditorProps = {
   draft: ReviewDraft;
+  onSaved: (draft: ReviewDraft) => void;
   onDeleted: () => void;
   onCreateUpdatedCopy: () => void;
 };
 
 export function ReviewDraftEditor({
   draft,
+  onSaved,
   onDeleted,
   onCreateUpdatedCopy,
 }: Readonly<ReviewDraftEditorProps>) {
   const { t } = useI18n();
   const [saveError, setSaveError] = useState(false);
+  const [saveSucceeded, setSaveSucceeded] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   // Both refs close same-tick confirmation callbacks before state rerenders.
@@ -47,8 +50,15 @@ export function ReviewDraftEditor({
 
       saveInFlightRef.current = true;
       try {
-        await reviewRepository.updateDraft(draft.id, value);
+        const savedDraft = await reviewRepository.updateDraft(draft.id, value);
+        form.reset({
+          title: savedDraft.title,
+          document: savedDraft.document,
+        });
+        onSaved(savedDraft);
+        setSaveSucceeded(true);
       } catch {
+        setSaveSucceeded(false);
         setSaveError(true);
       } finally {
         saveInFlightRef.current = false;
@@ -61,18 +71,23 @@ export function ReviewDraftEditor({
   const documentValidationIssue =
     getReviewDraftDocumentValidationIssue(document);
   const titleIsInvalid = !title.trim();
+  const isEditorBusy = isSubmitting || isDeleting;
   const validationMessage = getValidationMessage(
     titleIsInvalid,
     documentValidationIssue,
     t,
   );
 
+  const clearSaveFeedback = () => {
+    setSaveError(false);
+    setSaveSucceeded(false);
+  };
   const updateDocument = (nextDocument: ReviewDraftDocument) => {
     form.setFieldValue('document', nextDocument);
-    setSaveError(false);
+    clearSaveFeedback();
   };
   const deleteDraft = async () => {
-    if (deleteInFlightRef.current) {
+    if (saveInFlightRef.current || deleteInFlightRef.current) {
       return;
     }
 
@@ -106,16 +121,19 @@ export function ReviewDraftEditor({
         <Text variant="label">{t('review.editor.titleLabel')}</Text>
         <TextField
           accessibilityLabel={t('review.editor.titleLabel')}
+          accessibilityState={{ disabled: isEditorBusy }}
           hasError={titleIsInvalid}
+          editable={!isEditorBusy}
           value={title}
           onChangeText={(value) => {
             form.setFieldValue('title', value);
-            setSaveError(false);
+            clearSaveFeedback();
           }}
           style={styles.textInput}
         />
       </View>
       <ReviewDraftDocumentEditor
+        disabled={isEditorBusy}
         document={document}
         onChange={updateDocument}
       />
@@ -138,6 +156,11 @@ export function ReviewDraftEditor({
           {t('review.editor.saveError')}
         </Text>
       ) : null}
+      {saveSucceeded ? (
+        <Text accessibilityLiveRegion="polite" color="success">
+          {t('review.editor.saveSuccess')}
+        </Text>
+      ) : null}
       {deleteError ? (
         <Text
           accessibilityLiveRegion="polite"
@@ -148,7 +171,7 @@ export function ReviewDraftEditor({
         </Text>
       ) : null}
       <ReviewDraftOutputActions
-        disabled={isDeleting || validationMessage !== null}
+        disabled={isEditorBusy || validationMessage !== null}
         document={document}
         title={title}
       />
@@ -157,14 +180,14 @@ export function ReviewDraftEditor({
         fullWidth
         loading={isSubmitting}
         onPress={() => {
-          setSaveError(false);
+          clearSaveFeedback();
           void form.handleSubmit();
         }}
       >
         {t('review.editor.save')}
       </Button>
       <Button
-        disabled={isDeleting}
+        disabled={isEditorBusy}
         fullWidth
         variant="secondary"
         onPress={onCreateUpdatedCopy}
@@ -172,6 +195,7 @@ export function ReviewDraftEditor({
         {t('review.editor.createUpdatedCopy')}
       </Button>
       <Button
+        disabled={isSubmitting}
         fullWidth
         loading={isDeleting}
         variant="destructive"

@@ -9,24 +9,31 @@ import type { ReviewDraftDocument } from '@/domain/review/model';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type ReviewDraftDocumentEditorProps = {
+  disabled: boolean;
   document: ReviewDraftDocument;
   onChange: (document: ReviewDraftDocument) => void;
 };
 
 export function ReviewDraftDocumentEditor({
+  disabled,
   document,
   onChange,
 }: Readonly<ReviewDraftDocumentEditorProps>) {
   const { t } = useI18n();
   const { theme } = useTheme();
 
+  const commitDocument = (nextDocument: ReviewDraftDocument) => {
+    if (!disabled) {
+      onChange(nextDocument);
+    }
+  };
   const updateSection = (
     sectionIndex: number,
     update: (
       section: ReviewDraftDocument['sections'][number],
     ) => ReviewDraftDocument['sections'][number],
   ) => {
-    onChange({
+    commitDocument({
       sections: document.sections.map((section, index) =>
         index === sectionIndex ? update(section) : section,
       ),
@@ -45,7 +52,7 @@ export function ReviewDraftDocumentEditor({
     }
     sections[sectionIndex] = target;
     sections[targetIndex] = current;
-    onChange({ sections });
+    commitDocument({ sections });
   };
   const updateSectionTitle = (sectionIndex: number, title: string) => {
     updateSection(sectionIndex, (section) => ({ ...section, title }));
@@ -75,12 +82,12 @@ export function ReviewDraftDocumentEditor({
     }));
   };
   const removeSection = (sectionIndex: number) => {
-    onChange({
+    commitDocument({
       sections: document.sections.filter((_, index) => index !== sectionIndex),
     });
   };
   const addSection = () => {
-    onChange({
+    commitDocument({
       sections: [
         ...document.sections,
         {
@@ -110,6 +117,8 @@ export function ReviewDraftDocumentEditor({
         >
           <TextField
             accessibilityLabel={t('review.editor.sectionTitle')}
+            accessibilityState={{ disabled }}
+            editable={!disabled}
             hasError={!section.title.trim()}
             value={section.title}
             onChangeText={(value) => updateSectionTitle(sectionIndex, value)}
@@ -122,6 +131,8 @@ export function ReviewDraftDocumentEditor({
                 accessibilityLabel={t('review.editor.bulletLabel', {
                   number: bulletIndex + 1,
                 })}
+                accessibilityState={{ disabled }}
+                editable={!disabled}
                 hasError={!bullet.trim()}
                 multiline
                 value={bullet}
@@ -133,9 +144,11 @@ export function ReviewDraftDocumentEditor({
               <Pressable
                 accessibilityLabel={t('review.editor.removeBullet')}
                 accessibilityRole="button"
+                accessibilityState={{ disabled }}
+                disabled={disabled}
                 hitSlop={8}
                 onPress={() => removeBullet(sectionIndex, bulletIndex)}
-                style={styles.iconButton}
+                style={[styles.iconButton, disabled && styles.disabled]}
               >
                 <Text color="danger">×</Text>
               </Pressable>
@@ -143,6 +156,7 @@ export function ReviewDraftDocumentEditor({
           ))}
           <View style={styles.sectionActions}>
             <Button
+              disabled={disabled}
               size="sm"
               variant="secondary"
               onPress={() => addBullet(sectionIndex)}
@@ -150,7 +164,7 @@ export function ReviewDraftDocumentEditor({
               {t('review.editor.addBullet')}
             </Button>
             <Button
-              disabled={sectionIndex === 0}
+              disabled={disabled || sectionIndex === 0}
               size="sm"
               variant="ghost"
               onPress={() => moveSection(sectionIndex, -1)}
@@ -158,7 +172,9 @@ export function ReviewDraftDocumentEditor({
               {t('review.editor.moveSectionUp')}
             </Button>
             <Button
-              disabled={sectionIndex === document.sections.length - 1}
+              disabled={
+                disabled || sectionIndex === document.sections.length - 1
+              }
               size="sm"
               variant="ghost"
               onPress={() => moveSection(sectionIndex, 1)}
@@ -166,6 +182,7 @@ export function ReviewDraftDocumentEditor({
               {t('review.editor.moveSectionDown')}
             </Button>
             <Button
+              disabled={disabled}
               size="sm"
               variant="ghost"
               onPress={() => removeSection(sectionIndex)}
@@ -175,7 +192,12 @@ export function ReviewDraftDocumentEditor({
           </View>
         </View>
       ))}
-      <Button fullWidth variant="secondary" onPress={addSection}>
+      <Button
+        disabled={disabled}
+        fullWidth
+        variant="secondary"
+        onPress={addSection}
+      >
         {t('review.editor.addSection')}
       </Button>
     </View>
@@ -208,5 +230,6 @@ const styles = StyleSheet.create({
     minHeight: 52,
     minWidth: 48,
   },
+  disabled: { opacity: 0.5 },
   sectionActions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
 });

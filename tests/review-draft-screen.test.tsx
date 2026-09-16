@@ -51,6 +51,15 @@ jest.mock('@/i18n/I18nProvider', () => ({
 
 const repository = jest.mocked(reviewRepository);
 
+function createDeferred<Value>() {
+  let resolve!: (value: Value) => void;
+  const promise = new Promise<Value>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+}
+
 const draft: ReviewDraft = {
   id: 'review-1',
   title: 'September review',
@@ -120,6 +129,192 @@ describe('ReviewDraftScreen', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/review');
   });
 
+  test('confirms a save and replaces editor values with the canonical saved draft', async () => {
+    const savedDraft: ReviewDraft = {
+      ...draft,
+      title: 'Canonical review title',
+      document: {
+        sections: [
+          {
+            id: 'highlights',
+            title: 'Canonical highlights',
+            bullets: ['Canonical saved bullet.'],
+          },
+        ],
+      },
+      updatedAt: '2026-09-15T08:00:00.000Z',
+    };
+    const save = createDeferred<ReviewDraft>();
+    repository.updateDraft.mockReturnValue(save.promise);
+
+    await render(
+      <ThemeProvider>
+        <ReviewDraftScreen id="review-1" />
+      </ThemeProvider>,
+    );
+
+    await screen.findByLabelText('review.editor.titleLabel');
+
+    fireEvent.press(screen.getByRole('button', { name: 'review.editor.save' }));
+    await waitFor(() =>
+      expect(repository.updateDraft).toHaveBeenCalledTimes(1),
+    );
+    await act(async () => {
+      save.resolve(savedDraft);
+      await save.promise;
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText('review.editor.saveSuccess')).toBeVisible(),
+    );
+    expect(
+      screen.getByText('review.editor.saveSuccess').props
+        .accessibilityLiveRegion,
+    ).toBe('polite');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'review.editor.save' }).props
+          .accessibilityState,
+      ).toMatchObject({ busy: false }),
+    );
+    expect(screen.getByLabelText('review.editor.titleLabel').props.value).toBe(
+      'Canonical review title',
+    );
+    expect(
+      screen.getByLabelText('review.editor.bulletLabel:1').props.value,
+    ).toBe('Canonical saved bullet.');
+  });
+
+  test('clears the save confirmation after a title or document edit', async () => {
+    await render(
+      <ThemeProvider>
+        <ReviewDraftScreen id="review-1" />
+      </ThemeProvider>,
+    );
+
+    const title = await screen.findByLabelText('review.editor.titleLabel');
+    await act(async () => {
+      fireEvent.press(
+        screen.getByRole('button', { name: 'review.editor.save' }),
+      );
+    });
+    await screen.findByText('review.editor.saveSuccess');
+
+    fireEvent.changeText(title, 'Edited title');
+    await waitFor(() =>
+      expect(screen.queryByText('review.editor.saveSuccess')).toBeNull(),
+    );
+
+    await act(async () => {
+      fireEvent.press(
+        screen.getByRole('button', { name: 'review.editor.save' }),
+      );
+    });
+    await screen.findByText('review.editor.saveSuccess');
+
+    fireEvent.changeText(
+      screen.getByLabelText('review.editor.bulletLabel:1'),
+      'Edited bullet',
+    );
+    await waitFor(() =>
+      expect(screen.queryByText('review.editor.saveSuccess')).toBeNull(),
+    );
+  });
+
+  test('locks editor, output, copy, and deletion controls while a save is pending', async () => {
+    const save = createDeferred<ReviewDraft>();
+    repository.updateDraft.mockReturnValue(save.promise);
+
+    await render(
+      <ThemeProvider>
+        <ReviewDraftScreen id="review-1" />
+      </ThemeProvider>,
+    );
+
+    const title = await screen.findByLabelText('review.editor.titleLabel');
+    fireEvent.press(screen.getByRole('button', { name: 'review.editor.save' }));
+    await waitFor(() =>
+      expect(repository.updateDraft).toHaveBeenCalledTimes(1),
+    );
+
+    expect(title.props.editable).toBe(false);
+    expect(title.props.accessibilityState).toMatchObject({ disabled: true });
+    expect(
+      screen.getByLabelText('review.editor.sectionTitle').props.editable,
+    ).toBe(false);
+    expect(
+      screen.getByLabelText('review.editor.sectionTitle').props
+        .accessibilityState,
+    ).toMatchObject({ disabled: true });
+    expect(
+      screen.getByRole('button', { name: 'review.editor.addSection' }).props
+        .accessibilityState,
+    ).toMatchObject({ disabled: true });
+    expect(
+      screen.getByRole('button', { name: 'review.editor.removeBullet' }).props
+        .accessibilityState,
+    ).toMatchObject({ disabled: true });
+    expect(
+      screen.getByRole('button', { name: 'review.output.copyText' }).props
+        .accessibilityState,
+    ).toMatchObject({ disabled: true });
+    expect(
+      screen.getByRole('button', { name: 'review.editor.createUpdatedCopy' })
+        .props.accessibilityState,
+    ).toMatchObject({ disabled: true });
+    expect(
+      screen.getByRole('button', { name: 'review.editor.delete' }).props
+        .accessibilityState,
+    ).toMatchObject({ disabled: true });
+
+    fireEvent.press(screen.getByRole('button', { name: 'review.editor.save' }));
+    expect(repository.updateDraft).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      save.resolve(draft);
+      await save.promise;
+    });
+  });
+
+  test('shows a failed retry error, then confirms the next successful retry', async () => {
+    repository.updateDraft
+      .mockResolvedValueOnce(draft)
+      .mockRejectedValueOnce(new Error('save failed'))
+      .mockResolvedValueOnce(draft);
+
+    await render(
+      <ThemeProvider>
+        <ReviewDraftScreen id="review-1" />
+      </ThemeProvider>,
+    );
+
+    await screen.findByLabelText('review.editor.titleLabel');
+    await act(async () => {
+      fireEvent.press(
+        screen.getByRole('button', { name: 'review.editor.save' }),
+      );
+    });
+    await screen.findByText('review.editor.saveSuccess');
+
+    await act(async () => {
+      fireEvent.press(
+        screen.getByRole('button', { name: 'review.editor.save' }),
+      );
+    });
+    const error = await screen.findByText('review.editor.saveError');
+    expect(error.props.accessibilityRole).toBe('alert');
+    expect(screen.queryByText('review.editor.saveSuccess')).toBeNull();
+
+    await act(async () => {
+      fireEvent.press(
+        screen.getByRole('button', { name: 'review.editor.save' }),
+      );
+    });
+    await screen.findByText('review.editor.saveSuccess');
+    expect(screen.queryByText('review.editor.saveError')).toBeNull();
+    expect(repository.updateDraft).toHaveBeenCalledTimes(3);
+  });
+
   test('requires a confidentiality confirmation before output', async () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
     await render(
@@ -163,6 +358,12 @@ describe('ReviewDraftScreen', () => {
 
     const firstName = await screen.findByLabelText('review.editor.titleLabel');
     expect(firstName.props.value).toBe('September review');
+    await act(async () => {
+      fireEvent.press(
+        screen.getByRole('button', { name: 'review.editor.save' }),
+      );
+    });
+    await screen.findByText('review.editor.saveSuccess');
     repository.findDraft.mockResolvedValue(nextDraft);
 
     await act(async () => {

@@ -96,6 +96,15 @@ function ProfiledReviewDraftScreen({ id }: Readonly<ReviewDraftScreenProps>) {
       <ReviewDraftEditor
         key={state.draft.id}
         draft={state.draft}
+        onSaved={(savedDraft) => {
+          setState((current) =>
+            current.status === 'loaded' &&
+            current.id === id &&
+            current.draft.id === savedDraft.id
+              ? { ...current, draft: savedDraft }
+              : current,
+          );
+        }}
         onDeleted={() => router.replace('/review')}
         onCreateUpdatedCopy={() =>
           router.push({
