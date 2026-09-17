@@ -3,7 +3,7 @@ const { withAppDelegate } = require('expo/config-plugins');
 const CALL = '    excludeKerjaLogDatabaseFromBackup()\n';
 const CALL_ANCHOR = '    reactNativeFactory = factory\n';
 const HELPER_MARKER = 'private func excludeKerjaLogDatabaseFromBackup()';
-const HELPER = `
+const HELPER = String.raw`
 private func excludeKerjaLogDatabaseFromBackup() {
   guard let documentsDirectory = FileManager.default.urls(
     for: .documentDirectory,
@@ -30,7 +30,7 @@ private func excludeKerjaLogDatabaseFromBackup() {
     try sqliteDirectory.setResourceValues(resourceValues)
   } catch {
     NSLog(
-      "KerjaLog could not exclude its encrypted database from backup: \\(error.localizedDescription)"
+      "KerjaLog could not exclude its encrypted database from backup: \(error.localizedDescription)"
     )
   }
 }

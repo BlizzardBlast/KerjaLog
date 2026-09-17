@@ -8,8 +8,8 @@ import type { WorkEntryDetail } from '@/domain/entry/model';
 import type { WorkEntryUpdater } from '@/domain/entry/repository';
 import type { WorkEntrySkill } from '@/domain/skill/model';
 import {
-  entryRefinementSchema,
   type EntryRefinementValues,
+  entryRefinementSchema,
 } from '@/features/work-entry/refinement/refinementSchema';
 
 export async function updateWorkEntry(

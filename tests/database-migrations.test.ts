@@ -56,6 +56,15 @@ describe('migrateDatabase', () => {
     expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
       expect.stringContaining('excluded_from_exports IN (0, 1)'),
     );
+    expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
+      expect.stringContaining('CREATE TABLE review_drafts'),
+    );
+    expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
+      expect.stringContaining('CREATE TABLE review_draft_entries'),
+    );
+    expect(database.execAsync.mock.calls[0]?.[0]).toEqual(
+      expect.stringContaining('idx_review_draft_entries_order'),
+    );
     expect(database.execAsync).toHaveBeenNthCalledWith(
       2,
       'PRAGMA user_version = 1',

@@ -13,6 +13,7 @@ import {
   authenticateDevice,
   getDeviceAuthenticationAvailability,
 } from '@/platform/authentication/deviceAuthentication';
+import { captureAppLockHydrationFailure } from '@/platform/observability/sentry';
 import { setAppLockScreenPrivacyEnabled } from '@/platform/privacy/screenPrivacy';
 import { ignoreError } from '@/shared/utils/function';
 
@@ -119,6 +120,7 @@ export function useAppLockController(): AppLockContextValue {
         // The preference is privacy-sensitive: if it cannot be read, require
         // device authentication and best-effort native screen protection rather
         // than assuming App Lock was disabled.
+        captureAppLockHydrationFailure();
         await setAppLockScreenPrivacyEnabled(true).catch(ignoreError);
 
         if (!ignore) {

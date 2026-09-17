@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { Button } from '@/design-system/components/Button';
 import { Text } from '@/design-system/components/Text';
 import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
@@ -51,6 +52,15 @@ function ProfiledGrowthScreen() {
           </Text>
           <Text color="textMuted">{t('growth.description')}</Text>
         </View>
+        <Button
+          fullWidth
+          variant="secondary"
+          onPress={() =>
+            router.push({ pathname: '/review', params: { create: 'true' } })
+          }
+        >
+          {t('review.open')}
+        </Button>
 
         <GrowthEvidenceMapContent
           state={controller.state}

@@ -9,6 +9,7 @@ import {
   authenticateDevice,
   getDeviceAuthenticationAvailability,
 } from '@/platform/authentication/deviceAuthentication';
+import { captureAppLockHydrationFailure } from '@/platform/observability/sentry';
 import { setAppLockScreenPrivacyEnabled } from '@/platform/privacy/screenPrivacy';
 
 jest.mock('@/features/app-lock/storage', () => ({
@@ -25,6 +26,10 @@ jest.mock('@/platform/privacy/screenPrivacy', () => ({
   setAppLockScreenPrivacyEnabled: jest.fn(),
 }));
 
+jest.mock('@/platform/observability/sentry', () => ({
+  captureAppLockHydrationFailure: jest.fn(),
+}));
+
 jest.mock('@/i18n/I18nProvider', () => ({
   useI18n: () => ({
     t: (key: string) => key,
@@ -38,6 +43,9 @@ const getDeviceAuthenticationAvailabilityMock = jest.mocked(
   getDeviceAuthenticationAvailability,
 );
 const setScreenPrivacyMock = jest.mocked(setAppLockScreenPrivacyEnabled);
+const captureAppLockHydrationFailureMock = jest.mocked(
+  captureAppLockHydrationFailure,
+);
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -75,7 +83,8 @@ describe('useAppLockController', () => {
   });
 
   test('fails closed when the app lock preference cannot be read', async () => {
-    readAppLockEnabledMock.mockRejectedValue(new Error('storage unavailable'));
+    const error = new Error('storage unavailable');
+    readAppLockEnabledMock.mockRejectedValue(error);
     const { result } = await renderHook(() => useAppLockController());
 
     await waitFor(() => expect(result.current.isHydrated).toBe(true));
@@ -84,6 +93,7 @@ describe('useAppLockController', () => {
     expect(result.current.enabled).toBe(true);
     expect(result.current.locked).toBe(true);
     expect(result.current.error).toBe('storage-failed');
+    expect(captureAppLockHydrationFailureMock).toHaveBeenCalledWith();
   });
 
   test('stays locked when native screen privacy cannot be established', async () => {

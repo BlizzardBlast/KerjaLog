@@ -1,6 +1,6 @@
 import * as Font from 'expo-font';
-import regular from 'expo-symbols/androidWeights/regular';
 import { type AndroidSymbol, type SFSymbol, SymbolView } from 'expo-symbols';
+import regular from 'expo-symbols/androidWeights/regular';
 import {
   type ColorValue,
   Platform,

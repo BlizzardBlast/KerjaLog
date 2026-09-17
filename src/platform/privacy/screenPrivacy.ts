@@ -3,10 +3,21 @@ import { Platform } from 'react-native';
 
 const APP_LOCK_SCREEN_CAPTURE_KEY = 'kerjalog-app-lock';
 
+type ScreenPrivacyRuntime = {
+  readonly isDevelopment: boolean;
+  readonly platform: typeof Platform.OS;
+};
+
+function getScreenPrivacyRuntime(): ScreenPrivacyRuntime {
+  return { isDevelopment: __DEV__, platform: Platform.OS };
+}
+
 export async function setAppLockScreenPrivacyEnabled(
   enabled: boolean,
 ): Promise<void> {
-  if (Platform.OS === 'ios') {
+  const runtime = getScreenPrivacyRuntime();
+
+  if (runtime.platform === 'ios') {
     if (enabled) {
       await ScreenCapture.enableAppSwitcherProtectionAsync(1);
     } else {
@@ -15,8 +26,8 @@ export async function setAppLockScreenPrivacyEnabled(
     return;
   }
 
-  if (Platform.OS === 'android') {
-    if (enabled) {
+  if (runtime.platform === 'android') {
+    if (enabled && !runtime.isDevelopment) {
       await ScreenCapture.preventScreenCaptureAsync(
         APP_LOCK_SCREEN_CAPTURE_KEY,
       );

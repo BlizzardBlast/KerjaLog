@@ -83,3 +83,15 @@ export function initializeSentry(): void {
     },
   });
 }
+
+export function captureAppLockHydrationFailure(): void {
+  Sentry.withScope((scope) => {
+    scope.setTags({
+      'failure.kind': 'app-lock-hydration',
+      feature: 'app-lock',
+      operation: 'hydrate',
+    });
+    scope.setContext('appLock', { state: 'fail-closed' });
+    Sentry.captureException(new Error('App Lock preference hydration failed.'));
+  });
+}

@@ -8,8 +8,8 @@ import {
   isOutcomeType,
   isSkillId,
   isWorkEntryDraftStep,
-  type WorkEntryDraft,
   WORK_ENTRY_DRAFT_STEPS,
+  type WorkEntryDraft,
 } from '@/domain/entry/draft';
 import type { WorkEntryDraftRepository } from '@/domain/entry/repository';
 import type { WorkEntrySkill } from '@/domain/skill/model';

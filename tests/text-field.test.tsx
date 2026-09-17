@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { TextField } from '@/design-system/components/TextField';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import { themes } from '@/design-system/tokens/theme';
-import { TextField } from '@/design-system/components/TextField';
 
 describe('TextField', () => {
   test('uses accessible default, focused, and error borders', async () => {

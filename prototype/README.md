@@ -32,9 +32,9 @@ The prototype contains 16 connected mobile screens:
 15. Review Builder
 16. Editable generated review summary
 
-The primary flow is:
+### Primary flow
 
-**Onboarding → Home → Quick Capture → Outcome → Evidence → Impact Builder → Saved Entry → Growth → Review Builder**
+Onboarding → Home → Quick Capture → Outcome → Evidence → Impact Builder → Saved Entry → Growth → Review Builder
 
 ## Product principles represented
 
@@ -52,9 +52,9 @@ The primary flow is:
 
 The visual direction uses vivid purple as a concentrated interaction accent, warm neutral surfaces, semantic green/amber states, generous spacing, and a mobile-first 390×844 reference viewport.
 
-The signature interaction is the **Evidence Thread**:
+### Evidence Thread
 
-**What happened → What changed → What supports it → What this demonstrates**
+What happened → What changed → What supports it → What this demonstrates
 
 It appears in the Impact Builder, entry details, and skill evidence to make KerjaLog's core transformation visible without introducing scores or gamification.
 

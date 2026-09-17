@@ -24,6 +24,7 @@ type ThemeContextValue = {
   mode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   isHydrated: boolean;
+  restoreImportedMode: (mode: ThemeMode) => Promise<void>;
   setMode: (mode: ThemeMode) => void;
 };
 
@@ -71,6 +72,11 @@ export function ThemeProvider({ children }: Readonly<PropsWithChildren>) {
     persistThemeMode(nextMode).catch(ignoreError);
   }, []);
 
+  const restoreImportedMode = useCallback(async (nextMode: ThemeMode) => {
+    await persistThemeMode(nextMode);
+    setModeState(nextMode);
+  }, []);
+
   let resolvedTheme: ResolvedTheme;
   if (modeState === 'system') {
     resolvedTheme = systemColorScheme === 'dark' ? 'dark' : 'light';
@@ -84,9 +90,10 @@ export function ThemeProvider({ children }: Readonly<PropsWithChildren>) {
       mode: modeState,
       resolvedTheme,
       isHydrated,
+      restoreImportedMode,
       setMode,
     }),
-    [isHydrated, modeState, resolvedTheme, setMode],
+    [isHydrated, modeState, resolvedTheme, restoreImportedMode, setMode],
   );
 
   return <ThemeContext value={value}>{children}</ThemeContext>;
