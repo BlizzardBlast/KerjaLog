@@ -21,6 +21,7 @@ export type OptionCardProps = {
   title: string;
   description?: string;
   icon?: OptionCardIcon;
+  contentAlignment?: 'start' | 'center';
   selected: boolean;
   onPress: () => void;
   disabled?: boolean;
@@ -30,6 +31,7 @@ export function OptionCard({
   title,
   description,
   icon,
+  contentAlignment = 'start',
   selected,
   onPress,
   disabled = false,
@@ -77,6 +79,7 @@ export function OptionCard({
         <Animated.View
           style={[
             styles.container,
+            contentAlignment === 'center' && styles.centeredContainer,
             cardAnimatedStyle,
             selected && styles.selected,
             pressed && !disabled && styles.pressed,
@@ -97,13 +100,28 @@ export function OptionCard({
             </DecorativeView>
           ) : null}
 
-          <View style={styles.copy}>
-            <Text variant="bodyStrong">{title}</Text>
+          <View
+            style={[
+              styles.copy,
+              contentAlignment === 'center' && styles.centeredCopy,
+            ]}
+          >
+            <Text
+              variant="bodyStrong"
+              style={
+                contentAlignment === 'center' ? styles.centeredText : undefined
+              }
+            >
+              {title}
+            </Text>
             {description ? (
               <Text
                 variant="caption"
                 color="textMuted"
-                style={styles.description}
+                style={[
+                  styles.description,
+                  contentAlignment === 'center' && styles.centeredText,
+                ]}
               >
                 {description}
               </Text>
@@ -125,6 +143,10 @@ const styles = StyleSheet.create({
     minHeight: 68,
     padding: 14,
   },
+  centeredContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   selected: {
     borderWidth: 2,
     padding: 13,
@@ -145,6 +167,12 @@ const styles = StyleSheet.create({
   copy: {
     flex: 1,
     minWidth: 0,
+  },
+  centeredCopy: {
+    alignItems: 'center',
+  },
+  centeredText: {
+    textAlign: 'center',
   },
   description: {
     marginTop: 3,

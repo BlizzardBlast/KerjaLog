@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { reviewRepository } from '@/data/repositories/reviewRepository';
@@ -10,6 +10,7 @@ import { useTheme } from '@/design-system/theme/ThemeProvider';
 import { layout, spacing } from '@/design-system/tokens/theme';
 import type { ReviewDraft } from '@/domain/review/model';
 import { ReviewDraftEditor } from '@/features/review/ReviewDraftEditor';
+import { ReviewSaveToast } from '@/features/review/ReviewSaveToast';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type ReviewDraftScreenProps = { id: string };
@@ -25,7 +26,9 @@ function ProfiledReviewDraftScreen({ id }: Readonly<ReviewDraftScreenProps>) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [state, setState] = useState<DraftState>({ id, status: 'loading' });
+  const [saveToastKey, setSaveToastKey] = useState<number | null>(null);
   const requestId = useRef(0);
+  const dismissSaveToast = useCallback(() => setSaveToastKey(null), []);
 
   useEffect(() => {
     const activeRequestId = ++requestId.current;
@@ -37,11 +40,13 @@ function ProfiledReviewDraftScreen({ id }: Readonly<ReviewDraftScreenProps>) {
               ? { id, status: 'loaded', draft }
               : { id, status: 'not-found' },
           );
+          setSaveToastKey(null);
         }
       },
       () => {
         if (requestId.current === activeRequestId) {
           setState({ id, status: 'not-found' });
+          setSaveToastKey(null);
         }
       },
     );
@@ -54,11 +59,17 @@ function ProfiledReviewDraftScreen({ id }: Readonly<ReviewDraftScreenProps>) {
   if (state.status === 'loading' || state.id !== id) {
     return (
       <View
-        style={[styles.centered, { backgroundColor: theme.colors.surface }]}
+        testID="review-draft-loading-state"
+        style={[
+          styles.centered,
+          styles.loadingState,
+          { backgroundColor: theme.colors.surface },
+        ]}
       >
         <Text
           accessibilityRole="progressbar"
           accessibilityState={{ busy: true }}
+          style={styles.loadingText}
         >
           {t('review.editor.loading')}
         </Text>
@@ -82,38 +93,64 @@ function ProfiledReviewDraftScreen({ id }: Readonly<ReviewDraftScreenProps>) {
   }
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: theme.colors.surface }]}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingLeft: Math.max(insets.left, layout.screenHorizontalPadding),
-          paddingRight: Math.max(insets.right, layout.screenHorizontalPadding),
-        },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      <ReviewDraftEditor
-        key={state.draft.id}
-        draft={state.draft}
-        onSaved={(savedDraft) => {
-          setState((current) =>
-            current.status === 'loaded' &&
-            current.id === id &&
-            current.draft.id === savedDraft.id
-              ? { ...current, draft: savedDraft }
-              : current,
-          );
-        }}
-        onDeleted={() => router.replace('/review')}
-        onCreateUpdatedCopy={() =>
-          router.push({
-            pathname: '/review',
-            params: { copyFrom: state.draft.id },
-          })
-        }
-      />
-    </ScrollView>
+    <View style={[styles.screen, { backgroundColor: theme.colors.surface }]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingLeft: Math.max(insets.left, layout.screenHorizontalPadding),
+            paddingRight: Math.max(
+              insets.right,
+              layout.screenHorizontalPadding,
+            ),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <ReviewDraftEditor
+          key={state.draft.id}
+          draft={state.draft}
+          onSaved={(savedDraft) => {
+            setState((current) =>
+              current.status === 'loaded' &&
+              current.id === id &&
+              current.draft.id === savedDraft.id
+                ? { ...current, draft: savedDraft }
+                : current,
+            );
+            setSaveToastKey((current) => (current ?? 0) + 1);
+          }}
+          onSaveFeedbackCleared={dismissSaveToast}
+          onDeleted={() => router.replace('/review')}
+          onCreateUpdatedCopy={() =>
+            router.push({
+              pathname: '/review',
+              params: { copyFrom: state.draft.id },
+            })
+          }
+        />
+      </ScrollView>
+      {saveToastKey !== null ? (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.toastOverlay,
+            {
+              bottom: Math.max(insets.bottom, spacing[5]),
+              left: Math.max(insets.left, layout.screenHorizontalPadding),
+              right: Math.max(insets.right, layout.screenHorizontalPadding),
+            },
+          ]}
+        >
+          <ReviewSaveToast
+            key={saveToastKey}
+            message={t('review.editor.saveSuccess')}
+            onDismiss={dismissSaveToast}
+          />
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -123,11 +160,21 @@ export { ReviewDraftScreen };
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  scroll: { flex: 1 },
   centered: {
     flex: 1,
     gap: spacing[3],
     justifyContent: 'center',
     padding: spacing[5],
   },
+  loadingState: {
+    alignItems: 'center',
+  },
+  loadingText: {
+    textAlign: 'center',
+  },
   content: { paddingBottom: spacing[8], paddingTop: spacing[5] },
+  toastOverlay: {
+    position: 'absolute',
+  },
 });

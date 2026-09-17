@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { reviewRepository } from '@/data/repositories/reviewRepository';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import type { ReviewCandidate, ReviewDraft } from '@/domain/review/model';
@@ -130,5 +131,28 @@ describe('ReviewSetupForm', () => {
       expect.objectContaining({ skillId: 'communication' }),
     );
     expect(candidate.props.accessibilityState).toEqual({ checked: false });
+  });
+
+  test('centers short period labels without changing the radio behavior', async () => {
+    await render(
+      <ThemeProvider>
+        <ReviewSetupForm
+          skillId={undefined}
+          copyFromDraftId={undefined}
+          onCancel={jest.fn()}
+          onCreated={jest.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByText('review.period.this_month').props.style,
+      ).textAlign,
+    ).toBe('center');
+    expect(
+      screen.getByRole('radio', { name: 'review.period.this_month' }).props
+        .accessibilityState,
+    ).toEqual({ checked: true, disabled: false });
   });
 });

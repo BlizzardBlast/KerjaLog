@@ -252,6 +252,7 @@ export function ReviewSetupForm({
           {REVIEW_PERIOD_PRESETS.map((option) => (
             <View key={option} style={styles.optionCell}>
               <OptionCard
+                contentAlignment="center"
                 title={t(`review.period.${option}`)}
                 selected={preset === option}
                 onPress={() => choosePreset(option)}

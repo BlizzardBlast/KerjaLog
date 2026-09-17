@@ -20,6 +20,7 @@ type EditorValues = { title: string; document: ReviewDraftDocument };
 type ReviewDraftEditorProps = {
   draft: ReviewDraft;
   onSaved: (draft: ReviewDraft) => void;
+  onSaveFeedbackCleared: () => void;
   onDeleted: () => void;
   onCreateUpdatedCopy: () => void;
 };
@@ -27,12 +28,12 @@ type ReviewDraftEditorProps = {
 export function ReviewDraftEditor({
   draft,
   onSaved,
+  onSaveFeedbackCleared,
   onDeleted,
   onCreateUpdatedCopy,
 }: Readonly<ReviewDraftEditorProps>) {
   const { t } = useI18n();
   const [saveError, setSaveError] = useState(false);
-  const [saveSucceeded, setSaveSucceeded] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   // Both refs close same-tick confirmation callbacks before state rerenders.
@@ -56,9 +57,8 @@ export function ReviewDraftEditor({
           document: savedDraft.document,
         });
         onSaved(savedDraft);
-        setSaveSucceeded(true);
       } catch {
-        setSaveSucceeded(false);
+        onSaveFeedbackCleared();
         setSaveError(true);
       } finally {
         saveInFlightRef.current = false;
@@ -80,7 +80,7 @@ export function ReviewDraftEditor({
 
   const clearSaveFeedback = () => {
     setSaveError(false);
-    setSaveSucceeded(false);
+    onSaveFeedbackCleared();
   };
   const updateDocument = (nextDocument: ReviewDraftDocument) => {
     form.setFieldValue('document', nextDocument);
@@ -154,11 +154,6 @@ export function ReviewDraftEditor({
           color="danger"
         >
           {t('review.editor.saveError')}
-        </Text>
-      ) : null}
-      {saveSucceeded ? (
-        <Text accessibilityLiveRegion="polite" color="success">
-          {t('review.editor.saveSuccess')}
         </Text>
       ) : null}
       {deleteError ? (

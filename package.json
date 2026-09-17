@@ -65,7 +65,7 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start --dev-client",
+    "start": "expo start --dev-client --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "lint": "biome lint . && eslint src --max-warnings=0",

@@ -5,7 +5,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { reviewRepository } from '@/data/repositories/reviewRepository';
 import { ThemeProvider } from '@/design-system/theme/ThemeProvider';
 import type { ReviewDraft } from '@/domain/review/model';
@@ -85,6 +85,31 @@ describe('ReviewDraftScreen', () => {
     repository.findDraft.mockResolvedValue(draft);
     repository.updateDraft.mockResolvedValue(draft);
     repository.deleteDraft.mockResolvedValue();
+  });
+
+  test('centers the loading status on both axes', async () => {
+    const load = createDeferred<ReviewDraft | null>();
+    repository.findDraft.mockReturnValue(load.promise);
+
+    await render(
+      <ThemeProvider>
+        <ReviewDraftScreen id="review-1" />
+      </ThemeProvider>,
+    );
+
+    const loadingState = screen.getByTestId('review-draft-loading-state');
+    expect(StyleSheet.flatten(loadingState.props.style)).toMatchObject({
+      alignItems: 'center',
+      justifyContent: 'center',
+    });
+    expect(
+      StyleSheet.flatten(screen.getByRole('progressbar').props.style).textAlign,
+    ).toBe('center');
+
+    await act(async () => {
+      load.resolve(draft);
+      await load.promise;
+    });
   });
 
   test('edits the document through the canonical form and deletes only after confirmation', async () => {
@@ -167,10 +192,10 @@ describe('ReviewDraftScreen', () => {
     await waitFor(() =>
       expect(screen.getByText('review.editor.saveSuccess')).toBeVisible(),
     );
-    expect(
-      screen.getByText('review.editor.saveSuccess').props
-        .accessibilityLiveRegion,
-    ).toBe('polite');
+    const saveToast = screen.getByRole('alert', {
+      name: 'review.editor.saveSuccess',
+    });
+    expect(saveToast.props.accessibilityLiveRegion).toBe('polite');
     await waitFor(() =>
       expect(
         screen.getByRole('button', { name: 'review.editor.save' }).props
