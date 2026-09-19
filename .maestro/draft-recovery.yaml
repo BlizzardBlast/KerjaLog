@@ -6,6 +6,9 @@ name: Encrypted Log draft recovery
 - assertVisible: "Turn everyday work into evidence of progress"
 - tapOn: "Set up KerjaLog"
 - tapOn: "Technology & Product"
+- scrollUntilVisible:
+    element: "Junior individual contributor"
+    direction: DOWN
 - tapOn: "Junior individual contributor"
 - tapOn: "Continue"
 - tapOn: "Remember what I worked on"
@@ -14,6 +17,9 @@ name: Encrypted Log draft recovery
 - tapOn: "Finish setup"
 - tapOn: "Log something"
 - tapOn: "I completed something"
+- scrollUntilVisible:
+    element: "Describe what happened"
+    direction: DOWN
 - tapOn: "Describe what happened"
 - tapOn: "Write it the way you remember it"
 - inputText: "Draft that must survive a process restart."

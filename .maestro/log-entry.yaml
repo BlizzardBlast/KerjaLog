@@ -6,6 +6,9 @@ name: Core Log entry journey
 - assertVisible: "Turn everyday work into evidence of progress"
 - tapOn: "Set up KerjaLog"
 - tapOn: "Technology & Product"
+- scrollUntilVisible:
+    element: "Junior individual contributor"
+    direction: DOWN
 - tapOn: "Junior individual contributor"
 - tapOn: "Continue"
 - tapOn: "Remember what I worked on"
@@ -13,30 +16,44 @@ name: Core Log entry journey
 - tapOn: "Within the next 3 months"
 - tapOn: "Finish setup"
 - assertVisible: "Your work matters—even when it feels routine."
-- tapOn: "Log"
+- tapOn: "Log something"
 - assertVisible: "What happened at work?"
 - tapOn: "I completed something"
+- scrollUntilVisible:
+    element: "Describe what happened"
+    direction: DOWN
 - tapOn: "Describe what happened"
 - tapOn: "Write it the way you remember it"
 - inputText: "Prepared the weekly status report before the team deadline."
 - back
-- assertVisible: "What happened at work?"
-- tapOn: "Describe what happened"
+- assertVisible: "What happened?"
 - assertVisible: "Prepared the weekly status report before the team deadline."
 - tapOn: "Find the outcome"
 - tapOn: "A deadline was met"
+- scrollUntilVisible:
+    element: "Add supporting evidence"
+    direction: DOWN
 - tapOn: "Add supporting evidence"
+- scrollUntilVisible:
+    element: "Skip evidence"
+    direction: DOWN
 - tapOn: "Skip evidence"
 - assertVisible: "What does this demonstrate?"
 - tapOn: "Execution"
+- scrollUntilVisible:
+    element: "Review my impact"
+    direction: DOWN
 - tapOn: "Review my impact"
 - assertVisible: "See the value inside the work"
+- scrollUntilVisible:
+    element: "Confirm & save"
+    direction: DOWN
 - tapOn: "Confirm & save"
 - assertVisible: "Saved work entry"
 - assertVisible: "Prepared the weekly status report before the team deadline."
 - assertVisible: "Execution"
 - tapOn: "Back to Home"
-- assertVisible: "Prepared the weekly status report before the team deadline"
+- assertVisible: "1 entries"
 - tapOn: "Growth"
 - assertVisible: "Your evidence map"
 - assertVisible: "Evidence across 1 skill area"
