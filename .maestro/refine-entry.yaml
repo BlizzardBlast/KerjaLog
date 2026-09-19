@@ -6,6 +6,9 @@ name: Saved entry refinement journey
 - assertVisible: "Turn everyday work into evidence of progress"
 - tapOn: "Set up KerjaLog"
 - tapOn: "Technology & Product"
+- scrollUntilVisible:
+    element: "Junior individual contributor"
+    direction: DOWN
 - tapOn: "Junior individual contributor"
 - tapOn: "Continue"
 - tapOn: "Remember what I worked on"
@@ -14,26 +17,46 @@ name: Saved entry refinement journey
 - tapOn: "Finish setup"
 - tapOn: "Log something"
 - tapOn: "I completed something"
+- scrollUntilVisible:
+    element: "Describe what happened"
+    direction: DOWN
 - tapOn: "Describe what happened"
 - tapOn: "Write it the way you remember it"
 - inputText: "Found duplicate rows while checking the monthly report."
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Save as quick note"
+    direction: DOWN
 - tapOn: "Save as quick note"
 - assertVisible: "Quick note"
 - tapOn: "Develop this entry"
 - assertVisible: "What changed because of this?"
 - tapOn: "An error was fixed or prevented"
+- scrollUntilVisible:
+    element: "Add supporting evidence"
+    direction: DOWN
 - tapOn: "Add supporting evidence"
 - tapOn: "A number"
 - tapOn: "Useful detail"
 - inputText: "7 duplicate rows were removed before submission."
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Preview my impact"
+    direction: DOWN
 - tapOn: "Preview my impact"
 - assertVisible: "What does this demonstrate?"
 - tapOn: "Problem-solving"
 - tapOn: "Attention to detail"
+- scrollUntilVisible:
+    element: "Review my impact"
+    direction: DOWN
 - tapOn: "Review my impact"
 - assertVisible: "See the value inside the work"
 - assertVisible: "7 duplicate rows were removed before submission."
 - assertVisible: "Problem-solving · Attention to detail"
+- scrollUntilVisible:
+    element: "Confirm & save"
+    direction: DOWN
 - tapOn: "Confirm & save"
 - assertVisible: "Review ready"
 - assertVisible: "Problem-solving · Attention to detail"
