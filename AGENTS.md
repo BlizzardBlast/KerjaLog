@@ -241,6 +241,16 @@ permissions intact, and Android exact-alarm permission blocked. The weekly
 reminder is an opt-in ordinary local notification; do not require exact-alarm
 special access or represent its timing as exact.
 
+## Hosted CI and merge protection
+
+Draft pull requests skip GitHub-hosted Expo/native checks, including Android
+and iOS exports; use the local verification commands below during iteration.
+When the changes are review-ready, mark the PR ready and verify that its
+`validate` check **ran and passed on the latest revision**. Skipped checks
+are not test evidence. Repository branch protection/rulesets must make the
+`validate` status check required before merge; updating the workflow does
+not update those settings, which require separate administrator access.
+
 ## Verification expectations
 
 Start with the smallest relevant test, then run stronger checks proportional to
