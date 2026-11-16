@@ -13,14 +13,71 @@ const githubExpression =
   "github.event.pull_request.number || github.event_name == 'push' && " +
   'github.ref || github.run_id }}';
 
+// Use a deliberately restricted YAML subset; unsupported event syntax fails closed.
+function topLevelBlock(text, key) {
+  const lines = text.replaceAll('\r\n', '\n').split('\n');
+  const start = lines.indexOf(key + ':');
+  assert.notEqual(start, -1, 'Missing ' + key + ' block');
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index++) {
+    const line = lines[index];
+    if (!line.trim() || line.trimStart().startsWith('#')) {
+      continue;
+    }
+    if (!line.startsWith(' ')) {
+      end = index;
+      break;
+    }
+  }
+  return lines.slice(start + 1, end).join('\n');
+}
+
+function workflowTriggers(text) {
+  assert.equal(
+    [...text.matchAll(/^on:/gmu)].length,
+    1,
+    'Expected exactly one block-style on: declaration',
+  );
+  const declarations = topLevelBlock(text, 'on')
+    .split('\n')
+    .filter((line) => /^ {2}\S/u.test(line) && !line.trimStart().startsWith('#'));
+  assert.ok(declarations.length > 0, 'A workflow must declare an event');
+  for (const line of declarations) {
+    assert.match(
+      line,
+      /^ {2}[a-z_][a-z_0-9-]*:$/u,
+      'Unsupported workflow event syntax',
+    );
+  }
+  return declarations.map((line) => line.trim().slice(0, -1));
+}
+
+function assertReadOnlyPermissions(text) {
+  assert.equal(
+    [...text.matchAll(/^permissions:/gmu)].length,
+    1,
+    'Exactly one top-level permissions block is required',
+  );
+  const entries = topLevelBlock(text, 'permissions')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'));
+  assert.deepEqual(entries, ['contents: read'], 'Unexpected workflow permissions');
+  assert.doesNotMatch(
+    topLevelBlock(text, 'jobs'),
+    /^ {4}permissions:/mu,
+    'Unexpected job-level permission override',
+  );
+}
+
 test('all pull-request workflows are accounted for', () => {
   const names = readdirSync(workflowDirectory).filter((name) =>
     /\.ya?ml$/u.test(name),
   );
   const withPullRequests = names.filter((name) =>
-    /^ {2}pull_request:\s*$/mu.test(
+    workflowTriggers(
       readFileSync(new URL(name, workflowDirectory), 'utf8'),
-    ),
+    ).includes('pull_request'),
   );
   assert.deepEqual(withPullRequests.sort(), ['ci.yml']);
 });
@@ -58,7 +115,7 @@ test('PR cancellation and main push coalescing are isolated', () => {
     cancel?.[1],
     '$' + "{{ github.event_name == 'pull_request' }}",
   );
-  assert.match(source, /^permissions:\n {2}contents: read$/mu);
+  assertReadOnlyPermissions(source);
 });
 
 test('all Expo/native checks remain in the single CI job', () => {
@@ -83,5 +140,35 @@ test('all Expo/native checks remain in the single CI job', () => {
       'pnpm run export:android',
       'pnpm run export:ios',
     ],
+  );
+});
+
+test('unsupported inline event syntax cannot evade workflow inventory', () => {
+  assert.throws(
+    () => workflowTriggers('name: unsafe\non: [pull_request]\njobs:\n'),
+    /Missing on block/,
+  );
+  assert.throws(
+    () => workflowTriggers('on:\n  pull_request: {}\n'),
+    /Unsupported workflow event syntax/,
+  );
+});
+
+test('extra token permissions and job-level overrides are rejected', () => {
+  assertReadOnlyPermissions(source);
+  assert.throws(
+    () => assertReadOnlyPermissions(
+      source.replace('  contents: read', '  contents: read\n  actions: write'),
+    ),
+    /Unexpected workflow permissions/,
+  );
+  assert.throws(
+    () => assertReadOnlyPermissions(
+      source.replace(
+        '    runs-on: ubuntu-24.04',
+        '    permissions:\n      contents: write\n    runs-on: ubuntu-24.04',
+      ),
+    ),
+    /Unexpected job-level permission override/,
   );
 });
