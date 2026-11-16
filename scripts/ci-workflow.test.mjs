@@ -7,6 +7,15 @@ const source = readFileSync(
   new URL('ci.yml', workflowDirectory),
   'utf8',
 ).replaceAll('\r\n', '\n');
+// PR-related webhook events may have distinct trust and billing semantics.
+const prRelatedEvents = new Set([
+  'pull_request',
+  'pull_request_target',
+  'pull_request_review',
+  'pull_request_review_comment',
+  'issue_comment',
+]);
+
 const githubExpression =
   '$' +
   "{{ github.event_name == 'pull_request' && " +
@@ -54,6 +63,16 @@ function workflowTriggers(text) {
   return declarations.map((line) => line.trim().slice(0, -1));
 }
 
+function relatedTriggers(text) {
+  return workflowTriggers(text).filter((event) => prRelatedEvents.has(event));
+}
+
+function auditedWorkflowNames(filenames, readWorkflow) {
+  return filenames.filter(
+    (filename) => relatedTriggers(readWorkflow(filename)).length > 0,
+  );
+}
+
 function assertReadOnlyPermissions(text) {
   assert.equal(
     [...text.matchAll(/^permissions:/gmu)].length,
@@ -80,15 +99,19 @@ test('all pull-request workflows are accounted for', () => {
   const names = readdirSync(workflowDirectory).filter((name) =>
     /\.ya?ml$/u.test(name),
   );
-  const withPullRequests = names.filter((name) =>
-    workflowTriggers(
-      readFileSync(new URL(name, workflowDirectory), 'utf8'),
-    ).includes('pull_request'),
+  const withPullRequests = auditedWorkflowNames(
+    names,
+    (name) => readFileSync(new URL(name, workflowDirectory), 'utf8'),
   );
   assert.deepEqual(withPullRequests.sort(), ['ci.yml']);
 });
 
 test('draft gate handles stale ready-for-review payloads', () => {
+  assert.deepEqual(
+    relatedTriggers(source),
+    ['pull_request'],
+    'Another PR-related trigger requires a separately reviewed policy',
+  );
   const types = source.match(/^ {4}types: \[([^\]]+)\]$/mu);
   assert.ok(types, 'Explicit PR event types are required');
   assert.deepEqual(types[1].split(',').map((event) => event.trim()), [
@@ -177,4 +200,14 @@ test('extra token permissions and job-level overrides are rejected', () => {
     ),
     /Unexpected job-level permission override/,
   );
+});
+
+test('review and target PR events cannot evade the workflow inventory', () => {
+  for (const event of prRelatedEvents) {
+    const names = auditedWorkflowNames(
+      ['ci.yml', 'unreviewed.yml'],
+      (name) => name === 'ci.yml' ? source : 'on:\n  ' + event + ':\n',
+    );
+    assert.deepEqual(names.sort(), ['ci.yml', 'unreviewed.yml']);
+  }
 });

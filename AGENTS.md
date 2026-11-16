@@ -258,6 +258,12 @@ available for unusual cases. A successful draft skip must never be treated
 as approval to merge. The repository's `test:ci` command also executes a
 dependency-free CI-workflow contract test to protect these policies.
 
+The CI workflow inventory also flags `pull_request_target`, review,
+review-comment and issue-comment event sources for explicit security and
+Actions-cost review. Their trust boundaries differ from ordinary
+`pull_request` events; do not blindly inherit its draft guard. Newly added
+PR-related workflows must have a documented, separately approved policy.
+
 ## Verification expectations
 
 Start with the smallest relevant test, then run stronger checks proportional to
