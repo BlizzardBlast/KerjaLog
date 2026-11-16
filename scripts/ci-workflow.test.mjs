@@ -13,7 +13,7 @@ const githubExpression =
   "github.event.pull_request.number || github.event_name == 'push' && " +
   'github.ref || github.run_id }}';
 
-// Use a deliberately restricted YAML subset; unsupported event syntax fails closed.
+// Reject unsupported YAML event forms rather than silently missing workflows.
 function topLevelBlock(text, key) {
   const lines = text.replaceAll('\r\n', '\n').split('\n');
   const start = lines.indexOf(key + ':');
@@ -40,7 +40,9 @@ function workflowTriggers(text) {
   );
   const declarations = topLevelBlock(text, 'on')
     .split('\n')
-    .filter((line) => /^ {2}\S/u.test(line) && !line.trimStart().startsWith('#'));
+    .filter(
+      (line) => /^ {2}\S/u.test(line) && !line.trimStart().startsWith('#'),
+    );
   assert.ok(declarations.length > 0, 'A workflow must declare an event');
   for (const line of declarations) {
     assert.match(
@@ -62,7 +64,11 @@ function assertReadOnlyPermissions(text) {
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith('#'));
-  assert.deepEqual(entries, ['contents: read'], 'Unexpected workflow permissions');
+  assert.deepEqual(
+    entries,
+    ['contents: read'],
+    'Unexpected workflow permissions',
+  );
   assert.doesNotMatch(
     topLevelBlock(text, 'jobs'),
     /^ {4}permissions:/mu,
