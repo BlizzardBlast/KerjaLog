@@ -43,7 +43,9 @@ test('PR runs cancel superseded work and main pushes coalesce pending work', () 
 });
 
 test('all Expo/native validation commands remain in the one CI job', () => {
-  assert.deepEqual([...source.matchAll(/^ {2}([a-z][a-z-]*):$/gmu)].map((match) => match[1]), ['validate']);
+  const jobs = source.split(/^jobs:\s*$/mu)[1];
+  assert.ok(jobs, 'Missing jobs section');
+  assert.deepEqual([...jobs.matchAll(/^ {2}([a-z][a-z-]*):$/gmu)].map((match) => match[1]), ['validate']);
   assert.deepEqual(
     [...source.matchAll(/^ {8}run: (pnpm .+)$/gmu)].map((match) => match[1]),
     [
