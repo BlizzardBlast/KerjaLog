@@ -251,6 +251,13 @@ are not test evidence. Repository branch protection/rulesets must make the
 `validate` status check required before merge; updating the workflow does
 not update those settings, which require separate administrator access.
 
+Main-branch validation retains a running check while newer pending push
+runs may replace outdated pending work, reducing billed Actions minutes.
+Review-ready PRs always run the complete suite, and manual checks remain
+available for unusual cases. A successful draft skip must never be treated
+as approval to merge. The repository's `test:ci` command also executes a
+dependency-free CI-workflow contract test to protect these policies.
+
 ## Verification expectations
 
 Start with the smallest relevant test, then run stronger checks proportional to
