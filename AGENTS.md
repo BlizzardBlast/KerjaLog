@@ -241,6 +241,35 @@ permissions intact, and Android exact-alarm permission blocked. The weekly
 reminder is an opt-in ordinary local notification; do not require exact-alarm
 special access or represent its timing as exact.
 
+## Hosted CI and merge protection
+
+Draft pull requests skip GitHub-hosted Expo/native checks, including Android
+and iOS exports; use the local verification commands below during iteration.
+When the changes are review-ready, mark the PR ready and verify that its
+`validate` check **ran and passed on the latest revision**. Skipped checks
+are not test evidence. Repository branch protection/rulesets must make the
+`validate` status check required before merge; updating the workflow does
+not update those settings, which require separate administrator access.
+
+Main-branch validation retains a running check while newer pending push
+runs may replace outdated pending work, reducing billed Actions minutes.
+Review-ready PRs always run the complete suite, and manual checks remain
+available for unusual cases. A successful draft skip must never be treated
+as approval to merge. The repository's `test:ci` command also executes a
+dependency-free CI-workflow contract test to protect these policies.
+
+The CI workflow inventory also flags `pull_request_target`, review,
+review-comment and issue-comment event sources for explicit security and
+Actions-cost review. Their trust boundaries differ from ordinary
+`pull_request` events; do not blindly inherit its draft guard. Newly added
+PR-related workflows must have a documented, separately approved policy.
+The workflow contract also rejects noncanonical or repeated YAML mapping keys
+such as `permissions :`, `on :`, and `if :`, so equivalent YAML spellings
+cannot bypass event and token-permission assertions.
+The guard accepts only the repository's canonical plain-key mapping subset:
+explicit YAML keys, tagged keys, merge keys and aliases fail closed instead
+of being ignored by the workflow contract's textual assertions.
+
 ## Verification expectations
 
 Start with the smallest relevant test, then run stronger checks proportional to
