@@ -266,6 +266,9 @@ PR-related workflows must have a documented, separately approved policy.
 The workflow contract also rejects noncanonical or repeated YAML mapping keys
 such as `permissions :`, `on :`, and `if :`, so equivalent YAML spellings
 cannot bypass event and token-permission assertions.
+The guard accepts only the repository's canonical plain-key mapping subset:
+explicit YAML keys, tagged keys, merge keys and aliases fail closed instead
+of being ignored by the workflow contract's textual assertions.
 
 ## Verification expectations
 
