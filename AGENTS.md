@@ -263,6 +263,9 @@ review-comment and issue-comment event sources for explicit security and
 Actions-cost review. Their trust boundaries differ from ordinary
 `pull_request` events; do not blindly inherit its draft guard. Newly added
 PR-related workflows must have a documented, separately approved policy.
+The workflow contract also rejects noncanonical or repeated YAML mapping keys
+such as `permissions :`, `on :`, and `if :`, so equivalent YAML spellings
+cannot bypass event and token-permission assertions.
 
 ## Verification expectations
 
