@@ -84,13 +84,21 @@ representative first-time users, when available.
   controls or explaining the navigation. Clarify task wording without
   coaching; record any navigation or task-solving help as assistance.
 - Agree on a reasonable observation limit before sessions; it is not the
-  30-second objective. Start timing when the participant begins interacting
-  after understanding the task. Stop at the participant's declared completion
-  or observable save confirmation (whichever occurs first), abandonment,
-  moderator termination or the observation limit. Record the stop reason and
-  verify the actual outcome separately; do not count an incorrect or
-  unverified save as success. If neither completion signal occurs, record
-  the attempt as incomplete. Do not pause the timer during assistance.
+  30-second objective. Start timing at a consistent start cue after the
+  participant understands the task, including hesitation before the first
+  interaction. Record any declared completion separately; it does not stop
+  the timer. Stop at the observable successful save confirmation for the
+  intended action, abandonment, moderator termination or the observation
+  limit. Do not pause during assistance.
+- Independently verify the saved outcome after timing without changing
+  the entry. Use the save-confirmation time for successful task duration
+  only when the intended outcome is verified. A premature declaration,
+  failed save or wrong entry cannot establish successful completion.
+  If persistence is verified but no confirmation was observed, report
+  the outcome separately with unverified completion time. A save confirmed
+  after abandonment, termination or the limit is a late outcome, not
+  successful completion within the observation window. Record the stop
+  reason and do not retrospectively assign a successful duration.
 
 ### Synthetic tasks and outcome checks
 
@@ -106,22 +114,30 @@ representative first-time users, when available.
   Ask them to update the earlier note so they can remember the result.
   Verify that the same entry (not a duplicate) retains the original fact
   and records the supplied outcome without unsupported impact.
-- **Refinement (unknown outcome):** On a separate equivalent synthetic
-  quick note, explain that the result is not known yet and ask the
-  participant to record what is known without guessing. Check that the
-  original facts remain, the outcome stays unknown and no unsupported
-  impact is recorded. Do not require review-ready maturity.
+- **Refinement (unknown outcome):** Start at Home with a separate equivalent
+  synthetic quick note whose outcome is unset and which contains no new
+  supporting detail. Tell the participant that the seven duplicates were
+  found across two sections of the fictional report, but what changed
+  as a result is still unknown. Ask them to update the earlier note with
+  what they now know, without guessing the result. Verify that the same
+  entry retains the original facts, records the new detail in the note
+  or supporting evidence and explicitly records an unknown outcome
+  (rather than leaving the outcome unset). An unchanged entry, unsaved
+  edit, duplicate or unsupported outcome/impact is not success. Do not
+  require developed or review-ready maturity.
 - If capture fails, use a separately prepared equivalent synthetic quick
   note for refinement and record the substitution; do not classify it as
   successful capture.
 
 ### Evidence, comparison and privacy
 
-- Record verified completion (unaided or assisted), incorrect completion,
-  incomplete/abandoned attempts, or unverified outcomes, alongside elapsed
-  time, observable errors, confusion and assistance. Keep unaided and
-  assisted successful times separate from incorrect/incomplete/unverified
-  attempts. Report sample size and denominators; do not treat roughly
+- Record verified completion within the observation window (unaided or
+  assisted), incorrect completion, incomplete/abandoned attempts, late or
+  unverified outcomes, and any missing completion-time evidence, alongside
+  elapsed time, observable errors, confusion and assistance. Keep unaided
+  and assisted verified successful durations separate from all other times;
+  report perceived completion separately. Report sample size and
+  denominators; do not treat roughly
   30 seconds as a hard per-person deadline or claim population-level
   results from a small sample.
 - For retests, use comparable synthetic facts, starting state, task goal,
