@@ -69,32 +69,76 @@ ability to record useful work, not automated script speed. Complement the
 required functional and accessibility checks with consented observations of
 representative first-time users, when available.
 
-- Use a clean test build and entirely fictional work entries; never ask a
-  participant to enter employer, client, colleague or real work information.
-- Start with the app ready at Home, after onboarding; record that starting
-  state, app revision, platform, language, device and any accessibility
-  settings. Assess onboarding separately if it is in scope.
-- Give a goal, not taps: "You just finished checking a fictional weekly
-  report. Save a short note so you can remember the work later." Start timing
-  after the task is understood and stop when the note has been saved.
-  Independently check that the saved note exists and remains editable.
-- On a separate run, ask the participant to find and develop that saved note
-  with a fictional outcome. Observe whether they understand the difference
-  between an incomplete note and a finished entry; do not supply the
-  navigation path or invent missing outcomes.
-- Record unaided/assisted/abandoned completion, elapsed time, observable
-  errors, confusion and assistance. Record incomplete times separately from
-  successful completion times. Report sample size and individual results
-  without identifying participants; do not treat roughly 30 seconds as a
-  hard per-person deadline or claim population-level results from a small
-  sample.
-- Use consented, minimized, anonymized notes; do not collect screenshots,
-  recordings, real work data or telemetry by default. Keep notes local and
-  dispose of test entries and notes when no longer needed.
+### Setup and observation rules
+
+- Use an isolated test install/profile, never a participant's personal app
+  data. Prepare a completed-onboarding Home screen with a consistent
+  synthetic configuration, no active draft and no unrelated entries.
+  Recreate that baseline between independent capture attempts; retain only
+  the intended synthetic entry for the follow-up task. Assess onboarding
+  separately if in scope.
+- Record the build revision, platform, language, device class and only
+  accessibility/input settings material to the task. Record prior app
+  familiarity; separate first attempts from practice or retest attempts.
+- Read the same goal and supplied facts to each participant, without naming
+  controls or explaining the navigation. Clarify task wording without
+  coaching; record any navigation or task-solving help as assistance.
+- Agree on a reasonable observation limit before sessions; it is not the
+  30-second objective. Start timing when the participant begins interacting
+  after understanding the task. Stop at the participant's declared completion
+  or observable save confirmation (whichever occurs first), abandonment,
+  moderator termination or the observation limit. Record the stop reason and
+  verify the actual outcome separately; do not count an incorrect or
+  unverified save as success. If neither completion signal occurs, record
+  the attempt as incomplete. Do not pause the timer during assistance.
+
+### Synthetic tasks and outcome checks
+
+- **Capture:** "While checking a fictional weekly report, you found seven
+  duplicate records. Save a short note so you can remember the work later."
+  Independently check after timing that a new, retrievable and editable
+  quick note records the essential supplied fact without invented details.
+  Accept equivalent wording; an unrelated entry, unsaved draft or fully
+  developed entry does not establish Quick Capture success.
+- **Refinement (known outcome):** In a separate attempt starting at Home with
+  that saved quick note, tell the participant that correcting the seven
+  duplicates allowed the fictional report to be submitted on schedule.
+  Ask them to update the earlier note so they can remember the result.
+  Verify that the same entry (not a duplicate) retains the original fact
+  and records the supplied outcome without unsupported impact.
+- **Refinement (unknown outcome):** On a separate equivalent synthetic
+  quick note, explain that the result is not known yet and ask the
+  participant to record what is known without guessing. Check that the
+  original facts remain, the outcome stays unknown and no unsupported
+  impact is recorded. Do not require review-ready maturity.
+- If capture fails, use a separately prepared equivalent synthetic quick
+  note for refinement and record the substitution; do not classify it as
+  successful capture.
+
+### Evidence, comparison and privacy
+
+- Record verified completion (unaided or assisted), incorrect completion,
+  incomplete/abandoned attempts, or unverified outcomes, alongside elapsed
+  time, observable errors, confusion and assistance. Keep unaided and
+  assisted successful times separate from incorrect/incomplete/unverified
+  attempts. Report sample size and denominators; do not treat roughly
+  30 seconds as a hard per-person deadline or claim population-level
+  results from a small sample.
+- For retests, use comparable synthetic facts, starting state, task goal,
+  build/device conditions and timing rules. Identify practice/order effects
+  and material differences; avoid attributing changes to the UI alone when
+  they cannot be controlled.
+- Obtain consent; use local, access-restricted notes with non-identifying
+  session IDs. Never collect real employer, client, colleague or work data.
+  Do not collect screenshots, recordings or telemetry by default. Avoid
+  reporting identifying combinations of settings or individual results;
+  aggregate or suppress small groups when sharing. Delete notes and
+  synthetic entries from the isolated test environment after the review
+  and any agreed retest are complete, or sooner on withdrawal where possible.
 - Separate functional defects from discoverability or comprehension findings;
-  use evidence to prioritize changes and repeat comparable tasks after a fix.
-  A static prototype, scripted Maestro run or agent simulation is not observed
-  human use. If no sessions run, report usability evidence as unverified.
+  prioritize reproducible issues. A static prototype, scripted Maestro run
+  or agent simulation is not observed human use. If no sessions run,
+  report usability evidence as unverified.
 
 This protocol does not replace any mandatory native, privacy, accessibility
 or release checks above. It introduces no new product requirement, analytics,
